@@ -81,12 +81,7 @@ async function deploy() {
       signal: AbortSignal.timeout(30000)
     })
     const body = await response.json()
-    if (
-      allowMissing &&
-      response.status === 404 &&
-      body.errors?.some(error => error.code === 8000007)
-    )
-      return null
+    if (allowMissing && body.errors?.some(error => error.code === 8000007)) return null
     if (!response.ok || !body.success)
       throw new Error(
         `Cloudflare ${response.status}: ${body.errors?.map(error => error.message).join('; ') ?? 'Request failed'}`
