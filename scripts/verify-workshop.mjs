@@ -11,7 +11,7 @@ export async function verifyWorkshop(browser, baseURL) {
   )
   const staticFrame = staticPage.getByRole('region', { name: 'Shared theme workshop', exact: true })
   await staticFrame.locator('.demo-sources > summary').press('Enter')
-  assert.equal(await staticFrame.locator('pre').count(), 11)
+  assert.equal(await staticFrame.locator('pre').count(), 14)
   await staticPage.close()
 
   const context = await browser.newContext({
@@ -66,19 +66,19 @@ export async function verifyWorkshop(browser, baseURL) {
       await frame.getByRole('combobox', { name: 'Body family' }).selectOption('Georgia, serif')
       await frame.getByRole('combobox', { name: 'Body size' }).selectOption('1.125rem')
       await selectEditor('Spacing & surfaces')
-      await frame.getByRole('combobox', { name: 'Surface radius' }).selectOption('1.5rem')
+      await frame.getByRole('spinbutton', { name: 'Surface radius (px)', exact: true }).fill('24')
       await selectEditor('Motion')
       await frame.getByRole('combobox', { name: 'Release timing' }).selectOption('280ms')
       assert.equal(
         await form.getByRole('textbox', { name: 'Display name' }).inputValue(),
         'Workshop Ada'
       )
-      assert.equal(await variable('--rad-surface-radius'), '1.5rem')
+      assert.equal(await variable('--rad-surface-radius'), '24px')
       assert.equal(await variable('--rad-motion-release-duration'), '280ms')
       await selectEditor('Color')
       await frame.getByRole('button', { name: 'Reset color', exact: true }).click()
       assert.equal(await variable('--rad-color-accent'), baseline)
-      assert.equal(await variable('--rad-surface-radius'), '1.5rem')
+      assert.equal(await variable('--rad-surface-radius'), '24px')
       assert.equal(await variable('--rad-typography-family'), 'Georgia, serif')
       assert.equal(
         await form.getByRole('textbox', { name: 'Display name' }).inputValue(),
@@ -187,6 +187,9 @@ export async function verifyWorkshop(browser, baseURL) {
       'workshop/workshop-color.ts',
       'workshop/ColorEditor.tsx',
       'workshop/color-editor.css',
+      'workshop/GeometryEditor.tsx',
+      'workshop/workshop-geometry.ts',
+      'workshop/geometry-editor.css',
       'workshop/Specimens.tsx',
       'workshop/workshop.css',
       'profile/NativeProfileForm.tsx',
