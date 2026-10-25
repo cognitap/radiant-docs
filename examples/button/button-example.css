@@ -1,0 +1,12 @@
+.button-example {
+  display: grid;
+  justify-items: center;
+  gap: 1rem;
+}
+
+.button-example output {
+  font:
+    0.8125rem/1.5 ui-sans-serif,
+    system-ui,
+    sans-serif;
+}

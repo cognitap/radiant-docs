@@ -23,7 +23,7 @@ pnpm dev
 ```
 
 Open [localhost:3001](http://127.0.0.1:3001). Content lives in `content/docs`;
-interactive examples live in `components`. The public Button route is
+interactive examples live in `examples`. The public Button route is
 `/docs/button/`. Generated MDX and Next.js files are ignored.
 
 ## Build and verify
@@ -48,8 +48,10 @@ pnpm check
 
 This runs formatting, lint, typechecking, static build and browser smoke checks
 for static HTML without JavaScript, navigation, direct-load hydration,
-pointer/Enter/Space activation, the installed-version label, compiled CSS,
-mobile overflow and 404s. Desktop/mobile screenshots go to `output/docs/` and
+pointer/Enter/Space activation, independent controls/reset, keyboard source
+disclosure, real highlighted/copied source (including supporting files), clipboard
+failure feedback, the installed-version label, compiled CSS, mobile overflow and
+404s. Desktop/mobile screenshots go to `output/docs/` and
 are uploaded by CI. On Linux, install Chromium with `--with-deps` as CI does.
 
 `pnpm test:smoke` checks an already-built `out/`. Use `pnpm check` after changing
@@ -90,15 +92,51 @@ release before public deployment.
 ## Repository ownership
 
 - **Radiant:** components, tokens, supported presets (including Sharp and
-  Jelly), Storybook, story interactions and canonical recipe source.
-- **This repository:** MDX pages, navigation/search, demo presentation,
-  integration checks and independent site delivery.
+  Jelly), and Storybook for component development and regression checks.
+- **This repository:** MDX pages, navigation/search, independently authored
+  public demos and recipes, integration checks and site delivery.
 
-Shared examples will cross this boundary through pinned versioned artifacts
-from the library: [DEV-148](https://linear.app/cognitap/issue/DEV-148) produces
-them and [DEV-149](https://linear.app/cognitap/issue/DEV-149) consumes them. The
-reusable demo frame is [DEV-138](https://linear.app/cognitap/issue/DEV-138).
-Storybook and presets remain in Radiant; recipes are not copied here.
+The website consumes the published package as another application. It does not
+import Storybook source or an examples artifact. Public recipes explain how to
+use Radiant; Storybook can exercise development cases without mirroring them.
+
+## Add an interactive example
+
+```text
+content/docs/button.mdx
+  → components/ButtonDemo.tsx       server: lists the actual example files
+    → demo/Demo                    reads and highlights files at build time
+    → examples/button/ButtonPlayground.tsx
+      → DemoControls               labeled controls, local React state
+      → DemoPreview
+        → ButtonExample.tsx        actual component imported by the preview
+          → button-example.css     supporting source shown alongside it
+```
+
+1. Put the copyable component and its local supporting files under `examples/`.
+   Keep website controls in a separate `*Playground.tsx` client component.
+2. In a server component, compose `Demo` with a title, `files` relative to
+   `examples/`, and the playground as its children. List the exact files imported
+   by the preview, plus its supporting TS/TSX, CSS or JSON files. Source is read
+   verbatim; there is no separately maintained snippet. All listed files appear
+   inside the source disclosure and each has its own copy button.
+3. Use `DemoControls` and `DemoPreview` inside the playground. Both accept children
+   and an accessible `label`. The frame remounts this subtree on reset, restoring
+   both control defaults and component state while retaining source disclosure
+   and toolbar focus. Keep state local; multiple instances are independent.
+4. For a future theme/mode control, put its labeled selector in `DemoControls`
+   and compose the installed release's public Radiant provider inside
+   `DemoPreview`. Preset implementations stay in the library. Version 0.0.2 has
+   no theme/mode APIs, so this first slice uses its baseline styles. The gallery
+   belongs to [DEV-145](https://linear.app/cognitap/issue/DEV-145).
+5. Use `next/dynamic` in the client playground for separately loaded example
+   modules, retaining SSR so direct loads have real HTML. Highlighting and file
+   reads stay on the server. Browser checks stay under `scripts/`, outside the
+   production bundle. Add behavior checks to `scripts/verify-docs.mjs`.
+
+The native/TanStack recipes and their owner/placement controls follow in
+[DEV-137](https://linear.app/cognitap/issue/DEV-137). The frame does not prescribe
+their state model or depend on their test utilities.
 
 This repository replaces the in-library `apps/docs` prototype from
 [Radiant PR #39](https://github.com/cognitap/radiant/pull/39), closed without

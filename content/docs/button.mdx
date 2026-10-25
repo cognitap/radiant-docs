@@ -13,16 +13,8 @@ Use Button to submit a form, confirm a choice, or change something on the page.
 It renders a native button and defaults to `type="button"`. Use an anchor when
 the action takes someone to another page.
 
-```tsx
-'use client'
-
-import { Button } from '@cognitap/radiant'
-import '@cognitap/radiant/styles.css'
-
-export function ContinueButton({ onContinue }: { onContinue: () => void }) {
-  return <Button onClick={onContinue}>Continue</Button>
-}
-```
+Open **View source** to see and copy the files that power the preview, including
+its supporting styles. Import the compiled Radiant stylesheet once in your app.
 
 ## Try the example
 
@@ -30,5 +22,16 @@ The example is interactive after the page loads. Try it with a pointer, or use
 Tab followed by Enter or Space. The version at the top of this page identifies
 the installed Radiant package used by this build.
 
-Import the compiled stylesheet once in your app. This example uses native
-button props; newer presentation APIs will be documented when they ship.
+**Reset preview** restores the example and its controls. Each preview keeps its
+own state, so resetting one leaves the others alone.
+
+## Disabled state
+
+Use `disabled` when an action is temporarily unavailable. A disabled button
+cannot be activated with a pointer or keyboard. Use the control below to enable
+it and try the same example.
+
+<ButtonDemo disabled />
+
+These examples use native button props; newer presentation APIs will be
+documented when they ship.

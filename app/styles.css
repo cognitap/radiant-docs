@@ -21,8 +21,7 @@ body {
 }
 
 .site-header,
-.site-footer,
-.demo-caption {
+.site-footer {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -47,7 +46,6 @@ body {
 
 .preview-label,
 .eyebrow,
-.demo-caption,
 .site-footer {
   font-size: 0.75rem;
   color: var(--docs-muted);
@@ -99,11 +97,49 @@ body {
   line-height: 1.7;
 }
 
-.button-demo {
+.demo-frame {
   border: 1px solid var(--docs-border);
   border-radius: 1rem;
-  overflow: hidden;
   margin-block: 2.5rem;
+  background: var(--docs-surface);
+  min-width: 0;
+}
+
+.demo-heading,
+.demo-source-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+}
+
+.prose .demo-heading h2 {
+  margin: 0;
+  font-size: 1rem;
+  letter-spacing: 0;
+}
+
+.demo-controls {
+  margin: 0 1.25rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--docs-border);
+  border-radius: 0.5rem;
+  font-size: 0.8125rem;
+}
+
+.demo-controls legend {
+  padding-inline: 0.25rem;
+  color: var(--docs-muted);
+}
+
+.demo-controls label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: fit-content;
+  min-height: 2rem;
 }
 
 .demo-canvas {
@@ -115,15 +151,51 @@ body {
   background: var(--docs-surface);
 }
 
-.demo-canvas output {
+.demo-feedback,
+.demo-copy-feedback {
+  display: block;
+  min-height: 1.5em;
+  padding: 0 1.25rem 0.75rem;
   color: var(--docs-muted);
   font-size: 0.8125rem;
-  margin-top: 1rem;
 }
 
-.demo-caption {
-  padding: 0.9rem 1.25rem;
+.demo-feedback {
+  text-align: center;
+}
+
+.demo-sources {
   border-top: 1px solid var(--docs-border);
+}
+
+.demo-sources summary {
+  padding: 1rem 1.25rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 600;
+  border-radius: 0 0 1rem 1rem;
+}
+
+.demo-source {
+  min-width: 0;
+  border-top: 1px solid var(--docs-border);
+}
+
+.demo-filename {
+  font:
+    0.75rem/1.5 ui-monospace,
+    monospace;
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
+
+.prose .demo-source pre {
+  margin: 0;
+  border: 0;
+  border-radius: 0 0 1rem 1rem;
+  max-height: 30rem;
+  overscroll-behavior: contain;
+  tab-size: 2;
 }
 
 .prose {
@@ -169,9 +241,18 @@ a {
   text-underline-offset: 0.2em;
 }
 
-a:focus-visible {
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+summary:focus-visible,
+pre:focus-visible {
   outline: 3px solid currentColor;
   outline-offset: 4px;
+}
+
+.demo-source pre:focus-visible,
+.demo-sources summary:focus-visible {
+  outline-offset: -3px;
 }
 
 .explore-link {
@@ -180,8 +261,7 @@ a:focus-visible {
 }
 
 @media (max-width: 40rem) {
-  .site-header,
-  .demo-caption {
+  .site-header {
     align-items: flex-start;
     flex-direction: column;
   }
