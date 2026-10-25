@@ -124,6 +124,11 @@ check keeps normal certificate validation, fails immediately for permanent
 errors such as 403, and still requires the exact deployment revision/package.
 The browser assertions themselves are not retried by this readiness gate.
 
+The hosted gate also holds JavaScript loading to verify that both form owners
+keep fields and actions disabled until hydrated, then accept edits and save.
+This prevents an early edit to SSR markup being lost when controlled form state
+mounts on a slower connection.
+
 `docs-results` contains local screenshots and `verification.json` with target,
 revision, installed Radiant version, timestamps, exact Node/Chromium versions
 and platform. `deployment-results` adds the deployed site's browser evidence
