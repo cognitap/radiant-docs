@@ -11,6 +11,7 @@ import { verifyActions } from './verify-actions.mjs'
 import { verifyControls } from './verify-controls.mjs'
 import { verifyCompositions } from './verify-compositions.mjs'
 import { verifyFoundations } from './verify-foundations.mjs'
+import { waitForDeployment } from './deployment-readiness.mjs'
 
 const { values } = parseArgs({ options: { url: { type: 'string' } } })
 const remote = values.url ? new URL(values.url) : undefined
@@ -41,7 +42,9 @@ try {
   browser = await chromium.launch()
   const deploymentResponse = await browser.newContext().then(async context => {
     try {
-      const response = await context.request.get(`${baseURL}/deployment.json`)
+      const response = await waitForDeployment(timeout =>
+        context.request.get(`${baseURL}/deployment.json`, { timeout: Math.min(timeout, 10000) })
+      )
       assert.equal(response.status(), 200, 'Deployment metadata is a real static asset.')
       return await response.json()
     } finally {

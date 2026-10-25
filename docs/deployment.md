@@ -117,6 +117,13 @@ Checks also cover the public preset registry and light/dark/system modes,
 nested theme scopes, keyboard focus/activation/dismissal and 320/390px layouts.
 Form saves are local preview state, not external submissions.
 
+Before the suite starts, its metadata request waits up to three minutes for
+initial edge DNS/TLS readiness or temporary 404/502/503/504 responses. A first
+Pages project can finish uploading before its HTTPS endpoint is usable. The
+check keeps normal certificate validation, fails immediately for permanent
+errors such as 403, and still requires the exact deployment revision/package.
+The browser assertions themselves are not retried by this readiness gate.
+
 `docs-results` contains local screenshots and `verification.json` with target,
 revision, installed Radiant version, timestamps, exact Node/Chromium versions
 and platform. `deployment-results` adds the deployed site's browser evidence
