@@ -9,7 +9,7 @@ permissions:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
   check:
@@ -49,5 +49,93 @@ jobs:
         with:
           name: docs-results
           path: output/docs/
+          if-no-files-found: ignore
+          retention-days: 14
+
+      - name: Save tested static export
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: docs-site
+          path: out/
+          if-no-files-found: error
+          retention-days: 14
+
+  deploy:
+    name: Deploy and verify Pages
+    needs: check
+    if: >-
+      vars.CLOUDFLARE_PAGES_PROJECT != '' &&
+      ((github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository) ||
+      (github.event_name == 'push' && github.ref == 'refs/heads/main'))
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      deployments: write
+    environment:
+      name: ${{ github.event_name == 'pull_request' && 'Preview' || 'Production' }}
+      url: ${{ steps.deploy.outputs.url }}
+    concurrency:
+      group: pages-${{ github.event_name == 'pull_request' && github.event.pull_request.number || 'production' }}
+      cancel-in-progress: false
+    env:
+      CLOUDFLARE_PAGES_PROJECT: ${{ vars.CLOUDFLARE_PAGES_PROJECT }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+      DOCS_DEPLOY_BRANCH: ${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.pull_request.number) || 'main' }}
+      WRANGLER_SEND_METRICS: 'false'
+    steps:
+      - name: Check out the tested revision
+        uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up pinned pnpm
+        uses: pnpm/action-setup@v6.1.0
+        with:
+          run_install: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7.0.0
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Download the tested export
+        uses: actions/download-artifact@v8.0.2
+        with:
+          name: docs-site
+          path: out/
+
+      - name: Upload static files
+        id: deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          if [[ "$DOCS_DEPLOY_BRANCH" == main ]]; then
+            pnpm deploy:pages --production
+          else
+            pnpm deploy:pages --branch "$DOCS_DEPLOY_BRANCH"
+          fi
+
+      - name: Install Chromium
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Verify the deployed site
+        env:
+          DOCS_DEPLOYMENT_URL: ${{ steps.deploy.outputs.url }}
+        run: pnpm test:deployment "$DOCS_DEPLOYMENT_URL"
+
+      - name: Save deployment evidence
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: deployment-results
+          path: |
+            output/docs/
+            output/deployment/
           if-no-files-found: ignore
           retention-days: 14

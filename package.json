@@ -12,10 +12,13 @@
     "preview": "node scripts/serve-docs.mjs",
     "preview:candidate": "node scripts/preview-candidate.mjs",
     "test:smoke": "node scripts/verify-docs.mjs",
+    "test:deployment": "node scripts/verify-docs.mjs --url",
+    "test:hosting": "node --test scripts/deployment.test.mjs",
+    "deploy:pages": "node scripts/deploy-pages.mjs",
     "lint": "oxlint --deny-warnings",
     "format": "oxfmt",
     "format:check": "oxfmt --check",
-    "check": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm build && pnpm test:smoke"
+    "check": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test:hosting && pnpm build && pnpm test:smoke"
   },
   "dependencies": {
     "@cognitap/radiant": "0.0.3",
@@ -34,7 +37,8 @@
     "oxfmt": "0.72.0",
     "oxlint": "1.87.0",
     "playwright": "1.64.1",
-    "typescript": "6.0.3"
+    "typescript": "6.0.3",
+    "wrangler": "4.152.0"
   },
   "devEngines": {
     "runtime": {
