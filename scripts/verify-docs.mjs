@@ -1,5 +1,7 @@
 import assert from 'node:assert/strict'
-import { mkdir, readFile } from 'node:fs/promises'
+import { execFileSync } from 'node:child_process'
+import { mkdir, readFile, writeFile } from 'node:fs/promises'
+import { parseArgs } from 'node:util'
 import { chromium } from 'playwright'
 import { createDocsServer } from './serve-docs.mjs'
 import { radiantPackage } from './radiant-package.mjs'
@@ -9,14 +11,55 @@ import { verifyActions } from './verify-actions.mjs'
 import { verifyControls } from './verify-controls.mjs'
 import { verifyCompositions } from './verify-compositions.mjs'
 import { verifyFoundations } from './verify-foundations.mjs'
+import { waitForDeployment } from './deployment-readiness.mjs'
 
-const server = createDocsServer()
-await new Promise(resolve => server.listen(0, '127.0.0.1', resolve))
-const baseURL = `http://127.0.0.1:${server.address().port}`
+const { values } = parseArgs({ options: { url: { type: 'string' } } })
+const remote = values.url ? new URL(values.url) : undefined
+const loopback = remote && ['127.0.0.1', 'localhost', '[::1]'].includes(remote.hostname)
+if (
+  remote &&
+  ((remote.protocol !== 'https:' && !(remote.protocol === 'http:' && loopback)) ||
+    remote.pathname !== '/' ||
+    remote.search ||
+    remote.hash ||
+    remote.username ||
+    remote.password)
+) {
+  throw new Error(
+    'Deployment verification requires an HTTPS origin (or HTTP loopback) without a path, query or credentials.'
+  )
+}
+const server = remote ? undefined : createDocsServer()
+if (server) await new Promise(resolve => server.listen(0, '127.0.0.1', resolve))
+const baseURL = remote?.origin ?? `http://127.0.0.1:${server.address().port}`
+const startedAt = new Date().toISOString()
+const revision = execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim()
+await mkdir(new URL('../output/docs/', import.meta.url), { recursive: true })
+let passed = false
 let browser
 
 try {
   browser = await chromium.launch()
+  const deploymentResponse = await browser.newContext().then(async context => {
+    try {
+      const response = await waitForDeployment(timeout =>
+        context.request.get(`${baseURL}/deployment.json`, { timeout: Math.min(timeout, 10000) })
+      )
+      assert.equal(response.status(), 200, 'Deployment metadata is a real static asset.')
+      return await response.json()
+    } finally {
+      await context.close()
+    }
+  })
+  assert.equal(
+    deploymentResponse.revision,
+    revision,
+    'Verify the deployment from this exact checkout.'
+  )
+  assert.equal(deploymentResponse.radiantVersion, radiantPackage.version)
+  assert.equal(deploymentResponse.schemaVersion, 1)
+  assert.equal(deploymentResponse.candidate, radiantPackage.candidate)
+  assert.equal(deploymentResponse.experimental, true)
   const staticPage = await browser.newPage({ javaScriptEnabled: false })
   const staticResponse = await staticPage.goto(`${baseURL}/docs/button/`)
   assert.equal(staticResponse.status(), 200)
@@ -151,7 +194,6 @@ try {
   })
   assert.notEqual(styles.background, 'rgba(0, 0, 0, 0)', 'compiled Radiant CSS must load')
   assert.notEqual(styles.padding, '0px', 'component utilities must be present')
-  await mkdir(new URL('../output/docs/', import.meta.url), { recursive: true })
   await page.screenshot({ path: 'output/docs/button-desktop.png', fullPage: true })
   await disclosure.click()
   await page.screenshot({ path: 'output/docs/button-source-desktop.png', fullPage: true })
@@ -180,7 +222,35 @@ try {
   await verifyControls(browser, baseURL)
   await verifyCompositions(browser, baseURL)
   await verifyFoundations(browser, baseURL)
+  passed = true
 } finally {
+  await writeFile(
+    new URL('../output/docs/verification.json', import.meta.url),
+    `${JSON.stringify(
+      {
+        status: passed ? 'passed' : 'failed',
+        target: remote
+          ? loopback
+            ? 'supplied loopback origin'
+            : 'deployment'
+          : 'local static export',
+        baseURL,
+        revision,
+        radiant: radiantPackage,
+        startedAt,
+        finishedAt: new Date().toISOString(),
+        node: process.version,
+        browser: browser?.version() ?? null,
+        platform: process.platform,
+        architecture: process.arch,
+        limitations: [
+          'Chromium automation only; no manual screen-reader, Safari or Firefox verification is claimed.'
+        ]
+      },
+      null,
+      2
+    )}\n`
+  )
   await browser?.close()
-  await new Promise(resolve => server.close(resolve))
+  if (server) await new Promise(resolve => server.close(resolve))
 }

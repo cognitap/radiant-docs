@@ -20,6 +20,7 @@ const excluded = new Set([
   '.git',
   '.next',
   '.source',
+  '.wrangler',
   '.scratch',
   'node_modules',
   'out',

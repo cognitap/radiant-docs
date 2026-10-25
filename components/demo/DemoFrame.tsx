@@ -2,6 +2,7 @@
 
 import { Fragment, useId, useState, type ReactNode } from 'react'
 import { Button } from '@cognitap/radiant'
+import { useHydrated } from '@/examples/profile/useHydrated'
 
 type DemoSource = { name: string; code: string; highlighted: ReactNode }
 
@@ -16,6 +17,7 @@ export function DemoFrame({
 }) {
   const titleId = useId()
   const [revision, setRevision] = useState(0)
+  const ready = useHydrated()
 
   return (
     <section
@@ -24,7 +26,12 @@ export function DemoFrame({
     >
       <div className="demo-heading">
         <h2 id={titleId}>{title}</h2>
-        <Button onClick={() => setRevision(value => value + 1)}>Reset preview</Button>
+        <Button
+          disabled={!ready}
+          onClick={() => setRevision(value => value + 1)}
+        >
+          Reset preview
+        </Button>
       </div>
       <Fragment key={revision}>{children}</Fragment>
       <output className="demo-feedback">
@@ -46,6 +53,7 @@ export function DemoFrame({
 function SourceFile({ source }: { source: DemoSource }) {
   const [feedback, setFeedback] = useState('')
   const [copying, setCopying] = useState(false)
+  const ready = useHydrated()
 
   async function copy() {
     setCopying(true)
@@ -66,7 +74,8 @@ function SourceFile({ source }: { source: DemoSource }) {
         <span className="demo-filename">{source.name}</span>
         <Button
           aria-label={`Copy ${source.name}`}
-          aria-disabled={copying}
+          disabled={!ready}
+          aria-disabled={!ready || copying}
           onClick={() => {
             if (!copying) void copy()
           }}
@@ -88,8 +97,12 @@ export function DemoControls({
   children: ReactNode
   label?: string
 }) {
+  const ready = useHydrated()
   return (
-    <fieldset className="demo-controls">
+    <fieldset
+      className="demo-controls"
+      disabled={!ready}
+    >
       <legend>{label}</legend>
       {children}
     </fieldset>

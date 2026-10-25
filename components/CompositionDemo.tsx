@@ -26,7 +26,7 @@ export function CompositionDemo({
         `compositions/${file}`,
         'compositions/composition-types.ts',
         'compositions/composition-example.css',
-        ...(kind === 'dialog' || kind === 'card' ? ['profile/useHydrated.ts'] : [])
+        ...(kind !== 'accordion' ? ['profile/useHydrated.ts'] : [])
       ]}
     >
       <CompositionPlayground

@@ -48,6 +48,7 @@ export function TanStackProfileForm({ onSave, onReset }: ProfileFormProps) {
         {field => (
           <Field
             label="Display name"
+            disabled={!ready}
             description="The name people will see on your profile."
             error={field.state.meta.isTouched ? field.state.meta.errors.join(' ') : undefined}
             required
@@ -71,6 +72,7 @@ export function TanStackProfileForm({ onSave, onReset }: ProfileFormProps) {
         {field => (
           <Field
             label="Email address"
+            disabled={!ready}
             description="Used for account messages."
             error={field.state.meta.isTouched ? field.state.meta.errors.join(' ') : undefined}
             required
@@ -89,6 +91,7 @@ export function TanStackProfileForm({ onSave, onReset }: ProfileFormProps) {
       <form.Field name="contact">
         {field => (
           <RadioGroup
+            disabled={!ready}
             name={`${formId}-contact`}
             label="Contact preference"
             description="Choose whether people can contact you by email."
@@ -113,6 +116,7 @@ export function TanStackProfileForm({ onSave, onReset }: ProfileFormProps) {
         {field => (
           <Field
             label="Product updates"
+            disabled={!ready}
             description="Occasional release notes. You can opt out at any time."
           >
             <Checkbox
@@ -138,6 +142,7 @@ export function TanStackProfileForm({ onSave, onReset }: ProfileFormProps) {
         </form.Subscribe>
         <Button
           type="reset"
+          disabled={!ready}
           variant="outline"
         >
           Reset form
