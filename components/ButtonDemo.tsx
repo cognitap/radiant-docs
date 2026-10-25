@@ -1,25 +1,13 @@
-'use client'
+import { Demo } from './demo/Demo'
+import { ButtonPlayground } from '@/examples/button/ButtonPlayground'
 
-import { useState } from 'react'
-import { Button } from '@cognitap/radiant'
-
-export function ButtonDemo() {
-  const [count, setCount] = useState(0)
-
+export function ButtonDemo({ disabled = false }: { disabled?: boolean }) {
   return (
-    <div className="button-demo">
-      <div className="demo-canvas">
-        <Button onClick={() => setCount(value => value + 1)}>Try Radiant</Button>
-        <output>
-          {count === 0
-            ? 'Ready when you are.'
-            : `Activated ${count} ${count === 1 ? 'time' : 'times'}.`}
-        </output>
-      </div>
-      <div className="demo-caption">
-        <span>Live example</span>
-        <span>React · Radiant Button</span>
-      </div>
-    </div>
+    <Demo
+      title={disabled ? 'Disabled Button' : 'Interactive Button'}
+      files={['button/ButtonExample.tsx', 'button/button-example.css']}
+    >
+      <ButtonPlayground defaultDisabled={disabled} />
+    </Demo>
   )
 }
