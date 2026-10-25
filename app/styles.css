@@ -1,0 +1,197 @@
+:root {
+  color-scheme: light;
+  --docs-background: #fbfbfa;
+  --docs-foreground: #172121;
+  --docs-muted: #556060;
+  --docs-border: #d9dedd;
+  --docs-surface: #ffffff;
+  --docs-accent: #405953;
+  font-family: ui-sans-serif, system-ui, sans-serif;
+  color: var(--docs-foreground);
+  background: var(--docs-background);
+}
+
+body {
+  margin: 0;
+}
+
+.docs-shell {
+  min-height: 100dvh;
+  padding-inline: clamp(1.25rem, 6vw, 6rem);
+}
+
+.site-header,
+.site-footer,
+.demo-caption {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.site-header {
+  min-height: 6rem;
+  border-bottom: 1px solid var(--docs-border);
+}
+
+.wordmark {
+  font-size: 1.25rem;
+  font-weight: 650;
+  text-decoration: none;
+}
+
+.wordmark span {
+  color: var(--docs-accent);
+  margin-inline-start: 0.35rem;
+}
+
+.preview-label,
+.eyebrow,
+.demo-caption,
+.site-footer {
+  font-size: 0.75rem;
+  color: var(--docs-muted);
+}
+
+.preview-label {
+  border: 1px solid var(--docs-border);
+  border-radius: 999px;
+  padding: 0.4rem 0.7rem;
+}
+
+.home,
+.docs-page {
+  max-width: 52rem;
+  margin-inline: auto;
+  padding-block: clamp(3rem, 8vw, 7rem);
+}
+
+.home h1,
+.docs-page h1 {
+  font-size: clamp(2.75rem, 7vw, 5.75rem);
+  line-height: 1.05;
+  letter-spacing: -0.055em;
+  font-weight: 550;
+  margin-block: 1rem 1.5rem;
+}
+
+.docs-page h1 {
+  font-size: clamp(2.75rem, 6vw, 4rem);
+}
+
+.eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.lede {
+  max-width: 38rem;
+  font-size: clamp(1.125rem, 2vw, 1.4rem);
+  line-height: 1.65;
+  color: var(--docs-muted);
+  margin-bottom: 2rem;
+}
+
+.source-note {
+  max-width: 32rem;
+  margin-top: 3rem;
+  color: var(--docs-muted);
+  line-height: 1.7;
+}
+
+.button-demo {
+  border: 1px solid var(--docs-border);
+  border-radius: 1rem;
+  overflow: hidden;
+  margin-block: 2.5rem;
+}
+
+.demo-canvas {
+  min-height: 14rem;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  padding: 1.5rem;
+  background: var(--docs-surface);
+}
+
+.demo-canvas output {
+  color: var(--docs-muted);
+  font-size: 0.8125rem;
+  margin-top: 1rem;
+}
+
+.demo-caption {
+  padding: 0.9rem 1.25rem;
+  border-top: 1px solid var(--docs-border);
+}
+
+.prose {
+  line-height: 1.8;
+}
+
+.prose h2 {
+  margin-top: 2.5rem;
+  line-height: 1.3;
+  font-size: 1.5rem;
+  letter-spacing: -0.025em;
+}
+
+.prose pre {
+  overflow-x: auto;
+  padding: 1.5rem;
+  border: 1px solid var(--docs-border);
+  border-radius: 0.75rem;
+  font-size: 0.8125rem;
+  line-height: 1.8;
+}
+
+.site-footer {
+  padding-block: 1.5rem;
+  border-top: 1px solid var(--docs-border);
+}
+
+.skip-link {
+  position: absolute;
+  top: -5rem;
+  background: var(--docs-surface);
+  color: var(--docs-foreground);
+  padding: 0.75rem;
+  z-index: 1;
+}
+
+.skip-link:focus {
+  top: 0.5rem;
+}
+
+a {
+  color: var(--docs-accent);
+  text-underline-offset: 0.2em;
+}
+
+a:focus-visible {
+  outline: 3px solid currentColor;
+  outline-offset: 4px;
+}
+
+.explore-link {
+  display: inline-block;
+  font-weight: 600;
+}
+
+@media (max-width: 40rem) {
+  .site-header,
+  .demo-caption {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .site-header {
+    justify-content: center;
+    padding-block: 1rem;
+  }
+
+  .preview-label {
+    overflow-wrap: anywhere;
+  }
+}

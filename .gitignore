@@ -1,0 +1,13 @@
+node_modules/
+.next/
+.source/
+.scratch/
+out/
+output/
+next-env.d.ts
+*.tsbuildinfo
+*.log
+.env
+.env.*
+!.env.example
+.DS_Store

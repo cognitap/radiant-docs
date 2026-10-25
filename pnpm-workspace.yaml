@@ -1,0 +1,8 @@
+nodeVersion: 26.11.1
+engineStrict: true
+strictDepBuilds: true
+
+allowBuilds:
+  '@parcel/watcher': true
+  esbuild: true
+  sharp: true

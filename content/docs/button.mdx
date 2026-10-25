@@ -1,0 +1,34 @@
+---
+title: Button
+description: A clear next step. Native button behavior, with a shared visual language.
+---
+
+import { ButtonDemo } from '../../components/ButtonDemo'
+
+<ButtonDemo />
+
+## Built for actions
+
+Use Button to submit a form, confirm a choice, or change something on the page.
+It renders a native button and defaults to `type="button"`. Use an anchor when
+the action takes someone to another page.
+
+```tsx
+'use client'
+
+import { Button } from '@cognitap/radiant'
+import '@cognitap/radiant/styles.css'
+
+export function ContinueButton({ onContinue }: { onContinue: () => void }) {
+  return <Button onClick={onContinue}>Continue</Button>
+}
+```
+
+## Try the example
+
+The example is interactive after the page loads. Try it with a pointer, or use
+Tab followed by Enter or Space. The version at the top of this page identifies
+the installed Radiant package used by this build.
+
+Import the compiled stylesheet once in your app. This example uses native
+button props; newer presentation APIs will be documented when they ship.
