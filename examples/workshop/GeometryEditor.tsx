@@ -94,17 +94,17 @@ export function GeometryEditor({
   available,
   onChange
 }: {
-  recipe: GeometryRecipe
+  recipe: GeometryRecipe | null
   theme: Theme
   disabled: boolean
   available: boolean
   onChange: (recipe: GeometryRecipe) => void
 }) {
   const [scope, setScope] = useState<GeometryScope>('shared')
-  const values = geometryValues(recipe, scope)
-  const overrides = scope === 'shared' ? undefined : recipe.modes?.[scope]
+  const values = geometryValues(recipe ?? geometryPreset(), scope)
+  const overrides = scope === 'shared' ? undefined : recipe?.modes?.[scope]
   const update = (patch: Partial<GeometrySettings>) =>
-    onChange(changeGeometry(recipe, scope, patch))
+    onChange(changeGeometry(recipe ?? geometryPreset(), scope, patch))
   const overrideControl = (key: keyof GeometrySettings) =>
     scope !== 'shared' && (
       <div className="geometry-override">
@@ -112,7 +112,7 @@ export function GeometryEditor({
         <Button
           variant="outline"
           disabled={overrides?.[key] === undefined}
-          onClick={() => onChange(clearGeometryOverride(recipe, scope, key))}
+          onClick={() => onChange(clearGeometryOverride(recipe ?? geometryPreset(), scope, key))}
         >
           Use shared{' '}
           {key === 'borderStyle'
@@ -132,7 +132,15 @@ export function GeometryEditor({
           described below for editing.
         </p>
       )}
+      {!recipe && available && (
+        <p>
+          Imported spacing and surface values are preserved exactly. This document has no matching
+          geometry recipe. Use Reset spacing &amp; surfaces to start Balanced settings while
+          retaining other sections.
+        </p>
+      )}
       <fieldset
+        hidden={!recipe && available}
         disabled={disabled}
         className="geometry-settings"
       >
@@ -141,7 +149,7 @@ export function GeometryEditor({
           <label>
             Starting preset
             <select
-              value={matchingGeometryPreset(recipe)}
+              value={matchingGeometryPreset(recipe ?? geometryPreset())}
               onChange={event => onChange(geometryPreset(event.target.value))}
             >
               <option
@@ -188,7 +196,7 @@ export function GeometryEditor({
           <Button
             variant="outline"
             disabled={!overrides}
-            onClick={() => onChange(clearGeometryOverride(recipe, scope))}
+            onClick={() => onChange(clearGeometryOverride(recipe ?? geometryPreset(), scope))}
           >
             Clear all {scope} overrides
           </Button>

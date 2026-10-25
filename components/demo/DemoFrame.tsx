@@ -1,8 +1,15 @@
 'use client'
 
-import { Fragment, useId, useState, type ReactNode } from 'react'
+import { createContext, Fragment, useContext, useId, useState, type ReactNode } from 'react'
 import { Button } from '@cognitap/radiant'
 import { useHydrated } from '@/examples/profile/useHydrated'
+
+// Examples with external state (such as a share fragment) can distinguish an
+// initial load from the frame's explicit complete reset.
+const DemoRevision = createContext(0)
+export function useDemoRevision() {
+  return useContext(DemoRevision)
+}
 
 type DemoSource = { name: string; code: string; highlighted: ReactNode }
 
@@ -33,7 +40,9 @@ export function DemoFrame({
           Reset preview
         </Button>
       </div>
-      <Fragment key={revision}>{children}</Fragment>
+      <DemoRevision value={revision}>
+        <Fragment key={revision}>{children}</Fragment>
+      </DemoRevision>
       <output className="demo-feedback">
         <span key={revision}>{revision > 0 ? 'Preview reset.' : ''}</span>
       </output>
