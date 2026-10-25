@@ -16,7 +16,7 @@ export async function verifyNavigation(browser, baseURL) {
       1,
       'desktop navigation is visible and mobile navigation stays hidden'
     )
-    assert.equal(await nav.getByRole('heading').count(), 5)
+    assert.equal(await nav.getByRole('heading').count(), 6)
     assert.equal(
       await nav
         .getByRole('link', { name: 'Installation', exact: true })
@@ -270,7 +270,7 @@ export async function verifyNavigation(browser, baseURL) {
         .getByRole('navigation', { name: 'Documentation', exact: true })
         .getByRole('link')
         .count(),
-      16
+      17
     )
     await staticPage.getByRole('link', { name: 'System foundations', exact: true }).click()
     assert.equal(
@@ -279,7 +279,7 @@ export async function verifyNavigation(browser, baseURL) {
     )
     await staticPage.close()
     console.log(
-      'Navigation/search passed: five sections, active links, skip/outline links, static local search with heading results/retry, keyboard focus, light/dark/system, SSR and narrow layouts.'
+      'Navigation/search passed: six sections, active links, skip/outline links, static local search with heading results/retry, keyboard focus, light/dark/system, SSR and narrow layouts.'
     )
   } catch (error) {
     await page

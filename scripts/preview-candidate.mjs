@@ -79,6 +79,7 @@ try {
   await run(['install', '--no-frozen-lockfile'])
   if (option === '--check') {
     await run(['typecheck'])
+    await run(['test:workshop'])
     await run(['build'])
     await run(['test:smoke'])
   } else {
@@ -92,5 +93,10 @@ try {
 } finally {
   process.off('SIGINT', onInterrupt)
   process.off('SIGTERM', onTerminate)
+  if (option === '--check') {
+    const evidence = path.join(staging, 'output')
+    if (await stat(evidence).catch(() => null))
+      await cp(evidence, path.join(root, 'output', 'candidate'), { recursive: true })
+  }
   await rm(staging, { recursive: true, force: true })
 }

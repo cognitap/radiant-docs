@@ -34,6 +34,14 @@ export default function HomePage() {
           Explore form recipes <span aria-hidden="true">↗</span>
         </a>
       </nav>
+      <p>
+        <a
+          href="/docs/workshop/"
+          className="explore-link"
+        >
+          Open the theme workshop <span aria-hidden="true">↗</span>
+        </a>
+      </p>
       <p className="source-note">
         {radiantCandidate
           ? 'This local preview uses an explicitly selected package candidate. Its APIs may differ from npm.'
