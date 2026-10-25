@@ -1,0 +1,70 @@
+---
+title: System foundations
+description: Native behavior, shared presentation and explicit ownership.
+---
+
+Radiant pairs native HTML behavior with a shared presentation system. Buttons
+remain buttons, links remain anchors, and form controls participate in real
+forms. Your application owns its data and actions.
+
+## Choose the right element
+
+| Need                                 | Use    | Behavior                           |
+| ------------------------------------ | ------ | ---------------------------------- |
+| Perform an action                    | Button | Native button activation           |
+| Navigate somewhere                   | Link   | Anchor navigation                  |
+| Label a control and show help/errors | Field  | Linked label and descriptions      |
+| Group a focused task                 | Dialog | Native modal dialog behavior       |
+| Group related content                | Card   | A surface with content and actions |
+
+See [Button](/docs/button/) and the [profile form](/docs/recipes/profile-form/)
+for complete examples using the installed package.
+
+## Control state deliberately
+
+Use uncontrolled values when the browser should own a control's state. Use
+controlled values when React or a form library should own it. Keep an instance
+with one owner for its lifetime; remount it deliberately to change ownership.
+
+The profile recipe demonstrates this distinction with native `FormData` and
+optional TanStack bindings. Radiant does not require a form library.
+
+## Apply a preset
+
+Use the public `ThemeScope` and a published preset around the relevant subtree:
+
+```tsx
+import { Button, ThemeScope, jelly } from '@cognitap/radiant'
+
+export function ThemedAction() {
+  return (
+    <ThemeScope
+      theme={jelly}
+      mode="light"
+    >
+      <Button>Continue</Button>
+    </ThemeScope>
+  )
+}
+```
+
+The public `themes` registry contains Radiant, Default, Soft, Expressive, Glass,
+Sharp 3D, Jelly and Ticket. Preset implementations live in the library. Try
+them on the profile recipe without changing its form behavior.
+
+### Modes
+
+`ThemeScope` accepts `light`, `dark` and `system`. A nested scope can choose its
+own theme and mode. The documentation's Appearance control changes the site;
+the profile previews keep their own explicit selections.
+
+<Callout title="Keep presentation separate from behavior">
+  Theme choices change presentation. They do not replace application validation, persistence or the
+  semantic role of a control.
+</Callout>
+
+## Read the package contract
+
+The library's [system guide](https://github.com/cognitap/radiant/blob/main/docs/system.md)
+and [theming guide](https://github.com/cognitap/radiant/blob/main/docs/theming.md)
+describe the full contract and migration guidance.

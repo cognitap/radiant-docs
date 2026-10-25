@@ -4,6 +4,7 @@ import { chromium } from 'playwright'
 import { createDocsServer } from './serve-docs.mjs'
 import { radiantPackage } from './radiant-package.mjs'
 import { verifyProfileRecipes } from './verify-profile-recipes.mjs'
+import { verifyNavigation } from './verify-navigation.mjs'
 
 const server = createDocsServer()
 await new Promise(resolve => server.listen(0, '127.0.0.1', resolve))
@@ -167,6 +168,7 @@ try {
     'Docs passed: static HTML/source, navigation, direct-load hydration, keyboard controls/copy/reset, exact highlighted source and supporting files, clipboard failure, independent previews, compiled CSS, narrow layouts and 404.'
   )
   await verifyProfileRecipes(browser, baseURL)
+  await verifyNavigation(browser, baseURL)
 } finally {
   await browser?.close()
   await new Promise(resolve => server.close(resolve))

@@ -2,7 +2,11 @@ import { radiantCandidate, radiantVersion } from '@/lib/radiant'
 
 export default function HomePage() {
   return (
-    <div className="home">
+    <main
+      className="home"
+      id="content"
+      tabIndex={-1}
+    >
       <p className="eyebrow">A language for interfaces</p>
       <h1>
         Make room for
@@ -35,6 +39,6 @@ export default function HomePage() {
           ? 'This local preview uses an explicitly selected package candidate. Its APIs may differ from npm.'
           : `These examples run on the published Radiant ${radiantVersion} package. More components and recipes will arrive alongside library releases.`}
       </p>
-    </div>
+    </main>
   )
 }

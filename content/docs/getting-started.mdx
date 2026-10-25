@@ -1,0 +1,57 @@
+---
+title: Installation
+description: Install Radiant and add your first interactive component.
+---
+
+Radiant is a collection of React components with native behavior and a shared
+visual language. These docs use the published **0.0.3** package with React 19.3.
+
+## Install the package
+
+```sh
+pnpm add @cognitap/radiant@0.0.3
+```
+
+Import the compiled stylesheet once in your application entry point:
+
+```tsx
+import '@cognitap/radiant/styles.css'
+```
+
+<Callout title="Start with the compiled CSS">
+  The compiled stylesheet works without a Tailwind setup in your application. The optional
+  `reset.css` export is a separate choice; only add a global reset when it fits your application.
+</Callout>
+
+## Add an action
+
+```tsx
+'use client'
+
+import { useState } from 'react'
+import { Button } from '@cognitap/radiant'
+
+export function FollowButton() {
+  const [following, setFollowing] = useState(false)
+  return (
+    <Button onClick={() => setFollowing(value => !value)}>
+      {following ? 'Following' : 'Follow'}
+    </Button>
+  )
+}
+```
+
+Try the [interactive Button example](/docs/button/) to inspect its source,
+test keyboard activation and reset the preview.
+
+## Build a complete flow
+
+The [profile form recipe](/docs/recipes/profile-form/) combines Field, Input,
+RadioGroup, Checkbox and Button. Choose native React or TanStack Form, and try
+standalone, Card and Dialog placements.
+
+## Make it yours
+
+Read the [foundations](/docs/foundations/) for component ownership, shared
+presets and modes. Check [releases](/docs/releases/) before upgrading an
+experimental package version.
