@@ -23,7 +23,12 @@ export function MobileNavigation({ groups }: { groups: NavigationGroup[] }) {
       <DialogContent className="docs-menu-dialog">
         <div className="docs-dialog-heading">
           <DialogTitle>Documentation menu</DialogTitle>
-          <DialogClose variant="ghost">Close menu</DialogClose>
+          <DialogClose
+            variant="ghost"
+            aria-label="Close menu"
+          >
+            Close
+          </DialogClose>
         </div>
         <DialogDescription>Choose a section or page.</DialogDescription>
         <Navigation

@@ -50,7 +50,12 @@ export function Search() {
       <DialogContent className="docs-search-dialog">
         <div className="docs-dialog-heading">
           <DialogTitle>Search documentation</DialogTitle>
-          <DialogClose variant="ghost">Close search</DialogClose>
+          <DialogClose
+            variant="ghost"
+            aria-label="Close search"
+          >
+            Close
+          </DialogClose>
         </div>
         <DialogDescription>
           Search pages and headings. Use Tab or the arrow keys to reach a result, then Enter to open
