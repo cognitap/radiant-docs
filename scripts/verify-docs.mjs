@@ -7,6 +7,7 @@ import { verifyProfileRecipes } from './verify-profile-recipes.mjs'
 import { verifyNavigation } from './verify-navigation.mjs'
 import { verifyActions } from './verify-actions.mjs'
 import { verifyControls } from './verify-controls.mjs'
+import { verifyCompositions } from './verify-compositions.mjs'
 
 const server = createDocsServer()
 await new Promise(resolve => server.listen(0, '127.0.0.1', resolve))
@@ -176,6 +177,7 @@ try {
   await verifyNavigation(browser, baseURL)
   await verifyActions(browser, baseURL)
   await verifyControls(browser, baseURL)
+  await verifyCompositions(browser, baseURL)
 } finally {
   await browser?.close()
   await new Promise(resolve => server.close(resolve))

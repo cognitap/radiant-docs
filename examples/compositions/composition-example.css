@@ -1,0 +1,39 @@
+.composition-example {
+  box-sizing: border-box;
+  width: 100%;
+  padding: clamp(1rem, 4vw, 2rem);
+}
+
+.composition-stack {
+  display: grid;
+  gap: 1rem;
+  width: 100%;
+  max-width: 30rem;
+  margin-inline: auto;
+}
+
+.composition-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.composition-copy {
+  margin: 0;
+  line-height: 1.6;
+}
+
+.composition-copy + .composition-copy {
+  margin-top: 1rem;
+}
+
+.composition-result {
+  display: block;
+  min-height: 3em;
+  overflow-wrap: anywhere;
+  font:
+    0.8125rem/1.6 ui-sans-serif,
+    system-ui,
+    sans-serif;
+}

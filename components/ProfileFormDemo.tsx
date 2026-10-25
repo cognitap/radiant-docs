@@ -1,7 +1,14 @@
 import { Demo } from './demo/Demo'
 import { ProfilePlayground } from '@/examples/profile/ProfilePlayground'
+import type { FormPlacement } from '@/examples/profile/ProfileRecipe'
 
-export function ProfileFormDemo({ compare = false }: { compare?: boolean }) {
+export function ProfileFormDemo({
+  compare = false,
+  placement
+}: {
+  compare?: boolean
+  placement?: FormPlacement
+}) {
   return (
     <Demo
       title={compare ? 'Compare configurations' : 'Profile editor'}
@@ -14,7 +21,10 @@ export function ProfileFormDemo({ compare = false }: { compare?: boolean }) {
         'profile/profile-form.css'
       ]}
     >
-      <ProfilePlayground compare={compare} />
+      <ProfilePlayground
+        compare={compare}
+        defaultPlacement={placement}
+      />
     </Demo>
   )
 }

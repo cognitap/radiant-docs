@@ -7,11 +7,10 @@ checkout, workspace link or source alias.
 
 The site consumes **Radiant 0.0.3**, pinned from npm. That experimental release
 exports the harmonised ten-family component system and shared theme APIs. This
-site includes installation/foundations/release guidance, Button, Link, Field,
-Input, Checkbox, RadioGroup and complete native/TanStack profile-form recipes;
-further component pages remain separate
-docs work. The installed version is
-displayed on every page. Site layout uses semantic HTML while live examples use
+site includes guides for all ten families, installation/foundations/release
+guidance and complete native/TanStack profile-form recipes. Broader setup and
+theming guidance remains separate work. The installed version is displayed on
+every page. Site layout uses semantic HTML while live examples use
 published Radiant components, presets and compiled CSS.
 Fumadocs UI is not installed.
 
@@ -28,8 +27,9 @@ pnpm dev
 
 Open [localhost:3001](http://127.0.0.1:3001). Content lives in `content/docs`;
 interactive examples live in `examples`. Public routes include `/docs/button/`,
-`/docs/link/`, `/docs/field/`, `/docs/input/`, `/docs/checkbox/`, `/docs/radio-group/`
-and `/docs/recipes/profile-form/`. Generated MDX and Next.js files are ignored.
+`/docs/link/`, `/docs/field/`, `/docs/input/`, `/docs/checkbox/`, `/docs/radio-group/`,
+`/docs/dialog/`, `/docs/collapsible/`, `/docs/accordion/`, `/docs/card/` and
+`/docs/recipes/profile-form/`. Generated MDX and Next.js files are ignored.
 
 ## Build and verify
 
@@ -67,6 +67,9 @@ the examples retain their own presentation.
 Form-control checks cover label/help/error relationships, a native Field adapter,
 required/disabled/read-only state, real FormData payloads, mixed checkboxes, native
 radio keyboard/reset behavior and isolation from embedded profile recipes.
+Composition checks cover native Dialog focus/dismissal and Button adapters,
+top-layer themes, controlled/uncontrolled disclosures, Accordion selection and
+disabled guards, passive Card actions and embedded form ownership.
 Desktop/mobile screenshots go to `output/docs/` and
 are uploaded by CI. On Linux, install Chromium with `--with-deps` as CI does.
 
@@ -214,6 +217,36 @@ recipe's setup and optional TanStack dependency instructions.
 
 `scripts/verify-controls.mjs` runs in the normal gate. CI saves desktop/mobile
 `controls-*.png` screenshots alongside recipe and navigation evidence.
+
+## Surface and disclosure guides
+
+Dialog, Collapsible, Accordion and Card use independently authored examples in
+`examples/compositions/`. The guides document named parts, public props, native
+hosts and style/ref targets against Radiant 0.0.3. `CompositionPlayground` keeps
+website options outside copyable components; `components/CompositionDemo.tsx`
+lists their exact source and supporting files. Preserve the displayed directory
+paths when copying shared types, CSS and the existing hydration helper.
+
+Dialog demonstrates a native Button render/ref adapter, modal/nonmodal behavior
+and dismissal policy. Collapsible shows local and controlled ownership while
+retaining a draft. Accordion supports single/multiple selection and disabled
+items; changing its type/owner remounts the preview. Card's explicit Button/Link
+actions leave the surface passive. Compact uses public local theme tokens;
+theme/mode changes retain example state.
+
+Dialog and Card reuse `ProfileFormDemo`. Its optional `placement` sets the
+embedding's initial placement and is restored by frame reset; existing callers
+keep their original defaults. The Dialog guide starts native/Dialog, while Card
+starts TanStack/Card. The recipe/form implementations and displayed source are
+shared with the recipe and form-control pages.
+
+Basic native details and links work without JavaScript. Dialog opening,
+coordinated selection, disabled guards and local action feedback require it;
+the guides distinguish those responsibilities explicitly. The compiled stylesheet
+preserves functional hiding, sizing, scrolling and focus presentation.
+
+`scripts/verify-compositions.mjs` runs through the normal gate and saves
+`composition-*.png` screenshots, including an open narrow Dialog and dark mode.
 
 ## Navigation and search
 
