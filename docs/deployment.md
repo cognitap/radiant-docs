@@ -152,6 +152,12 @@ Chromium automation, not a complete accessibility certification. Actual
 VoiceOver/screen-reader work and manual Safari/Firefox checks are not claimed.
 Preset font stacks currently use system fallbacks on this website.
 
+Native disclosure behavior without JavaScript is checked separately from
+hydrated React state/callback behavior. The latter waits for the example's
+hydration signal. Radiant 0.0.3 does not adopt an already-open native disclosure
+into React state when it was toggled before hydration; that library gap is
+tracked in [DEV-182](https://linear.app/cognitap/issue/DEV-182).
+
 [DEV-57](https://linear.app/cognitap/issue/DEV-57) is Done. Its
 [installed-consumer architecture checkpoint](https://github.com/cognitap/radiant/blob/23f0b8b05e2288da15b13c6d36f9583ea28a62ed/docs/verification/2026-10-25-installed-compositions.md)
 records archive-based integration evidence and its historical registry limits;

@@ -12,6 +12,7 @@ import {
   radiant
 } from '@cognitap/radiant'
 import type { CompositionOptions } from './composition-types'
+import { useHydrated } from '../profile/useHydrated'
 import '@cognitap/radiant/styles.css'
 import './composition-example.css'
 
@@ -23,6 +24,7 @@ export function CollapsibleExample({
 }: CompositionOptions & { controlled?: boolean }) {
   const [open, setOpen] = useState(false)
   const [feedback, setFeedback] = useState('Details are collapsed.')
+  const ready = useHydrated()
   function change(next: boolean) {
     setOpen(next)
     setFeedback(next ? 'Details expanded.' : 'Details collapsed.')
@@ -33,6 +35,7 @@ export function CollapsibleExample({
       theme={theme}
       mode={mode}
       className="composition-example"
+      data-hydrated={ready}
     >
       <div className="composition-stack">
         <Collapsible
