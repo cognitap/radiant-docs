@@ -1,0 +1,38 @@
+.foundation-example {
+  box-sizing: border-box;
+  width: 100%;
+  padding: clamp(1rem, 4vw, 2rem);
+}
+
+.foundation-stack {
+  display: grid;
+  gap: 1rem;
+  min-width: 0;
+  width: 100%;
+  max-width: 28rem;
+  margin-inline: auto;
+}
+
+.foundation-scopes {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.foundation-scope {
+  padding: 1rem;
+  border: 1px solid var(--rad-color-border);
+  border-radius: var(--rad-surface-radius);
+}
+
+.foundation-heading {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.foundation-result {
+  min-height: 3em;
+  overflow-wrap: anywhere;
+  font:
+    0.8125rem/1.6 system-ui,
+    sans-serif;
+}

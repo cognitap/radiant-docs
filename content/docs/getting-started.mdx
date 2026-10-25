@@ -3,6 +3,8 @@ title: Installation
 description: Install Radiant and add your first interactive component.
 ---
 
+import { FoundationDemo } from '@/components/FoundationDemo'
+
 Radiant is a collection of React components with native behavior and a shared
 visual language. These docs use the published **0.0.3** package with React 19.3.
 
@@ -11,6 +13,12 @@ visual language. These docs use the published **0.0.3** package with React 19.3.
 ```sh
 pnpm add @cognitap/radiant@0.0.3
 ```
+
+Use React and React DOM 19.3 or later within the supported React 19 peer range.
+Radiant is experimental; pin the package while evaluating it and read the
+[migration notes](/docs/releases/) before upgrading.
+
+## Choose a styling route
 
 Import the compiled stylesheet once in your application entry point:
 
@@ -23,26 +31,67 @@ import '@cognitap/radiant/styles.css'
   `reset.css` export is a separate choice; only add a global reset when it fits your application.
 </Callout>
 
-## Add an action
+The stylesheet includes component rules, utilities and a neutral light/dark
+baseline. You can render components immediately, without a provider. Use
+`ThemeScope` when you want a named preset or a scoped mode.
+
+### Optional global reset
+
+If you want Radiant's reset, import it before the component stylesheet:
 
 ```tsx
-'use client'
-
-import { useState } from 'react'
-import { Button } from '@cognitap/radiant'
-
-export function FollowButton() {
-  const [following, setFollowing] = useState(false)
-  return (
-    <Button onClick={() => setFollowing(value => !value)}>
-      {following ? 'Following' : 'Follow'}
-    </Button>
-  )
-}
+import '@cognitap/radiant/reset.css'
+import '@cognitap/radiant/styles.css'
 ```
 
-Try the [interactive Button example](/docs/button/) to inspect its source,
-test keyboard activation and reset the preview.
+The reset affects the whole document. Component behavior does not require it;
+an existing application can keep its own reset.
+
+### With Tailwind
+
+If your app already builds with **Tailwind 4.3.3 or later in the 4.x range**,
+use Radiant's source entry instead of the compiled `styles.css` entry:
+
+```css
+@import 'tailwindcss';
+@import '@cognitap/radiant/tailwind.css';
+```
+
+For Tailwind without Preflight, use:
+
+```css
+@layer theme, base, components, utilities;
+@import 'tailwindcss/theme.css' layer(theme);
+@import 'tailwindcss/utilities.css' layer(utilities);
+@import '@cognitap/radiant/tailwind.css';
+```
+
+Keep application source discovery enabled. If you configure `source(none)`,
+register your own application sources explicitly. This route lets Tailwind
+generate caller utilities and merge matching classes with component defaults.
+The compiled route includes Radiant's prebuilt utilities; it does not generate
+new utilities found in your application. Keep JavaScript and CSS on the same
+Radiant version and choose one component styling entry.
+
+## Add an action
+
+This example owns its toggle with React state and uses a real button. Open
+**View source** for the complete, typechecked file. In this statically exported
+site it waits for hydration before enabling the action.
+
+<FoundationDemo kind="setup" />
+
+In a Next.js App Router application, import global CSS in the root layout.
+Mark the module that owns hooks or event handlers with `'use client'`; a server
+layout can render that client component. See [client and server responsibilities](/docs/foundations/composition/#client-and-server-responsibilities).
+
+## Use public exports
+
+Import components, types, `defineTheme`, `ThemeScope` and presets from
+`@cognitap/radiant`. The public styling entries are `styles.css`, `reset.css`
+and `tailwind.css`. Avoid imports from `src`, `dist` or other implementation
+paths; they are not the package contract. The website and Storybook are
+separate consumers, not dependencies installed with the library.
 
 ## Build a complete flow
 
@@ -52,6 +101,6 @@ standalone, Card and Dialog placements.
 
 ## Make it yours
 
-Read the [foundations](/docs/foundations/) for component ownership, shared
-presets and modes. Check [releases](/docs/releases/) before upgrading an
-experimental package version.
+Explore the [preset gallery and theme authoring guide](/docs/foundations/theming/)
+and [composition guidance](/docs/foundations/composition/). Check
+[releases](/docs/releases/) before upgrading an experimental package version.

@@ -12,16 +12,41 @@ This release includes the harmonised ten-family system: Button, Link, Field,
 Input, Checkbox, RadioGroup, Dialog, Collapsible, Accordion and Card. It also
 ships the shared `ThemeScope` API and eight presets.
 
-The site currently demonstrates [Button](/docs/button/) and complete
-[profile form recipes](/docs/recipes/profile-form/). More component pages can
-be added as the catalog is documented.
+The site documents all ten families, complete
+[profile form recipes](/docs/recipes/profile-form/) and
+[setup](/docs/getting-started/), [theming](/docs/foundations/theming/) and
+[composition](/docs/foundations/composition/). Examples import the installed
+package's public API. Browser checks are evidence for those scenarios, not
+a claim of complete browser or assistive-technology certification.
 
 ## Upgrade from 0.0.2
 
 Version 0.0.2 was the earlier Button-only package. Version 0.0.3 includes
 breaking changes to action props, composition and themes. Check the
-[library changelog](https://github.com/cognitap/radiant/blob/main/CHANGELOG.md)
+[0.0.3 changelog](https://github.com/cognitap/radiant/blob/v0.0.3/CHANGELOG.md)
 and migration guidance before changing your application's pin.
+
+Key changes when moving earlier experiments to the 0.0.3 API:
+
+- Use action `variant` values `solid`, `soft`, `outline` or `ghost`; a separate
+  `tone` of `accent`, `neutral`, `warning` or `danger`; and `controlSize` of
+  `small`, `medium` or `large`.
+  Link also supports `inline` and `subtle`. The old `size`, `radius`, Link
+  `button` variant and color-named variants are removed.
+- Replace `{ name, style }`, `radiantTheme`, family `*Theme()` helpers and
+  `theme.style` / `theme.surface` with `defineTheme` and `ThemeScope`. Use
+  `ThemeComponentOverrides` or `ThemeStyle` for exceptions. Move shared
+  primary/secondary/destructive roles to accent/neutral/danger and the old
+  Radio gap shortcut to `components.radioGroup.gap`.
+- Use prefixed `--rad-*` roles instead of removed unprefixed Tailwind aliases
+  and ambient motion variables. Supply application-owned easing values where needed.
+- Forward resolved native props from action `render` callbacks to one
+  compatible button/anchor adapter; remove render-to-Radiant-Button wrappers.
+  Match multi-part `data-slot` values with `~=`.
+
+The changelog's earlier delivery entries can describe compatibility APIs
+that were removed later in the same release. Follow its final breaking-change
+notes and the [versioned theme migration](https://github.com/cognitap/radiant/blob/v0.0.3/docs/theming.md#migration-from-button-centred-themes).
 
 ## Preview a library change
 

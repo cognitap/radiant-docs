@@ -1,0 +1,136 @@
+---
+title: Theming
+description: Choose a preset, author semantic tokens and compose theme scopes.
+---
+
+import { FoundationDemo } from '@/components/FoundationDemo'
+
+Radiant 0.0.3 has one shared theme model. Semantic tokens describe your system;
+component overrides express exceptions. Start with the
+[stylesheet setup](/docs/getting-started/#choose-a-styling-route), then apply a
+theme to the subtree that needs it.
+
+## Supported presets
+
+Choose any of the eight presets from the readonly public `themes` registry.
+The gallery starts with Sharp 3D. Switch to Jelly, change modes, edit the name
+and save locally: changing presentation preserves the form's state. **Reset
+preview** restores the gallery's initial theme, mode and data.
+
+<FoundationDemo kind="presets" />
+
+| Stable ID       | Name          | Named export   | Shared font      | Action font/weight              |
+| --------------- | ------------- | -------------- | ---------------- | ------------------------------- |
+| `radiant`       | Radiant       | `radiant`      | Inter            | Inter 550                       |
+| `default`       | Default       | `defaultTheme` | System sans      | Baseline                        |
+| `soft-squircle` | Soft squircle | `soft`         | Nunito           | Nunito 800                      |
+| `expressive`    | Expressive    | `expressive`   | Poppins          | Poppins 600                     |
+| `glass`         | Glass         | `glass`        | Manrope          | Manrope 700                     |
+| `sharp-3d`      | Sharp 3D      | `sharp`        | System sans      | Archivo Black 400, uppercase    |
+| `jelly`         | Jelly         | `jelly`        | Baloo 2          | Baloo 2 700                     |
+| `ticket`        | Ticket        | `ticket`       | Barlow Condensed | Barlow Condensed 600, uppercase |
+
+Import a preset by its public export, for example `sharp` or `jelly` from
+`@cognitap/radiant`. Store a selection by its stable `id`, not its display name.
+Theme selection does not install a font or change the semantic role of a control.
+
+### Fonts and browser fallbacks
+
+These website previews use the configured font stacks with system fallbacks;
+they do not download preset fonts. Load your application's fonts with its font
+loader or self-hosted `@font-face` rules. Include body 400, label 600, heading
+700 and the action weight in the table. Default uses label 550 and heading 600. Inter 550 needs a variable font or a supplied face covering that weight.
+Sharp 3D's separate action font must also be loaded if you want its intended
+letterforms. `Theme` has no font-loading API or `fonts` field.
+
+Glass uses translucent surfaces and a gradient canvas, so surrounding content
+affects its appearance. Browsers without `corner-shape` fall back to rounded
+corners. Check your own content's contrast in both modes; a preset does not
+certify arbitrary application content.
+
+## Author a theme
+
+The Garden theme below is **an illustrative documentation example**, not a
+supported library preset. Its shared `control.radius` affects Input and Button.
+Enable **Button-only corners** to add `components.button.radius`: only Button's
+radius changes. The source includes the actual `defineTheme` definitions used
+by the preview.
+
+<FoundationDemo kind="authoring" />
+
+`defineTheme` accepts a stable lowercase slug `id`, a nonempty `name`, partial
+`tokens`, optional `components` and light/dark `modes`. It returns immutable,
+JSON-serializable theme data. Unknown groups and keys fail typechecking and
+throw at runtime. CSS values must be nonempty strings; numeric effects must
+be finite and opacity values must be between 0 and 1. You still own CSS grammar
+and contrast.
+
+Each mode resolves **library mode defaults → common theme values → mode
+overrides**. A common accent overrides both modes unless you explicitly give
+the dark mode its own value, as Garden does.
+
+### Semantic tokens and exceptions
+
+Shared token groups are `color`, `typography`, `control`, `surface`, `focus`,
+`motion`, `spacing` and `state`. Prefer these roles for changes across families.
+Components resolve **local component override → shared semantic role → neutral
+baseline**.
+
+| Authoring path              | Public CSS variable       | Scope of the change         |
+| --------------------------- | ------------------------- | --------------------------- |
+| `tokens.color.accent`       | `--rad-color-accent`      | Shared accent palette       |
+| `tokens.control.radius`     | `--rad-control-radius`    | Shared control shape        |
+| `tokens.typography.family`  | `--rad-typography-family` | Shared typography           |
+| `components.button.radius`  | `--rad-button-radius`     | Button's radius             |
+| `components.radioGroup.gap` | `--rad-radio-group-gap`   | Space between radio options |
+
+Reusable exceptions use the public `ThemeComponentOverrides` type; local
+styles can use `ThemeStyle`, which includes typed CSS properties and custom
+properties. Button's special font, uppercase text, shadow and press effects
+belong under `components.button`. `radio.labelGap` controls spacing inside an
+option; `radioGroup.gap` controls the group. Checkbox caps inherited rounding
+to keep its box shape, and Radio stays circular unless explicitly overridden.
+Variables beginning `--_` are private implementation details.
+
+## Nested scopes
+
+`ThemeScope` renders a `div`, accepts native props and a ref, and paints canvas,
+foreground and body typography inside its subtree. It does not change the
+document, persist preferences or install mode listeners. A native top-layer
+Dialog remains in its original DOM scope.
+
+The outer scope below starts with Jelly. The middle panel omits `theme` and
+sets `mode="dark"`, inheriting the selected theme. The final panel explicitly
+uses `defaultTheme`, resetting the theme and component effects while inheriting
+the outer mode. Each panel keeps its own input and counter state.
+
+<FoundationDemo kind="scopes" />
+
+Omit `theme` to inherit the current theme; omit `mode` to inherit the current
+mode. An inner scope with neither follows ordinary CSS inheritance. At the
+root, the stylesheet follows the system preference. `mode="system"` uses CSS
+media queries, keeping server markup and the first client render consistent.
+
+**Inline shared radius** puts `--rad-control-radius` on the outer ThemeScope's
+`style`. Known theme variables on ancestor ThemeScopes survive mode-only
+scopes. A new named theme starts from library defaults and clears inherited
+exceptions. A preset's explicit component radius can still take precedence
+over the shared radius; choose Default to compare the shared rule directly.
+
+Explicit inline styles win on their own scope host. An ordinary stylesheet
+rule or DOM wrapper is not recorded by ThemeScope: its token overrides are
+not recovered when a mode-only scope re-materializes the theme. Put an
+exception that must survive there into the theme definition or a ThemeScope's
+inline `style`. Other properties, such as body font size, follow normal CSS
+inheritance.
+
+## Customize without breaking behavior
+
+Keep native hit targets, labels and functional styles intact. Preserve closed
+dialog/details visibility, dialog bounds and scrolling, focus rings, invalid,
+disabled and pending cues, forced-colors support and reduced-motion alternatives.
+Read [composition](/docs/foundations/composition/#functional-css) before
+replacing a host or broad styling rules.
+
+For complete token and migration details, see the
+[0.0.3 theming reference](https://github.com/cognitap/radiant/blob/v0.0.3/docs/theming.md).
