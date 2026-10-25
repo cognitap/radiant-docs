@@ -8,8 +8,9 @@ checkout, workspace link or source alias.
 The site consumes **Radiant 0.0.3**, pinned from npm. That experimental release
 exports the harmonised ten-family component system and shared theme APIs. This
 site includes guides for all ten families, installation/foundations/release
-guidance and complete native/TanStack profile-form recipes. Broader setup and
-theming guidance remains separate work. The installed version is displayed on
+guidance and complete native/TanStack profile-form recipes. Setup, theming and
+composition guides include a public preset gallery, an illustrative authored
+theme and nested-scope examples. The installed version is displayed on
 every page. Site layout uses semantic HTML while live examples use
 published Radiant components, presets and compiled CSS.
 Fumadocs UI is not installed.
@@ -29,7 +30,8 @@ Open [localhost:3001](http://127.0.0.1:3001). Content lives in `content/docs`;
 interactive examples live in `examples`. Public routes include `/docs/button/`,
 `/docs/link/`, `/docs/field/`, `/docs/input/`, `/docs/checkbox/`, `/docs/radio-group/`,
 `/docs/dialog/`, `/docs/collapsible/`, `/docs/accordion/`, `/docs/card/` and
-`/docs/recipes/profile-form/`. Generated MDX and Next.js files are ignored.
+`/docs/recipes/profile-form/`, `/docs/foundations/theming/` and
+`/docs/foundations/composition/`. Generated MDX and Next.js files are ignored.
 
 ## Build and verify
 
@@ -70,6 +72,11 @@ radio keyboard/reset behavior and isolation from embedded profile recipes.
 Composition checks cover native Dialog focus/dismissal and Button adapters,
 top-layer themes, controlled/uncontrolled disclosures, Accordion selection and
 disabled guards, passive Card actions and embedded form ownership.
+Foundations checks verify guide links/anchors, static previews and source/copy,
+all eight presets in light/dark/system with live browser preference changes,
+preserved form state, shared versus component overrides, nested mode inheritance,
+named-theme resets and mobile layouts. Preset font stacks use system fallbacks
+on this site; loading custom fonts remains an application responsibility.
 Desktop/mobile screenshots go to `output/docs/` and
 are uploaded by CI. On Linux, install Chromium with `--with-deps` as CI does.
 
@@ -145,9 +152,9 @@ content/docs/button.mdx
    and toolbar focus. Keep state local; multiple instances are independent.
 4. For a theme/mode control, put its labeled selector in `DemoControls`
    and compose the installed release's `ThemeScope` inside `DemoPreview`.
-   Preset implementations stay in the library. Button, Link and profile previews
-   offer all published presets and light/dark/system modes. The broader setup
-   and theming guides belong to [DEV-145](https://linear.app/cognitap/issue/DEV-145).
+   Preset implementations stay in the library. The theming gallery, component
+   and profile previews offer all published presets and light/dark/system modes.
+   Site-only authored themes must be clearly labeled as illustrative examples.
 5. Use `next/dynamic` in the client playground for separately loaded example
    modules, retaining SSR so direct loads have real HTML. Highlighting and file
    reads stay on the server. Browser checks stay under `scripts/`, outside the

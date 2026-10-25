@@ -25,6 +25,8 @@ for complete examples using the installed package.
 Use uncontrolled values when the browser should own a control's state. Use
 controlled values when React or a form library should own it. Keep an instance
 with one owner for its lifetime; remount it deliberately to change ownership.
+Radiant supplies presentation and native relationships; your application owns
+validation, submission, persistence and feedback.
 
 The profile recipe demonstrates this distinction with native `FormData` and
 optional TanStack bindings. Radiant does not require a form library.
@@ -48,15 +50,19 @@ export function ThemedAction() {
 }
 ```
 
-The public `themes` registry contains Radiant, Default, Soft, Expressive, Glass,
+The public `themes` registry contains Radiant, Default, Soft squircle, Expressive, Glass,
 Sharp 3D, Jelly and Ticket. Preset implementations live in the library. Try
-them on the profile recipe without changing its form behavior.
+them in the [interactive gallery](/docs/foundations/theming/#supported-presets)
+without changing form behavior.
 
 ### Modes
 
 `ThemeScope` accepts `light`, `dark` and `system`. A nested scope can choose its
 own theme and mode. The documentation's Appearance control changes the site;
-the profile previews keep their own explicit selections.
+the previews keep their own selections. System mode follows the browser's
+color preference through CSS, including before hydration. Explore
+[nested scopes](/docs/foundations/theming/#nested-scopes) to inherit a theme,
+change only its mode or reset to Default.
 
 <Callout title="Keep presentation separate from behavior">
   Theme choices change presentation. They do not replace application validation, persistence or the
@@ -65,6 +71,12 @@ the profile previews keep their own explicit selections.
 
 ## Read the package contract
 
-The library's [system guide](https://github.com/cognitap/radiant/blob/main/docs/system.md)
-and [theming guide](https://github.com/cognitap/radiant/blob/main/docs/theming.md)
-describe the full contract and migration guidance.
+Continue with [theming](/docs/foundations/theming/) for semantic tokens, fonts
+and component overrides, or [composition](/docs/foundations/composition/) for
+state, events, native hosts, refs and React boundaries.
+
+The library's [0.0.3 system guide](https://github.com/cognitap/radiant/blob/v0.0.3/docs/system.md)
+and [0.0.3 theming reference](https://github.com/cognitap/radiant/blob/v0.0.3/docs/theming.md)
+describe the full contract behind these public examples. Storybook remains
+the library's development and regression workspace; these guides own the
+public explanations and examples.

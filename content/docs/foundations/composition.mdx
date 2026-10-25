@@ -1,0 +1,123 @@
+---
+title: Composition
+description: Keep native behavior, state ownership and styling responsibilities explicit.
+---
+
+Radiant components keep native HTML behavior. Your application chooses the
+state owner and supplies validation, requests and persistence. The
+[profile form recipe](/docs/recipes/profile-form/) demonstrates the same fields
+under native React and TanStack Form, inside a standalone form, Card or Dialog.
+
+## Choose one state owner
+
+| State                           | Browser-owned initial state | Application-owned state   |
+| ------------------------------- | --------------------------- | ------------------------- |
+| Input text                      | `defaultValue`              | `value` + `onChange`      |
+| Checkbox selection              | `defaultChecked`            | `checked` + `onChange`    |
+| RadioGroup selection            | `defaultValue`              | `value` + `onValueChange` |
+| Dialog / Collapsible visibility | `defaultOpen`               | `open` + `onOpenChange`   |
+| Accordion selection             | `defaultValue`              | `value` + `onValueChange` |
+
+Keep each state axis under one owner for the instance's lifetime. Do not pass
+both its controlled value and its default, or switch ownership on rerender.
+Defaults are initial snapshots. Remount with a new `key` when changing owner
+or Accordion selection type. Use an empty string for controlled empty Input
+text and `null` for a controlled RadioGroup with no selection; an empty string
+is also a valid radio value.
+
+Native form reset restores uncontrolled controls. A controlled form's owner
+must reset its values, validation and touched/submission metadata. Form reset
+does not own a Dialog's visibility or a disclosure's open state. Closed
+Collapsible content stays mounted, retaining state and form participation.
+
+## Events are observations and requests
+
+Input and Checkbox use native change/blur events. Disclosure state follows
+native details toggles; controlled callbacks request a change that the owner
+must accept by updating its prop. Prop synchronization and no-op requests do
+not represent fresh user changes.
+
+For cancellable actions, guards run first, then the consumer handler, then
+the uncancelled library request. Calling `preventDefault()` in the supported
+activation handler can veto the request. Disabling a component also preserves
+its native guard; styling something as disabled alone does not disable it.
+See [Dialog cancellation](/docs/dialog/) and
+[Accordion ownership](/docs/accordion/) for working examples.
+
+Field connects labels, descriptions, errors and control state. It does not
+decide when to validate or what an error means. Keep validation, touched state,
+submission and save feedback with the form owner, as the
+[Field adapter example](/docs/field/) does.
+
+## Anatomy, styles and refs
+
+Props and refs target the real native host, not an incidental label wrapper.
+Use the family pages for complete anatomy and prop tables.
+
+| Family / part            | Native target                           | Composition responsibility                                    |
+| ------------------------ | --------------------------------------- | ------------------------------------------------------------- |
+| Button / Link            | `button` / `a`                          | Actions versus navigation; Button defaults to `type="button"` |
+| Input / Checkbox / Radio | `input`                                 | Values, focus, native form participation                      |
+| Field                    | `div`, or grouped `fieldset` / `legend` | Connected label, help and error anatomy                       |
+| RadioGroup               | `fieldset` / `legend`                   | Native radio grouping and selection ownership                 |
+| Dialog / DialogContent   | Context without a host / `dialog`       | Compose title, description and real actions                   |
+| Collapsible / trigger    | `details` / `summary`                   | Browser disclosure behavior                                   |
+| Accordion                | Group of Collapsibles                   | Single or multiple selection coordination                     |
+| Card                     | `div`                                   | Passive surface; actions remain real controls inside it       |
+
+A convenience `label` does not redirect an Input or Checkbox's `ref`, style
+or event props to a wrapper. ThemeScope itself is a `div` with native props
+and a ref. Card is not an interactive region or a button; add explicit native
+semantics to an outer container when the content needs them.
+
+### Replacing an action host
+
+Button, Link and Dialog actions offer typed `render` callbacks. Return one
+compatible element, forward the resolved native props, ref, handlers, style
+and children, and preserve the real button or anchor host. Avoid fragments,
+multiple hosts and a second Radiant Button or Link wrapper that applies
+presentation twice. Radiant rejects directly incompatible native hosts;
+custom adapters must still honor the contract themselves.
+
+Use [Link's Next.js adapter](/docs/link/) or
+[Button's host replacement example](/docs/button/) as a starting point.
+Match stateful part selectors as tokens, for example
+`[data-slot~="dialog-trigger"]`, since one host can have multiple identities.
+
+## Functional CSS
+
+Appearance and behavior share the DOM. Keep closed `dialog` and `details`
+content hidden, constrain dialog geometry and scrolling, and keep the real
+input and its hit target available. Do not remove labels, focus rings or
+invalid, pending and disabled cues. Preserve forced-colors system colors and
+reduced-motion alternatives in replacement styles.
+
+Use [semantic tokens and local overrides](/docs/foundations/theming/#semantic-tokens-and-exceptions)
+for presentation changes. On the Tailwind route, matching caller utilities
+merge with component defaults; the ordinary CSS cascade still applies.
+Importing the optional reset is not required for these behaviors.
+
+## Client and server responsibilities
+
+Radiant's interactive modules declare their own `'use client'` boundaries;
+the package entry and pure theme data remain server-safe. A Next.js server
+layout may import the global stylesheet and render an interactive Radiant
+component. Your own module needs `'use client'` when it uses hooks, event
+handlers or browser APIs. Keep unrelated page content on the server.
+
+Themes returned by `defineTheme` are serializable and can cross a server/client
+boundary. System mode follows CSS media queries: do not branch the initial
+render on `window.matchMedia`. Keep initial values, ownership and generated
+IDs consistent through hydration.
+
+Collapsible's `defaultOpen` is reflected in server HTML. Dialog is rendered
+closed on the server; after mounting, Radiant calls the native `show()` or
+`showModal()` APIs for its selected state. Do not add a server `open` attribute
+to simulate a modal. Application handlers and coordinated state require
+hydration; native links and basic details disclosure can work before it.
+For static hosting, keep submissions disabled until their client handler is
+ready, as the public recipe does, rather than sending a form to a missing endpoint.
+
+Read the versioned [system guide](https://github.com/cognitap/radiant/blob/v0.0.3/docs/system.md)
+and [React bindings reference](https://github.com/cognitap/radiant/blob/v0.0.3/docs/react-bindings.md)
+for the complete lifecycle contract.
