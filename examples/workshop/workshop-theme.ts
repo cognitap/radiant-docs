@@ -79,9 +79,3 @@ export function resetEditor(document: WorkshopDocument, editor: Editor): Worksho
   }
   return documentAPI.update(document, { [editor]: {} }, 'replace')
 }
-
-export const accents = [
-  { id: 'violet', label: 'Violet', light: '#6D28D9', dark: '#C4B5FD' },
-  { id: 'forest', label: 'Forest', light: '#166534', dark: '#86EFAC' },
-  { id: 'rose', label: 'Rose', light: '#9F1239', dark: '#FDA4AF' }
-]

@@ -10,6 +10,7 @@ import { verifyNavigation } from './verify-navigation.mjs'
 import { verifyActions } from './verify-actions.mjs'
 import { verifyControls } from './verify-controls.mjs'
 import { verifyCompositions } from './verify-compositions.mjs'
+import { verifyColorEditor } from './verify-color-editor.mjs'
 import { verifyWorkshop } from './verify-workshop.mjs'
 import { verifyFoundations } from './verify-foundations.mjs'
 import { waitForDeployment } from './deployment-readiness.mjs'
@@ -224,6 +225,7 @@ try {
   await verifyCompositions(browser, baseURL)
   await verifyFoundations(browser, baseURL)
   await verifyWorkshop(browser, baseURL)
+  await verifyColorEditor(browser, baseURL)
   passed = true
 } finally {
   await writeFile(

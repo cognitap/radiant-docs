@@ -1,0 +1,595 @@
+'use client'
+
+/* oxlint-disable jsx-a11y/no-noninteractive-tabindex -- Named scrolling data regions need keyboard access. */
+
+import { useId, useState } from 'react'
+import { Button, Checkbox, Field, Input } from '@cognitap/radiant'
+import {
+  defaultColorRecipe,
+  overrideRole,
+  roleNames,
+  roleValue,
+  workingRoles,
+  type ColorRecipe,
+  type ColorSession,
+  type Mode,
+  type Role
+} from './workshop-color'
+import './color-editor.css'
+
+function HexField({
+  label,
+  value,
+  disabled,
+  onValid
+}: {
+  label: string
+  value: string
+  disabled?: boolean
+  onValid: (value: string) => void
+}) {
+  const [draft, setDraft] = useState(value)
+  const [previousValue, setPreviousValue] = useState(value)
+  if (previousValue !== value) {
+    setPreviousValue(value)
+    setDraft(value)
+  }
+  const valid = /^#[0-9a-f]{6}$/i.test(draft)
+  return (
+    <div className="color-hex-field">
+      <Field
+        label={label}
+        error={
+          !valid
+            ? 'Use six-digit sRGB hex, such as #7C3AED. The last valid theme is still shown.'
+            : undefined
+        }
+      >
+        <Input
+          value={draft}
+          disabled={disabled}
+          spellCheck={false}
+          maxLength={80}
+          onChange={event => {
+            setDraft(event.target.value)
+            if (/^#[0-9a-f]{6}$/i.test(event.target.value)) onValid(event.target.value)
+          }}
+        />
+      </Field>
+      <label className="color-picker-label">
+        Pick {label.toLowerCase()}
+        <input
+          type="color"
+          aria-label={`${label} picker`}
+          value={value}
+          disabled={disabled}
+          onChange={event => {
+            setDraft(event.target.value)
+            onValid(event.target.value)
+          }}
+        />
+      </label>
+    </div>
+  )
+}
+function Dial({
+  label,
+  value,
+  min,
+  max,
+  step,
+  disabled,
+  onChange
+}: {
+  label: string
+  value: number
+  min: number
+  max: number
+  step: number
+  disabled?: boolean
+  onChange: (value: number) => void
+}) {
+  const id = useId()
+  return (
+    <label
+      className="color-dial"
+      htmlFor={id}
+    >
+      <span>
+        {label}: <strong>{Number(value.toFixed(3))}</strong>
+      </span>
+      <input
+        id={id}
+        type="range"
+        min={min}
+        max={max}
+        step={step}
+        value={value}
+        disabled={disabled}
+        onChange={event => onChange(Number(event.target.value))}
+      />
+    </label>
+  )
+}
+function Chip({ value }: { value: string }) {
+  return (
+    <span className="color-chip">
+      <i
+        style={{ backgroundColor: value }}
+        aria-hidden="true"
+      />
+      <code>{value}</code>
+    </span>
+  )
+}
+
+export function ColorEditor({
+  session,
+  disabled,
+  onChange
+}: {
+  session: ColorSession | null
+  disabled: boolean
+  onChange: (recipe: ColorRecipe) => void
+}) {
+  const [mode, setMode] = useState<Mode>('light')
+  const [role, setRole] = useState<Role>('accent')
+  const [family, setFamily] = useState('brand')
+  const [stop, setStop] = useState(500)
+  if (!session)
+    return (
+      <div className="color-editor">
+        <p>
+          The complete color editor needs a package with the production color engine. Use the
+          labeled candidate preview described below.
+        </p>
+        <HexField
+          label="Brand color"
+          value={defaultColorRecipe().input.brand}
+          disabled
+          onValid={() => {}}
+        />
+      </div>
+    )
+  const { recipe, wall, palette } = session
+  const { input } = recipe
+  const changeInput = (patch: Partial<ColorRecipe['input']>) =>
+    onChange({ ...recipe, input: { ...input, ...patch } })
+  const choose = (value: string) => onChange(overrideRole(recipe, mode, role, value))
+  const selectedPalette = wall.color.palettes.find(p => p.id === family)!
+  const selectedSwatch = selectedPalette.swatches.find(s => s.stop === stop)!
+  const failures = palette.checks.filter(check => check.pass === false)
+  const required = palette.checks.filter(check => check.minimum !== null)
+  return (
+    <div className="color-editor">
+      <fieldset
+        disabled={disabled}
+        className="color-generator"
+      >
+        <legend>Brand and generator</legend>
+        <HexField
+          label="Brand color"
+          value={input.brand}
+          onValid={brand => changeInput({ brand })}
+        />
+        <p>
+          sRGB input and output. Alpha and Display P3 sources are not supported by this version.
+        </p>
+        <div className="color-controls">
+          <label>
+            Brand fidelity
+            <select
+              value={wall.input.fidelity}
+              onChange={event =>
+                changeInput({
+                  fidelity: event.target.value === 'unanchored' ? 'unanchored' : 'anchored'
+                })
+              }
+            >
+              <option value="anchored">Exact brand anchor</option>
+              <option value="unanchored">Regular ramp</option>
+            </select>
+          </label>
+          <label>
+            Lightness model
+            <select
+              value={wall.input.lightness}
+              onChange={event =>
+                changeInput({ lightness: event.target.value === 'shared' ? 'shared' : 'hue-aware' })
+              }
+            >
+              <option value="hue-aware">Hue aware</option>
+              <option value="shared">Shared stops</option>
+            </select>
+          </label>
+          <Checkbox
+            label="Automatic vividness"
+            checked={input.vividness === undefined}
+            onChange={event =>
+              changeInput({ vividness: event.target.checked ? undefined : wall.input.vividness })
+            }
+          />
+          <Dial
+            label="Vividness"
+            value={wall.input.vividness}
+            min={0}
+            max={1}
+            step={0.01}
+            disabled={input.vividness === undefined}
+            onChange={vividness => changeInput({ vividness })}
+          />
+          <Dial
+            label="Tone distribution"
+            value={wall.input.distribution}
+            min={0.75}
+            max={1.35}
+            step={0.01}
+            onChange={distribution => changeInput({ distribution })}
+          />
+          <Dial
+            label="Neutral tint"
+            value={wall.input.neutralTint}
+            min={0}
+            max={0.035}
+            step={0.001}
+            onChange={neutralTint => changeInput({ neutralTint })}
+          />
+          <Dial
+            label="Hue alignment"
+            value={wall.input.hueAlignment}
+            min={0}
+            max={1}
+            step={0.05}
+            onChange={hueAlignment => changeInput({ hueAlignment })}
+          />
+          <Dial
+            label="Neutral hue direction"
+            value={wall.input.neutralHue}
+            min={0}
+            max={359}
+            step={1}
+            disabled={!wall.neutralInput}
+            onChange={neutralHue => changeInput({ neutralHue })}
+          />
+        </div>
+      </fieldset>
+      <p
+        className="color-fidelity"
+        data-testid="color-fidelity"
+      >
+        <strong>
+          Original <code>{wall.color.brand.value}</code>.
+        </strong>{' '}
+        {wall.color.anchor ? (
+          <>
+            Retained exactly at {wall.color.anchor.paletteId} {wall.color.anchor.stop}; neighboring
+            shades reshape around it.
+          </>
+        ) : (
+          <>Retained as reference metadata; the regular ramp follows its own stops.</>
+        )}{' '}
+        Semantic roles can use related shades for contrast.{' '}
+        {wall.neutralInput && 'Neutral hue direction sets the wall’s low-chroma hue.'}
+      </p>
+      <details
+        className="color-working"
+        open
+      >
+        <summary>Working palette · six families</summary>
+        <p>
+          Family choices guide automatic roles. Exact role overrides stay pinned until you clear
+          them. Support and success are working colors; they do not add component tones.
+        </p>
+        <div className="color-working-grid">
+          {workingRoles.map(name => (
+            <div
+              className="color-working-choice"
+              key={name}
+            >
+              <label>
+                {name} family
+                <select
+                  aria-label={`${name} family`}
+                  disabled={disabled}
+                  value={palette.working[name].paletteId}
+                  onChange={event =>
+                    onChange({
+                      ...recipe,
+                      working: { ...recipe.working, [name]: event.target.value }
+                    })
+                  }
+                >
+                  {wall.color.palettes.map(p => (
+                    <option
+                      key={p.id}
+                      value={p.id}
+                    >
+                      {p.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              {(['light', 'dark'] as const).map(m => (
+                <div key={m}>
+                  <small>{m}</small>
+                  <Chip value={palette.working[name][m].background} />
+                  <span className="color-on-value">text {palette.working[name][m].foreground}</span>
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
+        <Button
+          variant="outline"
+          disabled={disabled || !recipe.working}
+          onClick={() => onChange({ ...recipe, working: undefined })}
+        >
+          Use recommended families
+        </Button>
+      </details>
+      <fieldset
+        disabled={disabled}
+        className="color-role-editor"
+      >
+        <legend>Semantic role adjustment</legend>
+        <p>
+          Choose a role and mode, then enter hex or choose a wall shade. Role mode is separate from
+          specimen preview mode.
+        </p>
+        <div className="color-controls">
+          <label>
+            Role mode
+            <select
+              value={mode}
+              onChange={event => setMode(event.target.value === 'dark' ? 'dark' : 'light')}
+            >
+              <option value="light">Light</option>
+              <option value="dark">Dark</option>
+            </select>
+          </label>
+          <label>
+            Semantic role
+            <select
+              value={role}
+              onChange={event => {
+                if (Object.hasOwn(roleNames, event.target.value))
+                  setRole(event.target.value as Role)
+              }}
+            >
+              {Object.entries(roleNames).map(([key, name]) => (
+                <option
+                  value={key}
+                  key={key}
+                >
+                  {name}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+        <HexField
+          key={`${mode}:${role}`}
+          label="Exact role color"
+          value={roleValue(session, mode, role)}
+          onValid={choose}
+        />
+        <p>
+          <strong>{recipe.modes?.[mode]?.[role] ? 'Explicit override' : 'Automatic choice'}</strong>{' '}
+          · {mode} {roleNames[role]} <Chip value={roleValue(session, mode, role)} />
+        </p>
+        <div className="workshop-actions">
+          <Button
+            variant="outline"
+            disabled={!recipe.modes?.[mode]?.[role]}
+            onClick={() => onChange(overrideRole(recipe, mode, role))}
+          >
+            Clear role override
+          </Button>
+          <Button
+            variant="outline"
+            disabled={!recipe.modes}
+            onClick={() => onChange({ ...recipe, modes: undefined })}
+          >
+            Use automatic roles
+          </Button>
+        </div>
+        <div className="color-controls color-wall-choice">
+          <label>
+            Wall family
+            <select
+              value={family}
+              onChange={event => setFamily(event.target.value)}
+            >
+              {wall.color.palettes.map(p => (
+                <option
+                  value={p.id}
+                  key={p.id}
+                >
+                  {p.name}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label>
+            Wall stop
+            <select
+              value={stop}
+              onChange={event => setStop(Number(event.target.value))}
+            >
+              {selectedPalette.swatches.map(s => (
+                <option
+                  key={s.stop}
+                  value={s.stop}
+                >
+                  {s.stop} · {s.value}
+                </option>
+              ))}
+            </select>
+          </label>
+          <Button onClick={() => choose(selectedSwatch.value)}>Apply selected shade</Button>
+        </div>
+      </fieldset>
+      <details
+        className="color-wall-details"
+        open
+      >
+        <summary>Complete color wall · {wall.color.palettes.length} families</summary>
+        <p>
+          Use the family and stop selectors above for keyboard selection, or click any swatch to set
+          the selected semantic role. Original and all supporting colors remain available.
+        </p>
+        <section
+          className="color-wall-scroll"
+          aria-label="Complete color wall"
+          tabIndex={0}
+        >
+          <table className="color-wall">
+            <caption>
+              All generated shades · choose for {mode} {roleNames[role]}
+            </caption>
+            <thead>
+              <tr>
+                <th scope="col">Family</th>
+                {wall.color.palettes[0].swatches.map(s => (
+                  <th
+                    scope="col"
+                    key={s.stop}
+                  >
+                    {s.stop}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {wall.color.palettes.map(p => (
+                <tr key={p.id}>
+                  <th scope="row">{p.name}</th>
+                  {p.swatches.map(s => (
+                    <td key={s.stop}>
+                      <button
+                        type="button"
+                        tabIndex={-1}
+                        disabled={disabled}
+                        className="color-swatch"
+                        style={{ backgroundColor: s.value }}
+                        aria-label={`Use ${p.name} ${s.stop} ${s.value} for ${mode} ${roleNames[role]}`}
+                        aria-pressed={recipe.modes?.[mode]?.[role] === s.value}
+                        onClick={() => {
+                          setFamily(p.id)
+                          setStop(s.stop)
+                          choose(s.value)
+                        }}
+                      />
+                      <code>{s.value}</code>
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </section>
+      </details>
+      <section
+        className="color-contrast"
+        aria-label="Color contrast report"
+      >
+        <h4>Contrast for actual semantic pairs</h4>
+        <output className="color-contrast-summary">
+          {failures.length
+            ? `${failures.length} required pairs need attention.`
+            : `${required.length} required pairs pass.`}{' '}
+          {palette.checks.length - required.length} inactive-control observations.
+        </output>
+        <p>
+          Checks use final opaque sRGB values and unrounded thresholds. Apply color and canvas
+          together. Component overrides, translucent surfaces and rendered effects need inspection
+          in the real specimens. Pending actions remain subject to contrast requirements.
+        </p>
+        {failures.length > 0 && (
+          <ul className="color-failures">
+            {failures.map(check => (
+              <li key={`${check.mode}:${check.foregroundRole}:${check.backgroundRole}`}>
+                <strong>
+                  {check.mode} · {check.foregroundRole} on {check.backgroundRole}
+                </strong>
+                : {check.ratio.toFixed(4)}:1. {check.message}
+              </li>
+            ))}
+          </ul>
+        )}
+        <details>
+          <summary>All {palette.checks.length} pair measurements</summary>
+          <section
+            className="color-data-scroll"
+            aria-label="Contrast measurements"
+            tabIndex={0}
+          >
+            <table>
+              <caption>Measured foreground/background pairs</caption>
+              <thead>
+                <tr>
+                  <th>Mode and pair</th>
+                  <th>Colors</th>
+                  <th>Ratio</th>
+                  <th>Result</th>
+                </tr>
+              </thead>
+              <tbody>
+                {palette.checks.map(c => (
+                  <tr key={`${c.mode}:${c.foregroundRole}:${c.backgroundRole}`}>
+                    <th scope="row">
+                      {c.mode} · {c.foregroundRole} / {c.backgroundRole}
+                    </th>
+                    <td>
+                      {c.foreground} / {c.background}
+                    </td>
+                    <td>{c.ratio.toFixed(4)}:1</td>
+                    <td>
+                      {c.pass === null
+                        ? 'Informational: inactive control'
+                        : c.pass
+                          ? `Pass ≥ ${c.minimum}:1`
+                          : `Fail < ${c.minimum}:1`}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </section>
+        </details>
+      </section>
+      <details className="color-role-values">
+        <summary>Semantic light/dark roles</summary>
+        <section
+          className="color-data-scroll"
+          aria-label="Semantic role values"
+          tabIndex={0}
+        >
+          <table>
+            <caption>Applied semantic role values</caption>
+            <thead>
+              <tr>
+                <th>Role</th>
+                <th>Light</th>
+                <th>Dark</th>
+              </tr>
+            </thead>
+            <tbody>
+              {(Object.keys(roleNames) as Role[]).map(name => (
+                <tr key={name}>
+                  <th scope="row">{roleNames[name]}</th>
+                  <td>
+                    <Chip value={roleValue(session, 'light', name)} />
+                  </td>
+                  <td>
+                    <Chip value={roleValue(session, 'dark', name)} />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </section>
+      </details>
+    </div>
+  )
+}

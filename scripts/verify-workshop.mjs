@@ -11,7 +11,7 @@ export async function verifyWorkshop(browser, baseURL) {
   )
   const staticFrame = staticPage.getByRole('region', { name: 'Shared theme workshop', exact: true })
   await staticFrame.locator('.demo-sources > summary').press('Enter')
-  assert.equal(await staticFrame.locator('pre').count(), 8)
+  assert.equal(await staticFrame.locator('pre').count(), 11)
   await staticPage.close()
 
   const context = await browser.newContext({
@@ -60,7 +60,7 @@ export async function verifyWorkshop(browser, baseURL) {
       .waitFor()
 
     if (editable) {
-      await frame.getByRole('combobox', { name: 'Accent palette' }).selectOption('violet')
+      await frame.getByRole('textbox', { name: 'Brand color', exact: true }).fill('#166534')
       assert.notEqual(await variable('--rad-color-accent'), baseline)
       await selectEditor('Typography')
       await frame.getByRole('combobox', { name: 'Body family' }).selectOption('Georgia, serif')
@@ -84,9 +84,12 @@ export async function verifyWorkshop(browser, baseURL) {
         await form.getByRole('textbox', { name: 'Display name' }).inputValue(),
         'Workshop Ada'
       )
-      await frame.getByRole('combobox', { name: 'Accent palette' }).selectOption('forest')
+      await frame.getByRole('textbox', { name: 'Brand color', exact: true }).fill('#166534')
     } else {
-      assert.equal(await frame.getByRole('combobox', { name: 'Accent palette' }).isDisabled(), true)
+      assert.equal(
+        await frame.getByRole('textbox', { name: 'Brand color', exact: true }).isDisabled(),
+        true
+      )
       await selectEditor('Typography')
       assert.equal(await frame.getByRole('combobox', { name: 'Body family' }).isDisabled(), true)
     }
@@ -181,6 +184,9 @@ export async function verifyWorkshop(browser, baseURL) {
     for (const file of [
       'workshop/ThemeWorkshop.tsx',
       'workshop/workshop-theme.ts',
+      'workshop/workshop-color.ts',
+      'workshop/ColorEditor.tsx',
+      'workshop/color-editor.css',
       'workshop/Specimens.tsx',
       'workshop/workshop.css',
       'profile/NativeProfileForm.tsx',
