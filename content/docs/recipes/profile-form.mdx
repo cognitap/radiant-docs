@@ -13,6 +13,13 @@ import { ProfileFormDemo } from '../../../components/ProfileFormDemo'
 
 ## Choose a form owner
 
+The component guides explain each building block:
+[Field](/docs/field/) connects labels/help/errors,
+[Input](/docs/input/) owns a native text control,
+[Checkbox](/docs/checkbox/) separates checked state from submitted payload,
+and [RadioGroup](/docs/radio-group/) owns one named choice. This recipe combines
+those same released controls with one form-state owner.
+
 **Native React** keeps values in the browser's form controls. The submit handler
 reads `FormData`, checks the values, and shows errors through Radiant Field.
 Use it for a small form with straightforward validation.
@@ -21,6 +28,11 @@ Use it for a small form with straightforward validation.
 pass `value`, `checked`, change and blur handlers to the same Radiant controls.
 Use it when your application already uses TanStack or needs more form state.
 It is an optional application dependency; Radiant does not require it.
+
+Keep one owner per value: use `defaultValue` / `defaultChecked` for native
+controls, or `value` / `checked` plus change handlers for controlled bindings.
+Do not mix the two during a mount. The native reset restores browser defaults;
+the TanStack reset handler resets controlled values and validation together.
 
 Both versions check the name and email, focus the first invalid control, and
 show help and error messages linked to that control. **Reset form** restores

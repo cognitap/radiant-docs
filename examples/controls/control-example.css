@@ -1,0 +1,47 @@
+.control-example {
+  box-sizing: border-box;
+  width: 100%;
+  padding: clamp(1rem, 4vw, 2rem);
+}
+
+.control-form {
+  display: grid;
+  gap: 1rem;
+  width: 100%;
+  max-width: 28rem;
+  margin-inline: auto;
+}
+
+.control-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.control-result {
+  display: block;
+  min-height: 3em;
+  overflow-wrap: anywhere;
+  font:
+    0.8125rem/1.6 ui-sans-serif,
+    system-ui,
+    sans-serif;
+}
+
+.native-field-input {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  border: 1px solid currentColor;
+  border-radius: 0.25rem;
+  padding: 0.5rem;
+  color: inherit;
+  background: transparent;
+  font: inherit;
+}
+
+.channel-options {
+  display: grid;
+  justify-items: start;
+  gap: 0.75rem;
+}
