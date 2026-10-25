@@ -7,9 +7,10 @@ checkout, workspace link or source alias.
 
 The site consumes **Radiant 0.0.3**, pinned from npm. That experimental release
 exports the harmonised ten-family component system and shared theme APIs. This
-site currently demonstrates Button; further component pages remain separate docs
-work. The installed version is displayed on every page. Site layout uses semantic
-HTML while live examples use the published Radiant Button and compiled CSS.
+site demonstrates Button and complete native/TanStack profile-form recipes;
+further component pages remain separate docs work. The installed version is
+displayed on every page. Site layout uses semantic HTML while live examples use
+published Radiant components, presets and compiled CSS.
 Fumadocs UI is not installed.
 
 ## Development
@@ -24,8 +25,8 @@ pnpm dev
 ```
 
 Open [localhost:3001](http://127.0.0.1:3001). Content lives in `content/docs`;
-interactive examples live in `examples`. The public Button route is
-`/docs/button/`. Generated MDX and Next.js files are ignored.
+interactive examples live in `examples`. Public routes include `/docs/button/`
+and `/docs/recipes/profile-form/`. Generated MDX and Next.js files are ignored.
 
 ## Build and verify
 
@@ -52,7 +53,10 @@ for static HTML without JavaScript, navigation, direct-load hydration,
 pointer/Enter/Space activation, independent controls/reset, keyboard source
 disclosure, real highlighted/copied source (including supporting files), clipboard
 failure feedback, the installed-version label, compiled CSS, mobile overflow and
-404s. Desktop/mobile screenshots go to `output/docs/` and
+404s. Recipe checks exercise both owners in all three placements, validation and
+reset, keyboard radio/checkbox changes, local save feedback, Dialog dismissal and
+focus restoration, instance/ID isolation and all eight presets in light/dark.
+Desktop/mobile screenshots go to `output/docs/` and
 are uploaded by CI. On Linux, install Chromium with `--with-deps` as CI does.
 
 `pnpm test:smoke` checks an already-built `out/`. Use `pnpm check` after changing
@@ -125,7 +129,7 @@ content/docs/button.mdx
    and an accessible `label`. The frame remounts this subtree on reset, restoring
    both control defaults and component state while retaining source disclosure
    and toolbar focus. Keep state local; multiple instances are independent.
-4. For a future theme/mode control, put its labeled selector in `DemoControls`
+4. For a theme/mode control, put its labeled selector in `DemoControls`
    and compose the installed release's `ThemeScope` inside `DemoPreview`.
    Preset implementations stay in the library. The current Button slice uses
    baseline styles; adopting the shared themes and modes in the gallery
@@ -135,9 +139,29 @@ content/docs/button.mdx
    reads stay on the server. Browser checks stay under `scripts/`, outside the
    production bundle. Add behavior checks to `scripts/verify-docs.mjs`.
 
-The native/TanStack recipes and their owner/placement controls follow in
-[DEV-137](https://linear.app/cognitap/issue/DEV-137). The frame does not prescribe
-their state model or depend on their test utilities.
+## Public profile recipes
+
+`examples/profile/` contains the website-owned recipe delivered in
+[DEV-137](https://linear.app/cognitap/issue/DEV-137). Its page explains setup,
+ownership and placement choices. The native version uses uncontrolled controls
+and `FormData`; the optional TanStack version uses controlled field bindings.
+`ProfileRecipe` composes either version with standalone, Card or Dialog layouts
+and the installed library's `ThemeScope`/presets. Website option controls live in
+`ProfilePlayground`, outside the copyable recipe.
+
+Both form versions, the shared validators/defaults, hydration helper, composition and CSS
+are displayed from the same files the preview imports. The website playground
+loads the recipe through `next/dynamic` with SSR; the copyable recipe uses plain
+React and has no Next.js dependency. TanStack Form 1.33.5 is a dependency of this
+website only; Radiant's runtime dependencies are unaffected. Native-only consumers can use
+`NativeProfileForm` and its callbacks directly without TanStack.
+
+Save feedback is local to each preview; no API request or persistence is implied.
+Form reset clears values, validation and saved feedback. Dismissing a Dialog
+retains unsaved edits until reset. Owner/placement changes start a fresh example;
+theme/mode changes preserve it. The frame's reset also restores option defaults.
+`scripts/verify-profile-recipes.mjs` runs through the normal smoke-check gate;
+it is not imported by production code.
 
 This repository replaces the in-library `apps/docs` prototype from
 [Radiant PR #39](https://github.com/cognitap/radiant/pull/39), closed without

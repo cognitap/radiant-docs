@@ -19,6 +19,7 @@
   },
   "dependencies": {
     "@cognitap/radiant": "0.0.3",
+    "@tanstack/react-form": "1.33.5",
     "fumadocs-core": "16.17.8",
     "fumadocs-mdx": "15.4.10",
     "next": "16.4.3",

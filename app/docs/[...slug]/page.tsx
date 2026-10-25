@@ -27,7 +27,9 @@ export default async function DocsPage({ params }: { params: Promise<{ slug: str
 
   return (
     <article className="docs-page">
-      <p className="eyebrow">Components / Actions</p>
+      <p className="eyebrow">
+        {slug[0] === 'recipes' ? 'Recipes / Forms' : 'Components / Actions'}
+      </p>
       <h1>{page.data.title}</h1>
       <p className="lede">{page.data.description}</p>
       <div className="prose">
