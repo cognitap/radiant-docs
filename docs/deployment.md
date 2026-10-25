@@ -129,6 +129,11 @@ keep fields and actions disabled until hydrated, then accept edits and save.
 This prevents an early edit to SSR markup being lost when controlled form state
 mounts on a slower connection.
 
+The same delayed-script check keeps demo Copy, Reset and controlled settings
+disabled until their handlers are ready, while native source disclosure stays
+usable. Keyboard activation checks wait for the existing enabled state before
+pressing keys; keyboard dispatch itself does not wait for enabled controls.
+
 `docs-results` contains local screenshots and `verification.json` with target,
 revision, installed Radiant version, timestamps, exact Node/Chromium versions
 and platform. `deployment-results` adds the deployed site's browser evidence

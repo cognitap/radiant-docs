@@ -53,7 +53,54 @@ async function radius(host) {
   })
 }
 
+/** Native source disclosure stays usable while JavaScript-owned frame actions wait. */
+export async function verifyDemoHydration(browser, baseURL) {
+  const context = await browser.newContext({
+    permissions: ['clipboard-read', 'clipboard-write']
+  })
+  const page = await context.newPage()
+  let release
+  const scripts = new Promise(resolve => {
+    release = resolve
+  })
+  await page.route('**/_next/static/**/*.js', async route => {
+    await scripts
+    await route.continue()
+  })
+  try {
+    await page.goto(`${baseURL}/docs/foundations/theming/`, { waitUntil: 'commit' })
+    const frame = page.getByRole('region', { name: 'Supported presets', exact: true })
+    await frame.locator('.demo-sources > summary').click()
+    const file = 'foundations/ThemeExample.tsx'
+    const copy = frame.getByRole('button', { name: `Copy ${file}`, exact: true })
+    const reset = frame.getByRole('button', { name: 'Reset preview', exact: true })
+    const theme = frame.getByRole('combobox', { name: 'Theme', exact: true })
+    assert.equal(await copy.isDisabled(), true, 'copy waits for its handler')
+    assert.equal(await reset.isDisabled(), true, 'reset waits for its handler')
+    assert.equal(await theme.isDisabled(), true, 'controlled settings wait for their owner')
+    assert.equal(await frame.getByLabel(`Source: ${file}`, { exact: true }).isVisible(), true)
+    release()
+    await copy.click()
+    await frame
+      .getByRole('status')
+      .filter({ hasText: `Copied ${file}.` })
+      .waitFor()
+    assert.equal(
+      await page.evaluate(() => navigator.clipboard.readText()),
+      await readFile(new URL(`../examples/${file}`, import.meta.url), 'utf8')
+    )
+    await theme.locator(':scope:enabled').waitFor()
+    await reset.click()
+    await frame.getByRole('status').filter({ hasText: 'Preview reset.' }).waitFor()
+  } finally {
+    release()
+    await page.unrouteAll({ behavior: 'wait' })
+    await context.close()
+  }
+}
+
 export async function verifyFoundations(browser, baseURL) {
+  await verifyDemoHydration(browser, baseURL)
   const context = await browser.newContext({
     permissions: ['clipboard-read', 'clipboard-write'],
     viewport: { width: 1440, height: 1000 },
@@ -129,7 +176,9 @@ export async function verifyFoundations(browser, baseURL) {
     }
     await page.goto(`${baseURL}/docs/getting-started/`)
     const setup = page.getByRole('region', { name: 'Your first action', exact: true })
-    await setup.getByRole('button', { name: 'Follow', exact: true }).press('Enter')
+    const follow = setup.getByRole('button', { name: 'Follow', exact: true })
+    await follow.locator(':scope:enabled').waitFor()
+    await follow.press('Enter')
     assert.equal(
       await setup
         .getByRole('button', { name: 'Following', exact: true })

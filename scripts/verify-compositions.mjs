@@ -417,6 +417,7 @@ export async function verifyCompositions(browser, baseURL) {
     assert.equal(await card.getAttribute('tabindex'), null)
     assert.equal(await card.getByRole('heading', { name: 'Radiant starter', level: 3 }).count(), 1)
     const bookmark = card.getByRole('button', { name: /Bookmark|Remove bookmark/ })
+    await bookmark.locator(':scope:enabled').waitFor()
     await bookmark.press('Space')
     await cardFrame
       .locator('.composition-result')
