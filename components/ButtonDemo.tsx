@@ -1,5 +1,6 @@
 import { Demo } from './demo/Demo'
 import { ButtonPlayground } from '@/examples/button/ButtonPlayground'
+import { ButtonCompositionPlayground } from '@/examples/button/ButtonCompositionPlayground'
 
 export function ButtonDemo({ disabled = false }: { disabled?: boolean }) {
   return (
@@ -8,6 +9,17 @@ export function ButtonDemo({ disabled = false }: { disabled?: boolean }) {
       files={['button/ButtonExample.tsx', 'button/button-example.css']}
     >
       <ButtonPlayground defaultDisabled={disabled} />
+    </Demo>
+  )
+}
+
+export function ButtonCompositionDemo() {
+  return (
+    <Demo
+      title="Custom button and ref"
+      files={['button/ButtonComposition.tsx', 'button/button-example.css']}
+    >
+      <ButtonCompositionPlayground />
     </Demo>
   )
 }

@@ -5,6 +5,7 @@ import { createDocsServer } from './serve-docs.mjs'
 import { radiantPackage } from './radiant-package.mjs'
 import { verifyProfileRecipes } from './verify-profile-recipes.mjs'
 import { verifyNavigation } from './verify-navigation.mjs'
+import { verifyActions } from './verify-actions.mjs'
 
 const server = createDocsServer()
 await new Promise(resolve => server.listen(0, '127.0.0.1', resolve))
@@ -103,7 +104,10 @@ try {
   await waitForCount(demo, 'Preview reset.')
   assert.equal(await count.innerText(), 'Ready when you are.')
   assert.equal(await button.isDisabled(), false)
-  assert.equal(await demo.getByRole('checkbox').isChecked(), false)
+  assert.equal(
+    await demo.getByRole('checkbox', { name: 'Disabled', exact: true }).isChecked(),
+    false
+  )
   assert.equal(await reset.evaluate(node => node === document.activeElement), true)
   assert.equal(await demo.locator('details').getAttribute('open'), '', 'reset keeps source open')
   assert.equal(await otherCount.innerText(), 'Activated 1 time.')
@@ -169,6 +173,7 @@ try {
   )
   await verifyProfileRecipes(browser, baseURL)
   await verifyNavigation(browser, baseURL)
+  await verifyActions(browser, baseURL)
 } finally {
   await browser?.close()
   await new Promise(resolve => server.close(resolve))

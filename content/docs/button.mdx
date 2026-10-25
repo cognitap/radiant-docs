@@ -3,29 +3,31 @@ title: Button
 description: A clear next step. Native button behavior, with a shared visual language.
 ---
 
-import { ButtonDemo } from '../../components/ButtonDemo'
+import { ButtonDemo, ButtonCompositionDemo } from '../../components/ButtonDemo'
 
 <ButtonDemo />
 
 ## Built for actions
 
 Use Button to submit a form, confirm a choice, or change something on the page.
-It renders a native button and defaults to `type="button"`. Use an anchor when
-the action takes someone to another page.
+It renders a native `button` and defaults to `type="button"`. Use
+[Link](/docs/link/) when the action takes someone to another page, even when
+you want it to look like a button.
 
 Open **View source** to see and copy the files that power the preview, including
 its supporting styles. Import the compiled Radiant stylesheet once in your app.
 
 ## Try the example
 
-The example is interactive after the page loads. Try it with a pointer, or use
-Tab followed by Enter or Space. The version at the top of this page identifies
-the installed Radiant package used by this build.
+Try a pointer, or Tab followed by Enter or Space. Variant changes the treatment;
+tone changes the semantic palette; control size changes the metrics. Theme and
+mode affect only this preview. System mode follows your browser preference.
+The version at the top identifies the installed package used by this build.
 
 **Reset preview** restores the example and its controls. Each preview keeps its
 own state, so resetting one leaves the others alone.
 
-## Disabled state
+## Disabled and pending
 
 Use `disabled` when an action is temporarily unavailable. A disabled button
 cannot be activated with a pointer or keyboard. Use the control below to enable
@@ -33,6 +35,72 @@ it and try the same example.
 
 <ButtonDemo disabled />
 
-These examples use native button props. Radiant 0.0.3 also supports independent
-`variant`, `tone`, and `controlSize` presentation choices; see the
-[public system guide](https://github.com/cognitap/radiant/blob/main/docs/system.md).
+`pending` is different: it sets `aria-busy`, shows a decorative spinner and
+guards activation before your `onClick`. The button stays focusable and keeps
+its accessible name. Turn Pending on, focus the button and try activating it:
+the counter should stay still. Turn it off to resume. With reduced motion, the
+label stays visible instead of the animated spinner.
+
+<Callout title="Your application owns the work">
+  Pending is a presentation and activation guard, not an async task runner. Set and clear it around
+  your own operation, expose success or error feedback, and guard duplicate submissions in your
+  form's submission handler. The preview holds pending on until you turn it off; it makes no network
+  request.
+</Callout>
+
+## Native host and accessible name
+
+The root receives native button attributes, handlers, `className`, `style` and
+`ref`. Its `data-slot` includes `button`; `data-variant`, `data-tone` and
+`data-control-size` describe presentation. Radiant wraps the label and adds a
+decorative pending indicator. Keep those resolved children intact in adapters.
+
+Use a short action label such as “Save changes”. For an icon-only action, set
+`iconOnly`, give the button an `aria-label` and hide a decorative icon with
+`aria-hidden`. A tooltip or `title` can help sighted users, but should not be the
+only accessible name. Preserve the visible keyboard focus indicator.
+
+Use `type="submit"` inside a form to submit, or `type="reset"` for a native
+reset. Set `name`, `value` and `form` as needed. Application state and validation
+still belong to the form; see the [profile recipe](/docs/recipes/profile-form/).
+
+## Custom render and ref
+
+This example returns a native button from `render`, adds an application data
+attribute and passes every resolved prop through. The arrow action uses the ref
+to focus that same button. It also demonstrates a named icon-only action and a
+full-width primary action. Try pending here to check that composition preserves
+the spinner, accessible name and guarded handler.
+
+<ButtonCompositionDemo />
+
+Return one compatible button or a component that forwards its props to one.
+Forward `ref`, event handlers, styles, native attributes and **children**. The
+children already contain pending presentation. Passing the resolved props
+through another Radiant Button would apply its behavior and presentation twice.
+This example needs only React and Radiant.
+
+## Public props
+
+These props are available in the installed **Radiant 0.0.3**. `ButtonProps` and
+`ButtonRenderProps` are exported from `@cognitap/radiant`.
+
+| Prop                 | Values / purpose                                                      | Default         |
+| -------------------- | --------------------------------------------------------------------- | --------------- |
+| `variant`            | `solid`, `soft`, `outline`, `ghost`                                   | `solid`         |
+| `tone`               | `accent`, `neutral`, `warning`, `danger`                              | `accent`        |
+| `controlSize`        | `small`, `medium`, `large`                                            | `medium`        |
+| `disabled`           | Native disabled state; removed from the tab sequence                  | `false`         |
+| `pending`            | Busy presentation and activation guard; remains focusable             | `false`         |
+| `iconOnly`           | Square action metrics; supply an accessible name                      | `false`         |
+| `fullWidth`          | Fill the available inline space                                       | `false`         |
+| `type`               | Native `button`, `submit` or `reset`                                  | `button`        |
+| `render`             | `(props: ButtonRenderProps) => ReactElement`                          | Native `button` |
+| `ref`                | Ref to the real `HTMLButtonElement`                                   | —               |
+| `className`, `style` | Root customization; style also accepts typed `--…` tokens             | —               |
+| `data-slot`          | Additional identity tokens; retains `button`                          | `button`        |
+| Other native props   | `name`, `value`, `form`, `aria-*`, events and other button attributes | Native behavior |
+
+Choose presets with `ThemeScope`, rather than replacing the host. The preview
+offers all published themes; preset fonts must be loaded by your application.
+Start with [System foundations](/docs/foundations/) for the shared theme model.

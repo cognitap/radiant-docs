@@ -7,7 +7,7 @@ checkout, workspace link or source alias.
 
 The site consumes **Radiant 0.0.3**, pinned from npm. That experimental release
 exports the harmonised ten-family component system and shared theme APIs. This
-site includes installation/foundations/release guidance, Button and complete
+site includes installation/foundations/release guidance, Button, Link and complete
 native/TanStack profile-form recipes; further component pages remain separate
 docs work. The installed version is
 displayed on every page. Site layout uses semantic HTML while live examples use
@@ -26,8 +26,8 @@ pnpm dev
 ```
 
 Open [localhost:3001](http://127.0.0.1:3001). Content lives in `content/docs`;
-interactive examples live in `examples`. Public routes include `/docs/button/`
-and `/docs/recipes/profile-form/`. Generated MDX and Next.js files are ignored.
+interactive examples live in `examples`. Public routes include `/docs/button/`,
+`/docs/link/` and `/docs/recipes/profile-form/`. Generated MDX and Next.js files are ignored.
 
 ## Build and verify
 
@@ -57,6 +57,11 @@ failure feedback, the installed-version label, compiled CSS, mobile overflow and
 404s. Recipe checks exercise both owners in all three placements, validation and
 reset, keyboard radio/checkbox changes, local save feedback, Dialog dismissal and
 focus restoration, instance/ID isolation and all eight presets in light/dark.
+Action checks verify the released variants/tones/sizes, theme/mode selection,
+pending activation guards and reduced-motion labels, custom button/ref forwarding,
+native and Next.js navigation (including modified clicks, middle clicks and new
+tabs), and source/copy integrity. Site link/focus styles exclude Radiant hosts so
+the examples retain their own presentation.
 Desktop/mobile screenshots go to `output/docs/` and
 are uploaded by CI. On Linux, install Chromium with `--with-deps` as CI does.
 
@@ -132,13 +137,29 @@ content/docs/button.mdx
    and toolbar focus. Keep state local; multiple instances are independent.
 4. For a theme/mode control, put its labeled selector in `DemoControls`
    and compose the installed release's `ThemeScope` inside `DemoPreview`.
-   Preset implementations stay in the library. The current Button slice uses
-   baseline styles; adopting the shared themes and modes in the gallery
-   belongs to [DEV-145](https://linear.app/cognitap/issue/DEV-145).
+   Preset implementations stay in the library. Button, Link and profile previews
+   offer all published presets and light/dark/system modes. The broader setup
+   and theming guides belong to [DEV-145](https://linear.app/cognitap/issue/DEV-145).
 5. Use `next/dynamic` in the client playground for separately loaded example
    modules, retaining SSR so direct loads have real HTML. Highlighting and file
    reads stay on the server. Browser checks stay under `scripts/`, outside the
-   production bundle. Add behavior checks to `scripts/verify-docs.mjs`.
+   production bundle. Call behavior checks from `scripts/verify-docs.mjs`.
+
+## Public action examples
+
+`examples/button/` and `examples/link/` contain the independently authored
+examples for [DEV-142](https://linear.app/cognitap/issue/DEV-142). The basic Button
+and Link examples require React and Radiant only. `ButtonComposition` forwards
+resolved props/ref/children to one native button. `RouterLinkExample` additionally
+uses the website's pinned Next.js `next/link` adapter and keeps native anchor
+responsibilities. The guides describe native host semantics, accessible naming,
+released props and dependency requirements.
+
+The playgrounds own focused controls separately from the displayed/copied
+components. Each copyable component accepts a theme/mode; changing those keeps
+local state. Reset remounts the preview and controls. No library Storybook source
+or development-state matrix is imported. `scripts/verify-actions.mjs` runs with
+the existing website gate against the exact installed package.
 
 ## Public profile recipes
 

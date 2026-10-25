@@ -294,6 +294,41 @@ body {
   min-height: 2rem;
 }
 
+.action-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 8rem), 1fr));
+  gap: 0.75rem;
+  margin-block: 0.5rem;
+}
+
+.demo-controls .action-options label {
+  display: grid;
+  width: auto;
+  gap: 0.25rem;
+}
+
+.action-options select {
+  min-width: 0;
+  width: 100%;
+  border: 1px solid var(--docs-border);
+  border-radius: 0.375rem;
+  padding: 0.4rem;
+  font: inherit;
+  color: var(--docs-foreground);
+  background: var(--docs-surface);
+}
+
+.action-toggles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+}
+
+.demo-canvas:has(> :is(.button-example, .link-example)) {
+  place-content: stretch;
+  align-items: center;
+}
+
 .demo-canvas {
   min-height: 14rem;
   display: grid;
@@ -590,17 +625,12 @@ body {
   top: 0.5rem;
 }
 
-a {
+a:not([data-slot~='link']) {
   color: var(--docs-accent);
   text-underline-offset: 0.2em;
 }
 
-a:focus-visible,
-button:focus-visible,
-input:focus-visible,
-select:focus-visible,
-summary:focus-visible,
-pre:focus-visible {
+:is(a, button, input, select, summary, pre):not([data-slot]):focus-visible {
   outline: 3px solid currentColor;
   outline-offset: 4px;
 }

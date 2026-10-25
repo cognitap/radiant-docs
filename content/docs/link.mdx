@@ -1,0 +1,95 @@
+---
+title: Link
+description: A real anchor for navigation, from an inline reference to a prominent next step.
+---
+
+import { LinkDemo, RouterLinkDemo } from '../../components/LinkDemo'
+
+<LinkDemo />
+
+## Navigate with an anchor
+
+Link renders a native `a`. Give it a meaningful `href` and descriptive text,
+such as “Read the installation guide”. Use [Button](/docs/button/) to change
+something on the page or submit a form.
+
+The preview really navigates. Activate it with a pointer or Enter, open it in a
+new tab with your browser's modified click, or inspect its destination with the
+browser menu. Space scrolls the page rather than activating a link. Use Back to
+return to this page.
+
+`inline` and `subtle` fit into text. `solid`, `soft`, `outline` and `ghost` use
+action presentation while keeping anchor semantics. Tone selects the semantic
+palette. Control size affects action-shaped variants; inline and subtle links
+follow text sizing. Theme and mode apply only to the preview; system follows
+your browser preference. Reset restores that preview's defaults.
+
+Open **View source** to display and copy the actual rendered files, including
+their supporting CSS. Import `@cognitap/radiant/styles.css` once in your app.
+The basic example needs only React and Radiant.
+
+## New tabs and unavailable destinations
+
+Turn on **Open in a new tab** to try `external`. It supplies `target="_blank"`
+and `rel="noopener noreferrer"` unless you explicitly provide those props.
+The example also announces “opens in a new tab” in its visible link text.
+Radiant does not add that text or an icon for you. Despite the prop's name,
+`external` applies these defaults to any destination, including this local guide.
+
+There is no `disabled` or `pending` Link prop. If navigation is unavailable,
+explain why and render appropriate noninteractive text, or omit the action.
+Do not leave a misleading live `href` behind an `aria-disabled` attribute.
+For an async action with busy feedback, use Button instead.
+
+## Native host and accessible name
+
+Native attributes, handlers, `className`, `style` and `ref` reach the anchor.
+The root exposes `data-slot="link"`, `data-variant`, `data-tone` and
+`data-control-size`. Its children supply the accessible name. Keep a clear
+destination in the text; hide decorative icons from assistive technology and
+preserve visible keyboard focus. Without `href`, an anchor is not a normal
+keyboard navigation target.
+
+## Router adapter and ref
+
+This adapter uses Next.js `next/link`, which is an **additional dependency** for
+this example (the website uses Next.js 16.4.3). A plain Radiant Link does not
+require Next.js or a router.
+
+The adapter spreads every resolved anchor prop into NextLink, including `ref`,
+children, handlers, target, rel and presentation. NextLink requires `href`, so
+the example supplies the same known destination as a fallback for Radiant's
+optional native `href` type. Focus the link with the helper button, then use
+Enter to navigate. Modified clicks and new-tab targets still belong to the
+browser.
+
+<RouterLinkDemo />
+
+Return one anchor or a router component that forwards its props to one. Avoid
+nesting anchors, wrapping the result in another Radiant Link, or unconditionally
+calling `preventDefault` to drive your router. Preserve native target and
+download behavior. This page's route is a real static page, so the link also
+works without JavaScript. Adapt the destination to a route in your own app.
+
+## Public props
+
+These props are available in the installed **Radiant 0.0.3**. `LinkProps`,
+`LinkRenderProps` and `LinkVariant` are exported from `@cognitap/radiant`.
+
+| Prop                 | Values / purpose                                                | Default         |
+| -------------------- | --------------------------------------------------------------- | --------------- |
+| `href`               | Native destination, including paths, fragments or external URLs | —               |
+| `variant`            | `inline`, `subtle`, `solid`, `soft`, `outline`, `ghost`         | `inline`        |
+| `tone`               | `accent`, `neutral`, `warning`, `danger`                        | `accent`        |
+| `controlSize`        | `small`, `medium`, `large`; metrics for action-shaped variants  | `medium`        |
+| `external`           | Supplies a new-tab target and safe rel defaults                 | `false`         |
+| `target`, `rel`      | Explicit native values override external defaults               | —               |
+| `download`           | Native anchor download behavior                                 | —               |
+| `render`             | `(props: LinkRenderProps) => ReactElement`                      | Native `a`      |
+| `ref`                | Ref to the real `HTMLAnchorElement`                             | —               |
+| `className`, `style` | Root customization; style also accepts typed `--…` tokens       | —               |
+| Other native props   | `aria-*`, events and other anchor attributes                    | Native behavior |
+
+Choose presets with `ThemeScope`. The preview offers every published theme;
+your application loads any preset fonts. See [System foundations](/docs/foundations/)
+for shared theme and mode behavior.
