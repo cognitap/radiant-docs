@@ -1,6 +1,7 @@
 node_modules/
 .next/
 .source/
+.wrangler/
 .scratch/
 out/
 output/

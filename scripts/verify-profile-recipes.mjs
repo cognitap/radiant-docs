@@ -1,7 +1,68 @@
 import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 
+/** Hold scripts so SSR fields cannot accept edits that controlled hydration would discard. */
+export async function verifyProfileHydration(browser, baseURL) {
+  const context = await browser.newContext()
+  const page = await context.newPage()
+  let release
+  const scripts = new Promise(resolve => {
+    release = resolve
+  })
+  await page.route('**/_next/static/**/*.js', async route => {
+    await scripts
+    await route.continue()
+  })
+  try {
+    await page.goto(`${baseURL}/docs/recipes/profile-form/`, { waitUntil: 'commit' })
+    for (const title of ['Profile editor', 'Compare configurations']) {
+      const frame = page.getByRole('region', { name: title, exact: true })
+      const form = frame.getByRole('form', { name: 'Edit profile' })
+      await form.getByRole('button', { name: 'Save profile', exact: true }).waitFor()
+      for (const control of await form.locator('input, button').all()) {
+        assert.equal(
+          await control.isDisabled(),
+          true,
+          `${title}: fields wait for their state owner before accepting edits`
+        )
+      }
+    }
+    release()
+    for (const title of ['Profile editor', 'Compare configurations']) {
+      const frame = page.getByRole('region', { name: title, exact: true })
+      const form = frame.getByRole('form', { name: 'Edit profile' })
+      await form
+        .getByRole('button', { name: 'Save profile', exact: true })
+        .locator(':scope:enabled')
+        .waitFor()
+      await form
+        .getByRole('textbox', { name: 'Display name', exact: true })
+        .fill('Hydrated profile')
+      await form
+        .getByRole('textbox', { name: 'Email address', exact: true })
+        .fill('ready@example.com')
+      await form.getByRole('radio', { name: 'No contact', exact: true }).check()
+      await form.getByRole('checkbox', { name: 'Product updates', exact: true }).check()
+      await form.getByRole('button', { name: 'Save profile', exact: true }).click()
+      await frame
+        .getByRole('status')
+        .filter({ hasText: 'Saved locally for Hydrated profile' })
+        .waitFor()
+    }
+  } catch (error) {
+    await page
+      .screenshot({ path: 'output/docs/profile-hydration-failure.png', fullPage: true })
+      .catch(() => {})
+    throw error
+  } finally {
+    release()
+    await page.unrouteAll({ behavior: 'wait' })
+    await context.close()
+  }
+}
+
 export async function verifyProfileRecipes(browser, baseURL) {
+  await verifyProfileHydration(browser, baseURL)
   const route = `${baseURL}/docs/recipes/profile-form/`
   const staticPage = await browser.newPage({ javaScriptEnabled: false })
   try {

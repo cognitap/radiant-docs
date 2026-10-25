@@ -43,8 +43,8 @@ pnpm preview
 
 `out/` contains the static site. Preview serves actual files and directory
 indexes, including direct page loads and a real 404 response. No Next.js server
-is needed to host the output. Hosting and public deployment are tracked in
-[DEV-141](https://linear.app/cognitap/issue/DEV-141).
+is needed to host the output. Hosting uses Cloudflare Pages Direct Upload at
+a generated origin root. See [deployment setup, verification and rollback](docs/deployment.md).
 
 For the complete local/CI gate:
 
@@ -82,6 +82,13 @@ are uploaded by CI. On Linux, install Chromium with `--with-deps` as CI does.
 
 `pnpm test:smoke` checks an already-built `out/`. Use `pnpm check` after changing
 source so the output is rebuilt before checking it.
+
+`pnpm test:deployment https://DEPLOYMENT.pages.dev` runs the same checks against
+a deployed origin and first verifies its revision/package metadata. Use the
+checkout matching that deployment. CI retains the tested `docs-site` artifact,
+browser captures and machine-readable environment evidence. Once the Cloudflare
+settings in the deployment guide are configured, trusted PRs receive verified
+previews and merges to `main` publish the tested export to production.
 
 ## Coordinate an unreleased library change
 

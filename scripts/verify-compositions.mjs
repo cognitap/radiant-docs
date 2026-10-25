@@ -30,8 +30,7 @@ async function sources(page, frame, file) {
     'compositions/composition-types.ts',
     'compositions/composition-example.css'
   ]
-  if (file === 'DialogExample.tsx' || file === 'CardExample.tsx')
-    files.push('profile/useHydrated.ts')
+  if (file !== 'AccordionExample.tsx') files.push('profile/useHydrated.ts')
   await frame.locator('.demo-sources > summary').click()
   for (const name of files) {
     const actual = await readFile(new URL(`../examples/${name}`, import.meta.url), 'utf8')
@@ -76,10 +75,7 @@ export async function verifyCompositions(browser, baseURL) {
       assert.equal((await staticPage.goto(`${baseURL}/docs/${route}/`)).status(), 200)
       const frame = staticPage.getByRole('region', { name: title, exact: true })
       await frame.locator('.demo-sources > summary').click()
-      assert.equal(
-        await frame.locator('pre').count(),
-        file === 'DialogExample.tsx' || file === 'CardExample.tsx' ? 4 : 3
-      )
+      assert.equal(await frame.locator('pre').count(), file === 'AccordionExample.tsx' ? 3 : 4)
       if (route === 'collapsible') {
         await frame.locator('summary[data-slot~="collapsible-trigger"]').press('Enter')
         assert.equal(
@@ -297,6 +293,7 @@ export async function verifyCompositions(browser, baseURL) {
       const details = frame.locator('details[data-slot~="collapsible"]')
       const summary = frame.locator('summary[data-slot~="collapsible-trigger"]')
       const input = frame.getByRole('textbox', { name: 'Draft note', exact: true })
+      await frame.locator('.composition-example[data-hydrated="true"]').waitFor()
       await summary.press('Enter')
       await detailsState(details, true)
       await summary.press('Tab')
@@ -420,6 +417,7 @@ export async function verifyCompositions(browser, baseURL) {
     assert.equal(await card.getAttribute('tabindex'), null)
     assert.equal(await card.getByRole('heading', { name: 'Radiant starter', level: 3 }).count(), 1)
     const bookmark = card.getByRole('button', { name: /Bookmark|Remove bookmark/ })
+    await bookmark.locator(':scope:enabled').waitFor()
     await bookmark.press('Space')
     await cardFrame
       .locator('.composition-result')

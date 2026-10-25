@@ -44,6 +44,7 @@ export function NativeProfileForm({ onSave, onReset }: ProfileFormProps) {
     >
       <Field
         label="Display name"
+        disabled={!ready}
         description="The name people will see on your profile."
         error={errors.displayName}
         required
@@ -56,6 +57,7 @@ export function NativeProfileForm({ onSave, onReset }: ProfileFormProps) {
       </Field>
       <Field
         label="Email address"
+        disabled={!ready}
         description="Used for account messages."
         error={errors.email}
         required
@@ -68,6 +70,7 @@ export function NativeProfileForm({ onSave, onReset }: ProfileFormProps) {
         />
       </Field>
       <RadioGroup
+        disabled={!ready}
         name={`${formId}-contact`}
         label="Contact preference"
         description="Choose whether people can contact you by email."
@@ -84,6 +87,7 @@ export function NativeProfileForm({ onSave, onReset }: ProfileFormProps) {
       </RadioGroup>
       <Field
         label="Product updates"
+        disabled={!ready}
         description="Occasional release notes. You can opt out at any time."
       >
         <Checkbox
@@ -100,6 +104,7 @@ export function NativeProfileForm({ onSave, onReset }: ProfileFormProps) {
         </Button>
         <Button
           type="reset"
+          disabled={!ready}
           variant="outline"
         >
           Reset form

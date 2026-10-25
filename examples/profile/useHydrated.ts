@@ -6,7 +6,7 @@ const subscribe = () => () => {}
 const clientSnapshot = () => true
 const serverSnapshot = () => false
 
-// Keep submission disabled until React owns the form's submit handler.
+// Keep client actions disabled until React owns their handlers.
 export function useHydrated() {
   return useSyncExternalStore(subscribe, clientSnapshot, serverSnapshot)
 }
