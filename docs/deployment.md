@@ -25,6 +25,9 @@ Set the project variable last: its presence enables the deployment job. While
 it is unset, builds, browser checks and downloadable site artifacts still run.
 Do not paste the token into chat or commit it to this repository.
 
+After setting these values, re-run CI on the open same-repository PR to create
+the first hosted preview. Updating settings alone does not start a workflow.
+
 The first deployment creates the named Direct Upload project if absent, with
 `main` as its production branch. An existing project must have that branch and
 no Git integration; the script refuses a conflicting setup. Cloudflare's own
