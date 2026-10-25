@@ -9,13 +9,14 @@ import { WorkshopDemo } from '@/components/WorkshopDemo'
 
 ## A shared workspace
 
-Color, Typography, Spacing & surfaces and Motion edit one theme document. The color editor builds a complete palette; typography, spacing and motion have
-starting controls for the shared workspace. No edits are sent to a server.
+Color, Typography, Spacing & surfaces and Motion edit one theme document. Color builds a complete palette, and Spacing & surfaces shapes the shared geometry.
+Typography and Motion have starting controls for the shared workspace. No edits are sent to a server.
 
 **Reset color**, **Reset typography**, **Reset spacing & surfaces** and **Reset
 motion** restore that section's baseline (Color returns to the default purple brand,
 recommended families and automatic roles) while retaining the other sections and
-specimen interactions. Color owns the canvas color; resetting geometry preserves
+specimen interactions. Spacing & surfaces returns to Balanced, including the dark
+backdrop override. Color owns the canvas color; resetting geometry preserves
 it. Component exceptions remain intact.
 
 ## Build your color system
@@ -49,6 +50,45 @@ pairs need attention. Inactive-control observations are informational. The repor
 is not a whole-page accessibility certification: inspect component exceptions,
 translucent effects and rendered content in the specimens too. Pending controls
 still need contrast. No AI or server request is involved.
+
+## Shape spacing and surfaces
+
+Start with **Balanced**, **Compact**, **Spacious** or **Square & flat**. Each preset
+sets this editor’s bounded decisions in both modes and clears previous overrides.
+It preserves your colors, fonts, motion, focus settings and component exceptions.
+Balanced uses 8px control and 12px panel radii; its backdrop starts at 45% in light
+mode and a 65% dark override.
+
+**Spacing multiplier** scales all five shared gaps plus panel padding and gap.
+**Control density** scales small, medium and large control heights, horizontal
+padding and indicators while keeping font sizes unchanged. Values derive from
+Radiant’s neutral baseline; repeated changes never multiply an earlier result.
+Use the number fields for precise values or the labeled sliders with arrow keys.
+Invalid or out-of-range input keeps the last valid theme.
+
+Control and surface radii and border widths are independent. Border style affects
+both; Radio remains circular and Checkbox caps its inherited radius. Elevation
+controls passive panel and overlay shadows with mode-specific opacity. Backdrop
+opacity controls the black modal backdrop; action shadows and dialog panel
+filters remain component exceptions.
+
+**Geometry scope** selects shared defaults, light overrides or dark overrides;
+it is separate from specimen preview mode. Shared edits retain mode overrides.
+Choose **Use shared…** for one setting or clear the selected mode’s overrides.
+Clearing the default dark backdrop override makes it follow the shared opacity.
+Switching editors retains the selected scope; resetting this section returns to
+shared defaults and the Balanced recipe.
+
+Use **Components** to compare all three sizes and inspect keyboard focus,
+disabled/invalid states and the real modal. Check boundaries and hit targets when
+reducing density or removing borders. The resolved-values table shows the actual
+compiled light/dark shared roles; component exceptions can still override them.
+This editor changes theme roles, rather than composing page layouts.
+
+Geometry remains ordinary `control`, `spacing` and `surface` document sections,
+so full-theme and selective round trips use the public document APIs. A selective
+surface section includes its canvas color, even though Color owns that decision
+in the editor. Copy/import/share controls follow in the handoff chapter.
 
 ## Inspect the result
 

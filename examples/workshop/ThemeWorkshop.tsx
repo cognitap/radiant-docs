@@ -22,6 +22,8 @@ import {
   type Specimen,
   type InspectionState
 } from './Specimens'
+import { GeometryEditor } from './GeometryEditor'
+import { geometryAPI, geometryPreset, type GeometryRecipe } from './workshop-geometry'
 import { ColorEditor } from './ColorEditor'
 import { colorAPI, defaultColorRecipe, type ColorRecipe, type ColorSession } from './workshop-color'
 import './workshop.css'
@@ -60,12 +62,15 @@ function Choice({
 /** The document and preview controls have separate owners; theme edits never remount specimens. */
 export function ThemeWorkshop() {
   const [workshop, setWorkshop] = useState(() => {
-    const document = initialDocument()
+    const geometry = geometryPreset()
+    const initial = initialDocument()
+    const document = documentAPI && geometryAPI ? geometryAPI.apply(initial, geometry) : initial
     const color = documentAPI && colorAPI ? colorAPI.create(defaultColorRecipe()) : null
-    return { document: color ? colorAPI!.apply(document, color) : document, color }
+    return { document: color ? colorAPI!.apply(document, color) : document, color, geometry }
   })
-  const { document, color } = workshop
+  const { document, color, geometry } = workshop
   const [colorRevision, setColorRevision] = useState(0)
+  const [geometryRevision, setGeometryRevision] = useState(0)
   const [editor, setEditor] = useState<Editor>('color')
   const [specimen, setSpecimen] = useState<Specimen>('article')
   const [mode, setMode] = useState<ThemeMode>('light')
@@ -92,12 +97,27 @@ export function ThemeWorkshop() {
     const api = colorAPI
     if (!api) return
     const next: ColorSession = api.create(recipe)
-    setWorkshop(previous => ({ document: api.apply(previous.document, next), color: next }))
+    setWorkshop(previous => ({
+      ...previous,
+      document: api.apply(previous.document, next),
+      color: next
+    }))
     setFeedback('Color updated. Other sections and specimen state retained.')
+  }
+  function updateGeometry(recipe: GeometryRecipe) {
+    const api = geometryAPI
+    if (!api) return
+    setWorkshop(previous => ({
+      ...previous,
+      document: api.apply(previous.document, recipe),
+      geometry: recipe
+    }))
+    setFeedback('Spacing & surfaces updated. Other sections and specimen state retained.')
   }
   return (
     <div
       className="theme-workshop"
+      data-workshop-geometry={documentAPI && geometryAPI ? 'enabled' : 'unavailable'}
       data-workshop-color={color ? 'enabled' : 'unavailable'}
       data-workshop-editing={documentAPI ? 'enabled' : 'unavailable'}
     >
@@ -132,11 +152,14 @@ export function ThemeWorkshop() {
           <h3>{current.label}</h3>
           <Button
             variant="outline"
-            disabled={!ready || !documentAPI}
+            disabled={!ready || !documentAPI || (editor === 'geometry' && !geometryAPI)}
             onClick={() => {
               if (editor === 'color' && colorAPI) {
                 updateColor(defaultColorRecipe())
                 setColorRevision(n => n + 1)
+              } else if (editor === 'geometry' && geometryAPI) {
+                updateGeometry(geometryPreset())
+                setGeometryRevision(n => n + 1)
               } else
                 setWorkshop(previous => ({
                   ...previous,
@@ -151,7 +174,9 @@ export function ThemeWorkshop() {
         <p>
           {editor === 'color'
             ? 'Build a complete color system and inspect its roles in the same specimens.'
-            : 'Starting controls for the shared theme. All five specimens use these same decisions.'}
+            : editor === 'geometry'
+              ? 'Shape shared spacing, control sizes and surfaces across the same specimens.'
+              : 'Starting controls for the shared theme. All five specimens use these same decisions.'}
         </p>
         <fieldset
           disabled={!ready || !documentAPI}
@@ -193,50 +218,19 @@ export function ThemeWorkshop() {
               />
             </>
           )}
-          {editor === 'geometry' && (
-            <>
-              <Choice
-                label="Panel spacing"
-                value={token('--rad-surface-padding')}
-                choices={[
-                  ['0.75rem', 'Compact'],
-                  ['1.5rem', 'Comfortable'],
-                  ['2rem', 'Spacious']
-                ]}
-                onChange={padding => edit({ surface: { values: { padding } } })}
-              />
-              <Choice
-                label="Surface radius"
-                value={token('--rad-surface-radius')}
-                choices={[
-                  ['0', 'Square'],
-                  ['0.75rem', 'Rounded'],
-                  ['1.5rem', 'Soft']
-                ]}
-                onChange={radius => edit({ surface: { values: { radius } } })}
-              />
-              <Choice
-                label="Control density"
-                value={token('--rad-control-medium-height')}
-                choices={[
-                  ['2rem', 'Compact'],
-                  ['2.5rem', 'Comfortable'],
-                  ['3rem', 'Spacious']
-                ]}
-                onChange={height =>
-                  edit({
-                    control: {
-                      values: {
-                        small: { height: height === '2rem' ? '1.75rem' : '2rem' },
-                        medium: { height },
-                        large: { height: height === '3rem' ? '3.5rem' : '3rem' }
-                      }
-                    }
-                  })
-                }
-              />
-            </>
-          )}
+          <div
+            hidden={editor !== 'geometry'}
+            className="workshop-geometry-panel"
+          >
+            <GeometryEditor
+              key={geometryRevision}
+              recipe={geometry}
+              theme={theme}
+              disabled={!ready || !documentAPI || !geometryAPI}
+              available={!!documentAPI && !!geometryAPI}
+              onChange={updateGeometry}
+            />
+          </div>
           {editor === 'motion' && (
             <Choice
               label="Release timing"

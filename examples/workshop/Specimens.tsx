@@ -232,6 +232,42 @@ export function ComponentSpecimen({ state }: { state: InspectionState }) {
         <Link href="#content">Back to the workshop heading</Link>
       </div>
       <output>Action activated {count} times.</output>
+      <section
+        aria-label="Control size comparison"
+        className="workshop-size-grid"
+      >
+        {(['small', 'medium', 'large'] as const).map(size => (
+          <div
+            className="workshop-stack"
+            key={size}
+          >
+            <h4>{size} controls</h4>
+            <Button
+              controlSize={size}
+              disabled={disabled}
+              pending={state === 'pending'}
+            >
+              {size} action
+            </Button>
+            <Field
+              label={`${size} input`}
+              disabled={disabled}
+              error={state === 'invalid' ? 'Check this value.' : undefined}
+            >
+              <Input
+                controlSize={size}
+                placeholder={`${size} control`}
+              />
+            </Field>
+            <Checkbox
+              controlSize={size}
+              label={`${size} selection`}
+              disabled={disabled}
+              defaultChecked
+            />
+          </div>
+        ))}
+      </section>
       <Field
         label="Project name"
         error={state === 'invalid' ? 'Enter a project name.' : undefined}
