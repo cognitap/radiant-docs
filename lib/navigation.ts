@@ -3,6 +3,7 @@ import { source } from './source'
 export const sections = [
   { id: 'getting-started', title: 'Getting started' },
   { id: 'foundations', title: 'Foundations' },
+  { id: 'workshop', title: 'Workshop' },
   { id: 'components', title: 'Components' },
   { id: 'recipes', title: 'Recipes' },
   { id: 'releases', title: 'Releases' }
@@ -14,7 +15,10 @@ export type NavigationGroup = {
 }
 
 export function sectionFor(slugs: string[]) {
-  return sections.find(section => section.id === slugs[0]) ?? sections[2]
+  return (
+    sections.find(section => section.id === slugs[0]) ??
+    sections.find(section => section.id === 'components')!
+  )
 }
 
 export function docsURL(url: string) {

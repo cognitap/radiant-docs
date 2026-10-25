@@ -8,6 +8,7 @@ import { verifyNavigation } from './verify-navigation.mjs'
 import { verifyActions } from './verify-actions.mjs'
 import { verifyControls } from './verify-controls.mjs'
 import { verifyCompositions } from './verify-compositions.mjs'
+import { verifyWorkshop } from './verify-workshop.mjs'
 import { verifyFoundations } from './verify-foundations.mjs'
 
 const server = createDocsServer()
@@ -180,6 +181,7 @@ try {
   await verifyControls(browser, baseURL)
   await verifyCompositions(browser, baseURL)
   await verifyFoundations(browser, baseURL)
+  await verifyWorkshop(browser, baseURL)
 } finally {
   await browser?.close()
   await new Promise(resolve => server.close(resolve))

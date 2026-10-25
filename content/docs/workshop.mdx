@@ -1,0 +1,55 @@
+---
+title: Theme workshop
+description: One theme, four editing areas and five live specimens.
+---
+
+import { WorkshopDemo } from '@/components/WorkshopDemo'
+
+<WorkshopDemo />
+
+## A shared workspace
+
+Color, Typography, Spacing & surfaces and Motion edit one theme document. The
+starting controls establish the shared workspace; the complete palette,
+typesetting and motion editors will build on it. No edits are sent to a server.
+
+**Reset color**, **Reset typography**, **Reset spacing & surfaces** and **Reset
+motion** restore that section's baseline while retaining the other sections and
+specimen interactions. Color owns the canvas color; resetting geometry preserves
+it. Component exceptions remain intact.
+
+## Inspect the result
+
+Switch between an article, profile form, dense dashboard with a semantic table,
+landing page and everyday components. Preview mode and width belong to the
+inspection controls and never change the theme document. Phone width is capped
+by the available space; its specimens respond to their container.
+
+Each specimen keeps its own interaction state when you switch views or edit the
+theme. **Reset specimen** resets only the selected example. The frame's **Reset
+preview** restores the complete workspace, including controls and specimen state,
+while keeping source inspection open. Component states include invalid, disabled
+and pending; use the keyboard to inspect focus. Motion respects the operating
+system's reduced-motion preference.
+
+## Package availability
+
+The installed package is identified in the site header. The published 0.0.3 pin
+supports all specimen controls; shared document editing requires the upcoming
+public theme-document APIs. With that pin, editing controls remain disabled and
+the specimens use the neutral theme.
+
+For the complete editing preview, use the repository's documented
+`pnpm preview:candidate /absolute/path/radiant.tgz` workflow with a packed library
+candidate. The header explicitly labels it **Local candidate**. No library source,
+Storybook module or workspace alias is imported. A future published package pin
+with those exports enables the same editing path.
+
+## Source and ownership
+
+View source shows the actual files rendered here, including the existing
+website-owned native profile form and its supporting files. Workshop orchestration
+uses the site's shared demo frame; copy the frame imports too when adapting that
+orchestration to another app. The specimens and document adapter use public
+Radiant exports and ordinary React. Font loading, validation and application
+persistence remain consumer responsibilities.

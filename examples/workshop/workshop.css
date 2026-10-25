@@ -1,0 +1,194 @@
+.theme-workshop {
+  min-width: 0;
+}
+.workshop-editor-nav,
+.workshop-editor-heading,
+.workshop-options {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+}
+.workshop-editor-nav {
+  padding: 1rem;
+  border-bottom: 1px solid var(--docs-border);
+}
+.workshop-editor {
+  padding: 1rem;
+}
+.workshop-editor-heading {
+  justify-content: space-between;
+}
+.workshop-editor-heading h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+.workshop-editor > p,
+.workshop-notice {
+  font-size: 0.875rem;
+  color: var(--docs-muted);
+}
+.workshop-notice {
+  margin: 1rem;
+  padding: 1rem;
+  border: 1px solid var(--docs-border);
+  border-radius: 0.5rem;
+}
+.workshop-options {
+  border: 0;
+  padding: 0;
+  margin: 0.75rem 0;
+  align-items: start;
+}
+.workshop-options legend {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+.workshop-options label {
+  display: grid;
+  gap: 0.3rem;
+  font-size: 0.8125rem;
+  min-width: 0;
+}
+.workshop-options select {
+  max-width: 100%;
+  padding: 0.5rem;
+  font: inherit;
+  color: var(--docs-foreground);
+  background: var(--docs-surface);
+  border: 1px solid var(--docs-border);
+  border-radius: 0.375rem;
+}
+.workshop-options select:focus-visible,
+.workshop-table-scroll:focus-visible {
+  outline: 2px solid var(--docs-accent);
+  outline-offset: 3px;
+}
+.workshop-feedback {
+  display: block;
+  min-height: 2.5em;
+  font-size: 0.8125rem;
+  padding-inline: 1rem;
+  overflow-wrap: anywhere;
+}
+.theme-workshop .demo-canvas {
+  display: block;
+  padding: 0;
+  background: transparent;
+}
+.workshop-canvas {
+  container-type: inline-size;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  margin-inline: auto;
+}
+.workshop-canvas[data-width='phone'] {
+  max-width: 24rem;
+}
+/* The site uses compiled CSS without a global reset. Keep padded native
+   disclosure summaries inside the specimen's available width. */
+.workshop-canvas *,
+.workshop-canvas *::before,
+.workshop-canvas *::after {
+  box-sizing: border-box;
+}
+.workshop-specimen {
+  padding: clamp(0.75rem, 3cqi, 2rem);
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.workshop-specimen[hidden] {
+  display: none !important;
+}
+.workshop-stack {
+  display: grid;
+  gap: var(--rad-spacing-group-gap);
+  min-width: 0;
+}
+.workshop-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--rad-spacing-footer-gap);
+}
+.workshop-specimen h3 {
+  font-size: var(--rad-typography-heading-size);
+  font-weight: var(--rad-typography-heading-weight);
+  margin: 0;
+}
+.workshop-specimen h4 {
+  margin: 0;
+}
+.workshop-specimen p,
+.workshop-specimen ul {
+  line-height: 1.65;
+}
+.workshop-article {
+  max-width: 62ch;
+  margin-inline: auto;
+}
+.workshop-article > h3,
+.workshop-landing > h3 {
+  font-size: clamp(1.75rem, 6cqi, 3rem);
+  line-height: 1.12;
+  letter-spacing: -0.025em;
+}
+.workshop-intro {
+  font-size: 1.2em;
+}
+.workshop-kicker,
+.workshop-specimen small {
+  color: var(--rad-color-muted-foreground);
+  font-size: var(--rad-typography-small-size);
+}
+.workshop-article blockquote {
+  margin-inline: 0;
+  padding-inline-start: 1rem;
+  border-inline-start: 3px solid var(--rad-color-accent);
+  font-style: italic;
+}
+.workshop-metrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--rad-spacing-group-gap);
+}
+.workshop-metrics small {
+  display: block;
+}
+.workshop-table-scroll {
+  max-width: 100%;
+  overflow-x: auto;
+}
+.workshop-table-scroll table {
+  width: 100%;
+  min-width: 28rem;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: var(--rad-typography-small-size);
+}
+.workshop-table-scroll caption {
+  text-align: left;
+  padding-bottom: 0.75rem;
+  color: var(--rad-color-muted-foreground);
+}
+.workshop-table-scroll th,
+.workshop-table-scroll td {
+  padding: var(--rad-spacing-field-gap) 0.75rem;
+  border-bottom: 1px solid var(--rad-color-border);
+  white-space: nowrap;
+}
+.workshop-landing nav {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.workshop-specimen .profile-form {
+  gap: var(--rad-spacing-group-gap);
+}
+@container (max-width: 30rem) {
+  .workshop-metrics {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

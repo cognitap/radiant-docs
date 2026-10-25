@@ -257,7 +257,7 @@ preserves functional hiding, sizing, scrolling and focus presentation.
 
 ## Navigation and search
 
-The documentation shell has five sections: Getting started, Foundations,
+The documentation shell has six sections: Getting started, Foundations, Workshop,
 Components, Recipes and Releases. `lib/navigation.ts` derives links and titles
 from the Fumadocs source loader. A page whose first slug matches a section goes
 there; other pages (including the existing `/docs/button/`) go under Components.
@@ -293,3 +293,40 @@ normal browser gate. CI also saves `navigation-*.png` and `search-*.png`.
 This repository replaces the in-library `apps/docs` prototype from
 [Radiant PR #39](https://github.com/cognitap/radiant/pull/39), closed without
 merging. The library's package and CI are unchanged by this setup.
+
+## Shared theme workshop
+
+`/docs/workshop/` composes four editor areas around one library-owned theme
+document, with article, form, dense dashboard/table, landing-page and component
+specimens. `examples/workshop/` owns the public examples, CSS and orchestration;
+`WorkshopDemo` reuses the existing source/copy/reset frame. Navigation and search
+include the page, and the homepage links to it.
+
+The current published 0.0.3 pin has no theme-document exports. Its normal build
+keeps the five specimens, mode/width/state inspection and source available while
+explicitly disabling document editing. `workshop-theme.ts` detects the public
+exports and treats document data as opaque; it does not duplicate the schema or
+provide a replacement compiler. The packed-candidate path enables shared editing
+against the actual library implementation, with the existing candidate header.
+No dependency pin or lockfile is changed by this feature.
+
+Run both paths when changing workshop behavior:
+
+```sh
+pnpm check
+pnpm preview:candidate /absolute/path/radiant-candidate.tgz --check
+```
+
+The candidate check runs the document reset tests as well as typecheck, build and
+browser checks. Its screenshots are retained under ignored `output/candidate/`
+before the temporary installation is removed. Normal-build screenshots remain
+under `output/docs/`. Current baseline-only runs explicitly skip the two tests
+that require unavailable document exports; the candidate must run all three.
+
+Theme edits and section resets retain specimen interactions. Inspection controls
+never enter the document. Color owns canvas colors; geometry reset preserves the
+per-mode canvas. Reset specimen remounts only the active example; the demo frame's
+Reset preview remounts the whole workshop while retaining source/toolbar focus.
+The form reuses the website-owned `NativeProfileForm` and its supporting files;
+no library Storybook code is imported. Complete editor and handoff features remain
+separate work after this shared shell.

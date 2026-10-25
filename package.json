@@ -15,7 +15,8 @@
     "lint": "oxlint --deny-warnings",
     "format": "oxfmt",
     "format:check": "oxfmt --check",
-    "check": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm build && pnpm test:smoke"
+    "check": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test:workshop && pnpm build && pnpm test:smoke",
+    "test:workshop": "node --test scripts/workshop-theme.test.mjs"
   },
   "dependencies": {
     "@cognitap/radiant": "0.0.3",
