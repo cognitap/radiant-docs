@@ -1,0 +1,90 @@
+---
+title: Collapsible
+description: A native details disclosure for optional content that stays in the document.
+---
+
+import { CompositionDemo } from '../../components/CompositionDemo'
+
+<CompositionDemo kind="collapsible" />
+
+## Show optional content
+
+Collapsible renders native `details`. CollapsibleTrigger is its direct-child
+`summary`, and CollapsibleContent is the content `div`. Activate the summary
+with a pointer, Enter or Space. The marker is decorative; descriptive trigger
+text gives the disclosure its name.
+
+Open Reading notes, type a draft and collapse it again. The content stays
+mounted, so reopening preserves the input value. Closed content is hidden and
+its input is skipped by keyboard navigation. Collapsing does not clear values
+or submit a form. Reset preview remounts this example and clears the draft.
+
+## Controlled and uncontrolled
+
+The first example uses `defaultOpen={false}`. Collapsible owns subsequent state,
+and `onOpenChange` reports semantic changes for the feedback below it.
+
+The next example passes `open` with `onOpenChange`. Its outside button updates
+the same application-owned state as the summary. Try both controls and type a
+draft to see that state changes preserve mounted content. Each preview has its
+own draft, content ID and feedback.
+
+<CompositionDemo
+  kind="collapsible"
+  controlled
+/>
+
+Choose one owner per mount; do not pass both `open` and `defaultOpen`, or change
+ownership in place. Changing State owner in the website starts a fresh example.
+Native `onToggle` observes the details event; use `onOpenChange` to accept a
+controlled state change. Do not write the same state through two callbacks.
+
+## Anatomy and customization
+
+| Component          | Native style/ref target | `data-slot` identity  |
+| ------------------ | ----------------------- | --------------------- |
+| Collapsible        | `details`               | `collapsible`         |
+| CollapsibleTrigger | `summary`               | `collapsible-trigger` |
+| CollapsibleContent | `div`                   | `collapsible-content` |
+
+Keep the summary directly inside details. Do not wrap it in a button or move it
+into another wrapper; native activation and disclosure semantics belong to it.
+The root, trigger and content expose `data-state="open" | "closed"`; the root
+also has native `open`. CollapsibleContent receives its generated content ID.
+
+Compact demonstrates `--rad-collapsible-padding` on the root's inline style.
+Each named part also accepts `className`, typed theme `style` and its own native
+ref. Preserve the hidden-content behavior, focus indicator and reduced-motion
+alternative when customizing. `useCollapsible()` returns the nearest state or
+`null` outside a Collapsible.
+
+## Public props
+
+These contracts match **Radiant 0.0.3**; each named part's prop type and
+`CollapsibleState` are exported.
+
+| Collapsible prop            | Purpose / default                                         |
+| --------------------------- | --------------------------------------------------------- |
+| `open` / `defaultOpen`      | Controlled state or initial local state; initially closed |
+| `onOpenChange`              | Receives the next boolean change request                  |
+| `onToggle`                  | Native details event observation                          |
+| `className`, `style`, `ref` | Customization and ref on the native details               |
+| `data-slot`                 | Additional identity tokens; retains the base token        |
+| Other native props          | Remaining details attributes/events and children          |
+
+Trigger and Content accept native summary/div props, styles, refs and additive
+identities. There is no Button `render` API or native `disabled` prop on this
+family. Use [Accordion](/docs/accordion/) when related disclosures need a
+selection owner and disabled items. Use [Dialog](/docs/dialog/) for a modal task.
+
+## Use the examples
+
+Install `@cognitap/radiant@0.0.3` and import `@cognitap/radiant/styles.css` once.
+View source displays the actual component, shared types and supporting CSS;
+keep the `compositions/` paths when copying. These examples need React and
+Radiant only. Basic native details work without JavaScript; controlled state,
+external actions, feedback and website options require it.
+
+Theme/mode and Compact preserve drafts. Reset preview restores only that frame's
+options and content. Your application decides whether to retain, clear or persist
+the content; disclosure state alone does not own those decisions.

@@ -329,7 +329,7 @@ body {
   align-items: center;
 }
 
-.demo-canvas:has(> .control-example) {
+.demo-canvas:has(> :is(.control-example, .composition-example)) {
   place-content: stretch;
   align-items: center;
 }

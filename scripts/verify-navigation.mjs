@@ -270,7 +270,7 @@ export async function verifyNavigation(browser, baseURL) {
         .getByRole('navigation', { name: 'Documentation', exact: true })
         .getByRole('link')
         .count(),
-      10
+      14
     )
     await staticPage.getByRole('link', { name: 'System foundations', exact: true }).click()
     assert.equal(

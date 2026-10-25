@@ -1,0 +1,91 @@
+---
+title: Card
+description: Group a heading, content and explicit actions on a shared surface.
+---
+
+import { CompositionDemo } from '../../components/CompositionDemo'
+import { ProfileFormDemo } from '../../components/ProfileFormDemo'
+
+<CompositionDemo kind="card" />
+
+## Content with explicit actions
+
+Card is a passive `div` surface. Header, Content and Footer organize its
+children; they do not add click behavior, selection or focus management.
+The preview's Button owns its bookmark action, and Link owns navigation to the
+installation guide. Try the button with Enter or Space, or follow the real link.
+The entire Card is not another interactive target.
+
+Use [Button](/docs/button/) for actions and [Link](/docs/link/) for destinations.
+Keep each interactive element's accessible name, focus indicator and native
+behavior intact. Avoid putting nested controls inside a clickable card wrapper.
+If the grouping needs an article or region relationship in your document,
+compose appropriate semantic HTML around it; Card does not assign that role.
+
+## Anatomy and customization
+
+| Component       | Native host / style and ref target | `data-slot` token  |
+| --------------- | ---------------------------------- | ------------------ |
+| Card            | `div` surface                      | `card`             |
+| CardHeader      | `div`                              | `card-header`      |
+| CardTitle       | Heading, default `h2`              | `card-title`       |
+| CardDescription | `p`                                | `card-description` |
+| CardContent     | `div`                              | `card-content`     |
+| CardFooter      | `div` with wrapping action layout  | `card-footer`      |
+
+CardTitle's `level` accepts `1`–`6`; the example uses `3` beneath the demo's
+heading. This changes the heading host, which remains its style/ref target.
+Other parts keep their listed hosts. Each accepts native attributes/events,
+`className`, typed theme `style`, ref and additive `data-slot` identities.
+These are separate named components, rather than a root `parts` object.
+
+Compact demonstrates `--rad-card-padding` on Card's inline style. Shared
+surface tokens set its background, shape, spacing and shadow; its child actions
+retain their own family contracts. Theme/mode and Compact preserve the bookmark.
+Reset preview clears local state and restores the frame's options.
+
+## Public props
+
+These contracts match **Radiant 0.0.3**. Every part's prop type and
+`CardHeadingLevel` are exported.
+
+| Prop                 | Applies to / purpose                                             |
+| -------------------- | ---------------------------------------------------------------- |
+| `children`           | Content for each named part                                      |
+| `level`              | CardTitle only; `1`–`6`, default `2`                             |
+| `className`, `style` | Each component's actual host, including local theme tokens       |
+| `ref`                | Each component's native host; not redirected to a child control  |
+| `data-slot`          | Additional identity tokens; retains the part's base identity     |
+| Other native props   | Attributes/events of the corresponding div, heading or paragraph |
+
+Card has no open, selected or disabled state owner. Put those responsibilities
+on the form, action, [Dialog](/docs/dialog/) or [disclosure](/docs/collapsible/)
+that owns the interaction. Styling a passive surface does not disable its children.
+
+## Reuse the profile form
+
+This is the existing [profile recipe](/docs/recipes/profile-form/), starting
+with TanStack Form in a Card. Header/Title/Description introduce the editor;
+CardContent contains the same form implementation used in standalone and Dialog
+placements. Try validation, saved feedback and Reset form, or switch ownership
+to native React. Card supplies the surface; the form owns values, validation,
+submission and reset.
+
+<ProfileFormDemo compare />
+
+Changing owner or placement starts a fresh form. Changing theme/mode preserves
+edits. In Dialog placement, dismissal preserves drafts and returns focus;
+saving closes the editor. Every preview has independent IDs, values and feedback.
+
+## Use the examples
+
+Install `@cognitap/radiant@0.0.3` and import `@cognitap/radiant/styles.css` once.
+View source displays actual components and supporting files. Keep the displayed
+`compositions/` and `profile/` paths when copying. The focused Card demo uses
+React and Radiant only. Its native link works without JavaScript; local bookmark
+feedback requires it.
+
+The combined profile selector imports optional `@tanstack/react-form@1.33.5`.
+See the [recipe setup](/docs/recipes/profile-form/#use-the-recipe) for native-only
+and TanStack copy paths. No example persists data or sends it to a backend;
+connect your own submission and persistence policy when adapting the form.

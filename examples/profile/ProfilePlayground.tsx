@@ -8,9 +8,17 @@ import type { FormOwner, FormPlacement } from './ProfileRecipe'
 
 const ProfileRecipe = dynamic(() => import('./ProfileRecipe').then(module => module.ProfileRecipe))
 
-export function ProfilePlayground({ compare = false }: { compare?: boolean }) {
+export function ProfilePlayground({
+  compare = false,
+  defaultPlacement
+}: {
+  compare?: boolean
+  defaultPlacement?: FormPlacement
+}) {
   const [owner, setOwner] = useState<FormOwner>(compare ? 'tanstack' : 'native')
-  const [placement, setPlacement] = useState<FormPlacement>(compare ? 'card' : 'standalone')
+  const [placement, setPlacement] = useState<FormPlacement>(
+    defaultPlacement ?? (compare ? 'card' : 'standalone')
+  )
   const [themeId, setThemeId] = useState(radiant.id)
   const [mode, setMode] = useState<ThemeMode>('light')
 

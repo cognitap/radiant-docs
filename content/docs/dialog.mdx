@@ -1,0 +1,111 @@
+---
+title: Dialog
+description: A native dialog for a focused task, with explicit actions and a shared theme.
+---
+
+import { CompositionDemo } from '../../components/CompositionDemo'
+import { ProfileFormDemo } from '../../components/ProfileFormDemo'
+
+<CompositionDemo kind="dialog" />
+
+## Open, review and dismiss
+
+Dialog owns open state and the native dialog lifecycle. DialogContent renders
+the actual `dialog`. By default it opens modally: the rest of the page becomes
+inert and focus moves inside. Tab reaches its controls while the background
+page controls remain unavailable.
+Close returns focus to the opening control. Give every dialog a clear title,
+description and explicit close action.
+
+Open the preview with Enter or a pointer. Mark as reviewed closes it and records
+local feedback. Close review, Escape or a click outside the dialog's border box
+dismiss it without recording a review. Reopen to try each path. Clicking inside
+the surface does not count as a backdrop click.
+
+Turn off Close on Escape or Close on backdrop before opening to test those
+policies. Keep an explicit close action available. Turn off Modal for a
+nonmodal dialog: the surrounding page remains usable, and those two modal-only
+dismissal policies no longer apply. The nonmodal preview stays in the page flow
+so its launcher remains visible. Use Close review to dismiss it.
+
+## Button composition and state ownership
+
+DialogTrigger and DialogClose compose [Button](/docs/button/), so they accept
+its variants, tones, control sizes, disabled/pending state and `render` contract.
+The example's trigger returns a native button from `render`, forwarding every
+resolved prop, including ref, guarded handlers and children. Focus trigger
+uses that ref to reach the same native button. Do not nest another Button
+around the resolved result or substitute an anchor for an action.
+
+Choose uncontrolled state (`defaultOpen`) for local ownership, or controlled
+state (`open` with `onOpenChange`) when your application coordinates the dialog.
+Do not pass both or switch ownership during a mount. Changing State owner in
+this preview starts a fresh example. Theme/mode and Compact preserve its state.
+
+Compact demonstrates local `DialogContent.style` tokens for width and padding.
+The dialog remains inside ThemeScope, so its top-layer presentation inherits
+the selected theme. Keep its height bounded and its contents scrollable on
+small screens. Radiant's compiled CSS provides those functional constraints.
+
+## Named parts and targets
+
+| Component         | Host, style/ref target and identity                |
+| ----------------- | -------------------------------------------------- |
+| Dialog            | Logical state owner; no DOM host or root style/ref |
+| DialogTrigger     | Native button; `button dialog-trigger`             |
+| DialogContent     | Native `dialog`; `dialog`                          |
+| DialogTitle       | `h2`; `dialog-title`                               |
+| DialogDescription | `p`; `dialog-description`                          |
+| DialogClose       | Native button; `button dialog-close`               |
+
+Identities are `data-slot` tokens; match composed ones with `[data-slot~="dialog-trigger"]`.
+The trigger exposes `aria-haspopup`, `aria-expanded` and `aria-controls`.
+Content connects generated title/description IDs and exposes
+`data-state="open" | "closed"`. Keep one title/description pair per content.
+Use the named parts rather than overwriting their owned IDs. `useDialog()`
+returns the current owner state, or `null` outside a Dialog.
+
+## Public props
+
+These contracts match the installed **Radiant 0.0.3**.
+
+| Dialog prop            | Purpose / default                                                  |
+| ---------------------- | ------------------------------------------------------------------ |
+| `open` / `defaultOpen` | Controlled state or initial local state; initially closed          |
+| `onOpenChange`         | Receives a requested next boolean state                            |
+| `modal`                | Uses native `showModal()` when true (default), `show()` when false |
+| `closeOnBackdrop`      | Modal backdrop dismissal; defaults to `true`                       |
+| `closeOnEscape`        | Modal Escape dismissal; defaults to `true`                         |
+| `children`             | Compose the named parts under this owner                           |
+
+DialogContent accepts native dialog attributes/events except `open`, which the
+owner controls; `className`, `style` and `ref` target the dialog. Its `onCancel`
+can cancel native Escape dismissal with `preventDefault`; `onClose` observes
+the native close event. DialogTitle/Description accept their native host props,
+styles and refs. Trigger/Close accept `ButtonProps`, including `render`.
+Their public prop types and `DialogRenderProps` are exported from the package.
+
+## Put the existing form in a dialog
+
+This is the same [profile recipe](/docs/recipes/profile-form/) used elsewhere
+on the website, starting in Dialog placement. Open it, submit an invalid form,
+then correct and save it. Saving closes the editor and shows the result locally.
+Close, Escape and backdrop dismissal preserve drafts; Reset form clears values,
+validation and saved feedback. Focus returns to Edit profile after dismissal.
+Change Form owner to compare native React and TanStack without a second form
+implementation.
+
+<ProfileFormDemo placement="dialog" />
+
+## Use the examples
+
+Install `@cognitap/radiant@0.0.3` and import its `styles.css` once. View source
+shows the actual preview files, shared types, CSS and hydration helper. Preserve
+the displayed `compositions/` and `profile/` paths when copying. The focused
+example needs React and Radiant only; JavaScript opens native dialogs and
+coordinates state. The combined profile selector also imports optional
+`@tanstack/react-form@1.33.5`; see the [recipe setup](/docs/recipes/profile-form/#use-the-recipe).
+
+Your application owns validation, persistence and any confirmation policy for
+unsaved work. Reset preview restores that frame's defaults; other previews
+retain their own state.
