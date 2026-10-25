@@ -7,8 +7,9 @@ checkout, workspace link or source alias.
 
 The site consumes **Radiant 0.0.3**, pinned from npm. That experimental release
 exports the harmonised ten-family component system and shared theme APIs. This
-site demonstrates Button and complete native/TanStack profile-form recipes;
-further component pages remain separate docs work. The installed version is
+site includes installation/foundations/release guidance, Button and complete
+native/TanStack profile-form recipes; further component pages remain separate
+docs work. The installed version is
 displayed on every page. Site layout uses semantic HTML while live examples use
 published Radiant components, presets and compiled CSS.
 Fumadocs UI is not installed.
@@ -162,6 +163,41 @@ retains unsaved edits until reset. Owner/placement changes start a fresh example
 theme/mode changes preserve it. The frame's reset also restores option defaults.
 `scripts/verify-profile-recipes.mjs` runs through the normal smoke-check gate;
 it is not imported by production code.
+
+## Navigation and search
+
+The documentation shell has five sections: Getting started, Foundations,
+Components, Recipes and Releases. `lib/navigation.ts` derives links and titles
+from the Fumadocs source loader. A page whose first slug matches a section goes
+there; other pages (including the existing `/docs/button/`) go under Components.
+Add MDX under `content/docs/` to make it available to navigation and search.
+There is no second list of page links to maintain.
+
+The desktop sidebar and mobile Radiant Dialog share the same navigation model.
+Active links follow the current pathname. Fumadocs' generated `toc` supplies the
+page outline and active-heading tracking; only authored content headings appear
+there, so embedded demo headings do not pollute it. The skip link targets the
+page's focusable main content after the sidebar.
+
+`app/search-index.json/route.ts` exports Fumadocs Core's advanced search index at
+build time. Static hosting must serve `/search-index.json` as an ordinary JSON
+asset; there is no runtime search API or external search service. The search
+panel/engine load on demand, download and cache the index, and run subsequent
+queries in the browser. Results include content-derived page/heading anchors.
+An index failure offers Retry search with a fresh download URL.
+
+Search uses released Radiant Dialog, Field, Input, Button and Link components,
+with native links for results. Tab, arrows and Enter reach/open results; Escape
+dismisses the dialog. Ctrl/Cmd+K opens search unless focus is in an editable
+control or another dialog is open, preserving the interactive examples.
+
+The site uses Radiant `ThemeScope` with light/dark/system appearance. Selection
+survives client-side navigation; a fresh load defaults to the operating system.
+Recipe previews keep their explicit theme/mode. MDX typography, syntax colors,
+scrollable tables and callouts stay scoped to documentation presentation.
+`scripts/verify-navigation.mjs` covers exported links/index, search results and
+retry, navigation/outline/skip focus, appearance and narrow layouts through the
+normal browser gate. CI also saves `navigation-*.png` and `search-*.png`.
 
 This repository replaces the in-library `apps/docs` prototype from
 [Radiant PR #39](https://github.com/cognitap/radiant/pull/39), closed without
