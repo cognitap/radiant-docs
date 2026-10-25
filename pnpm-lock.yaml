@@ -167,8 +167,8 @@ importers:
   .:
     dependencies:
       '@cognitap/radiant':
-        specifier: 0.0.2
-        version: 0.0.2(react@19.3.0)
+        specifier: 0.0.3
+        version: 0.0.3(react@19.3.0)
       fumadocs-core:
         specifier: 16.17.8
         version: 16.17.8(@mdx-js/mdx@3.1.1)(@types/estree-jsx@1.0.5)(@types/hast@3.0.5)(@types/mdast@4.0.4)(@types/react@19.3.0)(next@16.4.3(@types/node@26.6.5)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(zod@4.6.7)
@@ -215,8 +215,8 @@ importers:
 
 packages:
 
-  '@cognitap/radiant@0.0.2':
-    resolution: {integrity: sha512-kRlS3OPs4YgRltaM/FPxLcKr6cK+lDDHaPZodwN9t1/3hpSyuj1kX1S62cgNhPQnpXegVOrGvO1bzwqY6XXZrw==}
+  '@cognitap/radiant@0.0.3':
+    resolution: {integrity: sha512-Pm6FsWAOeNiFFOXsQICmZUDa2GsVMVH3XWg1vBfCnykqGJYFlOwuOzNaDVEb2u/ZIpJrqfr0RR6i2mkhIOF9sQ==}
     peerDependencies:
       react: ^19.3.0
       tailwindcss: ^4.3.3
@@ -1044,8 +1044,15 @@ packages:
     resolution: {integrity: sha512-Ec2Z7wpcKBiMpR7DxteoqS/sq5G5d2A4fpxzPv6+fD7xNNdrTghn7L11YwV5EN1B3i72Erc3XVT5FkWIDx90+A==}
     engines: {node: '>= 22.22'}
 
+  class-variance-authority@0.7.1:
+    resolution: {integrity: sha512-Ka+9Trutv7G8M6WT6SeiRWz792K5qEqIGEGzXKhAE6xOWAY6pPH8U+9IY3oCMv6kqTmLsv7Xh/2w2RigkePMsg==}
+
   client-only@0.0.1:
     resolution: {integrity: sha512-IV3Ou0jSMzZrd3pZ48nLkT9DA7Ag1pnPzaiQhpW7c3RbcqqzvzzVu+L8gfqMp/8IM2MQtSiqaCxrrcfu8I8rMA==}
+
+  clsx@2.1.1:
+    resolution: {integrity: sha512-eYm0QWBtUrBWZWG0d386OGAw16Z995PiOVo2B7bjWSbHedGl5e0ZWaq65kOGgUSNesEIDkB9ISbTg/JK9dhCZA==}
+    engines: {node: '>=6'}
 
   cn@0.4.0:
     resolution: {integrity: sha512-qOAeUhPwPzBxx6jaeQdo646XIKliKHc2j1ZF7Ngb1o0pJZKH5gq8FkA0aVdUdPFUDXNXyUCXpCtoJISo6dhizg==}
@@ -1887,8 +1894,9 @@ packages:
 
 snapshots:
 
-  '@cognitap/radiant@0.0.2(react@19.3.0)':
+  '@cognitap/radiant@0.0.3(react@19.3.0)':
     dependencies:
+      class-variance-authority: 0.7.1
       cn: 0.4.0
       react: 19.3.0
 
@@ -2408,7 +2416,13 @@ snapshots:
     dependencies:
       readdirp: 5.1.1
 
+  class-variance-authority@0.7.1:
+    dependencies:
+      clsx: 2.1.1
+
   client-only@0.0.1: {}
+
+  clsx@2.1.1: {}
 
   cn@0.4.0: {}
 

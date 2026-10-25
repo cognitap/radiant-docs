@@ -6,3 +6,5 @@ allowBuilds:
   '@parcel/watcher': true
   esbuild: true
   sharp: true
+minimumReleaseAgeExclude:
+  - '@cognitap/radiant@0.0.3'

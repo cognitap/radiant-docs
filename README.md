@@ -5,11 +5,12 @@ with Next.js static export, Fumadocs Core + MDX and Radiant UI. This is one app
 with its own dependencies, lockfile and CI. A normal build requires no library
 checkout, workspace link or source alias.
 
-The initial site documents **Radiant 0.0.2**, pinned from npm. That release exports
-Button; the newer components and theme APIs in the library repository will be
-adopted as they ship. The installed version is displayed on every page. Site
-layout uses semantic HTML while the live example uses the published Radiant
-Button and compiled CSS. Fumadocs UI is not installed.
+The site consumes **Radiant 0.0.3**, pinned from npm. That experimental release
+exports the harmonised ten-family component system and shared theme APIs. This
+site currently demonstrates Button; further component pages remain separate docs
+work. The installed version is displayed on every page. Site layout uses semantic
+HTML while live examples use the published Radiant Button and compiled CSS.
+Fumadocs UI is not installed.
 
 ## Development
 
@@ -125,9 +126,9 @@ content/docs/button.mdx
    both control defaults and component state while retaining source disclosure
    and toolbar focus. Keep state local; multiple instances are independent.
 4. For a future theme/mode control, put its labeled selector in `DemoControls`
-   and compose the installed release's public Radiant provider inside
-   `DemoPreview`. Preset implementations stay in the library. Version 0.0.2 has
-   no theme/mode APIs, so this first slice uses its baseline styles. The gallery
+   and compose the installed release's `ThemeScope` inside `DemoPreview`.
+   Preset implementations stay in the library. The current Button slice uses
+   baseline styles; adopting the shared themes and modes in the gallery
    belongs to [DEV-145](https://linear.app/cognitap/issue/DEV-145).
 5. Use `next/dynamic` in the client playground for separately loaded example
    modules, retaining SSR so direct loads have real HTML. Highlighting and file
