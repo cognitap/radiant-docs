@@ -5,7 +5,6 @@ import { Button, ThemeScope, defaultTheme, type ThemeMode } from '@cognitap/radi
 import { DemoControls, DemoPreview } from '@/components/demo/DemoFrame'
 import { useHydrated } from '../profile/useHydrated'
 import {
-  accents,
   documentAPI,
   editors,
   initialDocument,
@@ -23,6 +22,8 @@ import {
   type Specimen,
   type InspectionState
 } from './Specimens'
+import { ColorEditor } from './ColorEditor'
+import { colorAPI, defaultColorRecipe, type ColorRecipe, type ColorSession } from './workshop-color'
 import './workshop.css'
 
 function Choice({
@@ -58,7 +59,13 @@ function Choice({
 
 /** The document and preview controls have separate owners; theme edits never remount specimens. */
 export function ThemeWorkshop() {
-  const [document, setDocument] = useState(initialDocument)
+  const [workshop, setWorkshop] = useState(() => {
+    const document = initialDocument()
+    const color = documentAPI && colorAPI ? colorAPI.create(defaultColorRecipe()) : null
+    return { document: color ? colorAPI!.apply(document, color) : document, color }
+  })
+  const { document, color } = workshop
+  const [colorRevision, setColorRevision] = useState(0)
   const [editor, setEditor] = useState<Editor>('color')
   const [specimen, setSpecimen] = useState<Specimen>('article')
   const [mode, setMode] = useState<ThemeMode>('light')
@@ -78,12 +85,20 @@ export function ThemeWorkshop() {
   function edit(patch: SectionPatch) {
     const api = documentAPI
     if (!api) return
-    setDocument(previous => api.update(previous, patch))
+    setWorkshop(previous => ({ ...previous, document: api.update(previous.document, patch) }))
     setFeedback(`${current.label} updated. Specimen state retained.`)
+  }
+  function updateColor(recipe: ColorRecipe) {
+    const api = colorAPI
+    if (!api) return
+    const next: ColorSession = api.create(recipe)
+    setWorkshop(previous => ({ document: api.apply(previous.document, next), color: next }))
+    setFeedback('Color updated. Other sections and specimen state retained.')
   }
   return (
     <div
       className="theme-workshop"
+      data-workshop-color={color ? 'enabled' : 'unavailable'}
       data-workshop-editing={documentAPI ? 'enabled' : 'unavailable'}
     >
       {!documentAPI && (
@@ -119,46 +134,41 @@ export function ThemeWorkshop() {
             variant="outline"
             disabled={!ready || !documentAPI}
             onClick={() => {
-              setDocument(previous => resetEditor(previous, editor))
+              if (editor === 'color' && colorAPI) {
+                updateColor(defaultColorRecipe())
+                setColorRevision(n => n + 1)
+              } else
+                setWorkshop(previous => ({
+                  ...previous,
+                  document: resetEditor(previous.document, editor)
+                }))
               setFeedback(`${current.label} reset. Other sections and specimen state retained.`)
             }}
           >
             Reset {current.label.toLowerCase()}
           </Button>
         </div>
-        <p>Starting controls for the shared theme. All five specimens use these same decisions.</p>
+        <p>
+          {editor === 'color'
+            ? 'Build a complete color system and inspect its roles in the same specimens.'
+            : 'Starting controls for the shared theme. All five specimens use these same decisions.'}
+        </p>
         <fieldset
           disabled={!ready || !documentAPI}
           className="workshop-options"
         >
           <legend>{current.label} settings</legend>
-          {editor === 'color' && (
-            <Choice
-              label="Accent palette"
-              value={
-                accents.find(item => item.light === token('--rad-color-accent'))?.id ?? 'baseline'
-              }
-              choices={[
-                ['baseline', 'Neutral baseline'],
-                ...accents.map(item => [item.id, item.label] as const)
-              ]}
-              onChange={id => {
-                const accent = accents.find(item => item.id === id)
-                if (!accent) {
-                  setDocument(previous => resetEditor(previous, 'color'))
-                  return
-                }
-                edit({
-                  color: {
-                    modes: {
-                      light: { accent: accent.light, accentForeground: '#FFFFFF' },
-                      dark: { accent: accent.dark, accentForeground: '#000000' }
-                    }
-                  }
-                })
-              }}
+          <div
+            hidden={editor !== 'color'}
+            className="workshop-color-panel"
+          >
+            <ColorEditor
+              key={colorRevision}
+              session={color}
+              disabled={!ready || !documentAPI}
+              onChange={updateColor}
             />
-          )}
+          </div>
           {editor === 'typography' && (
             <>
               <Choice

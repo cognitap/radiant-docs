@@ -9,14 +9,46 @@ import { WorkshopDemo } from '@/components/WorkshopDemo'
 
 ## A shared workspace
 
-Color, Typography, Spacing & surfaces and Motion edit one theme document. The
-starting controls establish the shared workspace; the complete palette,
-typesetting and motion editors will build on it. No edits are sent to a server.
+Color, Typography, Spacing & surfaces and Motion edit one theme document. The color editor builds a complete palette; typography, spacing and motion have
+starting controls for the shared workspace. No edits are sent to a server.
 
 **Reset color**, **Reset typography**, **Reset spacing & surfaces** and **Reset
-motion** restore that section's baseline while retaining the other sections and
+motion** restore that section's baseline (Color returns to the default purple brand,
+recommended families and automatic roles) while retaining the other sections and
 specimen interactions. Color owns the canvas color; resetting geometry preserves
 it. Component exceptions remain intact.
+
+## Build your color system
+
+Enter an opaque six-digit sRGB **Brand color**. The production OKLCH engine
+creates 18 families with 11 shades each. **Exact brand anchor** keeps your input
+unchanged at the identified brand stop, reshaping nearby shades. **Regular ramp**
+keeps the original as reference metadata instead. Semantic roles may choose
+related shades for contrast, so your action fill can differ from the original.
+
+Start with automatic vividness, then explore hue-aware versus shared lightness,
+tone distribution, neutral tint and hue alignment. Neutral brands also expose a
+hue direction for supporting colors. All output is sRGB; this version does not
+accept alpha or Display P3 sources. Invalid hex keeps the last valid theme visible.
+
+The six-family **Working palette** recommends primary, support, neutral, success,
+warning and danger colors from the full wall. Change a family to guide automatic
+roles, or choose **Use recommended families**. Support and success remain working
+colors rather than new component tones.
+
+For precise control, choose a **Role mode** and **Semantic role**, then enter an
+exact color or apply a wall shade. Family and stop selectors provide the same
+selection by keyboard. Overrides stay pinned across brand and family changes;
+**Clear role override** returns the selected role to automatic selection. **Use
+automatic roles** clears both modes' overrides. Role mode is independent of the
+specimen preview mode. Switching editors preserves your selections.
+
+The contrast report measures the final opaque semantic colors in light and dark
+modes, including canvas pairs. It preserves failing choices and explains which
+pairs need attention. Inactive-control observations are informational. The report
+is not a whole-page accessibility certification: inspect component exceptions,
+translucent effects and rendered content in the specimens too. Pending controls
+still need contrast. No AI or server request is involved.
 
 ## Inspect the result
 
@@ -36,7 +68,7 @@ system's reduced-motion preference.
 
 The installed package is identified in the site header. The published 0.0.3 pin
 supports all specimen controls; shared document editing requires the upcoming
-public theme-document APIs. With that pin, editing controls remain disabled and
+public theme-document and color APIs. With that pin, editing controls remain disabled and
 the specimens use the neutral theme.
 
 For the complete editing preview, use the repository's documented

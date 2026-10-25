@@ -8,6 +8,9 @@ export function WorkshopDemo() {
       files={[
         'workshop/ThemeWorkshop.tsx',
         'workshop/workshop-theme.ts',
+        'workshop/workshop-color.ts',
+        'workshop/ColorEditor.tsx',
+        'workshop/color-editor.css',
         'workshop/Specimens.tsx',
         'workshop/workshop.css',
         'profile/NativeProfileForm.tsx',
