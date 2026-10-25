@@ -1,0 +1,95 @@
+---
+title: Profile form
+description: Build a complete profile editor with Radiant. Choose native React or TanStack Form, then put it inline, in a Card, or in a Dialog.
+---
+
+import { ProfileFormDemo } from '../../../components/ProfileFormDemo'
+
+<ProfileFormDemo />
+
+<noscript>
+  Enable JavaScript to use the live forms. You can still read and copy the source.
+</noscript>
+
+## Choose a form owner
+
+**Native React** keeps values in the browser's form controls. The submit handler
+reads `FormData`, checks the values, and shows errors through Radiant Field.
+Use it for a small form with straightforward validation.
+
+**TanStack Form** owns values, touched state and validation. Its field bindings
+pass `value`, `checked`, change and blur handlers to the same Radiant controls.
+Use it when your application already uses TanStack or needs more form state.
+It is an optional application dependency; Radiant does not require it.
+
+Both versions check the name and email, focus the first invalid control, and
+show help and error messages linked to that control. **Reset form** restores
+empty text fields, email contact, and updates off, and clears errors and saved
+feedback. A successful save shows the submitted values locally. This demo has
+no backend and sends no profile data over the network.
+
+## Choose a placement
+
+- **Standalone** keeps a frequently used form on the page.
+- **Card** groups the same form with a heading and description.
+- **Dialog** opens an editor for a focused task. Save closes the editor; Close,
+  Escape and the backdrop dismiss it and return focus to its trigger. Dismissing
+  keeps edits in memory so you can reopen and continue. Reset form clears them.
+
+Changing the form owner or placement starts a fresh example. Changing the
+theme or mode preserves your edits. **Reset preview** restores all options and
+the whole example. Each preview is independent; try different configurations
+in the second one below.
+
+<ProfileFormDemo compare />
+
+## Use the recipe
+
+These examples use **Radiant 0.0.3** and React 19.3. Install the package and
+load its compiled stylesheet once in your application:
+
+```sh
+pnpm add @cognitap/radiant@0.0.3
+```
+
+```tsx
+import '@cognitap/radiant/styles.css'
+```
+
+For the TanStack version or the combined `ProfileRecipe` selector, also install:
+
+```sh
+pnpm add @tanstack/react-form@1.33.5
+```
+
+Open **View source** to copy the actual recipe, both form versions, the shared
+values/validators, hydration helper and supporting CSS into one directory. The
+recipe imports those same files for its live preview. `ProfileRecipe` accepts `owner`,
+`placement`, `theme` and `mode`:
+
+```tsx
+import { jelly } from '@cognitap/radiant'
+import { ProfileRecipe } from './ProfileRecipe'
+
+export function Example() {
+  return (
+    <ProfileRecipe
+      owner="native"
+      placement="dialog"
+      theme={jelly}
+      mode="light"
+    />
+  )
+}
+```
+
+The website loads the recipe module separately from its presentation controls.
+A native-only app can copy `NativeProfileForm`, `profile.ts`, `useHydrated.ts`
+and the CSS, and use the form directly with `onSave` and `onReset` callbacks,
+without TanStack. Import `profile-form.css` alongside the Radiant stylesheet.
+Connect `onSave` to your own persistence and validate again on the server when
+adapting this demo for production.
+
+Every instance gets its own form, Field IDs and radio-group name. The dialog
+stays under its ThemeScope and uses Radiant's native dialog behavior. Presets
+come directly from the package; the website defines only example layout CSS.

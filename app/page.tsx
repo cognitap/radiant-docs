@@ -13,12 +13,23 @@ export default function HomePage() {
         React components with native behavior, shared design tokens, and room for your own
         expression.
       </p>
-      <a
-        href="/docs/button/"
-        className="explore-link"
+      <nav
+        aria-label="Examples"
+        className="home-links"
       >
-        Explore Button <span aria-hidden="true">↗</span>
-      </a>
+        <a
+          href="/docs/button/"
+          className="explore-link"
+        >
+          Explore Button <span aria-hidden="true">↗</span>
+        </a>
+        <a
+          href="/docs/recipes/profile-form/"
+          className="explore-link"
+        >
+          Explore form recipes <span aria-hidden="true">↗</span>
+        </a>
+      </nav>
       <p className="source-note">
         {radiantCandidate
           ? 'This local preview uses an explicitly selected package candidate. Its APIs may differ from npm.'
