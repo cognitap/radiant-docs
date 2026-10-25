@@ -7,8 +7,9 @@ checkout, workspace link or source alias.
 
 The site consumes **Radiant 0.0.3**, pinned from npm. That experimental release
 exports the harmonised ten-family component system and shared theme APIs. This
-site includes installation/foundations/release guidance, Button, Link and complete
-native/TanStack profile-form recipes; further component pages remain separate
+site includes installation/foundations/release guidance, Button, Link, Field,
+Input, Checkbox, RadioGroup and complete native/TanStack profile-form recipes;
+further component pages remain separate
 docs work. The installed version is
 displayed on every page. Site layout uses semantic HTML while live examples use
 published Radiant components, presets and compiled CSS.
@@ -27,7 +28,8 @@ pnpm dev
 
 Open [localhost:3001](http://127.0.0.1:3001). Content lives in `content/docs`;
 interactive examples live in `examples`. Public routes include `/docs/button/`,
-`/docs/link/` and `/docs/recipes/profile-form/`. Generated MDX and Next.js files are ignored.
+`/docs/link/`, `/docs/field/`, `/docs/input/`, `/docs/checkbox/`, `/docs/radio-group/`
+and `/docs/recipes/profile-form/`. Generated MDX and Next.js files are ignored.
 
 ## Build and verify
 
@@ -62,6 +64,9 @@ pending activation guards and reduced-motion labels, custom button/ref forwardin
 native and Next.js navigation (including modified clicks, middle clicks and new
 tabs), and source/copy integrity. Site link/focus styles exclude Radiant hosts so
 the examples retain their own presentation.
+Form-control checks cover label/help/error relationships, a native Field adapter,
+required/disabled/read-only state, real FormData payloads, mixed checkboxes, native
+radio keyboard/reset behavior and isolation from embedded profile recipes.
 Desktop/mobile screenshots go to `output/docs/` and
 are uploaded by CI. On Linux, install Chromium with `--with-deps` as CI does.
 
@@ -184,6 +189,31 @@ retains unsaved edits until reset. Owner/placement changes start a fresh example
 theme/mode changes preserve it. The frame's reset also restores option defaults.
 `scripts/verify-profile-recipes.mjs` runs through the normal smoke-check gate;
 it is not imported by production code.
+
+## Form control guides
+
+The Field, Input, Checkbox and RadioGroup pages document Radiant 0.0.3's native
+hosts, parts, props and consumer responsibilities. `examples/controls/` owns
+five focused examples: Field relationships with a native-input adapter, email
+validation/read-only behavior, checkbox payloads, controlled mixed selection,
+and native radio grouping/reset. `ControlPlayground` owns website options;
+`components/ControlDemo.tsx` lists the actual preview and supporting files.
+
+Copyable examples use React and public Radiant exports only. They share
+`control-types.ts`, `control-example.css` and the existing
+`profile/useHydrated.ts`. Preserve the displayed `controls/` and `profile/`
+paths when copying so relative imports resolve. The helper disables submit until
+JavaScript handlers are ready; static HTML still includes controls and source.
+Validation, saved feedback and controlled reset remain explicit in each example.
+
+Field and RadioGroup also embed the existing `ProfileFormDemo`, starting with
+native/standalone and TanStack/Card respectively. These are the same recipe
+modules and source files as the recipe page, with no duplicate form implementation.
+Readers can choose every owner/placement there. The component guides link to the
+recipe's setup and optional TanStack dependency instructions.
+
+`scripts/verify-controls.mjs` runs in the normal gate. CI saves desktop/mobile
+`controls-*.png` screenshots alongside recipe and navigation evidence.
 
 ## Navigation and search
 

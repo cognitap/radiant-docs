@@ -1,0 +1,90 @@
+---
+title: Input
+description: A native input with shared control metrics, Field relationships and browser form behavior.
+---
+
+import { ControlDemo } from '../../components/ControlDemo'
+
+<ControlDemo kind="input" />
+
+## Edit a native value
+
+Input renders one native `input`, defaulting to `type="text"` and
+`controlSize="medium"`. Use it for text, email and other appropriate native
+input types. Use [Checkbox](/docs/checkbox/) or [RadioGroup](/docs/radio-group/)
+for choice controls.
+
+The example uses `type="email"`, an autocomplete hint and an initial value.
+Submit an invalid address to see an error, or clear it to try required
+validation. The application checks native `validity`, supplies Field's error
+and focuses the input. It uses `noValidate` to replace the browser popup with
+that feedback. Input itself does not decide validation rules or timing.
+
+Reset restores `ada@example.com` and clears errors and feedback. **Focus input**
+shows that the ref reaches the native input. Tab reaches it normally; Enter
+submits this form. Theme/mode and size changes preserve the current value.
+
+## Labels and state
+
+Use [Field](/docs/field/) for the label, description and error relationships.
+Input consumes its IDs and required/disabled state. A placeholder is not a
+label. Outside Field, associate a native label with an explicit `id`, or supply
+an appropriate accessible name yourself.
+
+Try **Read only** and **Disabled** separately. A read-only input remains
+focusable and its value is submitted; a disabled input cannot be edited or
+focused and is omitted from `FormData`. Native read-only inputs do not
+participate in constraint validation. Neither state is an application permission
+check. If both are enabled, disabled behavior takes precedence.
+
+## Choose one value owner
+
+Use `defaultValue` for browser-owned state, as this example does. Native form
+reset restores that default. For React or a form library, pass `value` and update
+it from `onChange`. Initialize an empty controlled text input with `''`, rather
+than `null` or `undefined`.
+
+Do not pass both `value` and `defaultValue`, or switch ownership during a mount.
+Remount when intentionally changing owners. A controlled form's reset handler
+must reset application values and validation metadata too. The
+[native/TanStack profile recipe](/docs/recipes/profile-form/) demonstrates both
+owners using the same Input, with complete displayed source.
+
+## Anatomy and public props
+
+The host is the styling, native-prop and ref target: `HTMLInputElement`,
+`data-slot="input"`, and `data-control-size`. Invalid state exposes
+`data-invalid` and `aria-invalid`. There is no wrapper or `parts` prop.
+
+These props match **Radiant 0.0.3**; `InputProps` is exported.
+
+| Prop                                                 | Purpose / default                                                                                |
+| ---------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| `type`                                               | Native input type; defaults to `text`                                                            |
+| `value` / `defaultValue`                             | Controlled value or initial browser-owned value; choose one                                      |
+| `onChange`, `onBlur`                                 | Native events; text changes still expose `event.target.value`                                    |
+| `controlSize`                                        | `small`, `medium` (default), `large`                                                             |
+| `size`                                               | Native numeric character-width hint, separate from `controlSize`; layout CSS can constrain width |
+| `name`, `form`                                       | Native form-data name and form association                                                       |
+| `required`, `disabled`                               | Native state, also inherited from Field                                                          |
+| `readOnly`                                           | Native read-only behavior                                                                        |
+| `id`, `aria-*`                                       | Native relationships; Field owns its control ID and adds its descriptions                        |
+| `autoComplete`, `inputMode`, `min`, `max`, `pattern` | Native hints and constraints for the chosen input type                                           |
+| `className`, `style`, `ref`                          | Customization and ref on the actual input; style accepts typed theme tokens                      |
+| Other native props                                   | Remaining input attributes/events                                                                |
+
+Keep native keyboard editing, selection, autofill and focus indicators intact.
+Server-side validation and persistence belong to your application.
+
+## Use the example in a form
+
+Install `@cognitap/radiant@0.0.3` and import
+`@cognitap/radiant/styles.css` once. View source shows the actual example,
+shared types, hydration helper and CSS. Keep their `controls/` and `profile/`
+paths when copying. It needs React and Radiant only, without a form library.
+
+For a complete form, use the [profile recipe](/docs/recipes/profile-form/).
+It covers native FormData or optional TanStack bindings, validation focus,
+saved/reset feedback and standalone/Card/Dialog placement. Choosing TanStack
+adds `@tanstack/react-form@1.33.5` to your application; it is not a Radiant
+runtime dependency. Your form owns validation, touched state and persistence.

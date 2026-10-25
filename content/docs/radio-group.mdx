@@ -1,0 +1,119 @@
+---
+title: RadioGroup
+description: One choice among labeled native radios, with a shared name, Field relationships and form reset.
+---
+
+import { ControlDemo } from '../../components/ControlDemo'
+import { ProfileFormDemo } from '../../components/ProfileFormDemo'
+
+<ControlDemo kind="radio" />
+
+## Choose one value
+
+RadioGroup composes [Field](/docs/field/) in group layout: a native `fieldset`
+and `legend`, help/error text, and a container of Radio options. Each Radio
+renders a native `input type="radio"` with its own label and a decorative dot.
+Its `value` identifies the option. The group owns their shared `name` and selection.
+
+Tab reaches the selected radio (or an enabled option when none is selected).
+Use arrow keys to move and select within the group; Space selects a focused
+option. The disabled Phone option is skipped. There is no custom roving-tabindex
+or ARIA widget replacing the browser's radio behavior.
+
+**Save preference** reads the selected value from FormData. Reset restores the
+initial selection and clears errors and feedback. Try **Start with no selection**
+and submit to see required validation and focus. Changing this initial-state
+option starts a fresh example. Disabled applies to the whole group and removes
+its values from form submission.
+
+## Name and selection ownership
+
+Supply a stable `name` on RadioGroup and a distinct `value` on each Radio.
+The example uses `useId()` to create an instance-specific name. Its raw FormData
+key is that generated name; the feedback labels it “contact” for readability.
+Only the selected, enabled option contributes a value.
+
+For browser-owned state, set `defaultValue`; native form reset restores that
+initial choice. For controlled state, pass `value` and update it with
+`onValueChange`. Use `null` to clear a controlled selection; `''` is a real
+option value, and `undefined` changes ownership. Do not switch ownership during
+a mount or pass both `value` and `defaultValue`.
+
+Keep one state-writing callback: `onValueChange` receives the selected string;
+`onChange` observes the native input event. Do not write the same state in both.
+Inside a group, do not give Radio a conflicting `name`, `checked` or
+`defaultChecked`; the group owns those decisions. A standalone Radio may own
+its own checked state, but RadioGroup supplies the shared field relationships.
+
+Controlled form reset must reset application values and validation metadata.
+It does not automatically erase the current controlled selection. The profile
+recipe below demonstrates that reset with TanStack.
+
+## Anatomy and parts
+
+| Hook                    | Target / identity                                         |
+| ----------------------- | --------------------------------------------------------- |
+| RadioGroup root         | `fieldset`; `data-slot` includes `field radio-group`      |
+| Group label/help/error  | Field's `parts.label`, `description`, `error`, `required` |
+| `parts.options`         | Option container; `radio-group-options`                   |
+| Radio root              | Native input; `data-slot="radio"`, `data-control-size`    |
+| Radio `parts.wrapper`   | Outer label/span; `radio-wrapper`                         |
+| Radio `parts.label`     | Convenience label text; `radio-label`                     |
+| Radio `parts.indicator` | Decorative dot; `radio-indicator`                         |
+
+Parts accept `className` and `style`. Group `className`, `style` and `ref` target
+the fieldset; Radio's native props, styling and ref target its input. Required,
+disabled and error relationships belong to the group; keep an accessible name
+on every option and preserve visible focus. Required means one selected option,
+not every option.
+
+## Public props
+
+These contracts match **Radiant 0.0.3**. `RadioGroupProps` and `RadioProps` are exported.
+
+| RadioGroup prop          | Purpose / default                                                         |
+| ------------------------ | ------------------------------------------------------------------------- |
+| `name`, `label`          | Required shared native name and group legend                              |
+| `value` / `defaultValue` | Controlled selection or initial browser-owned selection; string or `null` |
+| `onValueChange`          | Receives the newly selected string                                        |
+| `onChange`               | Native change observation                                                 |
+| `description`, `error`   | Field help/error content and relationships                                |
+| `required`, `disabled`   | Group state; defaults to `false`                                          |
+| `requiredIndicator`      | Field's decorative indicator; defaults to `*`                             |
+| `controlSize`            | Inherited by options; `small`, `medium` (default), `large`                |
+| `parts`                  | Field parts plus `options` styling                                        |
+| Other native props       | Fieldset attributes, events, `form`, root styling and ref                 |
+
+| Radio prop                           | Purpose / default                                                             |
+| ------------------------------------ | ----------------------------------------------------------------------------- |
+| `value`                              | Required option string                                                        |
+| `label`                              | Convenience label; otherwise provide an accessible name                       |
+| `disabled`, `required`               | Native option state; group state also applies                                 |
+| `controlSize`                        | Option override; otherwise group size or `medium`                             |
+| `checked` / `defaultChecked`, `name` | Standalone ownership; group owns these when nested                            |
+| `parts`                              | Wrapper, label and indicator styling                                          |
+| Other native props                   | Input attributes/events, styling and `HTMLInputElement` ref; type stays radio |
+
+## Complete recipe and controlled reset
+
+This is the same website-owned [profile recipe](/docs/recipes/profile-form/),
+starting with TanStack Form in a Card. Try RadioGroup's controlled binding,
+validation, saved feedback and Reset form. Switch to native ownership to compare,
+or Dialog placement to try dismissal and focus restoration. Dismissal retains
+unsaved edits; resetting the form clears values, errors and saved feedback.
+Each preview has independent IDs, names and state.
+
+<ProfileFormDemo compare />
+
+## Use the examples
+
+Install `@cognitap/radiant@0.0.3` and import
+`@cognitap/radiant/styles.css` once. View source displays the real preview and
+supporting files. Preserve their `controls/` and `profile/` paths when copying.
+The focused radio example needs React and Radiant only. The combined profile
+selector additionally imports optional `@tanstack/react-form@1.33.5`; see the
+[recipe setup](/docs/recipes/profile-form/#use-the-recipe) for both copy paths.
+
+Your form owns validation, submission and persistence. The examples display local
+feedback without a backend. Themes/modes preserve edits; Reset preview restores
+the frame's options and its whole example.

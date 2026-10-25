@@ -329,6 +329,11 @@ body {
   align-items: center;
 }
 
+.demo-canvas:has(> .control-example) {
+  place-content: stretch;
+  align-items: center;
+}
+
 .demo-canvas {
   min-height: 14rem;
   display: grid;
