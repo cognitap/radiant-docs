@@ -89,8 +89,9 @@ export async function verifyColorEditor(browser, baseURL) {
     const wallPreset = frame.getByRole('combobox', { name: 'Wall preset', exact: true })
     const rampPreset = frame.getByRole('combobox', { name: 'Brand ramp preset', exact: true })
     await wallPreset.focus()
-    await wallPreset.press('Home')
-    await wallPreset.press('Enter')
+    await wallPreset.press('Tab')
+    assert.equal(await rampPreset.evaluate(node => node === document.activeElement), true)
+    await wallPreset.selectOption('classic')
     assert.equal(await wallPreset.inputValue(), 'classic')
     assert.equal(
       await frame
