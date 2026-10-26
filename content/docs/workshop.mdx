@@ -104,8 +104,8 @@ in the editor. Use the handoff panel below for whole-theme and selective exports
 **Copy typed theme** is the primary handoff: a typed `ThemeDocument` and the
 compiled Radiant `theme`, ready for `ThemeScope`. Import the package’s compiled
 styles once in your app entry and use a release that includes the document APIs.
-The optional reset is separate. The candidate header identifies the package used
-for this preview; the published 0.0.3 pin does not yet provide these APIs.
+The optional reset is separate. Radiant 0.0.4 provides these APIs; the site header identifies the installed
+package used by every specimen and export.
 
 **Download configuration** saves the complete authoring document, palette/font
 metadata and available color/geometry recipes, including both named color
@@ -160,16 +160,14 @@ system's reduced-motion preference.
 
 ## Package availability
 
-The installed package is identified in the site header. The published 0.0.3 pin
-supports all specimen controls; shared document editing requires the upcoming
-public theme-document and color APIs. With that pin, editing controls remain disabled and
-the specimens use the neutral theme.
+The site consumes the exact published **Radiant 0.0.4** package from npm. The
+complete palette, spacing/surfaces and handoff editors use its public document,
+generation and appearance APIs. No library source, Storybook module or workspace
+alias is imported.
 
-For the complete editing preview, use the repository's documented
-`pnpm preview:candidate /absolute/path/radiant.tgz` workflow with a packed library
-candidate. The header explicitly labels it **Local candidate**. No library source,
-Storybook module or workspace alias is imported. A future published package pin
-with those exports enables the same editing path.
+The repository can also inspect a future packed library build with
+`pnpm preview:candidate /absolute/path/radiant.tgz`. Such previews display an
+explicit **Local candidate** label; they do not change the public dependency pin.
 
 ## Source and ownership
 

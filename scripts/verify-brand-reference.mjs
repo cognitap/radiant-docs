@@ -150,10 +150,16 @@ export async function verifyBrandReference(browser, baseURL) {
       'output/docs/brand-reference.json',
       `${JSON.stringify(
         {
-          defaults: { fidelity: 'anchored', gamut: 'srgb', lightness: 'hue-aware' },
-          ownerDecision: 'DEV-151: reshaping on the left looks better',
+          defaults: {
+            fidelity: 'anchored',
+            gamut: 'srgb',
+            lightness: 'hue-aware',
+            wallPreset: 'balanced',
+            rampPreset: 'balanced'
+          },
+          ownerDecision: 'DEV-160: Ready — keep Balanced defaults; nearby readable UI fills',
           review:
-            'Automated proof and captures; final production owner visual review remains separate.',
+            'Production owner review accepted; automated proof remains scoped to the recorded fixtures and states.',
           cases
         },
         null,

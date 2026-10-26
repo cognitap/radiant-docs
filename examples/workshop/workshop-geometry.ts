@@ -1,32 +1,17 @@
-import * as Radiant from '@cognitap/radiant'
+import { updateThemeAppearance, type ThemeGeometrySettings } from '@cognitap/radiant'
+import { readThemeDocument } from './workshop-theme.ts'
 
-// Consumption types for the published pin/candidate seam. Radiant owns all
-// geometry-to-token mapping; these are bounded authoring choices, not a compiler.
-export interface GeometrySettings {
-  spacing: number
-  density: number
-  controlRadius: number
-  surfaceRadius: number
-  controlBorderWidth: number
-  surfaceBorderWidth: number
-  borderStyle: 'solid' | 'dashed' | 'dotted'
-  elevation: 0 | 1 | 2 | 3
-  backdropOpacity: number
-}
+// The editor materialises every bounded geometry control; Radiant owns token mapping.
+export type GeometrySettings = Required<ThemeGeometrySettings>
 export type GeometryScope = 'shared' | 'light' | 'dark'
 export interface GeometryRecipe {
   values: GeometrySettings
   modes?: { light?: Partial<GeometrySettings>; dark?: Partial<GeometrySettings> }
 }
-const packageExports: object = Radiant
-const apply = Reflect.get(packageExports, 'updateThemeAppearance')
-export const geometryAPI =
-  typeof apply === 'function'
-    ? {
-        apply: (document: object, recipe: GeometryRecipe): object =>
-          apply(document, { geometry: recipe })
-      }
-    : null
+export const geometryAPI = {
+  apply: (document: object, recipe: GeometryRecipe): object =>
+    updateThemeAppearance(readThemeDocument(document), { geometry: recipe })
+}
 
 const balanced: GeometrySettings = {
   spacing: 1,

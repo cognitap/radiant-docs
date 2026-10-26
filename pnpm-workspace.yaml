@@ -8,4 +8,4 @@ allowBuilds:
   sharp: true
   workerd: true
 minimumReleaseAgeExclude:
-  - '@cognitap/radiant@0.0.3'
+  - '@cognitap/radiant@0.0.4'

@@ -50,9 +50,4 @@ export const workshopAvailable =
     'updateThemeAppearance'
   ].every(name => typeof Reflect.get(Radiant, name) === 'function') &&
   Array.isArray(Reflect.get(Radiant, 'colorCalibrationPresets'))
-if (candidate || installed.version !== '0.0.3')
-  assert.equal(
-    workshopAvailable,
-    true,
-    'Workshop releases/candidates must expose the complete public API.'
-  )
+assert.equal(workshopAvailable, true, 'Docs require the complete released workshop API.')
