@@ -408,46 +408,7 @@ export function ColorEditor({
           Choose a role and mode, then enter hex or choose a wall shade. Role mode is separate from
           specimen preview mode.
         </p>
-        <p>
-          Choose wall and brand-ramp presets independently. Dials customize the selected treatment;
-          choosing a preset resets its own dials and keeps your pinned semantic colors. Action fills
-          use the nearest readable brand shade in each mode.
-        </p>
         <div className="color-controls">
-          {(['wall', 'ramp'] as const).map(section => (
-            <label
-              key={section}
-              className="color-preset"
-            >
-              {section === 'wall' ? 'Wall preset' : 'Brand ramp preset'}
-              <select
-                aria-label={section === 'wall' ? 'Wall preset' : 'Brand ramp preset'}
-                aria-describedby={`${presetsId}-${section}`}
-                value={section === 'wall' ? wall.input.wallPreset : wall.input.rampPreset}
-                onChange={event => {
-                  const preset = colorPresets.find(p => p.id === event.target.value)!
-                  onChange(selectColorPreset(recipe, section, preset.id))
-                }}
-              >
-                {colorPresets.map(preset => (
-                  <option
-                    key={preset.id}
-                    value={preset.id}
-                  >
-                    {preset.name}
-                  </option>
-                ))}
-              </select>
-              <small>
-                {
-                  colorPresets.find(
-                    p =>
-                      p.id === (section === 'wall' ? wall.input.wallPreset : wall.input.rampPreset)
-                  )?.description
-                }
-              </small>
-            </label>
-          ))}
           <label>
             Role mode
             <select
