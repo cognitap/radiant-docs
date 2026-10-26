@@ -3,10 +3,14 @@ import type { SharedTokens } from '@cognitap/radiant'
 
 // Temporary consumption types for the published pin/candidate seam. All color
 // generation, recommendation, validation and document application stay in Radiant.
+export type ColorPreset = 'classic' | 'balanced' | 'expressive'
 export interface ColorInput {
   brand: string
   fidelity?: 'anchored' | 'unanchored'
+  wallPreset?: ColorPreset
+  rampPreset?: ColorPreset
   vividness?: number
+  brandVividness?: number
   lightness?: 'hue-aware' | 'shared'
   distribution?: number
   neutralTint?: number
@@ -60,11 +64,16 @@ export interface ColorSession {
   palette: PaletteView
 }
 const packageExports: object = Radiant
+export const colorPresets = (Reflect.get(packageExports, 'colorCalibrationPresets') ??
+  []) as readonly { id: ColorPreset; name: string; description: string }[]
 const generate = Reflect.get(packageExports, 'generateColorWall')
 const recommend = Reflect.get(packageExports, 'recommendColorPalette')
 const apply = Reflect.get(packageExports, 'updateThemeAppearance')
 export const colorAPI =
-  typeof generate === 'function' && typeof recommend === 'function' && typeof apply === 'function'
+  colorPresets.length === 3 &&
+  typeof generate === 'function' &&
+  typeof recommend === 'function' &&
+  typeof apply === 'function'
     ? {
         create(recipe: ColorRecipe): ColorSession {
           const wall = generate(recipe.input) as WallView
@@ -72,7 +81,18 @@ export const colorAPI =
             working: recipe.working,
             modes: recipe.modes
           }) as PaletteView
-          return { recipe, wall, palette }
+          return {
+            recipe: {
+              ...recipe,
+              input: {
+                ...recipe.input,
+                wallPreset: wall.input.wallPreset,
+                rampPreset: wall.input.rampPreset
+              }
+            },
+            wall,
+            palette
+          }
         },
         apply(document: object, session: ColorSession): object {
           return apply(document, { palette: session.palette })
@@ -80,7 +100,7 @@ export const colorAPI =
       }
     : null
 export function defaultColorRecipe(): ColorRecipe {
-  return { input: { brand: '#7C3AED' } }
+  return { input: { brand: '#7C3AED', wallPreset: 'balanced', rampPreset: 'balanced' } }
 }
 export const workingRoles: WorkingRole[] = [
   'primary',
@@ -125,4 +145,23 @@ export function overrideRole(
   if (value === undefined) delete values[role]
   else values[role] = value
   return { ...recipe, modes: { ...recipe.modes, [mode]: values } }
+}
+
+/** Selecting a preset resets only its owned dials; role pins and the other preset survive. */
+export function selectColorPreset(
+  recipe: ColorRecipe,
+  section: 'wall' | 'ramp',
+  preset: ColorPreset
+): ColorRecipe {
+  const input = { ...recipe.input }
+  if (section === 'wall') {
+    input.wallPreset = preset
+    delete input.vividness
+    delete input.neutralTint
+    delete input.hueAlignment
+  } else {
+    input.rampPreset = preset
+    delete input.brandVividness
+  }
+  return { ...recipe, input }
 }

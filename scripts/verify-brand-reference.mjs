@@ -40,6 +40,37 @@ export async function verifyBrandReference(browser, baseURL) {
     const mode = frame.getByRole('combobox', { name: 'Preview mode', exact: true })
     const specimen = frame.getByRole('combobox', { name: 'Specimen', exact: true })
     const canvas = frame.locator('.workshop-canvas')
+    const wallPreset = frame.getByRole('combobox', { name: 'Wall preset', exact: true })
+    const rampPreset = frame.getByRole('combobox', { name: 'Brand ramp preset', exact: true })
+    for (const wall of ['classic', 'balanced', 'expressive'])
+      for (const ramp of ['classic', 'balanced', 'expressive']) {
+        await wallPreset.selectOption(wall)
+        await rampPreset.selectOption(ramp)
+        const expected = colorAPI.create({
+          input: { brand: '#7C3AED', wallPreset: wall, rampPreset: ramp }
+        })
+        await page.waitForFunction(expected => {
+          const rows = [...document.querySelectorAll('.color-wall tbody tr')]
+          return expected.every((p, i) =>
+            p.swatches.every(s => rows[i].textContent.includes(s.value))
+          )
+        }, expected.wall.color.palettes)
+        assert.equal(
+          await frame
+            .getByRole('checkbox', { name: 'Automatic wall vividness', exact: true })
+            .isChecked(),
+          true
+        )
+        assert.equal(
+          await frame
+            .getByRole('checkbox', { name: 'Automatic brand vividness', exact: true })
+            .isChecked(),
+          true
+        )
+      }
+    await frame.getByRole('button', { name: 'Reset color', exact: true }).click()
+    assert.equal(await wallPreset.inputValue(), 'balanced')
+    assert.equal(await rampPreset.inputValue(), 'balanced')
     for (const value of brands) {
       const session = colorAPI.create({ input: { brand: value } })
       const { wall, palette } = session

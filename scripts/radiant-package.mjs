@@ -38,16 +38,18 @@ export const radiantPackage = { version: installed.version, candidate }
 
 // Exercise the installed API on both registry releases and packed candidates.
 // Candidate labeling is provenance, not a switch that enables editing.
-export const workshopAvailable = [
-  'themeDocumentFromDefinition',
-  'parseThemeDocument',
-  'compileThemeDocument',
-  'updateThemeDocument',
-  'exportThemeSections',
-  'generateColorWall',
-  'recommendColorPalette',
-  'updateThemeAppearance'
-].every(name => typeof Reflect.get(Radiant, name) === 'function')
+export const workshopAvailable =
+  [
+    'themeDocumentFromDefinition',
+    'parseThemeDocument',
+    'compileThemeDocument',
+    'updateThemeDocument',
+    'exportThemeSections',
+    'generateColorWall',
+    'recommendColorPalette',
+    'updateThemeAppearance'
+  ].every(name => typeof Reflect.get(Radiant, name) === 'function') &&
+  Array.isArray(Reflect.get(Radiant, 'colorCalibrationPresets'))
 if (candidate || installed.version !== '0.0.3')
   assert.equal(
     workshopAvailable,

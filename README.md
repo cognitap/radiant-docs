@@ -329,7 +329,7 @@ The candidate check runs the document reset tests as well as typecheck, build an
 browser checks. Its screenshots are retained under ignored `output/candidate/`
 before the temporary installation is removed. Normal-build screenshots remain
 under `output/docs/`. Current baseline runs execute four transport/preset tests and explicitly skip
-12 tests requiring unavailable APIs; the candidate must run all 16. The browser
+13 tests requiring unavailable APIs; the candidate must run all 17. The browser
 gate also checks all 12 agreed brand references and actual exported themes in
 compiled-CSS and Tailwind consumers, with both reset choices. Editing assertions
 follow installed capabilities on registry releases and candidates alike.

@@ -6,6 +6,8 @@ import { useId, useState } from 'react'
 import { Button, Checkbox, Field, Input } from '@cognitap/radiant'
 import {
   defaultColorRecipe,
+  colorPresets,
+  selectColorPreset,
   overrideRole,
   roleNames,
   roleValue,
@@ -134,6 +136,7 @@ export function ColorEditor({
   disabled: boolean
   onChange: (recipe: ColorRecipe) => void
 }) {
+  const presetsId = useId()
   const [mode, setMode] = useState<Mode>('light')
   const [role, setRole] = useState<Role>('accent')
   const [family, setFamily] = useState('brand')
@@ -187,7 +190,46 @@ export function ColorEditor({
         <p>
           sRGB input and output. Alpha and Display P3 sources are not supported by this version.
         </p>
+        <p>
+          Choose wall and brand-ramp presets independently. Dials customize the selected treatment;
+          choosing a preset resets its own dials and keeps your pinned semantic colors. Action fills
+          use the nearest readable brand shade in each mode.
+        </p>
         <div className="color-controls">
+          {(['wall', 'ramp'] as const).map(section => (
+            <label
+              key={section}
+              className="color-preset"
+            >
+              {section === 'wall' ? 'Wall preset' : 'Brand ramp preset'}
+              <select
+                aria-label={section === 'wall' ? 'Wall preset' : 'Brand ramp preset'}
+                aria-describedby={`${presetsId}-${section}`}
+                value={section === 'wall' ? wall.input.wallPreset : wall.input.rampPreset}
+                onChange={event => {
+                  const preset = colorPresets.find(p => p.id === event.target.value)!
+                  onChange(selectColorPreset(recipe, section, preset.id))
+                }}
+              >
+                {colorPresets.map(preset => (
+                  <option
+                    key={preset.id}
+                    value={preset.id}
+                  >
+                    {preset.name}
+                  </option>
+                ))}
+              </select>
+              <small id={`${presetsId}-${section}`}>
+                {
+                  colorPresets.find(
+                    p =>
+                      p.id === (section === 'wall' ? wall.input.wallPreset : wall.input.rampPreset)
+                  )?.description
+                }
+              </small>
+            </label>
+          ))}
           <label>
             Brand fidelity
             <select
@@ -215,20 +257,38 @@ export function ColorEditor({
             </select>
           </label>
           <Checkbox
-            label="Automatic vividness"
+            label="Automatic wall vividness"
             checked={input.vividness === undefined}
             onChange={event =>
               changeInput({ vividness: event.target.checked ? undefined : wall.input.vividness })
             }
           />
           <Dial
-            label="Vividness"
+            label="Wall vividness"
             value={wall.input.vividness}
             min={0}
             max={1}
             step={0.01}
             disabled={input.vividness === undefined}
             onChange={vividness => changeInput({ vividness })}
+          />
+          <Checkbox
+            label="Automatic brand vividness"
+            checked={input.brandVividness === undefined}
+            onChange={event =>
+              changeInput({
+                brandVividness: event.target.checked ? undefined : wall.input.brandVividness
+              })
+            }
+          />
+          <Dial
+            label="Brand vividness"
+            value={wall.input.brandVividness}
+            min={0}
+            max={1}
+            step={0.01}
+            disabled={input.brandVividness === undefined}
+            onChange={brandVividness => changeInput({ brandVividness })}
           />
           <Dial
             label="Tone distribution"
@@ -348,7 +408,46 @@ export function ColorEditor({
           Choose a role and mode, then enter hex or choose a wall shade. Role mode is separate from
           specimen preview mode.
         </p>
+        <p>
+          Choose wall and brand-ramp presets independently. Dials customize the selected treatment;
+          choosing a preset resets its own dials and keeps your pinned semantic colors. Action fills
+          use the nearest readable brand shade in each mode.
+        </p>
         <div className="color-controls">
+          {(['wall', 'ramp'] as const).map(section => (
+            <label
+              key={section}
+              className="color-preset"
+            >
+              {section === 'wall' ? 'Wall preset' : 'Brand ramp preset'}
+              <select
+                aria-label={section === 'wall' ? 'Wall preset' : 'Brand ramp preset'}
+                aria-describedby={`${presetsId}-${section}`}
+                value={section === 'wall' ? wall.input.wallPreset : wall.input.rampPreset}
+                onChange={event => {
+                  const preset = colorPresets.find(p => p.id === event.target.value)!
+                  onChange(selectColorPreset(recipe, section, preset.id))
+                }}
+              >
+                {colorPresets.map(preset => (
+                  <option
+                    key={preset.id}
+                    value={preset.id}
+                  >
+                    {preset.name}
+                  </option>
+                ))}
+              </select>
+              <small>
+                {
+                  colorPresets.find(
+                    p =>
+                      p.id === (section === 'wall' ? wall.input.wallPreset : wall.input.rampPreset)
+                  )?.description
+                }
+              </small>
+            </label>
+          ))}
           <label>
             Role mode
             <select

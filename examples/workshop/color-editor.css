@@ -218,3 +218,11 @@ fieldset.workshop-options {
     outline-color: Highlight;
   }
 }
+
+.color-controls .color-preset {
+  flex: 1 1 14rem;
+  max-width: 24rem;
+}
+.color-preset small {
+  line-height: 1.5;
+}

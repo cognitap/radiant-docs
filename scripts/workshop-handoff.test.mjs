@@ -38,6 +38,9 @@ test(
     const before = JSON.stringify({ document, recipes })
     const config = handoffAPI.configuration(document, recipes)
     const text = jsonText(config)
+    assert.equal(config.recipes.color.input.wallPreset, 'expressive')
+    assert.equal(config.recipes.color.input.rampPreset, 'classic')
+    assert.equal(config.recipes.color.input.brandVividness, 0.35)
     assert.equal(jsonText(handoffAPI.read(text)), text)
     assert.equal(jsonText(handoffAPI.read(await decodeShare(await encodeShare(text)))), text)
     assert.deepEqual(

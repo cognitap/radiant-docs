@@ -7,7 +7,15 @@ export function handoffFixture() {
   const recommend = Reflect.get(Radiant, 'recommendColorPalette')
   const appearance = Reflect.get(Radiant, 'updateThemeAppearance')
   const color = {
-    input: { brand: '#166534', fidelity: 'unanchored', lightness: 'shared', vividness: 0.65 },
+    input: {
+      brand: '#166534',
+      wallPreset: 'expressive',
+      rampPreset: 'classic',
+      fidelity: 'unanchored',
+      lightness: 'shared',
+      vividness: 0.65,
+      brandVividness: 0.35
+    },
     working: { primary: 'teal', support: 'orange' },
     modes: { dark: { canvas: '#112233' } }
   }

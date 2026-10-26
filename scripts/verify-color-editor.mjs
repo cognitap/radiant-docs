@@ -64,8 +64,15 @@ export async function verifyColorEditor(browser, baseURL) {
     await frame
       .getByRole('combobox', { name: 'Lightness model', exact: true })
       .selectOption('shared')
-    await frame.getByRole('checkbox', { name: 'Automatic vividness', exact: true }).uncheck()
-    for (const name of ['Vividness', 'Tone distribution', 'Neutral tint', 'Hue alignment']) {
+    await frame.getByRole('checkbox', { name: 'Automatic wall vividness', exact: true }).uncheck()
+    await frame.getByRole('checkbox', { name: 'Automatic brand vividness', exact: true }).uncheck()
+    for (const name of [
+      'Wall vividness',
+      'Brand vividness',
+      'Tone distribution',
+      'Neutral tint',
+      'Hue alignment'
+    ]) {
       const dial = frame.getByRole('slider', { name: new RegExp(name) })
       const before = await dial.inputValue()
       await dial.focus()
@@ -79,6 +86,32 @@ export async function verifyColorEditor(browser, baseURL) {
     await exact.fill('#FFFFFF')
     assert.ok((await frame.locator('.color-failures').innerText()).includes('1.0000:1'))
     await brand.fill('#7C3AED')
+    const wallPreset = frame.getByRole('combobox', { name: 'Wall preset', exact: true })
+    const rampPreset = frame.getByRole('combobox', { name: 'Brand ramp preset', exact: true })
+    await wallPreset.focus()
+    await wallPreset.press('Home')
+    await wallPreset.press('Enter')
+    assert.equal(await wallPreset.inputValue(), 'classic')
+    assert.equal(
+      await frame
+        .getByRole('checkbox', { name: 'Automatic wall vividness', exact: true })
+        .isChecked(),
+      true
+    )
+    assert.equal(
+      await frame
+        .getByRole('checkbox', { name: 'Automatic brand vividness', exact: true })
+        .isChecked(),
+      false
+    )
+    await rampPreset.selectOption('expressive')
+    assert.equal(
+      await frame
+        .getByRole('checkbox', { name: 'Automatic brand vividness', exact: true })
+        .isChecked(),
+      true
+    )
+    assert.equal(await wallPreset.inputValue(), 'classic')
     assert.equal(
       await variable('--rad-color-accent'),
       '#FFFFFF',

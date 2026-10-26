@@ -6,15 +6,20 @@ record does not claim a published 0.0.4 package or completed chapter acceptance.
 
 ## Source and reproducibility
 
-The library API source is merged main `22446b07767b2efff04796408fef4ed3872792a7`.
-[Radiant PR #53](https://github.com/cognitap/radiant/pull/53) adds only the
-0.0.4 manifest version and release notes. The prepared local candidate uses its
-clean commit `6c3f7a2a1f99760cb65e826f4a8155387e2ac400` and receipt:
+[Radiant PR #53](https://github.com/cognitap/radiant/pull/53) prepares 0.0.4
+and implements the owner's calibration decision: independent wall/ramp presets
+and nearby readable semantic fills. The production preset source is commit
+`a95866114b7de3b39aa4b056ed4a1658a94ceff5`. Its clean-source release preparation
+passes the installed archive checks and publication dry run. This receipt
+supersedes the earlier calibration candidate:
 
 ```text
 version: 0.0.4
-sha512-YnP+NdBAn3mqoXbglhCPjQyzeYVs2AZlvWaPR5PNaLqox8FGOtX8+PpzLrylYpHv9Sb/jl3uTeREUWuvEJ3gWQ==
+sha512-0dejL/znZR/NTmuulF3XXcjuE5JsnbqqzeHBKEHoq2ITZ/TPSVMQhyKWsyoxq9MZzh8tIcqqUBcFVzrgukXVrw==
 ```
+
+The disposable comparison HTML remains on its separate prototype branch and is
+excluded from the release.
 
 Use each repository's locked Node 26.11.1 / pnpm 12.11.2. In the clean library
 release checkout run `pnpm install --frozen-lockfile`, `pnpm check`, then
@@ -32,13 +37,26 @@ change the public pin. It retains browser captures and receipts in ignored
 `output/candidate/docs/`; registry checks use `output/docs/`. Archive and generated
 measurements remain build evidence, rather than committed source.
 
-## Accepted defaults and reference proof
+## Owner calibration decision and reference proof
 
 The owner's [DEV-151 decision](https://github.com/cognitap/radiant/blob/22446b07767b2efff04796408fef4ed3872792a7/docs/research/dev-151-calibration-proposal.md)
 was **“reshaping on the left looks better.”** Keep the supplied brand exact at a
 numbered stop, choose its anchor by lightness, reshape neighboring shades, and
 retain the original metadata. Unanchored is an explicit alternative. The
-selected output is opaque sRGB, hue-aware lightness and source-derived vividness;
+selected output is opaque sRGB with hue-aware lightness. The owner subsequently
+requested more calibration across the wall, brand ramp and semantic UI, then
+chose to expose the alternatives as named presets and selected **B — Nearby
+readable fill** for semantic mapping.
+
+**Classic**, **Balanced** and **Expressive** are independently selectable for the
+wall and brand ramp. Balanced starts both; separate automatic/manual vividness
+controls prevent a muted brand from flattening every supporting family. Preset
+selection resets only its owned dials and preserves the other treatment, shared
+tone controls and explicit semantic pins. Classic retains the original anchored
+reference values. Balanced/Expressive use smooth monotone anchor remapping.
+Primary fills choose the smallest Oklab distance to the source among swatches
+with 4.5:1 text and 3:1 boundaries against both opaque surfaces. Exact source
+metadata and anchors remain unchanged even when a related shade supplies the UI.
 P3 generation and silent source adjustment remain unsupported.
 
 `verify-brand-reference.mjs` exercises all 12 agreed seeds: violet `#7C3AED`,
@@ -48,6 +66,14 @@ muted plum `#7F6A75`, pale lavender `#F5E6FF`, dark tint `#17111F`, gray
 and six working-family selections against the installed production engine,
 checks the required semantic contrast report, compares actual light/dark scope
 variables, visits all five specimens and inspects the invalid component state.
+
+Before the reference matrix, the browser exercises all nine independent
+wall/ramp combinations against production output and checks Reset color returns
+both to Balanced. Unit checks cover all combinations across the reference seeds,
+near-black/white, exact source retention, strict rendered order, independent
+outputs and materialised JSON replay. Configuration/file/share-link checks
+restore an Expressive wall with a Classic ramp, manual dial overrides and pinned
+semantic colors, including after reload.
 
 The run retains 12 wall captures, 12 working-palette captures, 24 form captures
 and `brand-reference.json`: 24 mode cases / 120 specimen selections. These enable
@@ -59,7 +85,7 @@ this chapter.
 
 ## Installed-consumer coverage
 
-The library exhaustive gate passes 107 Node tests, 43 installed-package tests,
+The library exhaustive gate passes 109 Node tests, 43 installed-package tests,
 72 compiled-CSS/Tailwind theme/mode/reset cases, 128 installed composition
 cases, and 1,085 browser tests in 259 files. `release:prepare` separately verifies
 its one packed archive with all 43 installed checks and an npm dry run.
@@ -102,7 +128,7 @@ after scripts are released. Native links retain ordinary pre-hydration navigatio
 
 ## Publication order and remaining acceptance
 
-1. Review and merge the small 0.0.4 library PR after required CI passes. The
+1. Review and merge the 0.0.4 library preset/release PR after required CI passes. The
    [existing release policy](https://github.com/cognitap/radiant/blob/22446b07767b2efff04796408fef4ed3872792a7/RELEASE_POLICY.md)
    requires version/notes in a PR and successful checks before merging main.
 2. Dispatch **Release Radiant** on main with publishing selected. It prepares one
@@ -119,6 +145,10 @@ after scripts are released. Native links retain ordinary pre-hydration navigatio
    from that exact revision; record `/deployment.json`, the registry version,
    source/setup parity and workflow/artifact links here and in DEV-160. A green
    build or successful upload without passing remote verification is insufficient.
+
+The independently useful proof/hydration changes in docs PR #15 were merged as
+`c40c273`. Preset editor work is based on that commit in a separate PR; it does
+not replay the previous PR's diff.
 
 The current docs dependency remains public 0.0.3. Its read-only inspection is
 intentional until step 3. Library publication and public docs promotion have not
