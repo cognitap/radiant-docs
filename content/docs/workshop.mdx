@@ -88,7 +88,51 @@ This editor changes theme roles, rather than composing page layouts.
 Geometry remains ordinary `control`, `spacing` and `surface` document sections,
 so full-theme and selective round trips use the public document APIs. A selective
 surface section includes its canvas color, even though Color owns that decision
-in the editor. Copy/import/share controls follow in the handoff chapter.
+in the editor. Use the handoff panel below for whole-theme and selective exports.
+
+## Take your theme
+
+**Copy typed theme** is the primary handoff: a typed `ThemeDocument` and the
+compiled Radiant `theme`, ready for `ThemeScope`. Import the package’s compiled
+styles once in your app entry and use a release that includes the document APIs.
+The optional reset is separate. The candidate header identifies the package used
+for this preview; the published 0.0.3 pin does not yet provide these APIs.
+
+**Download configuration** saves the complete authoring document, palette/font
+metadata and available color/geometry recipes as JSON. Import the file or paste
+its JSON to continue editing. Full themes/configurations replace the theme and
+identity; specimen interactions and preview controls stay unchanged. Plain theme
+documents have no generator recipes, so their imported Color and Geometry values
+remain intact until you explicitly reset those editors. Typography and Motion
+continue editing supported leaves while preserving other authored values.
+
+Selective files contain exactly the chosen public sections. **Merge supplied
+leaves** keeps omitted values; **Replace supplied sections** removes omitted
+values in those sections, preserving all other sections and the destination
+identity. Select `components` explicitly to transfer component exceptions.
+`surface` includes both canvas and geometry; select `color` and `surface` when
+moving a complete color/canvas system. Importing surface data invalidates both
+editor recipes rather than silently pretending their controls still describe it.
+
+**Copy share link** puts a compressed version-1 configuration in the URL fragment;
+it needs no account and does not upload the configuration to a storage service.
+Links restore the theme and editor recipes, including after reload. Specimen form
+data is excluded. **Reset preview** restores the default workspace and clears its
+share fragment. Files and expanded links are limited to 256 KiB; links also have
+a 16,000-character transport limit. Use a configuration file when a link is too
+large. Invalid, unsupported or damaged input leaves the current theme intact.
+
+The optional scoped CSS output contains the actual compiled light/dark values.
+Load it after Radiant’s compiled styles and use the documented plain wrapper;
+React/nested mode scopes should use the typed theme. CSS export rejects text that
+cannot be safely represented as declarations, while the typed theme and JSON
+remain available. A failed clipboard action leaves selectable output fields.
+
+Font family names and requirements travel with themes, configurations and links;
+font files stay local. Load required fonts in the consuming app. The setup panel
+lists local/catalog/system descriptors, weights and styles when available. The
+same document sections retain existing typography and motion values and component
+exceptions for the later typesetting and spring tools.
 
 ## Inspect the result
 

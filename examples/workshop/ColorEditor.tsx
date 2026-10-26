@@ -125,10 +125,12 @@ function Chip({ value }: { value: string }) {
 
 export function ColorEditor({
   session,
+  imported = false,
   disabled,
   onChange
 }: {
   session: ColorSession | null
+  imported?: boolean
   disabled: boolean
   onChange: (recipe: ColorRecipe) => void
 }) {
@@ -136,6 +138,16 @@ export function ColorEditor({
   const [role, setRole] = useState<Role>('accent')
   const [family, setFamily] = useState('brand')
   const [stop, setStop] = useState(500)
+  if (!session && imported)
+    return (
+      <div className="color-editor">
+        <p>
+          Imported colors are preserved exactly. This document has no matching generator recipe. Use
+          Reset color to start the default brand recipe; this replaces the imported color system
+          while retaining other sections.
+        </p>
+      </div>
+    )
   if (!session)
     return (
       <div className="color-editor">

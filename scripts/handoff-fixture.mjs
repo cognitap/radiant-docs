@@ -1,0 +1,56 @@
+import * as Radiant from '@cognitap/radiant'
+import { geometryPreset } from '../examples/workshop/workshop-geometry.ts'
+export function handoffFixture() {
+  const create = Reflect.get(Radiant, 'themeDocumentFromDefinition')
+  const update = Reflect.get(Radiant, 'updateThemeDocument')
+  const generate = Reflect.get(Radiant, 'generateColorWall')
+  const recommend = Reflect.get(Radiant, 'recommendColorPalette')
+  const appearance = Reflect.get(Radiant, 'updateThemeAppearance')
+  const color = {
+    input: { brand: '#166534', fidelity: 'unanchored', lightness: 'shared', vividness: 0.65 },
+    working: { primary: 'teal', support: 'orange' },
+    modes: { dark: { canvas: '#112233' } }
+  }
+  const geometry = geometryPreset('spacious')
+  geometry.modes.dark = { ...geometry.modes.dark, density: 0.9, elevation: 0 }
+  let document = create({
+    id: 'handoff-proof',
+    name: 'Handoff proof',
+    tokens: {
+      typography: { family: '"Local Display", serif', bodySize: '1rem' },
+      motion: {
+        pressDuration: '93ms',
+        releaseDuration: '237ms',
+        releaseEase: 'cubic-bezier(0.1, 0.9, 0.2, 1)',
+        colorDuration: '170ms',
+        disclosureDuration: '210ms'
+      },
+      focus: { width: '3px' },
+      control: { medium: { fontSize: '1.1rem' } }
+    },
+    components: {
+      button: { radius: '27px', pressScale: 0.94 },
+      input: { radius: '19px' },
+      dialog: { backdropFilter: 'blur(8px)' }
+    },
+    modes: { dark: { components: { card: { shadow: 'none' } } } }
+  })
+  document = appearance(document, {
+    palette: recommend(generate(color.input), { working: color.working, modes: color.modes }),
+    geometry
+  })
+  document = update(document, {
+    typography: {
+      fonts: [
+        {
+          id: 'local-display',
+          family: 'Local Display',
+          source: 'local',
+          weights: [400, 700],
+          styles: ['normal', 'italic']
+        }
+      ]
+    }
+  })
+  return { document, recipes: { color, geometry } }
+}

@@ -1,6 +1,6 @@
 'use client'
 
-import { useId, useMemo, useState } from 'react'
+import { useCallback, useId, useMemo, useState } from 'react'
 import { Button, ThemeScope, defaultTheme, type ThemeMode } from '@cognitap/radiant'
 import { DemoControls, DemoPreview } from '@/components/demo/DemoFrame'
 import { useHydrated } from '../profile/useHydrated'
@@ -22,6 +22,8 @@ import {
   type Specimen,
   type InspectionState
 } from './Specimens'
+import { ThemeHandoff, type ImportResult } from './ThemeHandoff'
+import { handoffAPI, errorMessage, type ImportData } from './workshop-handoff'
 import { GeometryEditor } from './GeometryEditor'
 import { geometryAPI, geometryPreset, type GeometryRecipe } from './workshop-geometry'
 import { ColorEditor } from './ColorEditor'
@@ -46,6 +48,7 @@ function Choice({
         value={value}
         onChange={event => onChange(event.target.value)}
       >
+        {!choices.some(([id]) => id === value) && <option value={value}>Custom · {value}</option>}
         {choices.map(([id, name]) => (
           <option
             key={id}
@@ -59,14 +62,30 @@ function Choice({
   )
 }
 
+interface WorkshopState {
+  document: object
+  color: ColorSession | null
+  geometry: GeometryRecipe | null
+  importResult: ImportResult | null
+  colorImportRevision: number
+  geometryImportRevision: number
+}
+
 /** The document and preview controls have separate owners; theme edits never remount specimens. */
 export function ThemeWorkshop() {
-  const [workshop, setWorkshop] = useState(() => {
+  const [workshop, setWorkshop] = useState<WorkshopState>(() => {
     const geometry = geometryPreset()
     const initial = initialDocument()
     const document = documentAPI && geometryAPI ? geometryAPI.apply(initial, geometry) : initial
     const color = documentAPI && colorAPI ? colorAPI.create(defaultColorRecipe()) : null
-    return { document: color ? colorAPI!.apply(document, color) : document, color, geometry }
+    return {
+      document: color ? colorAPI!.apply(document, color) : document,
+      color,
+      geometry,
+      importResult: null,
+      colorImportRevision: 0,
+      geometryImportRevision: 0
+    }
   })
   const { document, color, geometry } = workshop
   const [colorRevision, setColorRevision] = useState(0)
@@ -83,6 +102,59 @@ export function ThemeWorkshop() {
   const theme = useMemo(
     () => (documentAPI ? documentAPI.compile(document) : defaultTheme),
     [document]
+  )
+  const recipes = useMemo(
+    () => ({ color: color?.recipe, geometry: geometry ?? undefined }),
+    [color, geometry]
+  )
+  const importConfiguration = useCallback((data: ImportData, applyMode: 'merge' | 'replace') => {
+    const api = handoffAPI
+    if (!api) return
+    setWorkshop(previous => {
+      try {
+        const current = api.configuration(previous.document, {
+          color: previous.color?.recipe,
+          geometry: previous.geometry ?? undefined
+        })
+        const next = api.apply(current, data, applyMode)
+        const affected =
+          data.kind === 'radiant-workshop'
+            ? ['color', 'surface', 'control', 'spacing']
+            : Object.keys(data.sections)
+        return {
+          ...previous,
+          document: next.document,
+          color: next.recipes.color && colorAPI ? colorAPI.create(next.recipes.color) : null,
+          geometry: next.recipes.geometry ?? null,
+          colorImportRevision:
+            previous.colorImportRevision +
+            Number(affected.some(name => ['color', 'surface'].includes(name))),
+          geometryImportRevision:
+            previous.geometryImportRevision +
+            Number(affected.some(name => ['control', 'spacing', 'surface'].includes(name))),
+          importResult: {
+            ok: true,
+            message:
+              data.kind === 'radiant-workshop'
+                ? 'Configuration restored. Preview controls and specimen interactions retained.'
+                : `Sections ${applyMode === 'merge' ? 'merged' : 'replaced'}. Unrelated sections and specimen interactions retained.`
+          }
+        }
+      } catch (error) {
+        return {
+          ...previous,
+          importResult: {
+            ok: false,
+            message: `Import: ${errorMessage(error)} Current theme retained.`
+          }
+        }
+      }
+    })
+  }, [])
+  const importError = useCallback(
+    (message: string) =>
+      setWorkshop(previous => ({ ...previous, importResult: { ok: false, message } })),
+    []
   )
   const values = theme.modes.light
   const current = editors.find(item => item.id === editor)!
@@ -117,8 +189,10 @@ export function ThemeWorkshop() {
   return (
     <div
       className="theme-workshop"
-      data-workshop-geometry={documentAPI && geometryAPI ? 'enabled' : 'unavailable'}
-      data-workshop-color={color ? 'enabled' : 'unavailable'}
+      data-workshop-geometry={
+        documentAPI && geometryAPI ? (geometry ? 'enabled' : 'imported') : 'unavailable'
+      }
+      data-workshop-color={color ? 'enabled' : documentAPI && colorAPI ? 'imported' : 'unavailable'}
       data-workshop-editing={documentAPI ? 'enabled' : 'unavailable'}
     >
       {!documentAPI && (
@@ -188,8 +262,9 @@ export function ThemeWorkshop() {
             className="workshop-color-panel"
           >
             <ColorEditor
-              key={colorRevision}
+              key={`${colorRevision}:${workshop.colorImportRevision}`}
               session={color}
+              imported={!!documentAPI && !!colorAPI && !color}
               disabled={!ready || !documentAPI}
               onChange={updateColor}
             />
@@ -223,7 +298,7 @@ export function ThemeWorkshop() {
             className="workshop-geometry-panel"
           >
             <GeometryEditor
-              key={geometryRevision}
+              key={`${geometryRevision}:${workshop.geometryImportRevision}`}
               recipe={geometry}
               theme={theme}
               disabled={!ready || !documentAPI || !geometryAPI}
@@ -246,6 +321,7 @@ export function ThemeWorkshop() {
         </fieldset>
       </section>
       <output className="workshop-feedback">{feedback}</output>
+      {workshop.importResult && <p className="workshop-notice">{workshop.importResult.message}</p>}
       <DemoControls label="Specimen inspection">
         <div className="workshop-options">
           <Choice
@@ -342,6 +418,13 @@ export function ThemeWorkshop() {
           ))}
         </ThemeScope>
       </DemoPreview>
+      <ThemeHandoff
+        document={document}
+        recipes={recipes}
+        result={workshop.importResult}
+        onImport={importConfiguration}
+        onError={importError}
+      />
     </div>
   )
 }
