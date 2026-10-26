@@ -88,10 +88,17 @@ built successfully but failed at the router ref-focus assertion over HTTPS.
 Normal replay passed; holding application scripts made the underlying gap
 deterministic: the ref action was enabled in SSR before its handler existed.
 `RouterLinkExample` now uses the existing hydration guard. Its copied source
-includes the helper. `verify-router-hydration.mjs` holds scripts, requires a
+includes the helper. `verify-action-hydration.mjs` holds scripts, requires a
 disabled initial action, releases scripts and proves focus reaches the anchor.
 The original remote markup fails that check; the fixed static build passes it.
 The main deployment is not retroactively marked verified by this local fix.
+
+The first PR preview passed build checks, then exposed the same missing-handler
+interval in the Button counter after reload. The extended held-script regression
+reproduced its enabled SSR action against that preview. The counter and custom
+button/ref example now use the same guard, and both copied examples include the
+helper. The regression checks all four local activation/ref actions before and
+after scripts are released. Native links retain ordinary pre-hydration navigation.
 
 ## Publication order and remaining acceptance
 

@@ -156,7 +156,8 @@ export async function verifyActions(browser, baseURL) {
     await composition.getByRole('button', { name: 'Reset preview', exact: true }).click()
     await verifySources(page, composition, [
       'button/ButtonComposition.tsx',
-      'button/button-example.css'
+      'button/button-example.css',
+      'profile/useHydrated.ts'
     ])
     await composition.screenshot({
       path: 'output/docs/button-composition.png',
