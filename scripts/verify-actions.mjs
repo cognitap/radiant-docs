@@ -183,7 +183,11 @@ export async function verifyActions(browser, baseURL) {
       'previews are independent'
     )
     await verifySources(page, linkFrame, ['link/LinkExample.tsx', 'link/link-example.css'])
-    await verifySources(page, router, ['link/RouterLinkExample.tsx', 'link/link-example.css'])
+    await verifySources(page, router, [
+      'link/RouterLinkExample.tsx',
+      'link/link-example.css',
+      'profile/useHydrated.ts'
+    ])
     await linkFrame.getByRole('button', { name: 'Reset preview', exact: true }).click()
     assert.equal(await link.getAttribute('data-variant'), 'inline')
 
@@ -272,7 +276,10 @@ export async function verifyActions(browser, baseURL) {
       await staticPage.goto(`${baseURL}/docs/link/`)
       const staticFrame = staticPage.getByRole('region', { name: frame, exact: true })
       await staticFrame.locator('summary').click()
-      assert.equal(await staticFrame.locator('pre').count(), 2)
+      assert.equal(
+        await staticFrame.locator('pre').count(),
+        frame === 'Router link and ref' ? 3 : 2
+      )
       await staticFrame.getByRole('link', { name, exact: true }).click()
       await staticPage.waitForURL(`**/docs/${destination}/`)
     }

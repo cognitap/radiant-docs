@@ -17,7 +17,7 @@ export function RouterLinkDemo() {
   return (
     <Demo
       title="Router link and ref"
-      files={['link/RouterLinkExample.tsx', 'link/link-example.css']}
+      files={['link/RouterLinkExample.tsx', 'link/link-example.css', 'profile/useHydrated.ts']}
     >
       <RouterLinkPlayground />
     </Demo>

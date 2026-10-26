@@ -5,6 +5,7 @@ import NextLink from 'next/link'
 import { Button, Link, ThemeScope, radiant, type Theme, type ThemeMode } from '@cognitap/radiant'
 import '@cognitap/radiant/styles.css'
 import './link-example.css'
+import { useHydrated } from '../profile/useHydrated'
 
 const destination = '/docs/foundations/'
 
@@ -18,6 +19,7 @@ export function RouterLinkExample({
   mode?: ThemeMode
 }) {
   const anchorRef = useRef<HTMLAnchorElement>(null)
+  const ready = useHydrated()
   const [feedback, setFeedback] = useState('Focus the link, then use Enter to navigate.')
 
   return (
@@ -43,6 +45,7 @@ export function RouterLinkExample({
       </Link>
       <Button
         variant="ghost"
+        disabled={!ready}
         onClick={() => anchorRef.current?.focus()}
       >
         Focus router link

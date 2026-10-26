@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
-import { radiantPackage } from './radiant-package.mjs'
+import { workshopAvailable } from './radiant-package.mjs'
 import { handoffFixture } from './handoff-fixture.mjs'
 import { handoffAPI, jsonText } from '../examples/workshop/workshop-handoff.ts'
 
@@ -26,7 +26,7 @@ export async function verifyHandoff(browser, baseURL) {
     await page.waitForFunction(
       () => !document.querySelector('.theme-workshop .demo-controls button').disabled
     )
-    if (!radiantPackage.candidate) {
+    if (!workshopAvailable) {
       assert.equal(
         await handoff.getByRole('button', { name: 'Copy typed theme', exact: true }).isDisabled(),
         true

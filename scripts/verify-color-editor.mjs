@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict'
-import { radiantPackage } from './radiant-package.mjs'
+import { workshopAvailable } from './radiant-package.mjs'
 
 export async function verifyColorEditor(browser, baseURL) {
   const page = await browser.newPage({
@@ -19,7 +19,7 @@ export async function verifyColorEditor(browser, baseURL) {
     await page.waitForFunction(
       () => !document.querySelector('.theme-workshop .demo-controls button').disabled
     )
-    if (!radiantPackage.candidate) {
+    if (!workshopAvailable) {
       assert.equal(await brand.isDisabled(), true)
       assert.equal(await frame.locator('.color-swatch').count(), 0)
       console.log(

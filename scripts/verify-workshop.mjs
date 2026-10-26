@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
-import { radiantPackage } from './radiant-package.mjs'
+import { workshopAvailable } from './radiant-package.mjs'
 
 export async function verifyWorkshop(browser, baseURL) {
   const staticPage = await browser.newPage({ javaScriptEnabled: false })
@@ -34,9 +34,7 @@ export async function verifyWorkshop(browser, baseURL) {
       () => !document.querySelector('.theme-workshop .demo-controls button').disabled
     )
     const editable = (await shell.getAttribute('data-workshop-editing')) === 'enabled'
-    if (radiantPackage.candidate)
-      assert.equal(editable, true, 'packed candidate must exercise actual document editing')
-    else assert.equal(editable, false, 'published 0.0.3 stays explicitly read-only')
+    assert.equal(editable, workshopAvailable, 'editing follows installed package capabilities')
     const specimen = frame.getByRole('combobox', { name: 'Specimen', exact: true })
     const mode = frame.getByRole('combobox', { name: 'Preview mode', exact: true })
     const width = frame.getByRole('combobox', { name: 'Preview width', exact: true })
@@ -224,7 +222,7 @@ export async function verifyWorkshop(browser, baseURL) {
     await page.getByRole('heading', { name: 'Make room for the useful things.' }).waitFor()
     assert.deepEqual(errors, [], 'no workshop hydration/runtime/asset errors')
     console.log(
-      `Workshop passed: ${editable ? 'candidate document editing and section resets' : 'published read-only inspection'}, five isolated specimens, mode/viewport/state inspection, keyboard modal/table/reset, actual copied source, static/direct loads and 320px/390px layouts.`
+      `Workshop passed: ${editable ? 'installed document editing and section resets' : 'published read-only inspection'}, five isolated specimens, mode/viewport/state inspection, keyboard modal/table/reset, actual copied source, static/direct loads and 320px/390px layouts.`
     )
   } catch (error) {
     await page

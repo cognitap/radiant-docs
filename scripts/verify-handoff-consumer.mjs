@@ -1,7 +1,9 @@
 import assert from 'node:assert/strict'
 import { execFileSync } from 'node:child_process'
-import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
+import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
 import { fileURLToPath, pathToFileURL } from 'node:url'
+import { createRequire } from 'node:module'
+import * as Radiant from '@cognitap/radiant'
 import { handoffAPI } from '../examples/workshop/workshop-handoff.ts'
 import { handoffFixture } from './handoff-fixture.mjs'
 
@@ -9,20 +11,66 @@ import { handoffFixture } from './handoff-fixture.mjs'
 // the installed artifact. No library source or Storybook aliases participate.
 export async function verifyHandoffConsumer(browser) {
   if (!handoffAPI) return
+  await mkdir(new URL('../output/', import.meta.url), { recursive: true })
   const directory = await mkdtemp(new URL('../output/handoff-consumer-', import.meta.url))
   try {
-    const { document } = handoffFixture()
-    await writeFile(`${directory}/theme.ts`, handoffAPI.typedTheme(document))
+    const { document, recipes } = handoffFixture()
+    const full = handoffAPI.read(JSON.stringify(handoffAPI.configuration(document, recipes)))
+    const base = handoffAPI.configuration(
+      Radiant.themeDocumentFromDefinition({
+        id: 'partial-target',
+        name: 'Partial target',
+        tokens: {
+          typography: { family: '"Local Display", serif' },
+          motion: { releaseDuration: '237ms' },
+          control: { small: { fontSize: '1.321rem' } }
+        },
+        components: { button: { radius: '27px' }, input: { radius: '19px' } }
+      }),
+      {}
+    )
+    const partial = handoffAPI.read(
+      JSON.stringify(handoffAPI.sections(document, ['color', 'surface', 'control', 'spacing']))
+    )
+    const cases = [
+      { name: 'full', document: handoffAPI.apply(base, full, 'replace').document },
+      ...['merge', 'replace'].map(mode => ({
+        name: mode,
+        document: handoffAPI.apply(base, partial, mode).document
+      }))
+    ]
+    assert.equal(cases[1].document.id, 'partial-target')
+    assert.equal(cases[1].document.sections.control.values.small.fontSize, '1.321rem')
+    assert.equal(cases[2].document.sections.control.values.small?.fontSize, undefined)
+    for (const item of cases.slice(1)) {
+      assert.deepEqual(item.document.sections.typography, base.document.sections.typography)
+      assert.deepEqual(item.document.sections.components, base.document.sections.components)
+    }
+    for (const item of cases)
+      await writeFile(`${directory}/${item.name}.ts`, handoffAPI.typedTheme(item.document))
     await writeFile(
       `${directory}/consumer.tsx`,
       `import { renderToStaticMarkup } from 'react-dom/server'
-import { Button, Input, Card, CardContent, ThemeScope } from '@cognitap/radiant'
-import { theme } from './theme.js'
-const contents = <><Button>Installed action</Button><Input aria-label="Installed input"/><Card><CardContent>Installed surface</CardContent></Card></>
-export const markup = renderToStaticMarkup(<>{(['light', 'dark', 'system'] as const).map(mode => <div key={mode}>
-<ThemeScope theme={theme} mode={mode} data-proof={'typed-' + mode}>{contents}</ThemeScope>
-<div className="radiant-export" data-rad-mode={mode} data-proof={'css-' + mode}>{contents}</div>
-</div>)}</>)
+import { useId } from 'react'
+import { Button, Input, Card, CardContent, ThemeScope, defaultTheme, Link, Checkbox, Radio, RadioGroup, Field, Dialog, DialogContent, DialogTitle, Collapsible, CollapsibleTrigger, CollapsibleContent, Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@cognitap/radiant'
+${cases.map(item => `import { theme as ${item.name}Theme } from './${item.name}.js'`).join('\n')}
+function Contents() { const name = useId(); return <>
+<Button>Installed action</Button><Button controlSize="small">Small action</Button><Button disabled>Disabled action</Button><Button pending>Busy action</Button>
+<Input aria-label="Installed input"/><Field label="Invalid field" error="Invalid value"><Input aria-label="Invalid input" aria-invalid="true"/></Field>
+<Link href="#target">Installed link</Link><Checkbox defaultChecked label="Installed check"/>
+<RadioGroup label="Proof radio" name={name} defaultValue="one"><Radio value="one" label="Installed radio"/></RadioGroup>
+<Card><CardContent>Installed surface</CardContent></Card>
+<Dialog><DialogContent><DialogTitle>Installed dialog</DialogTitle></DialogContent></Dialog>
+<Collapsible defaultOpen><CollapsibleTrigger>Disclosure</CollapsibleTrigger><CollapsibleContent>Disclosure content</CollapsibleContent></Collapsible>
+<Accordion type="single" defaultValue="one"><AccordionItem value="one"><AccordionTrigger>Accordion</AccordionTrigger><AccordionContent>Accordion content</AccordionContent></AccordionItem></Accordion>
+<div data-inherited><Input aria-label="Inherited input"/></div>
+<ThemeScope theme={defaultTheme} mode="light" data-nested><Button>Nested reset</Button></ThemeScope>
+</> }
+export const markup = renderToStaticMarkup(<>{[${cases.map(item => `{name: '${item.name}', theme: ${item.name}Theme}`).join(',')}].map(item =>
+(['light', 'dark', 'system'] as const).map(mode => <div key={item.name + mode}>
+<ThemeScope theme={item.theme} mode={mode} data-proof={item.name + '-typed-' + mode}><Contents/></ThemeScope>
+<div className="radiant-export" data-case={item.name} data-rad-mode={mode} data-proof={item.name + '-css-' + mode}><Contents/></div>
+</div>))}</>)
 `
     )
     await writeFile(
@@ -37,7 +85,7 @@ export const markup = renderToStaticMarkup(<>{(['light', 'dark', 'system'] as co
           types: ['node', 'react', 'react-dom'],
           outDir: 'dist'
         },
-        files: ['theme.ts', 'consumer.tsx']
+        files: [...cases.map(item => `${item.name}.ts`), 'consumer.tsx']
       })
     )
     execFileSync(
@@ -57,62 +105,163 @@ export const markup = renderToStaticMarkup(<>{(['light', 'dark', 'system'] as co
         '-e',
         `const {markup} = await import(${JSON.stringify(consumerURL.href)}); process.stdout.write(markup)`
       ],
-      { encoding: 'utf8', timeout: 30000 }
+      { encoding: 'utf8', timeout: 30000, maxBuffer: 8 * 1024 * 1024 }
     )
-    const styles = await readFile(
+    const require = createRequire(import.meta.url)
+    const cliManifest = require('@tailwindcss/cli/package.json')
+    const cli = fileURLToPath(
+      new URL(
+        cliManifest.bin.tailwindcss,
+        pathToFileURL(require.resolve('@tailwindcss/cli/package.json'))
+      )
+    )
+    const compiled = await readFile(
       new URL(import.meta.resolve('@cognitap/radiant/styles.css')),
       'utf8'
     )
-    const page = await browser.newPage()
+    const reset = await readFile(
+      new URL(import.meta.resolve('@cognitap/radiant/reset.css')),
+      'utf8'
+    )
+    const routes = [
+      { name: 'compiled', styles: compiled },
+      { name: 'compiled-reset', styles: `${reset}\n${compiled}` }
+    ]
+    for (const withReset of [true, false]) {
+      const imports = withReset
+        ? "@import 'tailwindcss';"
+        : "@layer theme, base, components, utilities;\n@import 'tailwindcss/theme.css' layer(theme);\n@import 'tailwindcss/utilities.css' layer(utilities);"
+      await writeFile(
+        `${directory}/input.css`,
+        `${imports}\n@import '@cognitap/radiant/tailwind.css';`
+      )
+      execFileSync(
+        process.execPath,
+        [cli, '-i', `${directory}/input.css`, '-o', `${directory}/tailwind.css`, '--minify'],
+        { encoding: 'utf8', timeout: 60000 }
+      )
+      routes.push({
+        name: withReset ? 'tailwind' : 'tailwind-no-reset',
+        styles: await readFile(`${directory}/tailwind.css`, 'utf8')
+      })
+    }
+    const css = cases
+      .map(item =>
+        handoffAPI
+          .cssOutput(item.document)
+          .replaceAll('.radiant-export', `.radiant-export[data-case="${item.name}"]`)
+      )
+      .join('\n')
+    const parity = new Map()
+    const page = await browser.newPage({ reducedMotion: 'reduce' })
     try {
-      await page.setContent(`<style>${styles}\n${handoffAPI.cssOutput(document)}</style>${markup}`)
-      for (const preference of ['light', 'dark']) {
-        await page.emulateMedia({ colorScheme: preference })
-        await page.waitForFunction(() =>
-          document.getAnimations().every(animation => animation.playState !== 'running')
-        )
-        for (const mode of ['light', 'dark', 'system']) {
-          const actualMode = mode === 'system' ? preference : mode
-          const typed = page.locator(`[data-proof="typed-${mode}"]`)
-          const css = page.locator(`[data-proof="css-${mode}"]`)
-          const measure = region =>
-            region.evaluate(node => {
-              const button = node.querySelector('button'),
-                input = node.querySelector('input'),
-                card = node.querySelector('[data-slot~="card"]')
-              return {
-                background: getComputedStyle(node).backgroundColor,
-                font: getComputedStyle(node).fontFamily,
-                action: getComputedStyle(button).backgroundColor,
-                radius: getComputedStyle(button).borderRadius,
-                inputRadius: getComputedStyle(input).borderRadius,
-                motion: getComputedStyle(node)
-                  .getPropertyValue('--rad-motion-release-duration')
-                  .trim(),
-                cardShadow: getComputedStyle(card).boxShadow
-              }
-            })
-          const expected = await measure(typed)
-          assert.deepEqual(
-            await measure(css),
-            expected,
-            `${mode}/${preference}: copied CSS and typed exports render the same installed theme`
+      for (const route of routes) {
+        await page.setContent(`<style>${route.styles}\n${css}</style>${markup}`)
+        for (const preference of ['light', 'dark']) {
+          await page.emulateMedia({ colorScheme: preference })
+          await page.waitForFunction(() =>
+            document.getAnimations().every(a => a.playState !== 'running')
           )
-          assert.equal(expected.radius, '27px')
-          assert.equal(expected.inputRadius, '19px')
-          assert.equal(expected.motion, '237ms')
-          assert.ok(expected.font.includes('Local Display'))
-          if (actualMode === 'dark') assert.equal(expected.background, 'rgb(17, 34, 51)')
+          for (const item of cases)
+            for (const mode of ['light', 'dark', 'system']) {
+              const measure = async kind =>
+                page.locator(`[data-proof="${item.name}-${kind}-${mode}"]`).evaluate(node => {
+                  const properties = [
+                    'background-color',
+                    'color',
+                    'border-radius',
+                    'border-width',
+                    'border-color',
+                    'padding',
+                    'min-height',
+                    'height',
+                    'box-shadow',
+                    'font-family',
+                    'font-size',
+                    'gap',
+                    'outline-color',
+                    'outline-width'
+                  ]
+                  const styles = element =>
+                    Object.fromEntries(
+                      properties.map(key => [key, getComputedStyle(element).getPropertyValue(key)])
+                    )
+                  return {
+                    root: styles(node),
+                    samples: Object.fromEntries(
+                      [
+                        'button',
+                        'button:disabled',
+                        'button[aria-busy=true]',
+                        'button[data-control-size=small]',
+                        'input[aria-invalid]',
+                        'a',
+                        'input[type=checkbox]',
+                        'input[type=radio]',
+                        '[data-slot=card]',
+                        'details',
+                        '[data-slot=accordion]',
+                        '[data-inherited] input',
+                        '[data-nested] button'
+                      ].map(selector => [selector, styles(node.querySelector(selector))])
+                    ),
+                    motion: getComputedStyle(node)
+                      .getPropertyValue('--rad-motion-release-duration')
+                      .trim()
+                  }
+                })
+              const expected = await measure('typed')
+              assert.deepEqual(
+                await measure('css'),
+                expected,
+                `${route.name}/${item.name}/${mode}/${preference}: typed/CSS parity`
+              )
+              assert.equal(expected.samples.button['border-radius'], '27px')
+              assert.equal(expected.motion, '237ms')
+              assert.ok(expected.root['font-family'].includes('Local Display'))
+              if ((mode === 'system' ? preference : mode) === 'dark')
+                assert.equal(expected.root['background-color'], 'rgb(17, 34, 51)')
+              const key = `${route.name.includes('reset') ? 'no-reset' : 'reset'}-${item.name}-${mode}-${preference}`
+              // Match the same reset choice: compiled(no reset), compiled-reset;
+              // Tailwind includes Preflight unless explicitly omitted.
+              const parityKey = `${['compiled-reset', 'tailwind'].includes(route.name)}-${item.name}-${mode}-${preference}`
+              if (route.name.startsWith('compiled')) parity.set(parityKey, expected)
+              else
+                assert.deepEqual(
+                  expected,
+                  parity.get(parityKey),
+                  `${route.name}: installed style route parity (${key})`
+                )
+            }
+        }
+        for (const kind of ['typed', 'css']) {
+          const scope = page.locator(`[data-proof="full-${kind}-light"]`)
+          const action = scope.getByRole('button', { name: 'Installed action', exact: true })
+          await action.focus()
+          assert.equal(
+            await action.evaluate(n => parseFloat(getComputedStyle(n).outlineWidth) > 0),
+            true
+          )
+          const disabled = scope.getByRole('button', { name: 'Disabled action', exact: true })
+          assert.equal(await disabled.isDisabled(), true)
+          const before = await disabled.evaluate(n => getComputedStyle(n).backgroundColor)
+          await disabled.hover()
+          assert.equal(await disabled.evaluate(n => getComputedStyle(n).backgroundColor), before)
+          const dialog = scope.locator('dialog')
+          await dialog.evaluate(n => n.showModal())
+          assert.equal(await dialog.isVisible(), true)
+          assert.equal(await dialog.evaluate(n => getComputedStyle(n).borderRadius), '24px')
+          await dialog.evaluate(n => n.close())
         }
       }
     } finally {
       await page.close()
     }
     console.log(
-      'Handoff installed consumer passed: generated TypeScript compiles, public package SSR, copied CSS equals typed ThemeScope in light/dark/live system modes, component exceptions, fonts and motion.'
+      'Handoff installed consumer passed: actual exported TypeScript, complete/partial merge/replace, compiled CSS and Tailwind with/without reset, light/dark/live system, inherited/nested scopes, all ten families, focus/disabled/invalid/modal states, fonts, motion and exceptions.'
     )
   } catch (error) {
-    if (error.stdout) process.stderr.write(String(error.stdout))
+    if (error.stdout) process.stderr.write(String(error.stdout).slice(0, 8000))
     if (error.stderr) process.stderr.write(String(error.stderr))
     throw error
   } finally {

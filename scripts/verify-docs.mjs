@@ -12,6 +12,8 @@ import { verifyControls } from './verify-controls.mjs'
 import { verifyCompositions } from './verify-compositions.mjs'
 import { verifyHandoff } from './verify-handoff.mjs'
 import { verifyHandoffConsumer } from './verify-handoff-consumer.mjs'
+import { verifyBrandReference } from './verify-brand-reference.mjs'
+import { verifyRouterHydration } from './verify-router-hydration.mjs'
 import { verifyGeometryEditor } from './verify-geometry-editor.mjs'
 import { verifyColorEditor } from './verify-color-editor.mjs'
 import { verifyWorkshop } from './verify-workshop.mjs'
@@ -224,6 +226,7 @@ try {
   await verifyProfileRecipes(browser, baseURL)
   await verifyNavigation(browser, baseURL)
   await verifyActions(browser, baseURL)
+  await verifyRouterHydration(browser, baseURL)
   await verifyControls(browser, baseURL)
   await verifyCompositions(browser, baseURL)
   await verifyFoundations(browser, baseURL)
@@ -232,6 +235,7 @@ try {
   await verifyGeometryEditor(browser, baseURL)
   await verifyHandoff(browser, baseURL)
   await verifyHandoffConsumer(browser)
+  await verifyBrandReference(browser, baseURL)
   passed = true
 } finally {
   await writeFile(

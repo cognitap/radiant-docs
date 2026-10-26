@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict'
-import { radiantPackage } from './radiant-package.mjs'
+import { workshopAvailable } from './radiant-package.mjs'
 
 export async function verifyGeometryEditor(browser, baseURL) {
   const page = await browser.newPage({
@@ -35,7 +35,7 @@ export async function verifyGeometryEditor(browser, baseURL) {
     )
     await chooseEditor('Spacing & surfaces')
     assert.equal(await editor.getByRole('spinbutton').count(), 7)
-    if (!radiantPackage.candidate) {
+    if (!workshopAvailable) {
       assert.equal(await shell.getAttribute('data-workshop-geometry'), 'unavailable')
       assert.equal(await preset.isDisabled(), true)
       assert.equal(await number('Control density (×)').isDisabled(), true)
@@ -319,7 +319,7 @@ export async function verifyGeometryEditor(browser, baseURL) {
       await staticPage.close()
     }
     console.log(
-      `Geometry editor passed: ${radiantPackage.candidate ? 'production presets, precise controls, mode overrides/clear/reset, preserved sections and form state, three control sizes, focus/invalid/disabled/pending states, real light/dark overlays, compiled metrics and maximum-setting mobile layouts' : 'explicit published unavailability and read-only inspection'}; static output/hydration and 320px/390px widths.`
+      `Geometry editor passed: ${workshopAvailable ? 'production presets, precise controls, mode overrides/clear/reset, preserved sections and form state, three control sizes, focus/invalid/disabled/pending states, real light/dark overlays, compiled metrics and maximum-setting mobile layouts' : 'explicit published unavailability and read-only inspection'}; static output/hydration and 320px/390px widths.`
     )
   } catch (error) {
     await page
