@@ -38,19 +38,16 @@ export const radiantPackage = { version: installed.version, candidate }
 
 // Exercise the installed API on both registry releases and packed candidates.
 // Candidate labeling is provenance, not a switch that enables editing.
-export const workshopAvailable = [
-  'themeDocumentFromDefinition',
-  'parseThemeDocument',
-  'compileThemeDocument',
-  'updateThemeDocument',
-  'exportThemeSections',
-  'generateColorWall',
-  'recommendColorPalette',
-  'updateThemeAppearance'
-].every(name => typeof Reflect.get(Radiant, name) === 'function')
-if (candidate || installed.version !== '0.0.3')
-  assert.equal(
-    workshopAvailable,
-    true,
-    'Workshop releases/candidates must expose the complete public API.'
-  )
+export const workshopAvailable =
+  [
+    'themeDocumentFromDefinition',
+    'parseThemeDocument',
+    'compileThemeDocument',
+    'updateThemeDocument',
+    'exportThemeSections',
+    'generateColorWall',
+    'recommendColorPalette',
+    'updateThemeAppearance'
+  ].every(name => typeof Reflect.get(Radiant, name) === 'function') &&
+  Array.isArray(Reflect.get(Radiant, 'colorCalibrationPresets'))
+assert.equal(workshopAvailable, true, 'Docs require the complete released workshop API.')

@@ -3,6 +3,8 @@ import test from 'node:test'
 import {
   colorAPI,
   defaultColorRecipe,
+  colorPresets,
+  selectColorPreset,
   overrideRole,
   roleValue,
   workingRoles
@@ -99,5 +101,51 @@ test(
     }
     assert.notEqual(reset.modes.dark['--rad-surface-canvas'], '#112233')
     assert.equal(JSON.stringify(original), before)
+  }
+)
+
+test(
+  'preset selection resets only owned dials and preserves pins, independent treatment and global controls',
+  { skip: !colorAPI },
+  () => {
+    assert.deepEqual(
+      colorPresets.map(p => p.id),
+      ['classic', 'balanced', 'expressive']
+    )
+    const recipe = overrideRole(
+      {
+        input: {
+          brand: '#7F6A75',
+          wallPreset: 'classic',
+          rampPreset: 'expressive',
+          vividness: 0.3,
+          brandVividness: 0.7,
+          neutralTint: 0.03,
+          hueAlignment: 1,
+          distribution: 1.2,
+          lightness: 'shared'
+        },
+        working: { support: 'teal' }
+      },
+      'dark',
+      'accent',
+      '#ABCDEF'
+    )
+    const before = JSON.stringify(recipe)
+    const wall = selectColorPreset(recipe, 'wall', 'balanced')
+    assert.equal(wall.input.vividness, undefined)
+    assert.equal(wall.input.neutralTint, undefined)
+    assert.equal(wall.input.hueAlignment, undefined)
+    assert.equal(wall.input.brandVividness, 0.7)
+    assert.equal(wall.input.rampPreset, 'expressive')
+    assert.equal(wall.input.distribution, 1.2)
+    assert.equal(wall.input.lightness, 'shared')
+    const ramp = selectColorPreset(wall, 'ramp', 'classic')
+    assert.equal(ramp.input.wallPreset, 'balanced')
+    assert.equal(ramp.input.rampPreset, 'classic')
+    assert.equal(ramp.input.brandVividness, undefined)
+    assert.equal(roleValue(colorAPI.create(ramp), 'dark', 'accent'), '#ABCDEF')
+    assert.deepEqual(ramp.working, recipe.working)
+    assert.equal(JSON.stringify(recipe), before)
   }
 )

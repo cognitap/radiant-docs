@@ -25,9 +25,18 @@ Enter an opaque six-digit sRGB **Brand color**. The production OKLCH engine
 creates 18 families with 11 shades each. **Exact brand anchor** keeps your input
 unchanged at the identified brand stop, reshaping nearby shades. **Regular ramp**
 keeps the original as reference metadata instead. Semantic roles may choose
-related shades for contrast, so your action fill can differ from the original.
+the nearest brand shade with readable text and a visible boundary in each mode,
+so your action fill can differ from the original.
 
-Start with automatic vividness, then explore hue-aware versus shared lightness,
+Choose **Classic**, **Balanced** or **Expressive** independently for the **Wall
+preset** and **Brand ramp preset**. Balanced starts both. Classic preserves the
+original calibration; Balanced smooths the anchored ramp with restrained brand
+shades and coordinated families; Expressive supplies fuller colors. Choosing a
+preset resets only its own vividness/tint/alignment dials and keeps the other
+preset, shared tone controls and pinned semantic roles.
+
+Wall and brand vividness each start automatically from the source. Turn either
+automatic control off to adjust its own dial. Then explore hue-aware versus shared lightness,
 tone distribution, neutral tint and hue alignment. Neutral brands also expose a
 hue direction for supporting colors. All output is sRGB; this version does not
 accept alpha or Display P3 sources. Invalid hex keeps the last valid theme visible.
@@ -95,11 +104,12 @@ in the editor. Use the handoff panel below for whole-theme and selective exports
 **Copy typed theme** is the primary handoff: a typed `ThemeDocument` and the
 compiled Radiant `theme`, ready for `ThemeScope`. Import the package’s compiled
 styles once in your app entry and use a release that includes the document APIs.
-The optional reset is separate. The candidate header identifies the package used
-for this preview; the published 0.0.3 pin does not yet provide these APIs.
+The optional reset is separate. Radiant 0.0.4 provides these APIs; the site header identifies the installed
+package used by every specimen and export.
 
 **Download configuration** saves the complete authoring document, palette/font
-metadata and available color/geometry recipes as JSON. Import the file or paste
+metadata and available color/geometry recipes, including both named color
+presets and their dial overrides, as JSON. Import the file or paste
 its JSON to continue editing. Full themes/configurations replace the theme and
 identity; specimen interactions and preview controls stay unchanged. Plain theme
 documents have no generator recipes, so their imported Color and Geometry values
@@ -150,16 +160,14 @@ system's reduced-motion preference.
 
 ## Package availability
 
-The installed package is identified in the site header. The published 0.0.3 pin
-supports all specimen controls; shared document editing requires the upcoming
-public theme-document and color APIs. With that pin, editing controls remain disabled and
-the specimens use the neutral theme.
+The site consumes the exact published **Radiant 0.0.4** package from npm. The
+complete palette, spacing/surfaces and handoff editors use its public document,
+generation and appearance APIs. No library source, Storybook module or workspace
+alias is imported.
 
-For the complete editing preview, use the repository's documented
-`pnpm preview:candidate /absolute/path/radiant.tgz` workflow with a packed library
-candidate. The header explicitly labels it **Local candidate**. No library source,
-Storybook module or workspace alias is imported. A future published package pin
-with those exports enables the same editing path.
+The repository can also inspect a future packed library build with
+`pnpm preview:candidate /absolute/path/radiant.tgz`. Such previews display an
+explicit **Local candidate** label; they do not change the public dependency pin.
 
 ## Source and ownership
 

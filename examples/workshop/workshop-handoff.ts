@@ -1,21 +1,22 @@
-import * as Radiant from '@cognitap/radiant'
-import type { Theme } from '@cognitap/radiant'
+import {
+  parseThemeDocument as parse,
+  compileThemeDocument as compile,
+  updateThemeDocument as update,
+  exportThemeSections as select,
+  generateColorWall as generate,
+  recommendColorPalette as recommend,
+  updateThemeAppearance as appearance,
+  type ThemeDocument,
+  type ThemeSectionExport,
+  type ColorWallInput,
+  type ColorPaletteOptions
+} from '@cognitap/radiant'
+import { readThemeDocument } from './workshop-theme.ts'
 import type { ColorRecipe } from './workshop-color'
 import type { GeometryRecipe } from './workshop-geometry'
 
-// Consumption views only: the installed Radiant parser owns the document schema.
-export interface PortableDocument {
-  kind: 'radiant-theme'
-  version: 1
-  id: string
-  name: string
-  sections: Record<string, unknown>
-}
-export interface SectionFile {
-  kind: 'radiant-theme-sections'
-  version: 1
-  sections: Record<string, unknown>
-}
+export type PortableDocument = ThemeDocument
+export type SectionFile = ThemeSectionExport
 export interface Recipes {
   color?: ColorRecipe
   geometry?: GeometryRecipe
@@ -40,14 +41,6 @@ export const sectionNames = [
 ] as const
 export type SectionName = (typeof sectionNames)[number]
 export const maxConfigurationBytes = 262144
-const packageExports: object = Radiant
-const parse = Reflect.get(packageExports, 'parseThemeDocument')
-const compile = Reflect.get(packageExports, 'compileThemeDocument')
-const update = Reflect.get(packageExports, 'updateThemeDocument')
-const select = Reflect.get(packageExports, 'exportThemeSections')
-const generate = Reflect.get(packageExports, 'generateColorWall')
-const recommend = Reflect.get(packageExports, 'recommendColorPalette')
-const appearance = Reflect.get(packageExports, 'updateThemeAppearance')
 function record(value: unknown, label: string): asserts value is Record<string, unknown> {
   if (!value || typeof value !== 'object' || Array.isArray(value))
     throw new Error(`${label} must be an object.`)
@@ -72,27 +65,28 @@ function validateConfiguration(value: Record<string, unknown>): Configuration {
     throw new Error(
       'Unsupported workshop version. Expected 1; migrate the configuration before importing.'
     )
-  const document = parse(value.document) as PortableDocument
+  const document = parse(value.document)
   if (document.kind !== 'radiant-theme')
     throw new Error('A workshop configuration needs a full theme document.')
   const recipes = value.recipes ?? {}
   record(recipes, 'recipes')
   keys(recipes, ['color', 'geometry'], 'recipes')
   if (recipes.color !== undefined) {
-    if (![generate, recommend, appearance].every(fn => typeof fn === 'function'))
-      throw new Error('This package cannot restore color recipes.')
     record(recipes.color, 'recipes.color')
     keys(recipes.color, ['input', 'working', 'modes'], 'recipes.color')
-    const wall = generate(recipes.color.input)
-    const palette = recommend(wall, { working: recipes.color.working, modes: recipes.color.modes })
+    // These public functions validate unknown JSON at runtime; their released
+    // input types avoid duplicating the library's color/geometry schema here.
+    const wall = generate(recipes.color.input as ColorWallInput)
+    const palette = recommend(wall, {
+      working: recipes.color.working,
+      modes: recipes.color.modes
+    } as ColorPaletteOptions)
     if (JSON.stringify(appearance(document, { palette })) !== JSON.stringify(document))
       throw new Error(
         'Color recipe does not match the authored theme. Import the theme document alone to preserve its custom values.'
       )
   }
   if (recipes.geometry !== undefined) {
-    if (typeof appearance !== 'function')
-      throw new Error('This package cannot restore geometry recipes.')
     record(recipes.geometry, 'recipes.geometry')
     keys(recipes.geometry, ['values', 'modes'], 'recipes.geometry')
     record(recipes.geometry.values, 'recipes.geometry.values')
@@ -113,8 +107,9 @@ function validateConfiguration(value: Record<string, unknown>): Configuration {
         )
     }
     if (
-      JSON.stringify(appearance(document, { geometry: recipes.geometry })) !==
-      JSON.stringify(document)
+      JSON.stringify(
+        appearance(document, { geometry: recipes.geometry as unknown as GeometryRecipe })
+      ) !== JSON.stringify(document)
     )
       throw new Error(
         'Geometry recipe does not match the authored theme. Import the theme document alone to preserve its custom values.'
@@ -143,7 +138,7 @@ function read(text: string): ImportData {
   }
   record(value, 'configuration')
   if (value.kind === 'radiant-workshop') return validateConfiguration(value)
-  const parsed = parse(value) as PortableDocument | SectionFile
+  const parsed = parse(value)
   return parsed.kind === 'radiant-theme'
     ? { kind: 'radiant-workshop', version: 1, document: parsed, recipes: {} }
     : parsed
@@ -155,7 +150,7 @@ function apply(
 ): Configuration {
   if (imported.kind === 'radiant-workshop')
     return configuration(imported.document, imported.recipes)
-  const document = update(current.document, imported.sections, mode) as PortableDocument
+  const document = update(current.document, imported.sections, mode)
   const affected = Object.keys(imported.sections)
   const recipes = { ...current.recipes }
   if (affected.some(name => ['color', 'surface'].includes(name))) delete recipes.color
@@ -194,7 +189,7 @@ function safeCSS(value: string): boolean {
   return !quote && !escaped && stack.length === 0
 }
 function cssOutput(document: PortableDocument): string {
-  const theme = compile(document) as Theme
+  const theme = compile(document)
   const declarations = (mode: 'light' | 'dark') =>
     Object.entries(theme.modes[mode])
       .map(([key, value]) => {
@@ -209,14 +204,12 @@ function cssOutput(document: PortableDocument): string {
       .join('\n')
   return `/* Load @cognitap/radiant/styles.css first. Apply class="radiant-export"\n   and data-rad-mode="light", "dark" or "system" to a plain wrapper. */\n.radiant-export {\n${declarations('light')}\n  color-scheme: light;\n  background: var(--rad-surface-canvas);\n  color: var(--rad-color-foreground);\n  font-family: var(--rad-typography-family);\n  font-size: var(--rad-typography-body-size);\n  font-weight: var(--rad-typography-body-weight);\n  letter-spacing: var(--rad-typography-letter-spacing);\n}\n.radiant-export[data-rad-mode="dark"] {\n${declarations('dark')}\n  color-scheme: dark;\n}\n@media (prefers-color-scheme: dark) {\n  .radiant-export[data-rad-mode="system"] {\n${declarations('dark')}\n    color-scheme: dark;\n  }\n}\n`
 }
-export const handoffAPI = [parse, compile, update, select].every(fn => typeof fn === 'function')
-  ? {
-      configuration,
-      read,
-      apply,
-      typedTheme,
-      cssOutput,
-      sections: (document: object, names: SectionName[]): SectionFile =>
-        select(document, names) as SectionFile
-    }
-  : null
+export const handoffAPI = {
+  configuration,
+  read,
+  apply,
+  typedTheme,
+  cssOutput,
+  sections: (document: object, names: SectionName[]): SectionFile =>
+    select(readThemeDocument(document), names)
+}

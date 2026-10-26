@@ -3,9 +3,8 @@ import test from 'node:test'
 import { defaultTheme } from '@cognitap/radiant'
 import { documentAPI, initialDocument, resetEditor } from '../examples/workshop/workshop-theme.ts'
 
-test('an unavailable package never substitutes a local theme-document compiler', () => {
-  if (!documentAPI) assert.deepEqual(initialDocument(), {})
-  else assert.equal(documentAPI.compile(initialDocument()).id, 'workshop')
+test('the workshop compiles its initial document through the released library API', () => {
+  assert.equal(documentAPI.compile(initialDocument()).id, 'workshop')
 })
 
 test(

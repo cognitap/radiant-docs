@@ -5,7 +5,7 @@ with Next.js static export, Fumadocs Core + MDX and Radiant UI. This is one app
 with its own dependencies, lockfile and CI. A normal build requires no library
 checkout, workspace link or source alias.
 
-The site consumes **Radiant 0.0.3**, pinned from npm. That experimental release
+The site consumes **Radiant 0.0.4**, pinned from npm. That experimental release
 exports the harmonised ten-family component system and shared theme APIs. This
 site includes guides for all ten families, installation/foundations/release
 guidance and complete native/TanStack profile-form recipes. Setup, theming and
@@ -209,7 +209,7 @@ it is not imported by production code.
 
 ## Form control guides
 
-The Field, Input, Checkbox and RadioGroup pages document Radiant 0.0.3's native
+The Field, Input, Checkbox and RadioGroup pages document Radiant 0.0.4's native
 hosts, parts, props and consumer responsibilities. `examples/controls/` owns
 five focused examples: Field relationships with a native-input adapter, email
 validation/read-only behavior, checkbox payloads, controlled mixed selection,
@@ -236,7 +236,7 @@ recipe's setup and optional TanStack dependency instructions.
 
 Dialog, Collapsible, Accordion and Card use independently authored examples in
 `examples/compositions/`. The guides document named parts, public props, native
-hosts and style/ref targets against Radiant 0.0.3. `CompositionPlayground` keeps
+hosts and style/ref targets against Radiant 0.0.4. `CompositionPlayground` keeps
 website options outside copyable components; `components/CompositionDemo.tsx`
 lists their exact source and supporting files. Preserve the displayed directory
 paths when copying shared types, CSS and the existing hydration helper.
@@ -309,13 +309,12 @@ specimens. `examples/workshop/` owns the public examples, CSS and orchestration;
 `WorkshopDemo` reuses the existing source/copy/reset frame. Navigation and search
 include the page, and the homepage links to it.
 
-The current published 0.0.3 pin has no theme-document exports. Its normal build
-keeps the five specimens, mode/width/state inspection and source available while
-explicitly disabling document editing. `workshop-theme.ts` detects the public
-exports and treats document data as opaque; it does not duplicate the schema or
-provide a replacement compiler. The packed-candidate path enables shared editing
-against the actual library implementation, with the existing candidate header.
-The release proof and remaining publication order are recorded in
+The exact published 0.0.4 pin enables the complete color, geometry and handoff
+editors in ordinary builds. The adapters import released public functions and
+types; the library parser validates opaque document state and the library owns
+all color/geometry mapping. The old pre-release declaration/capability seam has
+been removed. The packed-candidate path remains available to inspect future
+library changes without changing the public pin. See
 [the chapter evidence](docs/verification/2026-10-26-workshop-chapter.md).
 
 Run both paths when changing workshop behavior:
@@ -328,8 +327,8 @@ pnpm preview:candidate /absolute/path/radiant-candidate.tgz --check
 The candidate check runs the document reset tests as well as typecheck, build and
 browser checks. Its screenshots are retained under ignored `output/candidate/`
 before the temporary installation is removed. Normal-build screenshots remain
-under `output/docs/`. Current baseline runs execute four transport/preset tests and explicitly skip
-12 tests requiring unavailable APIs; the candidate must run all 16. The browser
+under `output/docs/`. Both registry and matching candidate builds run all 17 workshop tests without
+API-availability skips. The browser
 gate also checks all 12 agreed brand references and actual exported themes in
 compiled-CSS and Tailwind consumers, with both reset choices. Editing assertions
 follow installed capabilities on registry releases and candidates alike.
@@ -341,5 +340,5 @@ Reset preview remounts the whole workshop while retaining source/toolbar focus.
 The form reuses the website-owned `NativeProfileForm` and its supporting files;
 no library Storybook code is imported. Color-wall, working-palette, spacing/surfaces and full/selective handoff editors
 share that same document. Typography and motion retain starter controls for later
-chapters. Public editor promotion waits for a registry release with these APIs,
-then a verified exact docs pin through the existing deployment workflow.
+chapters. Public editing uses the registry release through a verified exact docs pin and
+the existing deployment workflow.

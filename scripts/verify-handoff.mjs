@@ -90,6 +90,14 @@ export async function verifyHandoff(browser, baseURL) {
       await frame.getByRole('combobox', { name: 'Brand fidelity', exact: true }).inputValue(),
       'unanchored'
     )
+    assert.equal(
+      await frame.getByRole('combobox', { name: 'Wall preset', exact: true }).inputValue(),
+      'expressive'
+    )
+    assert.equal(
+      await frame.getByRole('combobox', { name: 'Brand ramp preset', exact: true }).inputValue(),
+      'classic'
+    )
     await frame.getByRole('button', { name: 'Spacing & surfaces', exact: true }).click()
     assert.equal(
       await frame.getByRole('combobox', { name: 'Starting preset', exact: true }).inputValue(),
@@ -117,6 +125,14 @@ export async function verifyHandoff(browser, baseURL) {
         document.querySelector('.theme-handoff textarea[readonly]')?.value.includes('handoff-proof')
       )
       assert.equal(await exported.inputValue(), text)
+      assert.equal(
+        await shared.getByRole('combobox', { name: 'Wall preset', exact: true }).inputValue(),
+        'expressive'
+      )
+      assert.equal(
+        await shared.getByRole('combobox', { name: 'Brand ramp preset', exact: true }).inputValue(),
+        'classic'
+      )
       await shared.reload()
       await shared.getByText('Reusable configuration JSON', { exact: true }).click()
       await shared.waitForFunction(() =>
