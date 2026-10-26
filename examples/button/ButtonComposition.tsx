@@ -4,6 +4,7 @@ import { useRef, useState } from 'react'
 import { Button, ThemeScope, radiant, type Theme, type ThemeMode } from '@cognitap/radiant'
 import '@cognitap/radiant/styles.css'
 import './button-example.css'
+import { useHydrated } from '../profile/useHydrated'
 
 export function ButtonComposition({
   pending = false,
@@ -15,6 +16,7 @@ export function ButtonComposition({
   mode?: ThemeMode
 }) {
   const actionRef = useRef<HTMLButtonElement>(null)
+  const ready = useHydrated()
   const [feedback, setFeedback] = useState('Focus the action with the arrow, then activate it.')
   const [reviews, setReviews] = useState(0)
 
@@ -26,6 +28,7 @@ export function ButtonComposition({
     >
       <Button
         ref={actionRef}
+        disabled={!ready}
         pending={pending}
         fullWidth
         onFocus={() => setFeedback('The ref reached the native button.')}
@@ -44,6 +47,7 @@ export function ButtonComposition({
       </Button>
       <Button
         iconOnly
+        disabled={!ready}
         variant="outline"
         aria-label="Focus action"
         title="Focus action"

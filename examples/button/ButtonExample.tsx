@@ -11,6 +11,7 @@ import {
 } from '@cognitap/radiant'
 import '@cognitap/radiant/styles.css'
 import './button-example.css'
+import { useHydrated } from '../profile/useHydrated'
 
 export function ButtonExample({
   disabled = false,
@@ -25,6 +26,7 @@ export function ButtonExample({
   mode?: ThemeMode
 }) {
   const [count, setCount] = useState(0)
+  const ready = useHydrated()
 
   return (
     <ThemeScope
@@ -33,7 +35,7 @@ export function ButtonExample({
       className="button-example"
     >
       <Button
-        disabled={disabled}
+        disabled={disabled || !ready}
         pending={pending}
         variant={variant}
         tone={tone}

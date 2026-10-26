@@ -12,6 +12,8 @@ import { verifyControls } from './verify-controls.mjs'
 import { verifyCompositions } from './verify-compositions.mjs'
 import { verifyHandoff } from './verify-handoff.mjs'
 import { verifyHandoffConsumer } from './verify-handoff-consumer.mjs'
+import { verifyBrandReference } from './verify-brand-reference.mjs'
+import { verifyActionHydration } from './verify-action-hydration.mjs'
 import { verifyGeometryEditor } from './verify-geometry-editor.mjs'
 import { verifyColorEditor } from './verify-color-editor.mjs'
 import { verifyWorkshop } from './verify-workshop.mjs'
@@ -72,7 +74,7 @@ try {
   assert.equal(await staticPage.getByRole('button', { name: 'Try Radiant' }).count(), 2)
   const staticDemo = staticPage.getByRole('region', { name: 'Interactive Button', exact: true })
   await staticDemo.locator('summary').press('Enter')
-  assert.equal(await staticDemo.locator('pre').count(), 2, 'source is available without JavaScript')
+  assert.equal(await staticDemo.locator('pre').count(), 3, 'source is available without JavaScript')
   assert.equal(await staticDemo.locator('pre').first().isVisible(), true)
   await staticPage.close()
 
@@ -119,7 +121,7 @@ try {
   await disclosure.press('Enter')
   assert.equal(await demo.locator('details').getAttribute('open'), '')
   await disclosure.press('Tab')
-  const files = ['button/ButtonExample.tsx', 'button/button-example.css']
+  const files = ['button/ButtonExample.tsx', 'button/button-example.css', 'profile/useHydrated.ts']
   for (const file of files) {
     const actual = await readFile(new URL(`../examples/${file}`, import.meta.url), 'utf8')
     const source = demo.getByLabel(`Source: ${file}`, { exact: true })
@@ -224,6 +226,7 @@ try {
   await verifyProfileRecipes(browser, baseURL)
   await verifyNavigation(browser, baseURL)
   await verifyActions(browser, baseURL)
+  await verifyActionHydration(browser, baseURL)
   await verifyControls(browser, baseURL)
   await verifyCompositions(browser, baseURL)
   await verifyFoundations(browser, baseURL)
@@ -232,6 +235,7 @@ try {
   await verifyGeometryEditor(browser, baseURL)
   await verifyHandoff(browser, baseURL)
   await verifyHandoffConsumer(browser)
+  await verifyBrandReference(browser, baseURL)
   passed = true
 } finally {
   await writeFile(

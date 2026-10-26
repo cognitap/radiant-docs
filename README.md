@@ -315,7 +315,8 @@ explicitly disabling document editing. `workshop-theme.ts` detects the public
 exports and treats document data as opaque; it does not duplicate the schema or
 provide a replacement compiler. The packed-candidate path enables shared editing
 against the actual library implementation, with the existing candidate header.
-No dependency pin or lockfile is changed by this feature.
+The release proof and remaining publication order are recorded in
+[the chapter evidence](docs/verification/2026-10-26-workshop-chapter.md).
 
 Run both paths when changing workshop behavior:
 
@@ -327,13 +328,18 @@ pnpm preview:candidate /absolute/path/radiant-candidate.tgz --check
 The candidate check runs the document reset tests as well as typecheck, build and
 browser checks. Its screenshots are retained under ignored `output/candidate/`
 before the temporary installation is removed. Normal-build screenshots remain
-under `output/docs/`. Current baseline-only runs explicitly skip the two tests
-that require unavailable document exports; the candidate must run all three.
+under `output/docs/`. Current baseline runs execute four transport/preset tests and explicitly skip
+12 tests requiring unavailable APIs; the candidate must run all 16. The browser
+gate also checks all 12 agreed brand references and actual exported themes in
+compiled-CSS and Tailwind consumers, with both reset choices. Editing assertions
+follow installed capabilities on registry releases and candidates alike.
 
 Theme edits and section resets retain specimen interactions. Inspection controls
 never enter the document. Color owns canvas colors; geometry reset preserves the
 per-mode canvas. Reset specimen remounts only the active example; the demo frame's
 Reset preview remounts the whole workshop while retaining source/toolbar focus.
 The form reuses the website-owned `NativeProfileForm` and its supporting files;
-no library Storybook code is imported. Complete editor and handoff features remain
-separate work after this shared shell.
+no library Storybook code is imported. Color-wall, working-palette, spacing/surfaces and full/selective handoff editors
+share that same document. Typography and motion retain starter controls for later
+chapters. Public editor promotion waits for a registry release with these APIs,
+then a verified exact docs pin through the existing deployment workflow.
