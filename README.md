@@ -337,8 +337,7 @@ editors in ordinary builds. The adapters import released public functions and
 types; the library parser validates opaque document state and the library owns
 all color/geometry mapping. The old pre-release declaration/capability seam has
 been removed. The packed-candidate path remains available to inspect future
-library changes without changing the public pin. See
-[the chapter evidence](docs/verification/2026-10-26-workshop-chapter.md).
+library changes without changing the public pin.
 
 Run both paths when changing workshop behavior:
 
