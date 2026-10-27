@@ -107,6 +107,14 @@ export async function verifyMotionEditor(browser, baseURL) {
     const handle = primary().getByRole('button', { name: 'Drag', exact: true })
     const offFrame = bench.getByRole('region', { name: 'Motion off motion example', exact: true })
     const offHandle = offFrame.getByRole('button', { name: 'Drag', exact: true })
+    await page.waitForFunction(() =>
+      [...document.querySelectorAll('.motion-frame')].every(frame => {
+        const track = frame.querySelector('.motion-drag-track')
+        const handle = frame.querySelector('.motion-drag-handle')
+        const slider = frame.querySelector('input[type="range"]')
+        return Number(slider.max) === Math.max(1, track.clientWidth - handle.offsetWidth)
+      })
+    )
     const end = Number(
       await offFrame
         .getByRole('slider', { name: 'Manual destination', exact: true })
