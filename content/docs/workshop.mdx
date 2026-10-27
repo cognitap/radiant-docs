@@ -99,6 +99,89 @@ so full-theme and selective round trips use the public document APIs. A selectiv
 surface section includes its canvas color, even though Color owns that decision
 in the editor. Use the handoff panel below for whole-theme and selective exports.
 
+## Try fonts
+
+Open **Typography** to try Inter, Source Serif 4, IBM Plex Sans or IBM Plex Mono.
+The site hosts pinned normal and true italic files and their complete open font
+licenses. Only selected families load; a visible status distinguishes loading,
+loaded and failed files. The sample uses the named fallback until loading succeeds.
+Changing the trial does not change your theme: choose **Use family in theme** to
+apply its family and selected weight. Existing theme sections and component
+exceptions remain. The Body family/size controls still edit the shared theme.
+
+Choose Body, Headings, UI or Code as the trial context. Studied combinations show
+their accepted starting metrics; unfamiliar fonts and unsupported contexts use
+neutral manual settings. Manual sample metrics survive family/context switching.
+**Reset context sample** restores only that context's automatic metrics. Sample
+copy stays editable. These are starting points, not readability scores.
+
+The weight field retains your requested weight when switching fonts. An unavailable
+weight is flagged and cannot be applied to the theme. Italic requires a real
+italic file. Inter and Source Serif expose automatic/manual optical size; Plex
+Sans exposes its real width axis at 100% by default. Other controls appear only
+for verified axes. Sample spacing and axis exploration stay local to the trial;
+the family/selected weight and face requirements travel through theme handoff.
+
+**Try a local font file** accepts WOFF2, WOFF, TTF or OTF up to 10 MiB. Set a unique
+CSS family name before choosing the file. TTF/OTF metadata supplies available
+weight/style/axes where present. For compressed web fonts this trial does not
+decode metadata: declare the actual file weight/style and tune manually, with no
+inferred axes. A normal-only file has no italic option; an italic-only file can
+be inspected but cannot become the shared theme family. Collections are unsupported.
+
+Local files stay in memory. They are never uploaded, saved to browser storage,
+embedded in configuration or included in share links. Remove the file or reset
+Typography to release it; resetting the preview/reloading also discards it.
+A theme can retain a local family requirement after removal, but uses fallback
+until that file is provided again. Recipients must supply their own licensed
+copy. The handoff setup identifies the required family, selected weights/styles
+and missing local file; a family name alone never establishes availability.
+
+The diagnostic line includes Hungarian, Greek, Cyrillic, Arabic and CJK samples.
+Some glyphs intentionally fall back: the curated files are not universal script
+fonts. A successful load does not certify every glyph, shaping or language.
+Inspect the copy you actually need in narrow and wide layouts.
+
+### Load fonts in your app
+
+Radiant never loads fonts. Self-host the required files or use your app's font
+loader. Preserve upstream licenses and choose a release/package setup matching
+your exported document. For example, with the unmodified Inter variable files:
+
+```css
+@font-face {
+  font-family: 'Inter';
+  src: url('/fonts/Inter.woff2') format('woff2');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Inter';
+  src: url('/fonts/Inter-Italic.woff2') format('woff2');
+  font-weight: 100 900;
+  font-style: italic;
+  font-display: swap;
+}
+.your-text {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-synthesis: none;
+  font-optical-sizing: auto;
+}
+```
+
+Use the actual file's supported descriptors. Plex Sans additionally needs
+`font-stretch: 85% 100%` on each face to expose width matching. Keep width at 100%
+unless you deliberately choose another supported design. Optical sizing has an
+effect only when the file contains that axis. For a local trial's chosen CSS name,
+use that exact family in your app's `@font-face`; substitute your own file URL.
+
+The workshop uses the [CSS Font Loading interface](https://www.w3.org/TR/css-font-loading/)
+to await specific faces, and reads TTF/OTF axes from their
+[OpenType variation table](https://learn.microsoft.com/en-us/typography/opentype/spec/fvar).
+Public URLs, exact checksums and license links are in the
+[asset manifest](/fonts/workshop/manifest.json).
+
 ## Take your theme
 
 **Copy typed theme** is the primary handoff: a typed `ThemeDocument` and the

@@ -8,6 +8,10 @@ export function WorkshopDemo() {
       files={[
         'workshop/ThemeWorkshop.tsx',
         'workshop/workshop-theme.ts',
+        'workshop/FontEditor.tsx',
+        'workshop/workshop-fonts.ts',
+        'workshop/font-runtime.ts',
+        'workshop/font-editor.css',
         'workshop/workshop-color.ts',
         'workshop/ColorEditor.tsx',
         'workshop/color-editor.css',

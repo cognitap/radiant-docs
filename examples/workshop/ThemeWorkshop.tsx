@@ -27,6 +27,7 @@ import { handoffAPI, errorMessage, type ImportData } from './workshop-handoff'
 import { GeometryEditor } from './GeometryEditor'
 import { geometryAPI, geometryPreset, type GeometryRecipe } from './workshop-geometry'
 import { ColorEditor } from './ColorEditor'
+import { FontEditor } from './FontEditor'
 import { colorAPI, defaultColorRecipe, type ColorRecipe, type ColorSession } from './workshop-color'
 import './workshop.css'
 
@@ -90,6 +91,7 @@ export function ThemeWorkshop() {
   const { document, color, geometry } = workshop
   const [colorRevision, setColorRevision] = useState(0)
   const [geometryRevision, setGeometryRevision] = useState(0)
+  const [fontRevision, setFontRevision] = useState(0)
   const [editor, setEditor] = useState<Editor>('color')
   const [specimen, setSpecimen] = useState<Specimen>('article')
   const [mode, setMode] = useState<ThemeMode>('light')
@@ -234,11 +236,13 @@ export function ThemeWorkshop() {
               } else if (editor === 'geometry' && geometryAPI) {
                 updateGeometry(geometryPreset())
                 setGeometryRevision(n => n + 1)
-              } else
+              } else {
+                if (editor === 'typography') setFontRevision(value => value + 1)
                 setWorkshop(previous => ({
                   ...previous,
                   document: resetEditor(previous.document, editor)
                 }))
+              }
               setFeedback(`${current.label} reset. Other sections and specimen state retained.`)
             }}
           >
@@ -293,6 +297,17 @@ export function ThemeWorkshop() {
               />
             </>
           )}
+          <div
+            hidden={editor !== 'typography'}
+            className="workshop-font-panel"
+          >
+            <FontEditor
+              key={fontRevision}
+              active={editor === 'typography'}
+              document={document}
+              onChange={next => setWorkshop(previous => ({ ...previous, document: next }))}
+            />
+          </div>
           <div
             hidden={editor !== 'geometry'}
             className="workshop-geometry-panel"

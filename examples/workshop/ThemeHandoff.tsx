@@ -400,6 +400,8 @@ export function ThemeHandoff({
               <li key={font.id}>
                 {font.family} · {font.source} · weights {font.weights?.join(', ') || 'unspecified'}{' '}
                 · styles {font.styles?.join(', ') || 'unspecified'}
+                {font.source === 'local' &&
+                  ' · File not included: recipients must supply this font; until then their browser uses fallback.'}
               </li>
             ))}
           </ul>
