@@ -109,6 +109,15 @@ export async function verifyTypesettingEditor(browser, baseURL) {
       'solid',
       'automatic semantic prose is highlighted too'
     )
+    await proofs.getByRole('combobox', { name: 'Proof composition' }).selectOption('landing')
+    await proof
+      .getByRole('button', { name: 'Join the list', exact: true })
+      .click({ position: { x: 3, y: 3 } })
+    assert.equal(
+      await proof.getByRole('status').filter({ hasText: 'No signup is sent.' }).count(),
+      1,
+      'inspection pauses actions even when clicking button padding'
+    )
     await proofs.getByRole('checkbox', { name: /Inspect text styles/ }).uncheck()
     await proofs.getByRole('combobox', { name: 'Proof composition' }).selectOption('form')
     await proof

@@ -280,6 +280,8 @@ export function TypographyProofs({
       <div
         onClickCapture={event => {
           if (!inspecting || !onSelectRole || !(event.target instanceof Element)) return
+          event.preventDefault()
+          event.stopPropagation()
           const explicit = event.target.closest<HTMLElement>('[data-rad-text]')
           const block = event.target.closest('p,ul,ol,blockquote,pre,h1,h2,h3,h4,h5,h6')
           const automatic = block?.parentElement?.hasAttribute('data-rad-prose')
@@ -301,8 +303,6 @@ export function TypographyProofs({
             : undefined
           const role = explicit?.dataset.radText ?? automatic
           if (role) {
-            event.preventDefault()
-            event.stopPropagation()
             onSelectRole(role)
           }
         }}
