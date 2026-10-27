@@ -8,7 +8,6 @@
   },
   "banned": ["docs/verification/**", "docs/research/**", "docs/*-audit-*.md"],
   "legacy": {
-    "README.md": 2802,
     "content/docs/accordion.mdx": 444,
     "content/docs/button.mdx": 465,
     "content/docs/card.mdx": 456,
@@ -20,7 +19,6 @@
     "content/docs/getting-started.mdx": 450,
     "content/docs/input.mdx": 404,
     "content/docs/link.mdx": 437,
-    "content/docs/radio-group.mdx": 489,
-    "docs/deployment.md": 1212
+    "content/docs/radio-group.mdx": 489
   }
 }
