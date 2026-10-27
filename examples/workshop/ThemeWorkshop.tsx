@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useId, useMemo, useState } from 'react'
+import { useCallback, useId, useMemo, useRef, useState } from 'react'
 import { Button, ThemeScope, defaultTheme, type ThemeMode } from '@cognitap/radiant'
 import { DemoControls, DemoPreview } from '@/components/demo/DemoFrame'
 import { useHydrated } from '../profile/useHydrated'
@@ -117,6 +117,7 @@ export function ThemeWorkshop() {
   const [feedback, setFeedback] = useState('')
   const ready = useHydrated()
   const panelId = useId()
+  const workshopHost = useRef<HTMLDivElement>(null)
   const theme = useMemo(
     () => (documentAPI ? documentAPI.compile(document) : defaultTheme),
     [document]
@@ -206,6 +207,7 @@ export function ThemeWorkshop() {
   }
   return (
     <div
+      ref={workshopHost}
       className="theme-workshop"
       data-workshop-geometry={
         documentAPI && geometryAPI ? (geometry ? 'enabled' : 'imported') : 'unavailable'
@@ -398,8 +400,8 @@ export function ThemeWorkshop() {
           selectedRole={selectedRole}
           onSelectRole={role => {
             setSelectedRole(role)
-            globalThis.document
-              .querySelector<HTMLSelectElement>('.typesetting-inspector select')
+            workshopHost.current
+              ?.querySelector<HTMLSelectElement>('.typesetting-inspector select')
               ?.focus()
           }}
         />

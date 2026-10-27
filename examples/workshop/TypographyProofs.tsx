@@ -2,7 +2,7 @@
 
 /* oxlint-disable jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events -- Optional delegated text picking has an equivalent keyboard-operable text-style selector. */
 
-import { useEffect, useRef, useState, type CSSProperties } from 'react'
+import { useEffect, useId, useRef, useState, type CSSProperties } from 'react'
 import { Button, ThemeScope, type Theme, type ThemeMode } from '@cognitap/radiant'
 import { ProofPage, initialProofInteraction, type ProofInteraction } from './ProofPages'
 import {
@@ -111,6 +111,7 @@ export function TypographyProofs({
   selectedRole?: string
   onSelectRole?: (role: string) => void
 }) {
+  const inspectorId = useId()
   const [proof, setProof] = useState<Proof>('article')
   const [width, setWidth] = useState('800')
   const [edits, setEdits] = useState<CopyEdits>({})
@@ -152,6 +153,7 @@ export function TypographyProofs({
     <section
       className="typography-proofs"
       aria-label="Typography proof sheets"
+      data-proof-inspector={inspectorId}
       data-proof-roles={roleSupport ? 'supported' : 'unavailable'}
     >
       <div className="proof-heading">
@@ -266,7 +268,7 @@ export function TypographyProofs({
         </p>
       )}
       {inspecting && (
-        <style>{`.proof-frames [data-rad-text="${/^[a-z-]+$/.test(selectedRole) ? selectedRole : 'prose-body'}"] { outline: 2px solid var(--rad-color-focus); outline-offset: 3px; }`}</style>
+        <style>{`[data-proof-inspector=${JSON.stringify(inspectorId)}] .proof-frames [data-rad-text="${/^[a-z-]+$/.test(selectedRole) ? selectedRole : 'prose-body'}"] { outline: 2px solid var(--rad-color-focus); outline-offset: 3px; }`}</style>
       )}
       <div
         onClickCapture={event => {
