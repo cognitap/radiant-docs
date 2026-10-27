@@ -204,3 +204,7 @@
   gap: var(--rad-spacing-group-gap);
   min-width: 0;
 }
+
+.workshop-proofs-panel[hidden] {
+  display: none !important;
+}

@@ -99,6 +99,39 @@ so full-theme and selective round trips use the public document APIs. A selectiv
 surface section includes its canvas color, even though Color owns that decision
 in the editor. Use the handoff panel below for whole-theme and selective exports.
 
+## Edit typography proofs
+
+Open **Typography** for composed **Article**, **Form**, **Data** and **Landing**
+proofs. Prose and UI are text contexts; Body, Headings, UI and Code are font
+assignments. The proofs mix these contexts rather than treating them as separate
+font scales. Font/role/rhythm controls are the next editor step.
+
+**Edit … copy** exposes the current composition’s headings, paragraphs, labels,
+links, lists and supporting copy. Changes are plain text and appear at every
+width. Untouched passages retain their inline emphasis and code. Form values,
+checkboxes, saved feedback, table filters and landing actions also share one
+owner across frames. They stay in memory when switching editors, compositions,
+widths or modes. They are not theme settings and do not enter exports or links.
+
+Choose 800, 640, 390 or 320 CSS pixels, or compare **800 + 390px**. Each frame
+keeps its real CSS width and reports its display scale when fitted into the
+available space. Evaluate reading comfort at 100% display size. Fluid headings
+respond to the frame’s local content width. Tables and code scroll inside named,
+keyboard-focusable regions; the rest of the composition reflows. The optional
+**Text spacing probe** changes only the preview, not exported typography.
+
+**Reset current proof** restores only that composition’s copy and interactions.
+Typography’s section reset retains proof copy and values, the other theme
+sections and inspection controls. The whole frame’s **Reset preview** restores
+everything. Preview mode uses the shared specimen mode below the proofs.
+
+The published 0.0.4 package does not include the DEV-163 text roles. Its proofs
+remain semantic and editable with an explicit availability notice. Verify the
+new role styling with a matching packed candidate; publication and the exact
+public pin belong to DEV-169. Product controls remain real Radiant components;
+their role adoption follows in DEV-167. The site supplies layouts and content,
+and consumes the package’s semantic text hooks without a second scale/compiler.
+
 ## Try fonts
 
 Open **Typography** to try Inter, Source Serif 4, IBM Plex Sans or IBM Plex Mono.
