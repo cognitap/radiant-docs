@@ -16,6 +16,7 @@ import { verifyBrandReference } from './verify-brand-reference.mjs'
 import { verifyActionHydration } from './verify-action-hydration.mjs'
 import { verifyGeometryEditor } from './verify-geometry-editor.mjs'
 import { verifyColorEditor } from './verify-color-editor.mjs'
+import { verifyMotionEditor } from './verify-motion-editor.mjs'
 import { verifyWorkshop } from './verify-workshop.mjs'
 import { verifyTypographyChapter } from './verify-typography-chapter.mjs'
 import { verifyTypesettingEditor } from './verify-typesetting-editor.mjs'
@@ -235,6 +236,7 @@ try {
   await verifyCompositions(browser, baseURL)
   await verifyFoundations(browser, baseURL)
   await verifyWorkshop(browser, baseURL)
+  await verifyMotionEditor(browser, baseURL)
   await verifyFontEditor(browser, baseURL)
   await verifyTypographyProofs(browser, baseURL)
   await verifyTypesettingEditor(browser, baseURL)

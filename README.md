@@ -5,7 +5,7 @@ with Next.js static export, Fumadocs Core + MDX and Radiant UI. This is one app
 with its own dependencies, lockfile and CI. A normal build requires no library
 checkout, workspace link or source alias.
 
-The site consumes **Radiant 0.0.5**, pinned from npm. That experimental release
+The site consumes **Radiant 0.0.6**, pinned from npm. That experimental release
 exports the harmonised ten-family component system and shared theme APIs. This
 site includes guides for all ten families, installation/foundations/release
 guidance and complete native/TanStack profile-form recipes. Setup, theming and
@@ -93,7 +93,7 @@ previews and merges to `main` publish the tested export to production.
 ## Workshop font trials
 
 Typography includes a website-owned font registry/trial panel alongside the
-complete typesetting editor. It consumes published Radiant 0.0.5's document and
+complete typesetting editor. It consumes published Radiant 0.0.6's document and
 typography APIs. `examples/workshop/workshop-fonts.ts`
 owns contextual recommendation metadata, local OpenType metadata and requirement
 handoff. `font-runtime.ts` owns browser faces and their cleanup; `FontEditor.tsx`
@@ -232,7 +232,7 @@ it is not imported by production code.
 
 ## Form control guides
 
-The Field, Input, Checkbox and RadioGroup pages document Radiant 0.0.5's native
+The Field, Input, Checkbox and RadioGroup pages document Radiant 0.0.6's native
 hosts, parts, props and consumer responsibilities. `examples/controls/` owns
 five focused examples: Field relationships with a native-input adapter, email
 validation/read-only behavior, checkbox payloads, controlled mixed selection,
@@ -259,7 +259,7 @@ recipe's setup and optional TanStack dependency instructions.
 
 Dialog, Collapsible, Accordion and Card use independently authored examples in
 `examples/compositions/`. The guides document named parts, public props, native
-hosts and style/ref targets against Radiant 0.0.5. `CompositionPlayground` keeps
+hosts and style/ref targets against Radiant 0.0.6. `CompositionPlayground` keeps
 website options outside copyable components; `components/CompositionDemo.tsx`
 lists their exact source and supporting files. Preserve the displayed directory
 paths when copying shared types, CSS and the existing hydration helper.
@@ -332,7 +332,7 @@ specimens. `examples/workshop/` owns the public examples, CSS and orchestration;
 `WorkshopDemo` reuses the existing source/copy/reset frame. Navigation and search
 include the page, and the homepage links to it.
 
-The exact published 0.0.5 pin enables the complete color, geometry, typesetting and handoff
+The exact published 0.0.6 pin enables the complete color, geometry, typesetting and handoff
 editors in ordinary builds. The adapters import released public functions and
 types; the library parser validates opaque document state and the library owns
 all color/geometry mapping. The old pre-release declaration/capability seam has
@@ -350,8 +350,7 @@ pnpm preview:candidate /absolute/path/radiant-candidate.tgz --check
 The candidate check runs the document reset tests as well as typecheck, build and
 browser checks. Its screenshots are retained under ignored `output/candidate/`
 before the temporary installation is removed. Normal-build screenshots remain
-under `output/docs/`. Both registry and matching candidate builds run all 31 workshop tests without
-API-availability skips. The browser
+under `output/docs/`. Both paths exercise the installed package. The browser
 gate also checks all 12 agreed brand references and actual exported themes in
 compiled-CSS and Tailwind consumers, with both reset choices. Editing assertions
 follow installed capabilities on registry releases and candidates alike.
@@ -362,8 +361,7 @@ per-mode canvas. Reset specimen remounts only the active example; the demo frame
 Reset preview remounts the whole workshop while retaining source/toolbar focus.
 The form reuses the website-owned `NativeProfileForm` and its supporting files;
 no library Storybook code is imported. Color-wall, working-palette, spacing/surfaces and full/selective handoff editors
-share that same document. Typography owns independent font assignments, prose/UI
-rhythm and 16 styles. Motion retains starter controls for the next chapter. Public editing uses the registry release through a verified exact docs pin and
+share that same document. Typography owns font assignments, prose/UI rhythm and 16 styles. Motion adds physical profiles and interruptible native, drag, following and layout proofs. Public editing uses the registry release through a verified exact docs pin and
 the existing deployment workflow.
 
 ### Typography proof sheets
@@ -375,7 +373,7 @@ The Typography panel owns four editable compositions in
 Radiant’s public `data-rad-text`, `data-rad-prose` and local-container hooks; the
 website stylesheet owns composition/layout only. `verify-typography-proofs.mjs`
 checks the installed production roles and local-container styling. The chapter
-uses exact npm 0.0.5; a matching packed candidate remains available for future changes.
+uses exact npm 0.0.6; a matching packed candidate remains available for future changes.
 
 The typography chapter includes `TypographyEditor.tsx` and the small
 `workshop-typography.ts` adapter. It consumes the public generator and validates

@@ -1,364 +1,111 @@
 ---
 title: Theme workshop
-description: One theme, four editing areas and five live specimens.
+description: Build a color system, typeset pages and tune physical motion in one theme.
 ---
 
 import { WorkshopDemo } from '@/components/WorkshopDemo'
 
 <WorkshopDemo />
 
-## A shared workspace
+## One theme, four editors
 
-Color, Typography, Spacing & surfaces and Motion edit one theme document. Color builds a complete palette, and Spacing & surfaces shapes the shared geometry.
-Typography provides independent font assignments, text styles and prose/UI rhythm; Motion has starting controls for the next chapter. No edits are sent to a server.
+Color, Typography, Spacing & surfaces and Motion edit the same Radiant theme
+document. Try changes in the article, form, dashboard, landing page and component
+specimens. Preview mode, width and example data belong to inspection; they never
+become theme settings. Editing stays in your browser.
 
-**Reset color**, **Reset typography**, **Reset spacing & surfaces** and **Reset
-motion** restore that section's baseline (Color returns to the default purple brand,
-recommended families and automatic roles) while retaining the other sections and
-specimen interactions. Spacing & surfaces returns to Balanced, including the dark
-backdrop override. Color owns the canvas color; resetting geometry preserves
-it. Component exceptions remain intact.
+Each section reset restores its own defaults and retains the other sections and
+specimen data. Color owns canvas colors, so resetting geometry preserves them.
+Reset specimen restores one specimen. Reset preview restores the entire workspace.
 
-## Build your color system
+## Color
 
-Enter an opaque six-digit sRGB **Brand color**. The production OKLCH engine
-creates 18 families with 11 shades each. **Exact brand anchor** keeps your input
-unchanged at the identified brand stop, reshaping nearby shades. **Regular ramp**
-keeps the original as reference metadata instead. Semantic roles may choose
-the nearest brand shade with readable text and a visible boundary in each mode,
-so your action fill can differ from the original.
+Start with an opaque six-digit sRGB brand color. Radiant generates a complete
+wall of 18 families and 11 shades. The exact-anchor treatment keeps your brand
+unchanged at its identified stop and reshapes nearby swatches. A regular ramp
+keeps the original as reference metadata.
 
-Choose **Classic**, **Balanced** or **Expressive** independently for the **Wall
-preset** and **Brand ramp preset**. Balanced starts both. Classic preserves the
-original calibration; Balanced smooths the anchored ramp with restrained brand
-shades and coordinated families; Expressive supplies fuller colors. Choosing a
-preset resets only its own vividness/tint/alignment dials and keeps the other
-preset, shared tone controls and pinned semantic roles.
+Wall and brand-ramp presets are independent: Classic, Balanced or Expressive.
+Balanced starts both. Vividness, hue alignment, neutral tint and tone controls
+refine the result. The working palette recommends six families for everyday use;
+you can choose others from the wall.
 
-Wall and brand vividness each start automatically from the source. Turn either
-automatic control off to adjust its own dial. Then explore hue-aware versus shared lightness,
-tone distribution, neutral tint and hue alignment. Neutral brands also expose a
-hue direction for supporting colors. All output is sRGB; this version does not
-accept alpha or Display P3 sources. Invalid hex keeps the last valid theme visible.
+Semantic roles map the palette into light and dark themes. Automatic roles choose
+readable colors; explicit role overrides stay authored. The contrast report
+measures the resulting pairs, including canvas boundaries. Inspect the actual
+specimens when choosing translucent effects or component exceptions.
 
-The six-family **Working palette** recommends primary, support, neutral, success,
-warning and danger colors from the full wall. Change a family to guide automatic
-roles, or choose **Use recommended families**. Support and success remain working
-colors rather than new component tones.
+## Typography
 
-For precise control, choose a **Role mode** and **Semantic role**, then enter an
-exact color or apply a wall shade. Family and stop selectors provide the same
-selection by keyboard. Overrides stay pinned across brand and family changes;
-**Clear role override** returns the selected role to automatic selection. **Use
-automatic roles** clears both modes' overrides. Role mode is independent of the
-specimen preview mode. Switching editors preserves your selections.
+Body, Headings, UI and Code are independent font assignments. Prose and UI rhythms
+supply starting metrics; the text-style inspector refines the 16 production roles.
+Choose fixed sizes or responsive endpoints that follow each proof’s local width.
+Manual styles survive rhythm changes; resetting a style returns it to generated
+values.
 
-The contrast report measures the final opaque semantic colors in light and dark
-modes, including canvas pairs. It preserves failing choices and explains which
-pairs need attention. Inactive-control observations are informational. The report
-is not a whole-page accessibility certification: inspect component exceptions,
-translucent effects and rendered content in the specimens too. Pending controls
-still need contrast. No AI or server request is involved.
+Article, Form, Data and Landing proofs use real layouts at 800, 640, 390 and 320px.
+Comparison frames share edited copy and interaction state. Text spacing and style
+inspection affect only the preview. Evaluate reading comfort at 100% display size;
+tables and code scroll within their own regions.
 
-## Shape spacing and surfaces
+The typeface lab includes hosted normal and italic files for Inter, Source Serif,
+Plex Sans and Plex Mono. Verified variation axes appear where available. Local
+font files stay in memory and are never uploaded or included in exports. Custom
+families keep portable font requirements while the application supplies the files.
+Use the handoff’s font setup output for matching face descriptors and asset links.
 
-Start with **Balanced**, **Compact**, **Spacious** or **Square & flat**. Each preset
-sets this editor’s bounded decisions in both modes and clears previous overrides.
-It preserves your colors, fonts, motion, focus settings and component exceptions.
-Balanced uses 8px control and 12px panel radii; its backdrop starts at 45% in light
-mode and a 65% dark override.
+## Spacing and surfaces
 
-**Spacing multiplier** scales all five shared gaps plus panel padding and gap.
-**Control density** scales small, medium and large control heights, horizontal
-padding and indicators while keeping font sizes unchanged. Values derive from
-Radiant’s neutral baseline; repeated changes never multiply an earlier result.
-Use the number fields for precise values or the labeled sliders with arrow keys.
-Invalid or out-of-range input keeps the last valid theme.
+Balanced, Compact, Spacious and Square & flat are starting recipes for control
+metrics, gaps, panel geometry, borders, shadows and backdrop opacity. Shared
+settings can have deliberate light/dark overrides. Color, typography, motion and
+component exceptions retain their own values.
 
-Control and surface radii and border widths are independent. Border style affects
-both; Radio remains circular and Checkbox caps its inherited radius. Elevation
-controls passive panel and overlay shadows with mode-specific opacity. Backdrop
-opacity controls the black modal backdrop; action shadows and dialog panel
-filters remain component exceptions.
+Sizes derive from the neutral baseline, so repeated adjustments do not compound.
+Inspect small, medium and large controls and their real focus, disabled and modal
+states when changing density or boundaries. These settings shape components;
+they do not compose a page layout.
 
-**Geometry scope** selects shared defaults, light overrides or dark overrides;
-it is separate from specimen preview mode. Shared edits retain mode overrides.
-Choose **Use shared…** for one setting or clear the selected mode’s overrides.
-Clearing the default dark backdrop override makes it follow the shared opacity.
-Switching editors retains the selected scope; resetting this section returns to
-shared defaults and the Balanced recipe.
+## Motion
 
-Use **Components** to compare all three sizes and inspect keyboard focus,
-disabled/invalid states and the real modal. Check boundaries and hit targets when
-reducing density or removing borders. The resolved-values table shows the actual
-compiled light/dark shared roles; component exceptions can still override them.
-This editor changes theme roles, rather than composing page layouts.
+Tune common stiffness, damping and mass, then override individual interactions
+where needed. Restrained provides a firm response; Expressive allows more
+overshoot. New destinations preserve in-flight position and momentum. Edited
+physics takes effect when a running spring rests.
 
-Geometry remains ordinary `control`, `spacing` and `surface` document sections,
-so full-theme and selective round trips use the public document APIs. A selective
-surface section includes its canvas color, even though Color owns that decision
-in the editor. Use the handoff panel below for whole-theme and selective exports.
+The proof bench includes native Button and disclosure feedback, a real modal,
+bounded drag/snap, a moving destination and measured layout resize/reorder.
+Repeat an input before motion finishes. Side-by-side treatments let you compare
+character, motion off and a reduced-motion preview while retaining the saved theme.
+The operating system’s reduced-motion preference always applies.
 
-## Edit typography proofs
+Live graphs show rendered position and destination over two seconds. Numeric
+examples report runtime velocity; Button/disclosure velocity is measured from
+presentation. Pausing inspection leaves the example operable. Reset example
+restores only its values; resetting Motion retains the examples.
 
-Open **Typography** for composed **Article**, **Form**, **Data** and **Landing**
-proofs. Prose and UI are text contexts; Body, Headings, UI and Code are font
-assignments. The proofs mix these contexts rather than treating them as separate
-font scales. The typesetting controls below edit their shared production roles.
-
-**Edit … copy** exposes the current composition’s headings, paragraphs, labels,
-links, lists and supporting copy. Changes are plain text and appear at every
-width. Untouched passages retain their inline emphasis and code. Form values,
-checkboxes, saved feedback, table filters and landing actions also share one
-owner across frames. They stay in memory when switching editors, compositions,
-widths or modes. They are not theme settings and do not enter exports or links.
-
-Choose 800, 640, 390 or 320 CSS pixels, or compare **800 + 390px**. Each frame
-keeps its real CSS width and reports its display scale when fitted into the
-available space. Evaluate reading comfort at 100% display size. Fluid headings
-respond to the frame’s local content width. Tables and code scroll inside named,
-keyboard-focusable regions; the rest of the composition reflows. The optional
-**Text spacing probe** changes only the preview, not exported typography.
-
-**Reset current proof** restores only that composition’s copy and interactions.
-Typography’s section reset retains proof copy and values, the other theme
-sections and inspection controls. The whole frame’s **Reset preview** restores
-everything. Preview mode uses the shared specimen mode below the proofs.
-
-The published 0.0.5 package supplies text roles and production component UI
-typography. The site owns layouts and copy; the library owns the semantic text
-hooks and calculations. Control sizes and deliberate component/caller overrides
-retain precedence.
-
-## Typeset the theme
-
-With a package containing the new typography roles, **Typesetting system** starts
-from Inter, Source Serif 4 + Inter or Plex Sans + Plex Mono. Body, Headings, UI and
-Code assignments change independently. Curated files are loaded by the site, not
-by Radiant; a shared session avoids duplicate faces between the editor and the
-**Typeface lab and local files**. Missing/loading files visibly use fallback.
-
-**Prose rhythm** controls body size, leading, paragraph spacing, measure and
-heading scale. **UI rhythm** controls interface size and leading. Studied Body/UI
-combinations identify their calibrated starting metrics; unfamiliar families and
-unsupported combinations use neutral manual settings. Manual rhythm survives
-family changes. **Reset prose rhythm** / **Reset UI rhythm** restore that context’s
-automatic metrics while keeping explicit text-style overrides.
-
-The **Text style inspector** exposes all 16 production styles. Choose one using
-the keyboard, or enable **Inspect text styles** and click text in a proof; actions
-pause while inspecting. The selected style can change assignment, fixed size or
-responsive narrow/wide endpoints, weight, leading, tracking and maximum measure.
-A measure of 0 leaves width to layout. Fluid endpoints interpolate over the local
-24–56rem content container; they are not tied to the workshop viewport. A style
-reset removes only its override, so generated rhythm becomes live again.
-
-Requested unsupported weights stay visible and produce a warning. Production
-styles disable synthetic fonts; a nearby weight or missing file is not claimed
-to match exactly. The typeface lab still provides real italic and verified axis
-trials. Its **Use family in theme** also assigns the trial family to its selected
-context in the typesetting editor. Role weights stay in the style inspector;
-axis and sample rhythm experiments remain local to the lab.
-
-Choose a loaded normal local font in an assignment selector, or enter an installed
-CSS family/fallback stack under **Use another installed family**. Custom families
-remain uncalibrated, even if their names resemble a curated font. Removing local
-bytes retains the portable family requirement and uses fallback. No font bytes,
-filenames or object URLs enter the theme. The existing handoff panel records
-required families/weights/styles; recipients provide their own files.
-
-Choosing or restoring a **Starting point** explicitly resets Typography’s recipe,
-manual rhythm/styles and typography token/mode overrides. Other theme sections,
-component exceptions and proof copy/values stay intact. Ordinary edits preserve
-authored typography token/mode overrides; those can take precedence over recipe
-controls. An imported legacy document without a typesetting recipe keeps its
-authored typography until you explicitly choose a starting point. Its earlier
-family/size controls are shown only while it has no recipe. Once initialized,
-font assignments and the Prose/UI controls own the typesetting decisions.
-
-The public 0.0.5 pin runs the complete editor and production roles. No alternate
-scale/compiler runs in the website.
-
-## Try fonts
-
-Open **Typography** to try Inter, Source Serif 4, IBM Plex Sans or IBM Plex Mono.
-The site hosts pinned normal and true italic files and their complete open font
-licenses. Only selected families load; a visible status distinguishes loading,
-loaded and failed files. The sample uses the named fallback until loading succeeds.
-Changing the trial does not change your theme: choose **Use family in theme** to
-assign its family to the chosen Body/Headings/UI/Code context. Set role weights
-in the text-style inspector; sample tuning remains local. Existing theme sections
-and component exceptions remain.
-
-Choose Body, Headings, UI or Code as the trial context. Studied combinations show
-their accepted starting metrics; unfamiliar fonts and unsupported contexts use
-neutral manual settings. Manual sample metrics survive family/context switching.
-**Reset context sample** restores only that context's automatic metrics. Sample
-copy stays editable. These are starting points, not readability scores.
-
-The weight field retains your requested weight when switching fonts. An unavailable
-weight is flagged and cannot be applied to the theme. Italic requires a real
-italic file. Inter and Source Serif expose automatic/manual optical size; Plex
-Sans exposes its real width axis at 100% by default. Other controls appear only
-for verified axes. Sample spacing and axis exploration stay local to the trial;
-the family/selected weight and face requirements travel through theme handoff.
-
-**Try a local font file** accepts WOFF2, WOFF, TTF or OTF up to 10 MiB. Set a unique
-CSS family name before choosing the file. TTF/OTF metadata supplies available
-weight/style/axes where present. For compressed web fonts this trial does not
-decode metadata: declare the actual file weight/style and tune manually, with no
-inferred axes. A normal-only file has no italic option; an italic-only file can
-be inspected but cannot become the shared theme family. Collections are unsupported.
-
-Local files stay in memory. They are never uploaded, saved to browser storage,
-embedded in configuration or included in share links. Remove the file or reset
-Typography to release it; resetting the preview/reloading also discards it.
-A theme can retain a local family requirement after removal, but uses fallback
-until that file is provided again. Recipients must supply their own licensed
-copy. The handoff setup identifies the required family, selected weights/styles
-and missing local file; a family name alone never establishes availability.
-
-The diagnostic line includes Hungarian, Greek, Cyrillic, Arabic and CJK samples.
-Some glyphs intentionally fall back: the curated files are not universal script
-fonts. A successful load does not certify every glyph, shaping or language.
-Inspect the copy you actually need in narrow and wide layouts.
-
-### Load fonts in your app
-
-Radiant never loads fonts. Self-host the required files or use your app's font
-loader. Preserve upstream licenses and choose a release/package setup matching
-your exported document. For example, with the unmodified Inter variable files:
-
-```css
-@font-face {
-  font-family: 'Inter';
-  src: url('/fonts/Inter.woff2') format('woff2');
-  font-weight: 100 900;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'Inter';
-  src: url('/fonts/Inter-Italic.woff2') format('woff2');
-  font-weight: 100 900;
-  font-style: italic;
-  font-display: swap;
-}
-.your-text {
-  font-family: 'Inter', system-ui, sans-serif;
-  font-synthesis: none;
-  font-optical-sizing: auto;
-}
-```
-
-Use the actual file's supported descriptors. Plex Sans additionally needs
-`font-stretch: 85% 100%` on each face to expose width matching. Keep width at 100%
-unless you deliberately choose another supported design. Optical sizing has an
-effect only when the file contains that axis. For a local trial's chosen CSS name,
-use that exact family in your app's `@font-face`; substitute your own file URL.
-
-The workshop uses the [CSS Font Loading interface](https://www.w3.org/TR/css-font-loading/)
-to await specific faces, and reads TTF/OTF axes from their
-[OpenType variation table](https://learn.microsoft.com/en-us/typography/opentype/spec/fvar).
-Public URLs, exact checksums and license links are in the
-[asset manifest](/fonts/workshop/manifest.json).
+Spring profiles need the stateful runtime. CSS timing tokens continue to describe
+CSS transitions. See [motion setup and ownership](/docs/foundations/motion/) for
+production usage and layout requirements.
 
 ## Take your theme
 
-**Copy typed theme** is the primary handoff: a typed `ThemeDocument` and the
-compiled Radiant `theme`, ready for `ThemeScope`. Import the package’s compiled
-styles once in your app entry and use a release that includes the document APIs.
-The optional reset is separate. Radiant 0.0.5 provides these APIs; the site header identifies the installed
-package used by every specimen and export.
+Copy typed theme produces a portable document and compiled theme for ThemeScope.
+Download configuration includes supported editor recipes; selective exports
+transfer only chosen sections. Merge keeps omitted values, while Replace removes
+omitted values within the supplied sections. Other sections and the destination
+identity remain intact.
 
-**Download configuration** saves the complete authoring document, palette/font
-metadata and available color/geometry recipes, including both named color
-presets and their dial overrides, as JSON. Import the file or paste
-its JSON to continue editing. Full themes/configurations replace the theme and
-identity; specimen interactions and preview controls stay unchanged. Plain theme
-documents have no generator recipes, so their imported Color and Geometry values
-remain intact until you explicitly reset those editors. Typography and Motion
-continue editing supported leaves while preserving other authored values.
+Typography-only output includes its recipe, styles and font requirements.
+Its scoped CSS uses `radiant-typography` with a light/dark/system mode attribute;
+load it after Radiant’s compiled styles. Nested ThemeScope modes use the typed
+route. Local font bytes and specimen input never enter exports.
 
-**Typography only · typed and CSS** exports the current typography section,
-including its normalized recipe, responsive roles, manual style/mode overrides
-and portable font requirements. The typed file exports `applyTypography(target)`;
-it replaces only Typography by default, preserving the target’s identity, color,
-control metrics, surfaces, spacing, motion and component exceptions. Pass `merge`
-to retain omitted typography leaves instead. The CSS file uses
-`className="radiant-typography"` and a light/dark/system mode attribute on a plain
-wrapper. It declares typography variables and text metrics only, inheriting the
-rest of the application theme. Use the typed route for nested ThemeScope modes.
+Share links store compressed configuration in the URL fragment without a server
+account. Imports and links preserve authored sections, even when no editor recipe
+is available. A configuration file handles themes too large for a link.
 
-**Required setup and fonts** lists each family’s requested weights/styles,
-available axis ranges and missing-file instructions. Curated families link their
-actual normal/italic WOFF2 files and license. **Copy font setup** produces matching
-`@font-face` declarations; place downloaded files in `./fonts` beside that CSS or
-adapt its URLs. Local files, private file names and blobs never enter exports or
-share links. Recipients provide their own licensed font and can restore the
-preview through Typeface lab using the saved CSS family name. Available axis
-ranges describe files; trial-only axis adjustments are not typography settings.
-The 0.0.5 native document parser retains axis metadata. Older package parsers
-reject those new keys; use matching package JavaScript and CSS.
-
-Selective files contain exactly the chosen public sections. **Merge supplied
-leaves** keeps omitted values; **Replace supplied sections** removes omitted
-values in those sections, preserving all other sections and the destination
-identity. Select `components` explicitly to transfer component exceptions.
-`surface` includes both canvas and geometry; select `color` and `surface` when
-moving a complete color/canvas system. Importing surface data invalidates both
-editor recipes rather than silently pretending their controls still describe it.
-
-**Copy share link** puts a compressed version-1 configuration in the URL fragment;
-it needs no account and does not upload the configuration to a storage service.
-Links restore the theme and editor recipes, including after reload. Specimen form
-data is excluded. **Reset preview** restores the default workspace and clears its
-share fragment. Files and expanded links are limited to 256 KiB; links also have
-a 16,000-character transport limit. Use a configuration file when a link is too
-large. Invalid, unsupported or damaged input leaves the current theme intact.
-
-The optional scoped CSS output contains the actual compiled light/dark values.
-Load it after Radiant’s compiled styles and use the documented plain wrapper;
-React/nested mode scopes should use the typed theme. CSS export rejects text that
-cannot be safely represented as declarations, while the typed theme and JSON
-remain available. A failed clipboard action leaves selectable output fields.
-
-Font family names and requirements travel with themes, configurations and links;
-font files stay local. Load required fonts in the consuming app. The setup panel
-lists local/catalog/system descriptors, weights and styles when available. The
-same document sections retain existing typography and motion values and component
-exceptions alongside typesetting decisions and the next spring chapter.
-
-## Inspect the result
-
-Switch between an article, profile form, dense dashboard with a semantic table,
-landing page and everyday components. Preview mode and width belong to the
-inspection controls and never change the theme document. Phone width is capped
-by the available space; its specimens respond to their container.
-
-Each specimen keeps its own interaction state when you switch views or edit the
-theme. **Reset specimen** resets only the selected example. The frame's **Reset
-preview** restores the complete workspace, including controls and specimen state,
-while keeping source inspection open. Component states include invalid, disabled
-and pending; use the keyboard to inspect focus. Motion respects the operating
-system's reduced-motion preference.
-
-## Package availability
-
-The site consumes the exact published **Radiant 0.0.5** package from npm. The
-complete palette, spacing/surfaces, typesetting and handoff editors use its public document,
-generation and appearance APIs. No library source, Storybook module or workspace
-alias is imported.
-
-The repository can also inspect a future packed library build with
-`pnpm preview:candidate /absolute/path/radiant.tgz`. Such previews display an
-explicit **Local candidate** label; they do not change the public dependency pin.
-
-## Source and ownership
-
-View source shows the actual files rendered here, including the existing
-website-owned native profile form and its supporting files. Workshop orchestration
-uses the site's shared demo frame; copy the frame imports too when adapting that
-orchestration to another app. The specimens and document adapter use public
-Radiant exports and ordinary React. Font loading, validation and application
-persistence remain consumer responsibilities.
+The header identifies the installed package. JavaScript and CSS must use matching
+versions. Local candidate previews are labeled explicitly and use the same public
+package interfaces as a release. View source contains the website-owned examples;
+Radiant owns their document compiler, color/typography calculations and motion.

@@ -1,0 +1,387 @@
+.workshop-motion-panel,
+.motion-editor,
+.motion-proofs,
+.motion-frame {
+  min-width: 0;
+  width: 100%;
+}
+.workshop-motion-panel[hidden] {
+  display: none !important;
+}
+.motion-editor,
+.motion-proofs {
+  box-sizing: border-box;
+}
+.motion-editor *,
+.motion-editor *::before,
+.motion-editor *::after,
+.motion-proofs *,
+.motion-proofs *::before,
+.motion-proofs *::after {
+  box-sizing: border-box;
+}
+.motion-editor {
+  display: grid;
+  gap: 1rem;
+  font-size: 0.875rem;
+}
+.motion-toolbar,
+.motion-physics-summary,
+.motion-inline-actions,
+.motion-proof-nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.65rem;
+}
+.motion-toolbar {
+  align-items: start;
+}
+.motion-editor label,
+.motion-proofs label {
+  display: grid;
+  gap: 0.35rem;
+  min-width: 0;
+  max-width: 100%;
+  font-size: 0.8125rem;
+}
+.motion-editor select,
+.motion-proofs select {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  border: 1px solid var(--docs-border);
+  border-radius: 0.4rem;
+  padding: 0.5rem;
+  font: inherit;
+  color: var(--docs-foreground);
+  background: var(--docs-surface);
+}
+.motion-editor input[type='range'],
+.motion-proofs input[type='range'] {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  accent-color: var(--docs-accent);
+}
+.motion-editor select:focus-visible,
+.motion-proofs select:focus-visible,
+.motion-editor input:focus-visible,
+.motion-proofs input:focus-visible {
+  outline: 2px solid var(--docs-accent);
+  outline-offset: 3px;
+}
+.motion-dials {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
+  gap: 1rem;
+}
+.motion-dial {
+  min-width: 0;
+  border: 1px solid var(--docs-border);
+  border-radius: 0.6rem;
+  padding: 1rem;
+}
+.motion-dial input[type='number'] {
+  max-width: 100%;
+}
+.motion-range {
+  margin-top: 0.75rem;
+}
+.motion-physics-summary {
+  justify-content: space-between;
+  padding-block: 0.5rem;
+}
+.motion-guidance,
+.motion-fine-print,
+.motion-preference {
+  margin: 0;
+  color: var(--docs-muted);
+  font-size: 0.8125rem;
+  line-height: 1.6;
+}
+.motion-proofs {
+  padding: 1rem;
+  display: grid;
+  gap: 1rem;
+  border-top: 1px solid var(--docs-border);
+}
+.motion-proofs > header h3 {
+  margin: 0.25rem 0 0.5rem;
+  font-size: 1.4rem;
+  line-height: 1.2;
+  letter-spacing: -0.025em;
+}
+.motion-proofs > header p {
+  margin: 0;
+  max-width: 65ch;
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+.motion-proofs .motion-eyebrow {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--docs-accent);
+}
+.motion-proof-nav button {
+  max-width: 100%;
+  white-space: normal;
+}
+.motion-frames {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
+  gap: 1rem;
+  align-items: start;
+}
+.motion-frame {
+  overflow: hidden;
+  border: 1px solid var(--docs-border);
+  border-radius: 0.8rem;
+}
+.motion-frames[data-motion-width='phone'] {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
+}
+.motion-frames[data-motion-width='phone'] .motion-frame {
+  max-width: 20rem;
+}
+.motion-frame-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: var(--docs-surface);
+  border-bottom: 1px solid var(--docs-border);
+}
+.motion-frame-heading h4 {
+  margin: 0 0 0.3rem;
+  font-size: 1rem;
+  line-height: 1.3;
+}
+.motion-frame-heading span {
+  display: block;
+  max-width: 28ch;
+  color: var(--docs-muted);
+  font-size: 0.75rem;
+  line-height: 1.5;
+}
+.motion-frame button {
+  max-width: 100%;
+  white-space: normal;
+}
+.motion-stage {
+  min-width: 0;
+  padding: 1rem;
+  background: var(--rad-surface-canvas);
+  color: var(--rad-color-foreground);
+}
+.motion-scene {
+  display: grid;
+  align-content: start;
+  justify-items: start;
+  gap: 1rem;
+  min-width: 0;
+  min-height: 19rem;
+  font-family: var(--rad-typography-family);
+  font-size: 0.875rem;
+}
+.motion-scene > p {
+  margin: 0;
+  max-width: 65ch;
+  line-height: 1.6;
+}
+.motion-scene > [data-slot~='collapsible'],
+.motion-scene > label {
+  width: 100%;
+}
+.motion-scene p.motion-fine-print {
+  color: var(--rad-color-muted-foreground);
+}
+.motion-action-count {
+  font-size: 0.8rem;
+}
+.motion-track {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  border: 1px solid var(--rad-color-border);
+  border-radius: 0.65rem;
+  background: var(--rad-color-surface);
+}
+.motion-drag-track {
+  min-height: 5.5rem;
+  padding-block: 1.5rem;
+}
+.motion-drag-handle {
+  transition-property: background-color, color, border-color, box-shadow;
+  width: 4rem;
+  position: relative;
+  z-index: 1;
+}
+.motion-snap-markers {
+  position: absolute;
+  inset: 0 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  pointer-events: none;
+}
+.motion-snap-markers i {
+  width: 0.35rem;
+  height: 0.35rem;
+  border-radius: 50%;
+  background: var(--rad-color-muted-foreground);
+}
+.motion-follow-track {
+  height: 7rem;
+}
+.motion-target-marker,
+.motion-follow-marker {
+  display: block;
+  position: absolute;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  top: 1rem;
+  left: 0;
+}
+.motion-target-marker {
+  border: 2px solid var(--rad-color-accent);
+  background: transparent;
+}
+.motion-follow-marker {
+  top: 3.75rem;
+  background: var(--rad-color-accent);
+}
+.motion-layout-scroll {
+  width: 100%;
+  max-height: 28rem;
+  overflow: auto;
+  padding: 0.25rem;
+}
+.motion-layout-root {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 10rem), 1fr));
+  align-items: stretch;
+  gap: 0.75rem;
+}
+.motion-layout-slot {
+  display: flow-root;
+  min-width: 0;
+}
+.motion-layout-part {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.motion-inspector {
+  padding: 1rem;
+  border-top: 1px solid var(--docs-border);
+  color: var(--docs-foreground);
+  background: var(--docs-surface);
+}
+.motion-inspector-heading,
+.motion-graph-key {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+}
+.motion-inspector-heading {
+  font-weight: 600;
+}
+.motion-inspector svg {
+  display: block;
+  width: 100%;
+  height: 7.5rem;
+  margin-top: 0.75rem;
+  overflow: visible;
+}
+.motion-inspector path {
+  fill: none;
+  vector-effect: non-scaling-stroke;
+}
+.motion-graph-grid {
+  stroke: var(--docs-border);
+  stroke-width: 1;
+}
+.motion-graph-actual {
+  stroke: var(--docs-accent);
+  stroke-width: 2;
+}
+.motion-graph-target {
+  stroke: var(--docs-muted);
+  stroke-width: 1.5;
+  stroke-dasharray: 5 4;
+}
+.motion-graph-key {
+  color: var(--docs-muted);
+  line-height: 1.4;
+}
+.motion-readouts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+  margin: 1rem 0 0.5rem;
+}
+.motion-readouts div {
+  min-width: 0;
+}
+.motion-readouts dt {
+  font-size: 0.7rem;
+  color: var(--docs-muted);
+}
+.motion-readouts dd {
+  margin: 0.25rem 0 0;
+  font-family: ui-monospace, monospace;
+  font-size: 0.75rem;
+  overflow-wrap: anywhere;
+}
+@media (max-width: 480px) {
+  .motion-proofs,
+  .motion-stage,
+  .motion-frame-heading,
+  .motion-inspector {
+    padding: 0.75rem;
+  }
+  .motion-toolbar {
+    align-items: stretch;
+  }
+  .motion-toolbar > label {
+    flex: 1 1 100%;
+  }
+  .motion-dials {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .motion-readouts {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .motion-readouts div {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 0.5rem;
+  }
+}
+@media (forced-colors: active) {
+  .motion-graph-actual {
+    stroke: Highlight;
+  }
+  .motion-graph-target {
+    stroke: CanvasText;
+  }
+  .motion-track,
+  .motion-frame,
+  .motion-dial {
+    border-color: CanvasText;
+  }
+  .motion-follow-marker {
+    background: Highlight;
+  }
+  .motion-target-marker {
+    border-color: Highlight;
+  }
+}

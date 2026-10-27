@@ -38,6 +38,9 @@ import {
   documentTypesetting,
   resolveTypesetting
 } from './workshop-typography'
+import { MotionProvider } from '@cognitap/radiant/motion/react'
+import { MotionEditor } from './MotionEditor'
+import { MotionProofs } from './MotionProofs'
 import { TypographyProofs } from './TypographyProofs'
 import { colorAPI, defaultColorRecipe, type ColorRecipe, type ColorSession } from './workshop-color'
 import './workshop.css'
@@ -228,6 +231,7 @@ export function ThemeWorkshop() {
         {editors.map(item => (
           <Button
             key={item.id}
+            disabled={!ready}
             variant={editor === item.id ? 'solid' : 'outline'}
             aria-pressed={editor === item.id}
             aria-controls={panelId}
@@ -275,7 +279,9 @@ export function ThemeWorkshop() {
             ? 'Build a complete color system and inspect its roles in the same specimens.'
             : editor === 'geometry'
               ? 'Shape shared spacing, control sizes and surfaces across the same specimens.'
-              : 'Starting controls for the shared theme. All five specimens use these same decisions.'}
+              : editor === 'motion'
+                ? 'Tune a physical response, then feel it in real interactions.'
+                : 'All five specimens use these same decisions.'}
         </p>
         <fieldset
           disabled={!ready || !documentAPI}
@@ -364,18 +370,15 @@ export function ThemeWorkshop() {
               onChange={updateGeometry}
             />
           </div>
-          {editor === 'motion' && (
-            <Choice
-              label="Release timing"
-              value={token('--rad-motion-release-duration')}
-              choices={[
-                ['0ms', 'Immediate'],
-                ['160ms', 'Quick'],
-                ['280ms', 'Relaxed']
-              ]}
-              onChange={releaseDuration => edit({ motion: { values: { releaseDuration } } })}
+          <div
+            hidden={editor !== 'motion'}
+            className="workshop-motion-panel"
+          >
+            <MotionEditor
+              document={document}
+              onChange={next => setWorkshop(previous => ({ ...previous, document: next }))}
             />
-          )}
+          </div>
         </fieldset>
       </section>
       <output className="workshop-feedback">{feedback}</output>
@@ -406,6 +409,12 @@ export function ThemeWorkshop() {
           }}
         />
       </div>
+      <MotionProofs
+        active={editor === 'motion'}
+        document={document}
+        mode={mode}
+        onModeChange={setMode}
+      />
       <DemoControls label="Specimen inspection">
         <div className="workshop-options">
           <Choice
@@ -480,26 +489,28 @@ export function ThemeWorkshop() {
           className="workshop-canvas"
           data-width={width}
         >
-          {specimens.map(item => (
-            <section
-              key={`${item.id}:${revisions[item.id] ?? 0}`}
-              className="workshop-specimen"
-              hidden={specimen !== item.id}
-              aria-label={`${item.label} specimen`}
-            >
-              {item.id === 'article' ? (
-                <ArticleSpecimen />
-              ) : item.id === 'form' ? (
-                <FormSpecimen />
-              ) : item.id === 'dashboard' ? (
-                <DashboardSpecimen />
-              ) : item.id === 'landing' ? (
-                <LandingSpecimen />
-              ) : (
-                <ComponentSpecimen state={state} />
-              )}
-            </section>
-          ))}
+          <MotionProvider>
+            {specimens.map(item => (
+              <section
+                key={`${item.id}:${revisions[item.id] ?? 0}`}
+                className="workshop-specimen"
+                hidden={specimen !== item.id}
+                aria-label={`${item.label} specimen`}
+              >
+                {item.id === 'article' ? (
+                  <ArticleSpecimen />
+                ) : item.id === 'form' ? (
+                  <FormSpecimen />
+                ) : item.id === 'dashboard' ? (
+                  <DashboardSpecimen />
+                ) : item.id === 'landing' ? (
+                  <LandingSpecimen />
+                ) : (
+                  <ComponentSpecimen state={state} />
+                )}
+              </section>
+            ))}
+          </MotionProvider>
         </ThemeScope>
       </DemoPreview>
       <ThemeHandoff
