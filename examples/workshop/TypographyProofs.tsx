@@ -234,8 +234,7 @@ export function TypographyProofs({ theme, mode }: { theme: Theme; mode: ThemeMod
       <p className="proof-explanation">
         Frames retain their stated CSS widths and scale down to fit. Use 100% display size to judge
         reading comfort; the spacing probe is a layout check, not browser zoom. Preview mode follows
-        the shared specimen mode below. Product controls use the installed component typography; its
-        role adoption follows in DEV-167.
+        the shared specimen mode below. Product controls use the installed component typography.
       </p>
       <div
         className="proof-frames"
