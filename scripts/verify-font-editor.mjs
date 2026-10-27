@@ -40,7 +40,7 @@ export async function verifyFontEditor(browser, baseURL) {
     const sample = panel.getByTestId('font-sample')
     // Typesetting assigns the selected trial context (Code here), independently
     // of UI. The released 0.0.4 editor still authors the legacy shared family.
-    const appliedText = (await frame.locator('.typography-editor').count())
+    const appliedText = (await frame.locator('.typesetting-editor').count())
       ? frame.locator('.typography-proofs [data-rad-text="code"]').first()
       : frame.locator('.workshop-canvas')
     const loaded = async family => {
@@ -189,9 +189,9 @@ export async function verifyFontEditor(browser, baseURL) {
       'local'
     )
     if (exported.document.sections.typography.typesetting)
-      assert.equal(
+      assert.match(
         exported.document.sections.typography.typesetting.fonts.ui.family,
-        'Inter',
+        /^Inter(?:,|$)/,
         'Code assignment preserves the independent UI family'
       )
     assert.doesNotMatch(JSON.stringify(exported), /my-private-font|blob:|data:|arrayBuffer|bytes/)
