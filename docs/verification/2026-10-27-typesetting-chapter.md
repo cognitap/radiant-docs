@@ -1,9 +1,9 @@
 # Chapter 05: typesetting verification and promotion (DEV-169)
 
 The DEV-169 docs branch is stacked on DEV-168, rather than duplicating its diff.
-The coordinated Radiant PR #57 prepares the 0.0.5 native typography/axis artifact;
-publish through the existing main-only release workflow, verify registry integrity
-against that workflow's receipt, then install/pin that exact registry version.
+The coordinated Radiant PR #57 merged and released the 0.0.5 native typography/axis
+artifact through the existing main-only workflow. Registry integrity matches that
+workflow's receipt, and the docs install pins that exact registry version.
 No file dependency, workspace alias, source compiler or Storybook asset belongs
 in the public docs artifact.
 
@@ -47,8 +47,23 @@ styling, 32 typography, 128 composition and 1,165 Storybook/browser cases.
 Raw docs receipts are `output/docs/verification.json` and
 `output/docs/typography-chapter/results.json`, with images beside them. Candidate
 receipts stay under `output/candidate/docs/`. The workflow release receipt records
-source commit and SHA-512 integrity; registry identity and exact lockfile pin are
-recorded after publication, before this stacked PR becomes ready for review.
+source commit and SHA-512 integrity; registry identity and the exact lockfile pin
+are recorded below.
+
+## Release artifact
+
+[Release workflow 40500056643](https://github.com/cognitap/radiant/actions/runs/40500056643)
+published the user-merged library source `799f32b011332277e63fadba9fc46a0ea2991920`.
+Its archive has the same SHA-512 integrity as the locally audited candidate:
+
+```text
+sha512-DpMAdMa+5UMwCSJDrp3tZbXAvjph9qVoEIsPoSm5ydzuX6Wd/ZIiZFyykcn4TAN7EGX9F/NPUV67hZY2nIeKBw==
+```
+
+The registry `@cognitap/radiant@0.0.5` reports that same integrity. The exact
+package/lockfile pin installs from npm, with a release-age exception scoped only
+to this verified package version. The workflow's publication and registry-integrity
+steps both succeeded; the public build uses no candidate or source substitution.
 
 ## Limits
 
