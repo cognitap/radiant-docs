@@ -190,6 +190,11 @@ function safeCSS(value: string): boolean {
 }
 function cssOutput(document: PortableDocument): string {
   const theme = compile(document)
+  // Match the installed ThemeScope contract. The released 0.0.4 package
+  // predates roles; its plain CSS wrapper retains the earlier typography.
+  const typography = Object.hasOwn(theme.modes.light, '--rad-typography-roles-ui-body-family')
+    ? `  font-family: var(--rad-typography-roles-ui-body-family);\n  font-size: var(--rad-typography-roles-ui-body-size);\n  font-weight: var(--rad-typography-roles-ui-body-weight);\n  line-height: var(--rad-typography-roles-ui-body-line-height);\n  letter-spacing: var(--rad-typography-roles-ui-body-letter-spacing);`
+    : `  font-family: var(--rad-typography-family);\n  font-size: var(--rad-typography-body-size);\n  font-weight: var(--rad-typography-body-weight);\n  letter-spacing: var(--rad-typography-letter-spacing);`
   const declarations = (mode: 'light' | 'dark') =>
     Object.entries(theme.modes[mode])
       .map(([key, value]) => {
@@ -202,7 +207,7 @@ function cssOutput(document: PortableDocument): string {
         return `  ${key}: ${value};`
       })
       .join('\n')
-  return `/* Load @cognitap/radiant/styles.css first. Apply class="radiant-export"\n   and data-rad-mode="light", "dark" or "system" to a plain wrapper. */\n.radiant-export {\n${declarations('light')}\n  color-scheme: light;\n  background: var(--rad-surface-canvas);\n  color: var(--rad-color-foreground);\n  font-family: var(--rad-typography-family);\n  font-size: var(--rad-typography-body-size);\n  font-weight: var(--rad-typography-body-weight);\n  letter-spacing: var(--rad-typography-letter-spacing);\n}\n.radiant-export[data-rad-mode="dark"] {\n${declarations('dark')}\n  color-scheme: dark;\n}\n@media (prefers-color-scheme: dark) {\n  .radiant-export[data-rad-mode="system"] {\n${declarations('dark')}\n    color-scheme: dark;\n  }\n}\n`
+  return `/* Load @cognitap/radiant/styles.css first. Apply class="radiant-export"\n   and data-rad-mode="light", "dark" or "system" to a plain wrapper. */\n.radiant-export {\n${declarations('light')}\n  color-scheme: light;\n  background: var(--rad-surface-canvas);\n  color: var(--rad-color-foreground);\n${typography}\n}\n.radiant-export[data-rad-mode="dark"] {\n${declarations('dark')}\n  color-scheme: dark;\n}\n@media (prefers-color-scheme: dark) {\n  .radiant-export[data-rad-mode="system"] {\n${declarations('dark')}\n    color-scheme: dark;\n  }\n}\n`
 }
 export const handoffAPI = {
   configuration,

@@ -10,8 +10,13 @@ The verifier now inspects the actual Code proof when the typesetting editor is
 available, and retains the whole-canvas assertion for the older released editor.
 It also checks that exporting a local Code assignment preserves the independent
 Inter UI assignment. Font removal still releases owned faces and retains the
-portable requirement/fallback. No editor behavior, font files, dependency or
-public package pin changes.
+portable requirement/fallback. The CSS export also mirrors the installed ThemeScope UI Body family, size,
+weight, leading and tracking when role tokens are available; released 0.0.4 keeps
+its earlier wrapper rules. The actual installed handoff gate found a 3px total
+height difference between typed and CSS wrappers before this correction. It now
+compares weight, leading and tracking explicitly alongside dimensions, colors
+and families, across full/partial exports, modes, scopes and both CSS routes.
+No font files, dependencies or public package pin change.
 
 Run the ordinary `pnpm check` against exact npm 0.0.4, and
 `pnpm preview:candidate /absolute/path/to/radiant-dev167.tgz --check` against the
