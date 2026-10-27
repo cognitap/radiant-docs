@@ -19,6 +19,7 @@ import { verifyColorEditor } from './verify-color-editor.mjs'
 import { verifyMotionEditor } from './verify-motion-editor.mjs'
 import { verifyMotionHandoff } from './verify-motion-handoff.mjs'
 import { verifyMotionHandoffConsumer } from './verify-motion-handoff-consumer.mjs'
+import { verifyMotionChapter } from './verify-motion-chapter.mjs'
 import { verifyWorkshop } from './verify-workshop.mjs'
 import { verifyTypographyChapter } from './verify-typography-chapter.mjs'
 import { verifyTypesettingEditor } from './verify-typesetting-editor.mjs'
@@ -249,6 +250,7 @@ try {
   await verifyMotionHandoff(browser, baseURL)
   await verifyHandoffConsumer(browser)
   await verifyMotionHandoffConsumer(browser)
+  await verifyMotionChapter(browser)
   await verifyBrandReference(browser, baseURL)
   passed = true
 } finally {

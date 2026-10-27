@@ -144,7 +144,7 @@ job and does not claim that the uploaded site is verified.
 
 ### Scope and known limitations
 
-The site remains **experimental**, currently pinned to public Radiant 0.0.3.
+The site remains **experimental**, currently pinned to public Radiant 0.0.6.
 Installation instructions, actual demo imports and displayed/copied files are
 verified against that installed version. Packed local candidates retain their
 separate visible label and are rejected by the publication script. The existing
@@ -155,20 +155,13 @@ Accessibility evidence consists of automated native roles/labels/descriptions,
 keyboard actions, focus restoration and related browser assertions. This is
 Chromium automation, not a complete accessibility certification. Actual
 VoiceOver/screen-reader work and manual Safari/Firefox checks are not claimed.
-Preset font stacks currently use system fallbacks on this website.
+Curated font files load in the workshop; custom font files remain local.
 
 Native disclosure behavior without JavaScript is checked separately from
 hydrated React state/callback behavior. The latter waits for the example's
 hydration signal. Radiant 0.0.3 does not adopt an already-open native disclosure
 into React state when it was toggled before hydration; that library gap is
 tracked in [DEV-182](https://linear.app/cognitap/issue/DEV-182).
-
-[DEV-57](https://linear.app/cognitap/issue/DEV-57) is Done. Its
-[installed-consumer architecture checkpoint](https://github.com/cognitap/radiant/blob/23f0b8b05e2288da15b13c6d36f9583ea28a62ed/docs/verification/2026-10-25-installed-compositions.md)
-records archive-based integration evidence and its historical registry limits;
-it does not stand in for deployment verification of this website. The deferred
-manual assistive-technology audit remains with DEV-83. Website launch does not
-establish stable-library or complete-catalog readiness.
 
 ## Independent updates and rollback
 
