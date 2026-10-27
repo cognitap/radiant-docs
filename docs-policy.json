@@ -1,0 +1,57 @@
+{
+  "defaultBudget": 600,
+  "budgets": {
+    "README.md": 400,
+    "docs/deployment.md": 500,
+    "content/docs/workshop.mdx": 1000,
+    "content/docs/*.mdx": 400
+  },
+  "ticketPrefixes": ["DEV"],
+  "forbiddenPaths": ["docs/verification/**", "docs/research/**", "docs/**/*-audit-*.md"],
+  "ignore": [".github/**", "public/**"],
+  "baseline": {
+    "words": {
+      "README.md": 2817,
+      "content/docs/accordion.mdx": 474,
+      "content/docs/button.mdx": 573,
+      "content/docs/card.mdx": 433,
+      "content/docs/checkbox.mdx": 484,
+      "content/docs/collapsible.mdx": 438,
+      "content/docs/dialog.mdx": 612,
+      "content/docs/field.mdx": 560,
+      "content/docs/foundations/composition.mdx": 737,
+      "content/docs/foundations/theming.mdx": 781,
+      "content/docs/getting-started.mdx": 433,
+      "content/docs/input.mdx": 452,
+      "content/docs/link.mdx": 530,
+      "content/docs/radio-group.mdx": 543,
+      "content/docs/releases.mdx": 417,
+      "content/docs/workshop.mdx": 2944,
+      "docs/deployment.md": 1265,
+      "docs/verification/2026-10-26-workshop-chapter.md": 978,
+      "docs/verification/2026-10-27-font-trials.md": 708,
+      "docs/verification/2026-10-27-typesetting-editor.md": 753,
+      "docs/verification/2026-10-27-typography-proofs.md": 708
+    },
+    "ticketRefs": {
+      "README.md": 6,
+      "docs/deployment.md": 5,
+      "docs/verification/2026-10-26-workshop-chapter.md": 5,
+      "docs/verification/2026-10-27-component-typography-integration.md": 2,
+      "docs/verification/2026-10-27-font-trials.md": 4,
+      "docs/verification/2026-10-27-typesetting-chapter.md": 3,
+      "docs/verification/2026-10-27-typesetting-editor.md": 5,
+      "docs/verification/2026-10-27-typography-handoff.md": 2,
+      "docs/verification/2026-10-27-typography-proofs.md": 7
+    },
+    "forbidden": [
+      "docs/verification/2026-10-26-workshop-chapter.md",
+      "docs/verification/2026-10-27-component-typography-integration.md",
+      "docs/verification/2026-10-27-font-trials.md",
+      "docs/verification/2026-10-27-typesetting-chapter.md",
+      "docs/verification/2026-10-27-typesetting-editor.md",
+      "docs/verification/2026-10-27-typography-handoff.md",
+      "docs/verification/2026-10-27-typography-proofs.md"
+    ]
+  }
+}
