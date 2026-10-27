@@ -8,6 +8,11 @@ export function WorkshopDemo() {
       files={[
         'workshop/ThemeWorkshop.tsx',
         'workshop/workshop-theme.ts',
+        'workshop/MotionEditor.tsx',
+        'workshop/MotionProofs.tsx',
+        'workshop/MotionInspector.tsx',
+        'workshop/workshop-motion.ts',
+        'workshop/motion-editor.css',
         'workshop/TypographyProofs.tsx',
         'workshop/ProofPages.tsx',
         'workshop/proof-content.ts',

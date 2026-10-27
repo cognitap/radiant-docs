@@ -1,0 +1,73 @@
+---
+title: Motion
+description: Apply physical springs to native interactions and changing layouts.
+---
+
+```tsx
+'use client'
+
+import { Button, ThemeScope, defineTheme } from '@cognitap/radiant'
+import { MotionProvider } from '@cognitap/radiant/motion/react'
+import '@cognitap/radiant/styles.css'
+
+const theme = defineTheme({
+  id: 'studio',
+  name: 'Studio',
+  motion: {
+    spring: { stiffness: 320, damping: 30, mass: 1 },
+    interactions: { press: { stiffness: 400 } }
+  }
+})
+
+export function SaveAction() {
+  return (
+    <ThemeScope theme={theme}>
+      <MotionProvider>
+        <Button type="button">Save</Button>
+      </MotionProvider>
+    </ThemeScope>
+  )
+}
+```
+
+Use Radiant 0.0.6 or later with matching package JavaScript and CSS.
+MotionProvider adds no wrapper. It enables native Button, disclosure and Dialog
+presentation. Native clicks, form submission, dismissal and focus keep their
+existing behavior. Local `motion="off"` disables supported family feedback.
+
+## Tune a profile
+
+A common spring supplies stiffness, damping and mass. Named interaction overrides
+cover press, disclosure, dialog, drag, follow and layout. Profiles are serializable
+parts of theme documents. `mode: 'off'` cancels spatial motion. System reduced
+motion always wins; React bindings subscribe to preference changes.
+
+Changing a destination retains position and momentum. Physics edits wait until
+rest. A physical spring needs a stateful runtime: a sampled CSS easing cannot
+retain that state during interruption. Existing duration/easing tokens still
+control CSS transitions, such as color fades.
+
+## Follow values and direct input
+
+Use `useSpringFollow(target)` for a numeric prop or subscribed source.
+`useSpringDrag(ref, initial, options)` adds bounded one-axis drag/release/snap;
+provide native keyboard controls as an alternative. Numeric subscriptions and
+`bindSpringStyle` update reserved presentation without rendering every frame.
+The owner cleans up manual controllers; React hooks own theirs.
+
+## Animate layout
+
+`useSpringLayout(rootRef)` measures direct-child `data-rad-layout-slot` wrappers,
+each containing one `data-rad-layout-part`. Keep stable keyed DOM identities.
+Slots reserve natural geometry while parts move and resize; text reflows without
+being scaled. Put borders and padding on parts, leaving slots borderless and
+unpadded. Reserve their positioning and translation for the adapter.
+
+Use an unscaled, unrotated coordinate plane. Scrolling and common ancestor
+translation retain local pixels. New and removed items appear/disappear directly;
+shared-element morphing and independently animated nested groups need a different
+interface.
+
+Try the [workshop](/docs/workshop/) and consult the
+[library motion reference](https://github.com/cognitap/radiant/blob/main/docs/motion.md)
+for units, ownership and supported geometry.

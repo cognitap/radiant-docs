@@ -12,7 +12,7 @@ export async function verifyWorkshop(browser, baseURL) {
   )
   const staticFrame = staticPage.getByRole('region', { name: 'Shared theme workshop', exact: true })
   await staticFrame.locator('.demo-sources > summary').press('Enter')
-  assert.equal(await staticFrame.locator('.demo-sources pre').count(), 30)
+  assert.equal(await staticFrame.locator('.demo-sources pre').count(), 35)
   await staticPage.close()
 
   const context = await browser.newContext({
@@ -66,13 +66,22 @@ export async function verifyWorkshop(browser, baseURL) {
       await selectEditor('Spacing & surfaces')
       await frame.getByRole('spinbutton', { name: 'Surface radius (px)', exact: true }).fill('24')
       await selectEditor('Motion')
-      await frame.getByRole('combobox', { name: 'Release timing' }).selectOption('280ms')
+      await frame
+        .locator('.motion-editor')
+        .getByRole('spinbutton', { name: 'Stiffness', exact: true })
+        .fill('450')
       assert.equal(
         await form.getByRole('textbox', { name: 'Display name' }).inputValue(),
         'Workshop Ada'
       )
       assert.equal(await variable('--rad-surface-radius'), '24px')
-      assert.equal(await variable('--rad-motion-release-duration'), '280ms')
+      assert.equal(
+        await frame
+          .locator('.motion-editor')
+          .getByRole('spinbutton', { name: 'Stiffness', exact: true })
+          .inputValue(),
+        '450'
+      )
       await selectEditor('Color')
       await frame.getByRole('button', { name: 'Reset color', exact: true }).click()
       assert.equal(await variable('--rad-color-accent'), baseline)
@@ -182,6 +191,11 @@ export async function verifyWorkshop(browser, baseURL) {
     for (const file of [
       'workshop/ThemeWorkshop.tsx',
       'workshop/workshop-theme.ts',
+      'workshop/MotionEditor.tsx',
+      'workshop/MotionProofs.tsx',
+      'workshop/MotionInspector.tsx',
+      'workshop/workshop-motion.ts',
+      'workshop/motion-editor.css',
       'workshop/TypographyProofs.tsx',
       'workshop/ProofPages.tsx',
       'workshop/proof-content.ts',
