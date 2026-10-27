@@ -12,10 +12,7 @@ import { ButtonDemo, ButtonCompositionDemo } from '../../components/ButtonDemo'
 Use Button to submit a form, confirm a choice, or change something on the page.
 It renders a native `button` and defaults to `type="button"`. Use
 [Link](/docs/link/) when the action takes someone to another page, even when
-you want it to look like a button.
-
-Variant changes the treatment, tone changes the semantic palette and control
-size changes the metrics. Import the compiled Radiant stylesheet once in your app.
+it looks like a button.
 
 ## Disabled and pending
 
@@ -24,15 +21,14 @@ cannot be activated with a pointer or keyboard.
 
 <ButtonDemo disabled />
 
-`pending` is different: it sets `aria-busy`, shows a decorative spinner and
-guards activation before your `onClick`. The button stays focusable and keeps
-its accessible name. With reduced motion, the
-label stays visible instead of the animated spinner.
+`pending` sets `aria-busy`, shows a decorative spinner and guards activation
+before your `onClick`. The button stays focusable and keeps its accessible
+name. With reduced motion, the label stays visible instead of the spinner.
 
 <Callout title="Your application owns the work">
   Pending is a presentation and activation guard, not an async task runner. Set and clear it around
-  your own operation, expose success or error feedback, and guard duplicate submissions in your
-  form's submission handler.
+  your own operation, show success or error feedback, and guard duplicate submissions in your form's
+  submission handler.
 </Callout>
 
 ## Native host and accessible name
@@ -40,43 +36,36 @@ label stays visible instead of the animated spinner.
 The root receives native button attributes, handlers, `className`, `style` and
 `ref`. Its `data-slot` includes `button`; `data-variant`, `data-tone` and
 `data-control-size` describe presentation. Radiant wraps the label and adds a
-decorative pending indicator. Keep those resolved children intact in adapters.
+decorative pending indicator.
 
 Use a short action label such as “Save changes”. For an icon-only action, set
 `iconOnly`, give the button an `aria-label` and hide a decorative icon with
-`aria-hidden`. A tooltip or `title` can help sighted users, but should not be the
-only accessible name. Child SVG icons are sized to the button. Preserve the
-visible keyboard focus indicator.
+`aria-hidden`. A tooltip or `title` should not be the only accessible name.
+Child SVG icons are sized to the button. Keep the visible focus indicator.
 
 Use `type="submit"` inside a form to submit, or `type="reset"` for a native
-reset. Set `name`, `value` and `form` as needed. Application state and validation
-still belong to the form; see the [profile recipe](/docs/recipes/profile-form/).
+reset. The form still owns state and validation; see the
+[profile recipe](/docs/recipes/profile-form/).
 
 ## Custom render and ref
 
-This example returns a native button from `render`, adds an application data
-attribute and passes every resolved prop through. The arrow action uses the ref
-to focus that same button. It also demonstrates a named icon-only action and a
-full-width primary action.
-
 <ButtonCompositionDemo />
 
-Return one compatible button or a component that forwards its props to one.
-Forward `ref`, event handlers, styles, native attributes and **children**. The
-children already contain pending presentation. Passing the resolved props
-through another Radiant Button would apply its behavior and presentation twice.
-This example needs only React and Radiant.
+Return one compatible button, or a component that forwards its props to one.
+Forward `ref`, event handlers, styles, native attributes and **children**,
+which already contain the pending presentation. Passing the resolved props
+through another Radiant Button would apply its behavior and presentation twice. The
+example needs only React and Radiant.
 
 ## Public props
 
-These props are available in the installed **Radiant 0.0.4**. `ButtonProps` and
-`ButtonRenderProps` are exported from `@cognitap/radiant`.
+`ButtonProps` and `ButtonRenderProps` are exported from `@cognitap/radiant`.
 
 | Prop                 | Values / purpose                                                                    | Default         |
 | -------------------- | ----------------------------------------------------------------------------------- | --------------- |
-| `variant`            | `solid`, `soft`, `outline`, `ghost`                                                 | `solid`         |
-| `tone`               | `accent`, `neutral`, `warning`, `danger`                                            | `accent`        |
-| `controlSize`        | `small`, `medium`, `large`                                                          | `medium`        |
+| `variant`            | Treatment: `solid`, `soft`, `outline`, `ghost`                                      | `solid`         |
+| `tone`               | Semantic palette: `accent`, `neutral`, `warning`, `danger`                          | `accent`        |
+| `controlSize`        | Metrics: `small`, `medium`, `large`                                                 | `medium`        |
 | `disabled`           | Native disabled state; removed from the tab sequence                                | `false`         |
 | `pending`            | Busy presentation and activation guard; remains focusable                           | `false`         |
 | `iconOnly`           | Square action metrics; supply an accessible name                                    | `false`         |
@@ -88,6 +77,6 @@ These props are available in the installed **Radiant 0.0.4**. `ButtonProps` and
 | `data-slot`          | Additional identity tokens; retains `button`                                        | `button`        |
 | Other native props   | `name`, `value`, `form`, `aria-*`, events and other button attributes               | Native behavior |
 
-Choose presets with `ThemeScope`, rather than replacing the host. Your
-application loads any preset fonts.
-Start with [System foundations](/docs/foundations/) for the shared theme model.
+Choose presets with `ThemeScope`, not by replacing the host. Your application
+loads any preset fonts. See [System foundations](/docs/foundations/) for the
+shared theme model.

@@ -20,28 +20,25 @@ A nested disclosure inside an item does not change the Accordion's selection.
 
 ## Keyboard, disabled state and content
 
-Use Tab to reach enabled summaries and links in open content. Enter and Space
-toggle the focused summary. Native disclosures use ordinary tab order; arrow
-keys do not implement a separate Accordion focus-navigation scheme here.
-Closed content stays mounted and is hidden from normal keyboard navigation.
+Tab reaches enabled summaries and links in open content. Enter and Space toggle
+the focused summary. There is no arrow-key navigation. Closed content stays
+mounted and is hidden from keyboard navigation.
 
 A disabled item's summary has `aria-disabled`, is removed from the tab sequence
-and guards pointer/Enter/Space activation. Disabled state prevents user changes;
-it does not replace your application's ownership of selection.
+and guards pointer/Enter/Space activation. Disabled state blocks user changes, not
+your application's control of selection.
 
-Basic native details can expand without JavaScript. Coordinated single/multiple
-selection, disabled guards and controlled state require JavaScript. Import the functional compiled stylesheet to preserve closed-content
+Native details expand without JavaScript. Coordinated selection, disabled
+guards and controlled state require it. The stylesheet provides closed-content
 and focus behavior.
 
 ## Controlled or local selection
 
-Use `defaultValue` for local selection or `value` with `onValueChange` for a
-controlled selection. In single mode the value is a string or `null`; in
-multiple mode it is a string array. Use `null` or `[]` to clear the corresponding
-controlled selection. Do not use `undefined` to clear it: that changes ownership.
-
-Summaries request updates through `onValueChange`. Give the Accordion a new key if changing
-its `type` or ownership intentionally; do not control each item's `open` yourself.
+In single mode the value is a string or `null`; in multiple mode it is a string
+array. Use `null` or `[]` to clear a controlled selection, not `undefined`,
+which changes ownership. Summaries request updates through `onValueChange`.
+Give the Accordion a new `key` to change its `type` or ownership. Do not
+control each item's `open` yourself.
 
 ## Named parts and targets
 
@@ -52,25 +49,23 @@ its `type` or ownership intentionally; do not control each item's `open` yoursel
 | AccordionTrigger | `summary`               | `collapsible-trigger accordion-trigger` |
 | AccordionContent | `div`                   | `collapsible-content accordion-content` |
 
-Match composed identities with token membership, such as
-`[data-slot~="accordion-item"]`. The root exposes `data-type` and optional
+Match identities as tokens, such as `[data-slot~="accordion-item"]`. The root exposes `data-type` and optional
 `data-disabled`. Items expose `data-value`, optional `data-disabled` and
 `data-state`; trigger/content also expose `data-state`.
 
 AccordionTrigger places a heading **inside** the direct-child summary.
-`level` defaults to `3`; choose a level from `1`–`6` to fit your document, or
-`null` to omit the heading. Its native attributes, styles and ref still target
-the summary. Never put a button or link inside AccordionTrigger.
+Its native attributes, styles and ref target the summary. Never put a button
+or link inside AccordionTrigger.
 
-`components.accordion.gap` sets the spacing between items. Items inherit
-`components.collapsible` theme values, so a Collapsible token such as padding
-on the Accordion root reaches every item. `useAccordion()` returns the nearest
+`components.accordion.gap` spaces the items. Items inherit
+`components.collapsible` values, so a Collapsible token such as padding on the
+Accordion root reaches every item. `useAccordion()` returns the nearest
 owner state, or `null` outside an Accordion.
 
 ## Public props
 
-These contracts match **Radiant 0.0.4**; each component's prop type,
-`AccordionValue`, `AccordionHeadingLevel` and `AccordionState` are exported.
+Each component's prop type, `AccordionValue`, `AccordionHeadingLevel` and
+`AccordionState` are exported.
 
 | Accordion prop           | Purpose / default                                                |
 | ------------------------ | ---------------------------------------------------------------- |
@@ -85,14 +80,12 @@ These contracts match **Radiant 0.0.4**; each component's prop type,
 | Item `value`                   | Required distinct string identifying this item                               |
 | Item `disabled`                | Disable this item; root disabled state also applies                          |
 | Item native props              | Details props/styles/ref, excluding owned open/defaultOpen/onOpenChange/name |
-| Trigger `level`                | Inner heading level; default `3`, or `null`                                  |
+| Trigger `level`                | Inner heading level `1`–`6`, default `3`; `null` omits the heading           |
 | Trigger / Content native props | Summary/div props, styles and refs                                           |
 | `data-slot`                    | Additive identities on root and named parts                                  |
 
 ## Use the example
 
-Install `@cognitap/radiant@0.0.4` and import `@cognitap/radiant/styles.css` once.
-Preserve the `compositions/` paths when copying. It needs React and Radiant
-only. For an independent disclosure,
-use [Collapsible](/docs/collapsible/); for passive grouping of content and actions,
-use [Card](/docs/card/).
+Keep the `compositions/` paths when copying. It needs only React and Radiant.
+For an independent disclosure, use [Collapsible](/docs/collapsible/); for
+passive grouping of content and actions, use [Card](/docs/card/).

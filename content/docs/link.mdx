@@ -15,64 +15,57 @@ something on the page or submit a form.
 
 Enter activates a link; Space scrolls the page instead.
 
-`inline` and `subtle` fit into text. `solid`, `soft`, `outline` and `ghost` use
-action presentation while keeping anchor semantics. Tone selects the semantic
-palette. Control size affects action-shaped variants; inline and subtle links
-follow text sizing. Import `@cognitap/radiant/styles.css` once in your app.
+`inline` and `subtle` fit into text and follow text sizing. `solid`, `soft`,
+`outline` and `ghost` look like actions but stay anchors.
 
 ## New tabs and unavailable destinations
 
 `external` supplies `target="_blank"` and `rel="noopener noreferrer"` unless
-you explicitly provide those props. Radiant does not add “opens in a new tab”
-text or an icon; write it into the link text yourself. Despite the prop's name,
-`external` applies these defaults to any destination, including local paths.
+you set those props. It does this for any destination, including local paths.
+Radiant adds no “opens in a new tab” text or icon; write it into the link text.
 
 There is no `disabled` or `pending` Link prop. If navigation is unavailable,
-explain why and render appropriate noninteractive text, or omit the action.
-Do not leave a misleading live `href` behind an `aria-disabled` attribute.
-For an async action with busy feedback, use Button instead.
+explain why and render noninteractive text, or omit the link. Do not leave a
+live `href` behind `aria-disabled`. For an async action with busy feedback,
+use Button.
 
 ## Native host and accessible name
 
 Native attributes, handlers, `className`, `style` and `ref` reach the anchor.
 The root exposes `data-slot="link"`, `data-variant`, `data-tone` and
-`data-control-size`. Its children supply the accessible name. Keep a clear
-destination in the text; hide decorative icons from assistive technology and
-preserve visible keyboard focus. Without `href`, an anchor is not a normal
+`data-control-size`. Its children supply the accessible name, so name the
+destination in the text. Hide decorative icons from assistive technology and
+keep visible focus. Without `href`, an anchor is not a normal
 keyboard navigation target.
 
 ## Router adapter and ref
 
-This adapter uses Next.js `next/link`, which is an **additional dependency** for
-this example (the website uses Next.js 16.4.3). A plain Radiant Link does not
-require Next.js or a router.
-
-The adapter spreads every resolved anchor prop into NextLink, including `ref`,
-children, handlers, target, rel and presentation. NextLink requires `href`, so
-the example supplies the same known destination as a fallback for Radiant's
-optional native `href` type. Modified clicks and new-tab targets still belong
-to the browser.
-
 <RouterLinkDemo />
 
-Return one anchor or a router component that forwards its props to one. Avoid
-nesting anchors, wrapping the result in another Radiant Link, or unconditionally
-calling `preventDefault` to drive your router. Preserve native target and
-download behavior.
+This adapter depends on Next.js `next/link`; a plain Radiant Link needs no
+router. It spreads every resolved anchor prop into NextLink, including `ref`,
+children, handlers, target and rel. NextLink requires `href`, which is optional
+in Radiant's type, so the example supplies a fallback. Modified clicks and
+new-tab targets still belong to the browser.
+
+Return one anchor, or a router component that forwards its props to one. Do not
+nest anchors, wrap the result in another Radiant Link, or always call
+`preventDefault` to drive your router. Preserve native target and download
+behavior.
 
 A custom adapter must call the supplied `onClick` once, before its own
 navigation. If `event.defaultPrevented` is then true, it must not navigate.
 
 ## Public props
 
-These props are available in the installed **Radiant 0.0.4**. `LinkProps`,
-`LinkRenderProps` and `LinkVariant` are exported from `@cognitap/radiant`.
+`LinkProps`, `LinkRenderProps` and `LinkVariant` are exported from
+`@cognitap/radiant`.
 
 | Prop                 | Values / purpose                                                | Default         |
 | -------------------- | --------------------------------------------------------------- | --------------- |
 | `href`               | Native destination, including paths, fragments or external URLs | —               |
 | `variant`            | `inline`, `subtle`, `solid`, `soft`, `outline`, `ghost`         | `inline`        |
-| `tone`               | `accent`, `neutral`, `warning`, `danger`                        | `accent`        |
+| `tone`               | Semantic palette: `accent`, `neutral`, `warning`, `danger`      | `accent`        |
 | `controlSize`        | `small`, `medium`, `large`; metrics for action-shaped variants  | `medium`        |
 | `external`           | Supplies a new-tab target and safe rel defaults                 | `false`         |
 | `target`, `rel`      | Explicit native values override external defaults               | —               |
@@ -82,5 +75,5 @@ These props are available in the installed **Radiant 0.0.4**. `LinkProps`,
 | `className`, `style` | Root customization; style also accepts typed `--…` tokens       | —               |
 | Other native props   | `aria-*`, events and other anchor attributes                    | Native behavior |
 
-Choose presets with `ThemeScope`. Your application loads any preset fonts. See [System foundations](/docs/foundations/)
-for shared theme and mode behavior.
+Choose presets with `ThemeScope`; your application loads their fonts. See
+[System foundations](/docs/foundations/) for theme and mode behavior.
