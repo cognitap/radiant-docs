@@ -238,3 +238,10 @@
     align-items: start;
   }
 }
+
+.proof-prose > header + p {
+  margin-block-start: var(--rad-typography-flow-paragraph, 1.25em);
+}
+.proof-prose > .proof-scroll {
+  margin-block: var(--rad-typography-flow-paragraph, 1.25em);
+}

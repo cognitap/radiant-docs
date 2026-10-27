@@ -49,15 +49,20 @@ export function ProofPage({
         data-rad-prose=""
         className="proof-prose"
       >
-        <p data-rad-text="ui-eyebrow">{text('article', 'kicker')}</p>
-        <h2 data-rad-text="prose-title">{text('article', 'title')}</h2>
-        <p data-rad-text="prose-lead">{text('article', 'lead')}</p>
-        <p
-          data-rad-text="ui-caption"
-          className="proof-muted"
+        <header
+          className="proof-stack"
+          data-rad-not-prose=""
         >
-          {text('article', 'note')}
-        </p>
+          <p data-rad-text="ui-eyebrow">{text('article', 'kicker')}</p>
+          <h2 data-rad-text="prose-title">{text('article', 'title')}</h2>
+          <p data-rad-text="prose-lead">{text('article', 'lead')}</p>
+          <p
+            data-rad-text="ui-caption"
+            className="proof-muted"
+          >
+            {text('article', 'note')}
+          </p>
+        </header>
         <p>
           {edits.article?.body === undefined ? (
             <>

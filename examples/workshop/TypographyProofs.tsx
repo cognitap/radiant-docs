@@ -63,6 +63,7 @@ function ProofFrame({
     <figure
       className="proof-frame"
       data-proof-width={width}
+      aria-label={`${proofNames[proof]} proof at ${width}px`}
     >
       <figcaption>
         {width}px CSS width · shown at {Math.round(scale * 100)}%
@@ -83,7 +84,6 @@ function ProofFrame({
             mode={mode}
             className="proof-page"
             data-rad-type-container=""
-            aria-label={`${proofNames[proof]} proof at ${width}px`}
           >
             <ProofPage
               proof={proof}
