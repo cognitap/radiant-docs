@@ -97,3 +97,11 @@
 .theme-workshop > .workshop-notice {
   overflow-wrap: anywhere;
 }
+
+.theme-handoff button {
+  max-width: 100%;
+}
+.theme-handoff button > span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}

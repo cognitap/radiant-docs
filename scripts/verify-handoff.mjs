@@ -299,6 +299,16 @@ export async function verifyHandoff(browser, baseURL) {
         true,
         `${width}: handoff overflow`
       )
+      const escapedActions = await handoff.locator('button:visible').evaluateAll(buttons =>
+        buttons
+          .filter(button => {
+            const rect = button.getBoundingClientRect()
+            const parent = button.parentElement.getBoundingClientRect()
+            return rect.left < parent.left - 1 || rect.right > parent.right + 1
+          })
+          .map(button => button.textContent)
+      )
+      assert.deepEqual(escapedActions, [], `${width}: handoff actions fit their container`)
       await field('Typed theme output').focus()
       await page.keyboard.press('ArrowRight')
       assert.equal(
@@ -349,10 +359,12 @@ export async function verifyHandoff(browser, baseURL) {
       )
       const modernText = await field('Configuration output').inputValue()
       assert.deepEqual(JSON.parse(modernText), modern)
+      const previousLink = await field('Share link').inputValue()
       await handoff.getByRole('button', { name: 'Copy share link', exact: true }).click()
-      await page.waitForFunction(() =>
-        document.querySelector('.theme-handoff input[readonly]').value.includes('#workshop=1.')
-      )
+      await page.waitForFunction(previous => {
+        const link = document.querySelector('.theme-handoff input[readonly]').value
+        return link !== previous && link.includes('#workshop=1.')
+      }, previousLink)
       const shared = await field('Share link').inputValue()
       const reopened = await context.newPage()
       try {
