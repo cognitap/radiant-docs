@@ -483,7 +483,7 @@ body {
   font-weight: 650;
 }
 
-.prose pre {
+.prose pre:not(:where(.proof-page *)) {
   overflow-x: auto;
   padding: 1.5rem;
   border: 1px solid var(--docs-border);
@@ -492,7 +492,7 @@ body {
   line-height: 1.8;
 }
 
-.prose pre code {
+.prose pre:not(:where(.proof-page *)) code {
   display: block;
   min-width: max-content;
 }

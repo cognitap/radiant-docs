@@ -366,3 +366,14 @@ no library Storybook code is imported. Color-wall, working-palette, spacing/surf
 share that same document. Typography and motion retain starter controls for later
 chapters. Public editing uses the registry release through a verified exact docs pin and
 the existing deployment workflow.
+
+### Typography proof sheets
+
+The Typography panel owns four editable compositions in
+`examples/workshop/TypographyProofs.tsx` / `ProofPages.tsx`, with copy in
+`proof-content.ts`. Copy and form/data interaction state are shared across real
+800/640/390/320px frames and the 800+390 comparison. Responsive type comes from
+Radiant’s public `data-rad-text`, `data-rad-prose` and local-container hooks; the
+website stylesheet owns composition/layout only. `verify-typography-proofs.mjs`
+checks both the released semantic fallback and the packed candidate's role
+styling. Keep the exact public pin unchanged until chapter publication (DEV-169).

@@ -28,6 +28,7 @@ import { GeometryEditor } from './GeometryEditor'
 import { geometryAPI, geometryPreset, type GeometryRecipe } from './workshop-geometry'
 import { ColorEditor } from './ColorEditor'
 import { FontEditor } from './FontEditor'
+import { TypographyProofs } from './TypographyProofs'
 import { colorAPI, defaultColorRecipe, type ColorRecipe, type ColorSession } from './workshop-color'
 import './workshop.css'
 
@@ -337,6 +338,15 @@ export function ThemeWorkshop() {
       </section>
       <output className="workshop-feedback">{feedback}</output>
       {workshop.importResult && <p className="workshop-notice">{workshop.importResult.message}</p>}
+      <div
+        hidden={editor !== 'typography'}
+        className="workshop-proofs-panel"
+      >
+        <TypographyProofs
+          theme={theme}
+          mode={mode}
+        />
+      </div>
       <DemoControls label="Specimen inspection">
         <div className="workshop-options">
           <Choice
