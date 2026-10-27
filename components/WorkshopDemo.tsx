@@ -17,6 +17,7 @@ export function WorkshopDemo() {
         'workshop/typography-editor.css',
         'workshop/FontEditor.tsx',
         'workshop/workshop-fonts.ts',
+        'workshop/font-requirements.ts',
         'workshop/font-runtime.ts',
         'workshop/font-editor.css',
         'workshop/workshop-color.ts',

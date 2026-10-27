@@ -15,6 +15,7 @@ import {
   type SectionName
 } from './workshop-handoff'
 import { decodeShare, encodeShare } from './workshop-share'
+import { fontRequirements, fontSetup } from './font-requirements'
 import './theme-handoff.css'
 
 export interface ImportResult {
@@ -54,15 +55,42 @@ export function ThemeHandoff({
     try {
       const config = handoffAPI.configuration(themeDocument, recipes)
       let css = '',
-        cssError = ''
+        cssError = '',
+        typographyCSS = '',
+        typographyCSSError = ''
       try {
         css = handoffAPI.cssOutput(config.document)
       } catch (error) {
         cssError = errorMessage(error)
       }
-      return { config, typed: handoffAPI.typedTheme(config.document), css, cssError, error: '' }
+      try {
+        typographyCSS = handoffAPI.cssOutput(config.document, ['typography'])
+      } catch (error) {
+        typographyCSSError = errorMessage(error)
+      }
+      return {
+        config,
+        typed: handoffAPI.typedTheme(config.document),
+        css,
+        cssError,
+        typographyTyped: handoffAPI.typedTheme(config.document, ['typography']),
+        typographyCSS,
+        typographyCSSError,
+        setup: fontSetup(config.document),
+        error: ''
+      }
     } catch (error) {
-      return { config: null, typed: '', css: '', cssError: '', error: errorMessage(error) }
+      return {
+        config: null,
+        typed: '',
+        css: '',
+        cssError: '',
+        typographyTyped: '',
+        typographyCSS: '',
+        typographyCSSError: '',
+        setup: '',
+        error: errorMessage(error)
+      }
     }
   }, [themeDocument, recipes])
   const sections =
@@ -181,17 +209,7 @@ export function ThemeHandoff({
     }
   }
   const unavailable = !ready || !prepared?.config
-  const fonts = prepared?.config?.document.sections.typography as
-    | {
-        fonts?: {
-          id: string
-          family: string
-          source: string
-          weights?: number[]
-          styles?: string[]
-        }[]
-      }
-    | undefined
+  const fonts = prepared?.config ? fontRequirements(prepared.config.document) : []
   return (
     <section
       className="theme-handoff"
@@ -378,6 +396,73 @@ export function ThemeHandoff({
             </>
           )}
         </details>
+        <details>
+          <summary>Typography only · typed and CSS</summary>
+          <p>
+            Apply the typed section to an existing document with <code>applyTypography</code>. It
+            retains colors, surfaces, control sizes, motion and component exceptions. The CSS
+            wrapper uses <code>className="radiant-typography"</code> and the same mode attribute;
+            its declarations affect typography only. Use the typed route for nested ThemeScope
+            modes.
+          </p>
+          <div className="workshop-actions">
+            <Button
+              variant="outline"
+              aria-disabled={!!busy}
+              onClick={() => void copy(prepared?.typographyTyped ?? '', 'Typography typed theme')}
+            >
+              Copy typography TypeScript
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() =>
+                download(
+                  prepared?.typographyTyped ?? '',
+                  'radiant-typography.ts',
+                  'text/typescript'
+                )
+              }
+            >
+              Download typography TypeScript
+            </Button>
+            <Button
+              variant="outline"
+              aria-disabled={!!busy}
+              disabled={!!prepared?.typographyCSSError}
+              onClick={() => void copy(prepared?.typographyCSS ?? '', 'Typography CSS')}
+            >
+              Copy typography CSS
+            </Button>
+            <Button
+              variant="outline"
+              disabled={!!prepared?.typographyCSSError}
+              onClick={() =>
+                download(prepared?.typographyCSS ?? '', 'radiant-typography.css', 'text/css')
+              }
+            >
+              Download typography CSS
+            </Button>
+          </div>
+          <label>
+            Typography TypeScript output
+            <textarea
+              readOnly
+              rows={12}
+              wrap="off"
+              value={prepared?.typographyTyped ?? ''}
+            />
+          </label>
+          {prepared?.typographyCSSError && <p>{prepared.typographyCSSError}</p>}
+          <label>
+            Typography CSS output
+            <textarea
+              readOnly
+              rows={12}
+              wrap="off"
+              value={prepared?.typographyCSS ?? ''}
+            />
+          </label>
+        </details>
       </fieldset>
       <details className="handoff-setup">
         <summary>Required setup and fonts</summary>
@@ -394,23 +479,71 @@ export function ThemeHandoff({
           Load the required fonts in the consuming app; exporting or importing a theme never loads a
           font file.
         </p>
-        {fonts?.fonts?.length ? (
+        {fonts.length ? (
           <ul>
-            {fonts.fonts.map(font => (
+            {fonts.map(font => (
               <li key={font.id}>
-                {font.family} · {font.source} · weights {font.weights?.join(', ') || 'unspecified'}{' '}
-                · styles {font.styles?.join(', ') || 'unspecified'}
-                {font.source === 'local' &&
-                  ' · File not included: recipients must supply this font; until then their browser uses fallback.'}
+                <strong>{font.family}</strong> · {font.source} · weights{' '}
+                {font.weights.join(', ') || 'unspecified'} · styles{' '}
+                {font.styles.join(', ') || 'unspecified'}
+                <p>
+                  Available axes:{' '}
+                  {font.axes
+                    .map(axis => `${axis.tag} ${axis.min}–${axis.max}, default ${axis.default}`)
+                    .join('; ') || 'not verified'}
+                  . Trial-only adjustments are not applied to the theme.
+                </p>
+                <p>{font.instruction}</p>
+                {font.files.map(file => (
+                  <span key={file.style}>
+                    <a
+                      href={file.url}
+                      download
+                    >
+                      {file.style} WOFF2
+                    </a>{' '}
+                  </span>
+                ))}
+                {font.license && (
+                  <a
+                    href={font.license}
+                    download
+                  >
+                    Font license
+                  </a>
+                )}
               </li>
             ))}
           </ul>
         ) : (
-          <p>
-            No font descriptors are attached. Make sure the chosen CSS font families are available
-            in your app.
-          </p>
+          <p>No font descriptors are attached. Verify the chosen CSS families in your app.</p>
         )}
+        <div className="workshop-actions">
+          <Button
+            variant="outline"
+            disabled={unavailable}
+            aria-disabled={!!busy}
+            onClick={() => void copy(prepared?.setup ?? '', 'Font setup CSS')}
+          >
+            Copy font setup
+          </Button>
+          <Button
+            variant="outline"
+            disabled={unavailable}
+            onClick={() => download(prepared?.setup ?? '', 'radiant-fonts.css', 'text/css')}
+          >
+            Download font setup
+          </Button>
+        </div>
+        <label>
+          Font setup CSS output
+          <textarea
+            readOnly
+            rows={12}
+            wrap="off"
+            value={prepared?.setup ?? ''}
+          />
+        </label>
       </details>
       <fieldset disabled={unavailable}>
         <legend>Import JSON</legend>

@@ -283,6 +283,27 @@ documents have no generator recipes, so their imported Color and Geometry values
 remain intact until you explicitly reset those editors. Typography and Motion
 continue editing supported leaves while preserving other authored values.
 
+**Typography only · typed and CSS** exports the current typography section,
+including its normalized recipe, responsive roles, manual style/mode overrides
+and portable font requirements. The typed file exports `applyTypography(target)`;
+it replaces only Typography by default, preserving the target’s identity, color,
+control metrics, surfaces, spacing, motion and component exceptions. Pass `merge`
+to retain omitted typography leaves instead. The CSS file uses
+`className="radiant-typography"` and a light/dark/system mode attribute on a plain
+wrapper. It declares typography variables and text metrics only, inheriting the
+rest of the application theme. Use the typed route for nested ThemeScope modes.
+
+**Required setup and fonts** lists each family’s requested weights/styles,
+available axis ranges and missing-file instructions. Curated families link their
+actual normal/italic WOFF2 files and license. **Copy font setup** produces matching
+`@font-face` declarations; place downloaded files in `./fonts` beside that CSS or
+adapt its URLs. Local files, private file names and blobs never enter exports or
+share links. Recipients provide their own licensed font and can restore the
+preview through Typeface lab using the saved CSS family name. Available axis
+ranges describe files; trial-only axis adjustments are not typography settings.
+Axis metadata needs the coordinated typography package, while the installed
+0.0.4 path retains its supported metadata and explicit availability notices.
+
 Selective files contain exactly the chosen public sections. **Merge supplied
 leaves** keeps omitted values; **Replace supplied sections** removes omitted
 values in those sections, preserving all other sections and the destination

@@ -11,7 +11,7 @@ export async function verifyWorkshop(browser, baseURL) {
   )
   const staticFrame = staticPage.getByRole('region', { name: 'Shared theme workshop', exact: true })
   await staticFrame.locator('.demo-sources > summary').press('Enter')
-  assert.equal(await staticFrame.locator('.demo-sources pre').count(), 29)
+  assert.equal(await staticFrame.locator('.demo-sources pre').count(), 30)
   await staticPage.close()
 
   const context = await browser.newContext({

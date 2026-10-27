@@ -1,3 +1,4 @@
+import * as Radiant from '@cognitap/radiant'
 import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 import { workshopAvailable } from './radiant-package.mjs'
@@ -49,6 +50,39 @@ export async function verifyHandoff(browser, baseURL) {
     )
     assert.equal(await page.evaluate(() => navigator.clipboard.readText()), typed)
     assert.equal(await copy.evaluate(node => node === document.activeElement), true)
+    await handoff.getByText('Typography only · typed and CSS', { exact: true }).click()
+    for (const [button, output, feedback] of [
+      [
+        'Copy typography TypeScript',
+        'Typography TypeScript output',
+        'Typography typed theme copied.'
+      ],
+      ['Copy typography CSS', 'Typography CSS output', 'Typography CSS copied.']
+    ]) {
+      const text = await field(output).inputValue()
+      const action = handoff.getByRole('button', { name: button, exact: true })
+      await action.focus()
+      await action.press('Enter')
+      await page.waitForFunction(
+        message => document.querySelector('.handoff-feedback').textContent === message,
+        feedback
+      )
+      assert.equal(await page.evaluate(() => navigator.clipboard.readText()), text)
+      assert.equal(await action.evaluate(node => node === document.activeElement), true)
+    }
+    assert.doesNotMatch(
+      await field('Typography CSS output').inputValue(),
+      /--rad-(?:color|control|surface|motion|button)-/
+    )
+    await handoff.getByText('Required setup and fonts', { exact: true }).click()
+    const setup = await field('Font setup CSS output').inputValue()
+    await handoff.getByRole('button', { name: 'Copy font setup', exact: true }).click()
+    await page.waitForFunction(
+      () => document.querySelector('.handoff-feedback').textContent === 'Font setup CSS copied.'
+    )
+    assert.equal(await page.evaluate(() => navigator.clipboard.readText()), setup)
+    assert.doesNotMatch(setup, /blob:|data:|base64/)
+    await handoff.getByText('Required setup and fonts', { exact: true }).click()
     const download = page.waitForEvent('download')
     await handoff.getByRole('button', { name: 'Download configuration', exact: true }).click()
     const file = await download
@@ -265,6 +299,16 @@ export async function verifyHandoff(browser, baseURL) {
         true,
         `${width}: handoff overflow`
       )
+      const escapedActions = await handoff.locator('button:visible').evaluateAll(buttons =>
+        buttons
+          .filter(button => {
+            const rect = button.getBoundingClientRect()
+            const parent = button.parentElement.getBoundingClientRect()
+            return rect.left < parent.left - 1 || rect.right > parent.right + 1
+          })
+          .map(button => button.textContent)
+      )
+      assert.deepEqual(escapedActions, [], `${width}: handoff actions fit their container`)
       await field('Typed theme output').focus()
       await page.keyboard.press('ArrowRight')
       assert.equal(
@@ -272,6 +316,117 @@ export async function verifyHandoff(browser, baseURL) {
         true
       )
       await page.screenshot({ path: `output/docs/handoff-${width}.png`, fullPage: true })
+    }
+    if (typeof Reflect.get(Radiant, 'generateTypography') === 'function') {
+      await page.setViewportSize({ width: 1600, height: 1000 })
+      const modern = handoffAPI.configuration(
+        Radiant.updateThemeDocument(
+          config.document,
+          {
+            typography: {
+              typesetting: {
+                preset: 'source-serif',
+                fonts: { body: { family: '"Missing brand", serif', profile: 'manual' } },
+                prose: { size: 22, lineHeight: 1.75, paragraphSpacing: 1.4 },
+                styles: {
+                  'prose-title': { narrow: 40, wide: 72, weight: 650 },
+                  'ui-label': { weight: 620 }
+                }
+              },
+              fonts: [
+                {
+                  id: 'typesetting-body',
+                  family: 'Missing brand',
+                  source: 'local',
+                  weights: [400, 650],
+                  styles: ['normal'],
+                  axes: [{ tag: 'wght', min: 100, default: 400, max: 900 }]
+                }
+              ],
+              modes: { dark: { roles: { 'ui-caption': { letterSpacing: '0.03em' } } } }
+            }
+          },
+          'replace'
+        ),
+        config.recipes
+      )
+      await input.fill(jsonText(modern))
+      await apply.click()
+      await page.waitForFunction(() =>
+        document
+          .querySelector('.handoff-import-result')
+          ?.textContent.includes('Configuration restored')
+      )
+      const modernText = await field('Configuration output').inputValue()
+      assert.deepEqual(JSON.parse(modernText), modern)
+      const previousLink = await field('Share link').inputValue()
+      await handoff.getByRole('button', { name: 'Copy share link', exact: true }).click()
+      await page.waitForFunction(previous => {
+        const link = document.querySelector('.theme-handoff input[readonly]').value
+        return link !== previous && link.includes('#workshop=1.')
+      }, previousLink)
+      const shared = await field('Share link').inputValue()
+      const reopened = await context.newPage()
+      try {
+        await reopened.goto(shared)
+        const restored = reopened.locator('.theme-handoff')
+        await reopened.waitForFunction(() =>
+          document
+            .querySelector('.handoff-import-result')
+            ?.textContent.includes('Configuration restored')
+        )
+        await restored.getByText('Reusable configuration JSON', { exact: true }).click()
+        assert.equal(
+          await restored
+            .getByRole('textbox', { name: 'Configuration output', exact: true })
+            .inputValue(),
+          modernText
+        )
+        await reopened
+          .locator('.theme-workshop')
+          .getByRole('button', { name: 'Typography', exact: true })
+          .click()
+        const system = reopened.locator('.typesetting-editor')
+        assert.equal(
+          await system
+            .getByRole('spinbutton', { name: 'Prose size (px)', exact: true })
+            .inputValue(),
+          '22'
+        )
+        assert.equal(
+          await system.getByRole('spinbutton', { name: 'Prose leading', exact: true }).inputValue(),
+          '1.75'
+        )
+        await system
+          .getByRole('combobox', { name: 'Text style', exact: true })
+          .selectOption('prose-title')
+        assert.equal(
+          await system
+            .getByRole('spinbutton', { name: 'Narrow size (px)', exact: true })
+            .inputValue(),
+          '40'
+        )
+        assert.equal(
+          await system
+            .getByRole('spinbutton', { name: 'Wide size (px)', exact: true })
+            .inputValue(),
+          '72'
+        )
+        const setup = restored.locator('.handoff-setup')
+        await setup.locator(':scope > summary').click()
+        assert.match(await setup.innerText(), /Missing brand[\s\S]*wght[\s\S]*File not included/)
+        assert.equal(
+          await reopened.evaluate(
+            () =>
+              [...document.fonts].filter(
+                face => face.family.replaceAll('"', '') === 'Missing brand'
+              ).length
+          ),
+          0
+        )
+      } finally {
+        await reopened.close()
+      }
     }
     assert.deepEqual(errors, [], 'no handoff runtime/hydration errors')
     const blocked = await context.newPage()

@@ -387,3 +387,15 @@ checks assignment/rhythm/style ownership, custom fonts, fixed/fluid sizes,
 proof inspection, resets, focus, draft editing and narrow hydration. Font trials
 and assigned families share one session loader with per-family pending requests,
 caching and actual availability notifications. Whole-workshop reset disposes it.
+
+### Typography handoff (DEV-168)
+
+The existing handoff adds Typography-only TypeScript/CSS and font setup outputs.
+`applyTypography(target)` uses the public partial-section update contract rather
+than reconstructing a theme. `.radiant-typography` emits only typography variables
+and text metrics; other groups and component exceptions inherit. Font requirements
+link curated WOFF2/license assets and retain local available axes through the
+native document parser when supported. Trial-only axes, binary data and private
+filenames stay local. The setup CSS deduplicates variable normal/italic faces and
+includes weight/width descriptors. Missing local files retain actionable family,
+weight/style/axis requirements and fallback guidance after import/share reload.

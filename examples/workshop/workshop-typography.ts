@@ -1,7 +1,13 @@
 import * as Radiant from '@cognitap/radiant'
 import type { ThemeFontMetadata } from '@cognitap/radiant'
 import { readThemeDocument } from './workshop-theme.ts'
-import { curatedFonts, fontFamily, type FontContext, type TrialFont } from './workshop-fonts.ts'
+import {
+  curatedFonts,
+  fontAxesAvailable,
+  fontFamily,
+  type FontContext,
+  type TrialFont
+} from './workshop-fonts.ts'
 
 // Editor-facing shape of the consumed public generator. This temporary capability
 // seam keeps npm 0.0.4 builds valid until chapter publication; no calculation or
@@ -140,7 +146,10 @@ export function applyTypesetting(
       family: known?.family ?? samePrevious?.family ?? font.family,
       source: known?.source ?? samePrevious?.source ?? 'system',
       weights,
-      styles: known?.styles ?? samePrevious?.styles ?? ['normal']
+      styles: known?.styles ?? samePrevious?.styles ?? ['normal'],
+      ...(fontAxesAvailable
+        ? { axes: known?.axes ?? (samePrevious && Reflect.get(samePrevious, 'axes')) ?? [] }
+        : {})
     })
   }
   const previous = current.sections.typography ?? {}

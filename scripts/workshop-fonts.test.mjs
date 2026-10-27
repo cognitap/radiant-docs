@@ -4,6 +4,7 @@ import { readFileSync } from 'node:fs'
 import { createHash } from 'node:crypto'
 import {
   curatedFonts,
+  fontAxesAvailable,
   fontRecommendation,
   inspectLocalFont,
   localFont,
@@ -117,11 +118,15 @@ test('theme and share handoff carry requirements only, preserving unrelated sett
       family: 'Brand font',
       source: 'local',
       weights: [650],
-      styles: ['normal']
+      styles: ['normal'],
+      ...(fontAxesAvailable ? { axes: localFont(bytes, 'Brand font', 'normal', 400).axes } : {})
     }
   ])
   const text = jsonText(handoffAPI.configuration(next, {}))
-  assert.doesNotMatch(text, /bytes|blob:|data:|InterVariable|arrayBuffer|files|axes/)
+  assert.doesNotMatch(
+    text,
+    /bytes|blob:|data:|InterVariable|arrayBuffer|files|variationSettings|selectedAxes/
+  )
   assert.deepEqual(handoffAPI.read(await decodeShare(await encodeShare(text))).document, d)
   const partial = handoffAPI.sections(next, ['typography'])
   assert.deepEqual(partial.sections.typography, d.sections.typography)
