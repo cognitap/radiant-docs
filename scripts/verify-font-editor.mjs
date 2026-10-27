@@ -46,6 +46,26 @@ export async function verifyFontEditor(browser, baseURL) {
       console.log(`Font trial loaded: ${family}, normal and italic.`)
     }
     await loaded('Inter')
+    const sizeField = panel.getByRole('spinbutton', { name: 'Sample size', exact: true })
+    await sizeField.focus()
+    await page.keyboard.press('ControlOrMeta+A')
+    await page.keyboard.type('21')
+    assert.equal(
+      await sizeField.inputValue(),
+      '21',
+      'typing accepts a valid number through an invalid intermediate draft'
+    )
+    assert.equal(await sample.evaluate(node => getComputedStyle(node).fontSize), '21px')
+    await sizeField.fill('99')
+    assert.equal(await sizeField.getAttribute('aria-invalid'), 'true')
+    assert.equal(
+      await sample.evaluate(node => getComputedStyle(node).fontSize),
+      '21px',
+      'invalid drafts preserve the last valid sample'
+    )
+    await page.keyboard.press('Tab')
+    assert.equal(await sizeField.inputValue(), '21', 'blur restores the last valid value')
+    await panel.getByRole('button', { name: 'Reset context sample', exact: true }).click()
     await panel.getByRole('spinbutton', { name: 'Sample line height', exact: true }).fill('1.85')
     await panel.getByRole('spinbutton', { name: 'Trial weight', exact: true }).fill('850')
     await select.selectOption('plex-sans')
@@ -64,7 +84,9 @@ export async function verifyFontEditor(browser, baseURL) {
       '1.85'
     )
     await panel.getByRole('spinbutton', { name: 'Trial weight', exact: true }).fill('600')
-    await panel.getByRole('spinbutton', { name: 'wdth · 85–100', exact: true }).fill('90')
+    await panel.getByRole('spinbutton', { name: 'wdth · 85–100', exact: true }).focus()
+    await page.keyboard.press('ControlOrMeta+A')
+    await page.keyboard.type('90')
     assert.equal(await sample.evaluate(node => getComputedStyle(node).fontStretch), '90%')
     await panel.getByRole('combobox', { name: 'Trial style', exact: true }).selectOption('italic')
     assert.equal(await sample.evaluate(node => getComputedStyle(node).fontStyle), 'italic')

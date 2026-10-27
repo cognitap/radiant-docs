@@ -19,6 +19,54 @@ import './font-editor.css'
 type Metrics = { size: number; leading: number; tracking: number; measure: number }
 const contexts: readonly FontContext[] = ['body', 'headings', 'ui', 'code']
 const diagnostic = 'Árvíztűrő tükörfúrógép · Ελληνικά α Ω · Кириллица Ж ж · العربية ا · 漢字'
+function FontNumber({
+  label,
+  value,
+  min,
+  max,
+  step = 1,
+  onValid
+}: {
+  label: string
+  value: number
+  min: number
+  max: number
+  step?: number
+  onValid: (value: number) => void
+}) {
+  const [draft, setDraft] = useState(String(value))
+  const [previous, setPrevious] = useState(value)
+  if (previous !== value) {
+    setPrevious(value)
+    setDraft(String(value))
+  }
+  const number = Number(draft)
+  const valid = draft.trim() !== '' && Number.isFinite(number) && number >= min && number <= max
+  return (
+    <label>
+      {label}
+      <input
+        type="number"
+        min={min}
+        max={max}
+        step={step}
+        value={draft}
+        aria-invalid={!valid || undefined}
+        onChange={event => {
+          const text = event.target.value
+          setDraft(text)
+          const next = Number(text)
+          if (text.trim() && Number.isFinite(next) && next >= min && next <= max) onValid(next)
+        }}
+        onBlur={() => setDraft(String(value))}
+        onKeyDown={event => {
+          if (event.key === 'Enter') setDraft(String(value))
+        }}
+      />
+    </label>
+  )
+}
+
 export function FontEditor({
   active,
   document,
@@ -206,19 +254,13 @@ export function FontEditor({
             ))}
           </select>
         </label>
-        <label>
-          Trial weight
-          <input
-            type="number"
-            min="1"
-            max="1000"
-            value={weight}
-            onChange={event => {
-              const value = event.target.valueAsNumber
-              if (Number.isFinite(value) && value >= 1 && value <= 1000) setWeight(value)
-            }}
-          />
-        </label>
+        <FontNumber
+          label="Trial weight"
+          value={weight}
+          min={1}
+          max={1000}
+          onValid={setWeight}
+        />
         <label>
           Trial style
           <select
@@ -269,50 +311,42 @@ export function FontEditor({
         </p>
       )}
       <div className="font-controls">
-        <label>
-          Sample size
-          <input
-            type="number"
-            min="12"
-            max="40"
-            step="0.5"
-            value={metrics.size}
-            onChange={e => editMetric('size', e.target.valueAsNumber, 12, 40)}
-          />
-        </label>
-        <label>
-          Sample line height
-          <input
-            type="number"
-            min="1"
-            max="3"
-            step="0.05"
-            value={metrics.leading}
-            onChange={e => editMetric('leading', e.target.valueAsNumber, 1, 3)}
-          />
-        </label>
-        <label>
-          Sample tracking (em)
-          <input
-            type="number"
-            min="-0.2"
-            max="0.5"
-            step="0.01"
-            value={metrics.tracking}
-            onChange={e => editMetric('tracking', e.target.valueAsNumber, -0.2, 0.5)}
-          />
-        </label>
-        <label>
-          Sample measure (ch)
-          <input
-            type="number"
-            min="0"
-            max="120"
-            value={metrics.measure}
-            onChange={e => editMetric('measure', e.target.valueAsNumber, 0, 120)}
-          />
-        </label>
+        <FontNumber
+          label="Sample size"
+          value={metrics.size}
+          min={12}
+          max={40}
+          step={0.5}
+          onValid={value => editMetric('size', value, 12, 40)}
+        />
+        <FontNumber
+          label="Sample line height"
+          value={metrics.leading}
+          min={1}
+          max={3}
+          step={0.05}
+          onValid={value => editMetric('leading', value, 1, 3)}
+        />
+        <FontNumber
+          label="Sample tracking (em)"
+          value={metrics.tracking}
+          min={-0.2}
+          max={0.5}
+          step={0.01}
+          onValid={value => editMetric('tracking', value, -0.2, 0.5)}
+        />
+        <FontNumber
+          label="Sample measure (ch)"
+          value={metrics.measure}
+          min={0}
+          max={120}
+          onValid={value => editMetric('measure', value, 0, 120)}
+        />
       </div>
+      <p>
+        Unfinished or out-of-range number drafts keep the last valid sample. Leaving the field
+        restores its last valid value.
+      </p>
       <Button
         variant="outline"
         onClick={() =>
@@ -346,21 +380,15 @@ export function FontEditor({
         {font.axes
           .filter(axis => axis.tag !== 'wght' && (axis.tag !== 'opsz' || optical === 'manual'))
           .map(axis => (
-            <label key={axis.tag}>
-              {axis.tag} · {axis.min}–{axis.max}
-              <input
-                type="number"
-                min={axis.min}
-                max={axis.max}
-                step="0.1"
-                value={axes[axis.tag] ?? axis.default}
-                onChange={e => {
-                  const value = e.target.valueAsNumber
-                  if (Number.isFinite(value) && value >= axis.min && value <= axis.max)
-                    setAxes(previous => ({ ...previous, [axis.tag]: value }))
-                }}
-              />
-            </label>
+            <FontNumber
+              key={axis.tag}
+              label={`${axis.tag} · ${axis.min}–${axis.max}`}
+              value={axes[axis.tag] ?? axis.default}
+              min={axis.min}
+              max={axis.max}
+              step={0.1}
+              onValid={value => setAxes(previous => ({ ...previous, [axis.tag]: value }))}
+            />
           ))}
         {font.axes.filter(axis => axis.tag !== 'wght').length === 0 && (
           <p>No additional verified axes. Optical sizing does not create an optical axis.</p>
@@ -431,19 +459,13 @@ export function FontEditor({
               onChange={e => setFamily(e.target.value)}
             />
           </label>
-          <label>
-            Declared file weight
-            <input
-              type="number"
-              min="1"
-              max="1000"
-              value={fileWeight}
-              onChange={e => {
-                const value = e.target.valueAsNumber
-                if (Number.isFinite(value) && value >= 1 && value <= 1000) setFileWeight(value)
-              }}
-            />
-          </label>
+          <FontNumber
+            label="Declared file weight"
+            value={fileWeight}
+            min={1}
+            max={1000}
+            onValid={setFileWeight}
+          />
           <label>
             Declared file style
             <select
