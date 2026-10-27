@@ -199,7 +199,11 @@ export function ProofPage({
       [text('data', 'projectTwo'), 'Engineering', 'Active', '$12,400'],
       [text('data', 'projectThree'), 'Research', 'Planning', '$2,600'],
       [text('data', 'projectFour'), 'Design', 'Active', '$7,200']
-    ].filter(row => row.join(' ').toLowerCase().includes(interaction.query.toLowerCase()))
+    ]
+      .map((cells, id) => ({ id, cells }))
+      .filter(({ cells }) =>
+        cells.join(' ').toLowerCase().includes(interaction.query.toLowerCase())
+      )
     return (
       <div
         className="proof-stack"
@@ -259,8 +263,8 @@ export function ProofPage({
               </tr>
             </thead>
             <tbody>
-              {rows.map(row => (
-                <tr key={row[0]}>
+              {rows.map(({ id, cells: row }) => (
+                <tr key={id}>
                   <th scope="row">{row[0]}</th>
                   {row.slice(1).map((cell, i) => (
                     <td key={i}>{cell}</td>

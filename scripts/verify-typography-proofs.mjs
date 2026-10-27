@@ -9,6 +9,9 @@ export async function verifyTypographyProofs(browser, baseURL) {
   const page = await context.newPage()
   const errors = []
   page.on('pageerror', error => errors.push(error.message))
+  page.on('console', message => {
+    if (message.type() === 'error') errors.push(message.text())
+  })
   try {
     await page.goto(`${baseURL}/docs/workshop/`)
     const workshop = page.locator('.theme-workshop')
@@ -189,6 +192,25 @@ export async function verifyTypographyProofs(browser, baseURL) {
       'no match'
     )
     await proofs.getByRole('button', { name: 'Reset current proof' }).click()
+    await copy.locator('summary').press('Enter')
+    await copy.getByRole('textbox', { name: 'Data · project one', exact: true }).fill('Twin')
+    await copy.getByRole('textbox', { name: 'Data · project two', exact: true }).fill('Twin')
+    await copy.locator('summary').press('Enter')
+    await frames
+      .first()
+      .getByRole('textbox', { name: 'Filter projects by name, team or status' })
+      .fill('Twin')
+    assert.equal(
+      await frames.locator('tbody tr').count(),
+      4,
+      'duplicate edited names remain independent rows in both frames'
+    )
+    await proofs.getByRole('button', { name: 'Reset current proof' }).click()
+    assert.equal(
+      await frames.locator('tbody tr').count(),
+      8,
+      'reset/filter do not leave orphaned rows after duplicate edits'
+    )
     await workshop.getByRole('button', { name: 'Color', exact: true }).click()
     await workshop.getByRole('textbox', { name: 'Brand color', exact: true }).fill('#166534')
     await workshop.getByRole('button', { name: 'Typography', exact: true }).click()
