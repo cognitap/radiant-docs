@@ -120,6 +120,13 @@ export function TypographyProofs({
   const [inspecting, setInspecting] = useState(false)
   const [feedback, setFeedback] = useState('')
   const roleSupport = Object.hasOwn(theme.modes.light, '--rad-typography-roles-prose-body-size')
+  const selectionScope = `[data-proof-inspector=${JSON.stringify(inspectorId)}] .proof-frames`
+  const automaticSelection =
+    selectedRole === 'prose-body'
+      ? '[data-rad-prose] > :is(p,ul,ol):not([data-rad-text],[data-slot],[data-rad-not-prose])'
+      : selectedRole === 'prose-quote'
+        ? '[data-rad-prose] > blockquote:not([data-rad-text],[data-slot],[data-rad-not-prose])'
+        : ''
   function updateInteraction(patch: Partial<ProofInteraction>) {
     setInteraction(previous => ({ ...previous, ...patch }))
   }
@@ -268,7 +275,7 @@ export function TypographyProofs({
         </p>
       )}
       {inspecting && (
-        <style>{`[data-proof-inspector=${JSON.stringify(inspectorId)}] .proof-frames [data-rad-text="${/^[a-z-]+$/.test(selectedRole) ? selectedRole : 'prose-body'}"] { outline: 2px solid var(--rad-color-focus); outline-offset: 3px; }`}</style>
+        <style>{`${selectionScope} [data-rad-text="${/^[a-z-]+$/.test(selectedRole) ? selectedRole : 'prose-body'}"]${automaticSelection ? `, ${selectionScope} ${automaticSelection}` : ''} { outline: 2px solid var(--rad-color-focus); outline-offset: 3px; }`}</style>
       )}
       <div
         onClickCapture={event => {

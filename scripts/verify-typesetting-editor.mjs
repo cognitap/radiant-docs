@@ -102,6 +102,13 @@ export async function verifyTypesettingEditor(browser, baseURL) {
     await proofs.getByRole('checkbox', { name: /Inspect text styles/ }).check()
     await proof.locator('[data-rad-text="prose-title"]').click()
     assert.equal(await select('Text style').inputValue(), 'prose-title')
+    await body().click()
+    assert.equal(await select('Text style').inputValue(), 'prose-body')
+    assert.equal(
+      await body().evaluate(node => getComputedStyle(node).outlineStyle),
+      'solid',
+      'automatic semantic prose is highlighted too'
+    )
     await proofs.getByRole('checkbox', { name: /Inspect text styles/ }).uncheck()
     await proofs.getByRole('combobox', { name: 'Proof composition' }).selectOption('form')
     await proof
@@ -194,21 +201,19 @@ export async function verifyTypesettingEditor(browser, baseURL) {
       (await fontFaces()).length / 2,
       'normal/italic pairs are shared without duplicate registration'
     )
-    await workshop
-      .getByRole('textbox', { name: 'Configuration JSON', exact: true })
-      .fill(
-        JSON.stringify({
-          kind: 'radiant-theme',
-          version: 1,
-          id: 'legacy-proof',
-          name: 'Legacy proof',
-          sections: {
-            typography: { values: { family: 'Georgia, serif' } },
-            color: { values: { accent: '#166534' } },
-            components: { values: { button: { radius: '23px' } } }
-          }
-        })
-      )
+    await workshop.getByRole('textbox', { name: 'Configuration JSON', exact: true }).fill(
+      JSON.stringify({
+        kind: 'radiant-theme',
+        version: 1,
+        id: 'legacy-proof',
+        name: 'Legacy proof',
+        sections: {
+          typography: { values: { family: 'Georgia, serif' } },
+          color: { values: { accent: '#166534' } },
+          components: { values: { button: { radius: '23px' } } }
+        }
+      })
+    )
     await workshop.getByRole('button', { name: 'Import JSON', exact: true }).click()
     assert.equal(
       await editor.getAttribute('data-typesetting'),
