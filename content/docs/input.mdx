@@ -14,9 +14,8 @@ Input renders one native `input`, defaulting to `type="text"` and
 input types. Use [Checkbox](/docs/checkbox/) or [RadioGroup](/docs/radio-group/)
 for choice controls.
 
-The example's application checks native `validity`, supplies Field's error
-and focuses the input. It uses `noValidate` to replace the browser popup with
-that feedback. Input itself does not decide validation rules or timing.
+Input does not decide validation rules or timing. Your application can check
+native `validity`, pass Field's `error` and focus the input.
 
 ## Labels and state
 
@@ -25,25 +24,21 @@ Input consumes its IDs and required/disabled state. A placeholder is not a
 label. Outside Field, associate a native label with an explicit `id`, or supply
 an appropriate accessible name yourself.
 
-A read-only input remains
-focusable and its value is submitted; a disabled input cannot be edited or
+A read-only input stays focusable and its value is submitted; a disabled input cannot be edited or
 focused and is omitted from `FormData`. Native read-only inputs do not
 participate in constraint validation. Neither state is an application permission
 check. If both are enabled, disabled behavior takes precedence.
 
 ## Choose one value owner
 
-Use `defaultValue` for browser-owned state, as this example does. Native form
-reset restores that default. For React or a form library, pass `value` and update
-it from `onChange`. Initialize an empty controlled text input with `''`, rather
+Native form reset restores a `defaultValue`. For React or a form library, pass
+`value` and update it from `onChange`. Initialize an empty controlled text input with `''`, rather
 than `null` or `undefined`. This ownership applies to text-like types; `file`,
 `checkbox` and `radio` keep native value behavior.
 
 Do not pass both `value` and `defaultValue`, or switch ownership during a mount.
-Remount when intentionally changing owners. A controlled form's reset handler
-must reset application values and validation metadata too. The
-[native/TanStack profile recipe](/docs/recipes/profile-form/) demonstrates both
-owners using the same Input, with complete displayed source.
+Remount to change owners. A controlled form's reset handler must reset
+application values and validation metadata too.
 
 ## Anatomy and public props
 
@@ -51,7 +46,7 @@ The host is the styling, native-prop and ref target: `HTMLInputElement`,
 `data-slot="input"`, and `data-control-size`. Invalid state exposes
 `data-invalid` and `aria-invalid`. There is no wrapper or `parts` prop.
 
-These props match **Radiant 0.0.4**; `InputProps` is exported.
+`InputProps` is exported.
 
 | Prop                                                 | Purpose / default                                                                                |
 | ---------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
@@ -73,11 +68,7 @@ Server-side validation and persistence belong to your application.
 
 ## Use the example in a form
 
-Install `@cognitap/radiant@0.0.4` and import
-`@cognitap/radiant/styles.css` once. Keep the example's `controls/` and
-`profile/` paths when copying. It needs React and Radiant only, without a form library.
-
-For a complete form, use the [profile recipe](/docs/recipes/profile-form/).
-It covers native FormData or optional TanStack bindings. Choosing TanStack
-adds `@tanstack/react-form@1.33.5` to your application; it is not a Radiant
-runtime dependency. Your form owns validation, touched state and persistence.
+Keep the `controls/` and `profile/` paths when copying. The example needs only
+React and Radiant. The [profile recipe](/docs/recipes/profile-form/) uses the
+same Input with native FormData or optional TanStack bindings; TanStack is not a
+Radiant runtime dependency.

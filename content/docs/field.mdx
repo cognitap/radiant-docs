@@ -10,41 +10,39 @@ import { ProfileFormDemo } from '../../components/ProfileFormDemo'
 
 ## One control, connected text
 
-Field owns the relationships around a control. Its default layout renders a
-`div` containing a `label`, your control, optional description and optional
-error. The label targets the control's ID. Description and error IDs are joined
-in the control's `aria-describedby`; an error also marks it invalid.
+Field connects a label, optional description and optional error to one
+control. The label targets the control's ID. Description and error IDs are joined in the
+control's `aria-describedby`; an error also marks it invalid.
 
-Field does not validate values, manage touched state or save data. You choose
-when to pass `error` and where to focus after a failed submission. Required
+Field does not validate, track touched state or save data. You choose when to
+pass `error` and where to focus after a failed submission. Required
 adds the relationship and indicator; a disabled control is unavailable and
-omitted from native form data. The examples use `noValidate` to present their
-own feedback instead of the browser's validation popup.
+omitted from native form data. Use `noValidate` on the form to show your own
+feedback instead of the browser's validation popup.
 
 ## Adapt a native control
 
-To use an ordinary HTML input, pass a children callback. It receives
+For an ordinary HTML input, pass a children callback. It receives
 `FieldControlProps`: `id`, `required`, `disabled`, `aria-invalid`,
-`aria-required` and `aria-describedby`. Forward all of them to the actual input.
-If the adapter sets its own `aria-describedby`, keep the IDs from the callback
-too. Radiant controls append external IDs once, without duplicates.
+`aria-required` and `aria-describedby`. Forward all of them to the input. If
+the adapter sets its own `aria-describedby`, keep the callback's IDs too.
+Radiant controls append external IDs once, without duplicates.
 
-Radiant [Input](/docs/input/), [Checkbox](/docs/checkbox/) and Radio consume Field
-relationships automatically. Set `controlId` on the Field when you need an
-explicit control ID. The Field's own `id`, `className`, `style` and `ref` target
-the wrapper; they do not move to its child. Put a control ref on the input.
+Radiant [Input](/docs/input/), [Checkbox](/docs/checkbox/) and Radio consume
+Field relationships automatically. The Field's own `id` and `ref` target the
+wrapper; put a control ref on the input.
 
 ## Group related controls
 
 `layout="group"` renders a native `fieldset` with a `legend`, description and
 error. It has no single label target, so it does not accept `controlId` or a
-children callback. Give each child its own accessible label. See the
-[mixed checkbox selection](/docs/checkbox/#mixed-selection) for a live group,
-or use [RadioGroup](/docs/radio-group/) for one choice among radio options.
+children callback. Give each child its own accessible label, as in
+[mixed checkbox selection](/docs/checkbox/#mixed-selection). For one choice,
+use [RadioGroup](/docs/radio-group/).
 
-A plain required Field group communicates a group requirement; it does not make
-every checkbox required. Your form implements rules such as “choose at least
-one”. A disabled group uses native fieldset disabling and inherited Field state.
+A required group does not make every checkbox required. Your form implements
+rules such as “choose at least one”. A disabled group uses native fieldset
+disabling and inherited Field state.
 
 ## Anatomy and parts
 
@@ -56,15 +54,13 @@ one”. A disabled group uses native fieldset disabling and inherited Field stat
 | `parts.error`       | Error `div` with `role="alert"`; `field-error`    |
 | `parts.required`    | Decorative required indicator; `field-required`   |
 
-Each part accepts `className` and `style`, rather than arbitrary DOM props.
-Root `data-layout` identifies the layout; `data-required`, `data-disabled` and
-`data-invalid` are presence-based state attributes. Keep labels, descriptions,
-errors and visible focus readable when customizing.
+Each part accepts `className` and `style`, not arbitrary DOM props. Root
+`data-layout` identifies the layout; `data-required`, `data-disabled` and
+`data-invalid` are presence-based state attributes.
 
 ## Public props
 
-These contracts match the installed **Radiant 0.0.4**. `FieldProps`,
-`FieldControlProps`, `FieldState` and `FieldLayout` are public types.
+`FieldProps`, `FieldControlProps`, `FieldState` and `FieldLayout` are exported.
 
 | Prop                        | Purpose / default                                                                      |
 | --------------------------- | -------------------------------------------------------------------------------------- |
@@ -79,23 +75,19 @@ These contracts match the installed **Radiant 0.0.4**. `FieldProps`,
 | `className`, `style`, `ref` | Root customization and ref to `div` / `fieldset`                                       |
 | Other native props          | Attributes and events for the selected root; group also accepts native `form` / `name` |
 
-`useField()` exposes the nearest Field state, or `null` outside a Field. In
-group layout its `controlProps` is `null`. It does not replace a form-state
-owner or validate anything.
+`useField()` returns the nearest Field state, or `null` outside a Field. In
+group layout its `controlProps` is `null`.
 
 ## Build a complete form
 
-The same website-owned [profile recipe](/docs/recipes/profile-form/) combines
-Field with Input, Checkbox and RadioGroup, using native or TanStack form
-state.
+The [profile recipe](/docs/recipes/profile-form/) combines Field with Input,
+Checkbox and RadioGroup.
 
 <ProfileFormDemo />
 
 ## Use the examples
 
-Install `@cognitap/radiant@0.0.4` and import
-`@cognitap/radiant/styles.css` once. Keep the displayed `controls/` and `profile/` directory paths so the shared
-hydration helper resolves; it keeps submit disabled until handlers are ready.
-The focused example needs React and Radiant only. The combined profile selector
-also imports the optional `@tanstack/react-form@1.33.5`; the
-[recipe setup](/docs/recipes/profile-form/#use-the-recipe) explains a native-only copy.
+Keep the `controls/` and `profile/` paths when copying so the shared hydration
+helper resolves; it keeps submit disabled until handlers are ready. The focused
+example needs only React and Radiant; the profile selector also imports optional
+TanStack Form ([recipe setup](/docs/recipes/profile-form/#use-the-recipe)).

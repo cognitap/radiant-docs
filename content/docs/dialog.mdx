@@ -10,18 +10,15 @@ import { ProfileFormDemo } from '../../components/ProfileFormDemo'
 
 ## Open, review and dismiss
 
-Dialog owns open state and the native dialog lifecycle. DialogContent renders
-the actual `dialog`. By default it opens modally: the rest of the page becomes
-inert and focus moves inside. Tab reaches its controls while the background
-page controls remain unavailable.
-Close returns focus to the opening control. An element with `autoFocus` takes
-initial focus instead. Give every dialog a clear title, description and explicit
-close action. Without DialogTitle, pass `aria-label` on DialogContent.
+Dialog owns open state and the native dialog lifecycle. By default it opens modally: the rest of the page becomes inert
+and focus moves inside. Closing returns focus to the opening control. An element
+with `autoFocus` takes initial focus instead. Give every dialog a title,
+description and explicit close action. Without DialogTitle, pass `aria-label`
+on DialogContent.
 
-Escape or a click outside the dialog's border box dismisses a modal dialog.
-Clicking inside the surface does not count as a backdrop click. Keep an explicit
-close action available even when you turn those policies off. A nonmodal dialog
-leaves the surrounding page usable. Changing `modal` while open switches between
+Escape or a click outside the dialog's border box dismisses a modal dialog;
+keep an explicit close action even when you turn those off. A nonmodal dialog
+leaves the page usable. Changing `modal` while open switches between
 `showModal()` and `show()` without requesting a new open state.
 
 A `<form method="dialog">` inside the content closes the dialog, and React state
@@ -33,75 +30,60 @@ fields inside it. Radiant does not lock body scrolling.
 
 ## Button composition and state ownership
 
-DialogTrigger and DialogClose compose [Button](/docs/button/), so they accept
-its variants, tones, control sizes, disabled/pending state and `render` contract.
-The example's trigger returns a native button from `render`, forwarding every
-resolved prop, including ref, guarded handlers and children. Do not nest another Button
-around the resolved result or substitute an anchor for an action.
+DialogTrigger and DialogClose compose [Button](/docs/button/) and accept its
+props, including `render`. Do not nest another Button around the resolved result or substitute
+an anchor for an action.
 
-Choose uncontrolled state (`defaultOpen`) for local ownership, or controlled
-state (`open` with `onOpenChange`) when your application coordinates the dialog.
-Do not pass both or switch ownership during a mount.
+Do not pass both `open` and `defaultOpen`, or switch ownership during a mount.
 
-The open dialog keeps a 1rem margin from the viewport, with a maximum height of
-`min(40rem, 100dvh - 2rem)`, and its contents scroll. Set `--rad-dialog-width`
-in `DialogContent.style` for a local width. Use the `open:` variant for classes
-that should apply only while open. The dialog inherits the theme of its
-ThemeScope.
+The open dialog keeps a 1rem viewport margin and a maximum height of
+`min(40rem, 100dvh - 2rem)`; its contents scroll. Set `--rad-dialog-width` in
+`DialogContent.style` for a local width. Use the `open:` variant for open-only
+classes. The dialog inherits its ThemeScope's theme.
 
 ## Named parts and targets
 
-| Component         | Host, style/ref target and identity                |
-| ----------------- | -------------------------------------------------- |
-| Dialog            | Logical state owner; no DOM host or root style/ref |
-| DialogTrigger     | Native button; `button dialog-trigger`             |
-| DialogContent     | Native `dialog`; `dialog`                          |
-| DialogTitle       | `h2`; `dialog-title`                               |
-| DialogDescription | `p`; `dialog-description`                          |
-| DialogClose       | Native button; `button dialog-close`               |
+| Component         | Host, style/ref target and identity                                                            |
+| ----------------- | ---------------------------------------------------------------------------------------------- |
+| Dialog            | Logical state owner; no DOM host or root style/ref                                             |
+| DialogTrigger     | Native button; `button dialog-trigger`; sets `aria-haspopup`, `aria-expanded`, `aria-controls` |
+| DialogContent     | Native `dialog`; `dialog`; `data-state="open" \| "closed"`                                     |
+| DialogTitle       | `h2`; `dialog-title`                                                                           |
+| DialogDescription | `p`; `dialog-description`                                                                      |
+| DialogClose       | Native button; `button dialog-close`                                                           |
 
 Identities are `data-slot` tokens; match composed ones with `[data-slot~="dialog-trigger"]`.
-The trigger exposes `aria-haspopup`, `aria-expanded` and `aria-controls`.
-Content connects generated title/description IDs and exposes
-`data-state="open" | "closed"`. Keep one title/description pair per content.
-Use the named parts rather than overwriting their owned IDs. `useDialog()`
-returns the current owner state, or `null` outside a Dialog.
+Content connects generated title/description IDs. Keep one title/description pair per content,
+and do not overwrite their IDs. `useDialog()` returns the owner state, or
+`null` outside a Dialog.
 
 ## Public props
 
-These contracts match the installed **Radiant 0.0.4**.
+| Dialog prop            | Purpose / default                                                   |
+| ---------------------- | ------------------------------------------------------------------- |
+| `open` / `defaultOpen` | Controlled state or initial local state; initially closed           |
+| `onOpenChange`         | Receives a requested next boolean state                             |
+| `modal`                | Uses native `showModal()` when true (default), `show()` when false  |
+| `closeOnBackdrop`      | Modal backdrop dismissal; defaults to `true`                        |
+| `closeOnEscape`        | Modal Escape dismissal; defaults to `true`                          |
+| `children`             | Compose the named parts under this owner                            |
+| `DialogContent`        | Native dialog props, styles and ref, except owner-controlled `open` |
+| `onCancel`             | On DialogContent; `preventDefault` cancels native Escape dismissal  |
+| `onClose`              | On DialogContent; observes the native close event                   |
+| Title / Description    | Native host props, styles and refs                                  |
+| Trigger / Close        | `ButtonProps`, including `render`                                   |
 
-| Dialog prop            | Purpose / default                                                  |
-| ---------------------- | ------------------------------------------------------------------ |
-| `open` / `defaultOpen` | Controlled state or initial local state; initially closed          |
-| `onOpenChange`         | Receives a requested next boolean state                            |
-| `modal`                | Uses native `showModal()` when true (default), `show()` when false |
-| `closeOnBackdrop`      | Modal backdrop dismissal; defaults to `true`                       |
-| `closeOnEscape`        | Modal Escape dismissal; defaults to `true`                         |
-| `children`             | Compose the named parts under this owner                           |
-
-DialogContent accepts native dialog attributes/events except `open`, which the
-owner controls; `className`, `style` and `ref` target the dialog. Its `onCancel`
-can cancel native Escape dismissal with `preventDefault`; `onClose` observes
-the native close event. DialogTitle/Description accept their native host props,
-styles and refs. Trigger/Close accept `ButtonProps`, including `render`.
-Their public prop types and `DialogRenderProps` are exported from the package.
+Each part's prop type and `DialogRenderProps` are exported.
 
 ## Put the existing form in a dialog
 
-This is the same [profile recipe](/docs/recipes/profile-form/) used elsewhere
-on the website, starting in Dialog placement. Saving closes the editor;
-dismissal preserves drafts.
+The [profile recipe](/docs/recipes/profile-form/), in Dialog placement.
 
 <ProfileFormDemo placement="dialog" />
 
 ## Use the examples
 
-Install `@cognitap/radiant@0.0.4` and import its `styles.css` once. Preserve
-the `compositions/` and `profile/` paths when copying. The focused
-example needs React and Radiant only; JavaScript opens native dialogs and
-coordinates state. The combined profile selector also imports optional
-`@tanstack/react-form@1.33.5`; see the [recipe setup](/docs/recipes/profile-form/#use-the-recipe).
-
-Your application owns validation, persistence and any confirmation policy for
-unsaved work.
+Preserve the `compositions/` and `profile/` paths when copying. The focused
+example needs only React and Radiant; the profile selector also imports optional
+TanStack Form ([recipe setup](/docs/recipes/profile-form/#use-the-recipe)).
+Your application owns validation, persistence and unsaved-work confirmation.

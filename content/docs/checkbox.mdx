@@ -10,53 +10,48 @@ import { ControlDemo } from '../../components/ControlDemo'
 ## Checked state and submitted value
 
 Checkbox renders a native `input type="checkbox"` with a decorative indicator.
-In this example, Field supplies its label, help and errors.
 
-`checked` is boolean state. `value="release-notes"` is the payload sent under
-`name="updates"` when checked. An unchecked or disabled checkbox contributes
+`checked` is boolean state. `value` is the payload sent under `name` when
+checked. An unchecked or disabled checkbox contributes
 no entry; omitting `value` uses the native payload `on`. Checkbox does not turn
 an unchecked value into `false` in FormData. Your submit handler decides how to
 represent that absence.
 
-Required and disabled can be inherited from Field. A disabled checkbox cannot
-be activated.
+A disabled checkbox cannot be activated.
 
 ## Mixed selection
 
 A select-all checkbox can show `indeterminate` when only some children are
-checked. Derive that mixed state from your application values. FormData contains only the named child checkboxes, using `getAll` for
-their shared `channels` name. The parent has no form-data name.
+checked. Derive it from your application values. Give the parent no name, so
+FormData contains only the named children; read them with `getAll`.
 
 <ControlDemo kind="selection" />
 
-`indeterminate` sets the native DOM property and visible mixed indicator. It is
-not a third submitted value. Radiant sets it after mount, so it is not in server
-HTML. After a form reset, recompute it from your values.
+`indeterminate` sets the native DOM property and the mixed indicator. It is not
+a third submitted value. Radiant sets it after mount, so it is not in server
+HTML. After a form reset, recompute it.
 
-The [Field](/docs/field/) group is a native fieldset/legend. Each checkbox has
-its own label. A group-level requirement does not mean every checkbox must be
-checked; implement an “at least one” rule in your form if needed.
+A [Field](/docs/field/) group is a native fieldset/legend, and each checkbox
+has its own label. A required group does not make every checkbox required.
 
 ## Ownership and accessible naming
 
-Use `defaultChecked` for browser-owned state, or `checked` plus `onChange` for
-controlled state. Choose one per mount. Read `event.target.checked` for state;
-`event.target.value` is the payload. A native reset restores an uncontrolled
-default. Reset controlled values and validation in your own handler, as the
-mixed-selection example does.
+Choose `defaultChecked` or `checked` with `onChange` once per mount. Read
+`event.target.checked` for state; `event.target.value` is the payload. A native
+reset restores an uncontrolled default. Reset controlled values and validation
+in your own handler.
 
 For one Field-wrapped checkbox, use Field's label and omit Checkbox's optional
 `label`. For individually labeled options in a group, use Checkbox's `label`.
-Do not rely on an icon or visual proximity alone for its accessible name.
-Keep the real input focusable and the indicators hidden from assistive technology.
-The indicators ignore pointer events. Keep the input's `appearance-none` class;
+Do not rely on an icon or visual proximity for its accessible name. Keep the
+real input focusable. The indicators are hidden from assistive technology and
+ignore pointer events. Keep the input's `appearance-none` class;
 removing it brings back the browser's own check glyph.
 
 ## Anatomy and public props
 
 Root `className`, `style`, native attributes and `ref` target the input, not its
-label or wrapper. A labeled checkbox wraps the input/indicators in a `label`;
-an unlabeled checkbox uses a `span` wrapper. The native type stays checkbox.
+wrapper. The wrapper is a `label` when `label` is set, otherwise a `span`.
 
 | Styling hook      | Target / identity                                                        |
 | ----------------- | ------------------------------------------------------------------------ |
@@ -65,8 +60,7 @@ an unlabeled checkbox uses a `span` wrapper. The native type stays checkbox.
 | `parts.label`     | Convenience label text; `checkbox-label`                                 |
 | `parts.indicator` | Decorative checked/mixed SVGs; `checkbox-indicator`                      |
 
-Parts accept `className` and `style` only. These contracts match **Radiant 0.0.4**;
-`CheckboxProps` is exported.
+Parts accept `className` and `style` only. `CheckboxProps` is exported.
 
 | Prop                         | Purpose / default                                               |
 | ---------------------------- | --------------------------------------------------------------- |
@@ -83,10 +77,6 @@ Parts accept `className` and `style` only. These contracts match **Radiant 0.0.4
 
 ## Use the examples in a form
 
-Install `@cognitap/radiant@0.0.4` and import
-`@cognitap/radiant/styles.css` once. Preserve the examples' `controls/` and
-`profile/` paths when copying. These focused examples need React and Radiant only.
-
-The [profile recipe](/docs/recipes/profile-form/) uses Checkbox with native
-FormData or controlled TanStack bindings. It explains optional
-`@tanstack/react-form@1.33.5`. Your application owns validation policy and persistence.
+Keep the `controls/` and `profile/` paths when copying. These examples need
+only React and Radiant. The [profile recipe](/docs/recipes/profile-form/) uses
+Checkbox with native FormData or controlled TanStack bindings.
