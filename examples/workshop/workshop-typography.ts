@@ -71,7 +71,8 @@ export function resolveTypesetting(input: unknown = {}): TypesettingResult {
 export function documentTypesetting(document: object): TypesettingResult | null {
   if (!typesettingAvailable) return null
   const section = readThemeDocument(document).sections.typography
-  return resolveTypesetting(section ? Reflect.get(section, 'typesetting') : undefined)
+  const input = section ? Reflect.get(section, 'typesetting') : undefined
+  return input === undefined ? null : resolveTypesetting(input)
 }
 export function assignedTrial(font: AssignedFont, local?: TrialFont | null): TrialFont | undefined {
   if (font.profile !== 'manual') return curatedFonts.find(item => item.id === font.profile)

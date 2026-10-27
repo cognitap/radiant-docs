@@ -131,7 +131,7 @@ test(
     )
     const text = JSON.stringify(removed)
     assert.doesNotMatch(text, /blob:|arrayBuffer|bytes|files|woff/)
-    const parsed = Radiant.parseThemeDocument(text)
+    const parsed = Radiant.parseThemeDocument(JSON.parse(text))
     assert.deepEqual(documentTypesetting(parsed).input, documentTypesetting(applied).input)
     const section = Radiant.exportThemeSections(parsed, ['typography'])
     const restored = Radiant.updateThemeDocument(document, section.sections, 'replace')

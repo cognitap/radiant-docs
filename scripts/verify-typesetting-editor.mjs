@@ -194,6 +194,49 @@ export async function verifyTypesettingEditor(browser, baseURL) {
       (await fontFaces()).length / 2,
       'normal/italic pairs are shared without duplicate registration'
     )
+    await workshop
+      .getByRole('textbox', { name: 'Configuration JSON', exact: true })
+      .fill(
+        JSON.stringify({
+          kind: 'radiant-theme',
+          version: 1,
+          id: 'legacy-proof',
+          name: 'Legacy proof',
+          sections: {
+            typography: { values: { family: 'Georgia, serif' } },
+            color: { values: { accent: '#166534' } },
+            components: { values: { button: { radius: '23px' } } }
+          }
+        })
+      )
+    await workshop.getByRole('button', { name: 'Import JSON', exact: true }).click()
+    assert.equal(
+      await editor.getAttribute('data-typesetting'),
+      'uninitialized',
+      'legacy import retains its authored typography until explicitly adopted'
+    )
+    assert.equal(
+      await editor.getByRole('combobox', { name: 'Body assignment', exact: true }).count(),
+      0
+    )
+    await editor.getByRole('button', { name: 'Start with Inter', exact: true }).click()
+    assert.equal(await number('Prose size (px)').inputValue(), '20')
+    assert.equal(
+      await proof.evaluate(node =>
+        getComputedStyle(node).getPropertyValue('--rad-color-accent').trim()
+      ),
+      '#166534'
+    )
+    assert.equal(
+      await proof.evaluate(node =>
+        getComputedStyle(node).getPropertyValue('--rad-button-radius').trim()
+      ),
+      '23px'
+    )
+    assert.equal(
+      await proof.getByRole('textbox', { name: 'Name shown to collaborators' }).inputValue(),
+      'Typesetting Ada'
+    )
     await page.reload()
     await workshop.getByRole('button', { name: 'Typography', exact: true }).click()
     assert.equal(await select('Starting point').inputValue(), 'inter')

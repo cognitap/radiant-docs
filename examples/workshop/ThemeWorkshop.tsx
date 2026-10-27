@@ -35,7 +35,8 @@ import {
   typesettingAvailable,
   applyTypesetting,
   chooseAssignment,
-  documentTypesetting
+  documentTypesetting,
+  resolveTypesetting
 } from './workshop-typography'
 import { TypographyProofs } from './TypographyProofs'
 import { colorAPI, defaultColorRecipe, type ColorRecipe, type ColorSession } from './workshop-color'
@@ -333,7 +334,11 @@ export function ThemeWorkshop() {
                     ? (next, font, context) =>
                         applyTypesetting(
                           next,
-                          chooseAssignment(documentTypesetting(next)!.input, context, font),
+                          chooseAssignment(
+                            documentTypesetting(next)?.input ?? resolveTypesetting().input,
+                            context,
+                            font
+                          ),
                           font.source === 'local' ? font : localFont
                         )
                     : undefined

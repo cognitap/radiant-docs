@@ -6,6 +6,7 @@ import { curatedFonts, type TrialFont } from './workshop-fonts'
 import { WorkshopFontLoader } from './font-runtime'
 import { FontNumber } from './FontEditor'
 import {
+  typesettingAvailable,
   assignments,
   assignmentName,
   styleName,
@@ -88,12 +89,35 @@ export function TypographyEditor({
       cancelled = true
     }
   }, [active, loader, fontKey, fonts, local, retry])
-  if (!result)
+  if (!typesettingAvailable)
     return (
       <p className="typesetting-availability">
         The full typesetting editor needs a package with typography roles. The installed release
         retains its existing font trials; use a matching candidate for the new editor.
       </p>
+    )
+  if (!result)
+    return (
+      <div
+        className="typesetting-editor"
+        data-typesetting="uninitialized"
+      >
+        <h4>Start a typesetting system</h4>
+        <p>
+          This imported document has no typesetting recipe. Its existing typography is retained.
+          Choose a starting point to replace Typography and activate these controls; other sections,
+          component exceptions and proof content stay intact.
+        </p>
+        {startingPoints.map(item => (
+          <Button
+            key={item.id}
+            variant="outline"
+            onClick={() => onChange(applyTypesetting(document, { preset: item.id }, local, true))}
+          >
+            Start with {item.name}
+          </Button>
+        ))}
+      </div>
     )
   const { input, prose, ui } = result
   const role = Object.hasOwn(result.styles, selectedRole) ? selectedRole : 'prose-body'
