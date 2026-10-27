@@ -329,7 +329,7 @@ export function FontEditor({
         <legend>Available axes</legend>
         <p>
           Weight uses the weight field above. Other controls appear only for axes verified in the
-          chosen files. Width stays at its real 100% design by default.
+          chosen files. Plex Sans starts at 100% width; custom files use their recorded default.
         </p>
         {font.axes.some(axis => axis.tag === 'opsz') && (
           <label>

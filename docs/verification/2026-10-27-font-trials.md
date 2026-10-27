@@ -2,7 +2,8 @@
 
 27 October 2026. Complete `pnpm check` passed on clean source
 `1312b8c98e8be7fedd21ea89e44ec6dac5ce156c`, based on docs main
-`a6c1937`. The later delivery commit only adds this evidence record. PR CI
+`a6c1937`. Later delivery changes add this evidence record and clarify the axis
+default copy (custom files use their recorded width default). PR CI
 verifies the delivery/merge revision separately.
 
 ## Environment and provenance
