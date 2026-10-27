@@ -46,6 +46,21 @@ export async function verifyHandoffConsumer(browser) {
       assert.deepEqual(item.document.sections.typography, base.document.sections.typography)
       assert.deepEqual(item.document.sections.components, base.document.sections.components)
     }
+    if (typeof Reflect.get(Radiant, 'generateTypography') === 'function')
+      cases.push({
+        name: 'typesetting',
+        document: Radiant.updateThemeDocument(cases[0].document, {
+          typography: {
+            typesetting: {
+              fonts: { ui: { family: '"Local Display", serif', profile: 'manual' } },
+              ui: { size: 18, lineHeight: 1.7 },
+              styles: { 'ui-label': { weight: 650 } }
+            },
+            // Recipe-owned UI must win over these retained legacy values.
+            values: { bodySize: '1.5rem', bodyWeight: 300 }
+          }
+        })
+      })
     for (const item of cases)
       await writeFile(`${directory}/${item.name}.ts`, handoffAPI.typedTheme(item.document))
     await writeFile(
@@ -178,6 +193,9 @@ export const markup = renderToStaticMarkup(<>{[${cases.map(item => `{name: '${it
                     'box-shadow',
                     'font-family',
                     'font-size',
+                    'font-weight',
+                    'line-height',
+                    'letter-spacing',
                     'gap',
                     'outline-color',
                     'outline-width'
@@ -219,6 +237,11 @@ export const markup = renderToStaticMarkup(<>{[${cases.map(item => `{name: '${it
               assert.equal(expected.samples.button['border-radius'], '27px')
               assert.equal(expected.motion, '237ms')
               assert.ok(expected.root['font-family'].includes('Local Display'))
+              if (item.name === 'typesetting') {
+                assert.equal(expected.root['font-size'], '18px')
+                assert.equal(expected.root['line-height'], '30.6px')
+                assert.equal(expected.root['font-weight'], '400')
+              }
               if ((mode === 'system' ? preference : mode) === 'dark')
                 assert.equal(expected.root['background-color'], 'rgb(17, 34, 51)')
               const key = `${route.name.includes('reset') ? 'no-reset' : 'reset'}-${item.name}-${mode}-${preference}`
