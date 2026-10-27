@@ -15,11 +15,6 @@ Field owns the relationships around a control. Its default layout renders a
 error. The label targets the control's ID. Description and error IDs are joined
 in the control's `aria-describedby`; an error also marks it invalid.
 
-In this example, submit an empty or one-character name to see the application's
-validation message and focus the input. Enter a longer name and submit again
-to clear the error and show local feedback. Reset restores the empty default
-and clears errors and feedback. Required and Disabled are independent options.
-
 Field does not validate values, manage touched state or save data. You choose
 when to pass `error` and where to focus after a failed submission. Required
 adds the relationship and indicator; a disabled control is unavailable and
@@ -28,11 +23,11 @@ own feedback instead of the browser's validation popup.
 
 ## Adapt a native control
 
-Turn on **Use native input** to try the same Field with an ordinary HTML input.
-The children callback receives `FieldControlProps`: `id`, `required`, `disabled`,
-`aria-invalid`, `aria-required` and `aria-describedby`. Forward all of them to
-the actual input. The source includes this adapter and its layout styles.
-Changing this option starts a fresh example.
+To use an ordinary HTML input, pass a children callback. It receives
+`FieldControlProps`: `id`, `required`, `disabled`, `aria-invalid`,
+`aria-required` and `aria-describedby`. Forward all of them to the actual input.
+If the adapter sets its own `aria-describedby`, keep the IDs from the callback
+too. Radiant controls append external IDs once, without duplicates.
 
 Radiant [Input](/docs/input/), [Checkbox](/docs/checkbox/) and Radio consume Field
 relationships automatically. Set `controlId` on the Field when you need an
@@ -61,8 +56,7 @@ one”. A disabled group uses native fieldset disabling and inherited Field stat
 | `parts.error`       | Error `div` with `role="alert"`; `field-error`    |
 | `parts.required`    | Decorative required indicator; `field-required`   |
 
-Each part accepts `className` and `style`, rather than arbitrary DOM props. The
-example constrains the description width through `parts.description.style`.
+Each part accepts `className` and `style`, rather than arbitrary DOM props.
 Root `data-layout` identifies the layout; `data-required`, `data-disabled` and
 `data-invalid` are presence-based state attributes. Keep labels, descriptions,
 errors and visible focus readable when customizing.
@@ -85,27 +79,23 @@ These contracts match the installed **Radiant 0.0.4**. `FieldProps`,
 | `className`, `style`, `ref` | Root customization and ref to `div` / `fieldset`                                       |
 | Other native props          | Attributes and events for the selected root; group also accepts native `form` / `name` |
 
-`useField()` exposes the nearest Field state, or `null` outside a Field. It
-does not replace a form-state owner or validate anything.
+`useField()` exposes the nearest Field state, or `null` outside a Field. In
+group layout its `controlProps` is `null`. It does not replace a form-state
+owner or validate anything.
 
 ## Build a complete form
 
 The same website-owned [profile recipe](/docs/recipes/profile-form/) combines
-Field with Input, Checkbox and RadioGroup. Try native or TanStack ownership,
-then standalone, Card or Dialog placement. Save feedback stays local. Dialog
-dismissal retains edits; Reset form clears values, errors and saved feedback.
+Field with Input, Checkbox and RadioGroup, using native or TanStack form
+state.
 
 <ProfileFormDemo />
 
 ## Use the examples
 
 Install `@cognitap/radiant@0.0.4` and import
-`@cognitap/radiant/styles.css` once. View source reads the actual preview files.
-Keep the displayed `controls/` and `profile/` directory paths so the shared
+`@cognitap/radiant/styles.css` once. Keep the displayed `controls/` and `profile/` directory paths so the shared
 hydration helper resolves; it keeps submit disabled until handlers are ready.
 The focused example needs React and Radiant only. The combined profile selector
 also imports the optional `@tanstack/react-form@1.33.5`; the
 [recipe setup](/docs/recipes/profile-form/#use-the-recipe) explains a native-only copy.
-
-Theme and mode affect only their preview and preserve edits. Reset preview
-restores that frame's options and form state. Every form is independent.

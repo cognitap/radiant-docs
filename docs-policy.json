@@ -8,22 +8,19 @@
   },
   "banned": ["docs/verification/**", "docs/research/**", "docs/*-audit-*.md"],
   "legacy": {
-    "README.md": 2806,
-    "content/docs/accordion.mdx": 490,
-    "content/docs/button.mdx": 603,
+    "README.md": 2802,
+    "content/docs/accordion.mdx": 444,
+    "content/docs/button.mdx": 465,
     "content/docs/card.mdx": 456,
-    "content/docs/checkbox.mdx": 506,
-    "content/docs/collapsible.mdx": 461,
-    "content/docs/dialog.mdx": 640,
-    "content/docs/field.mdx": 589,
+    "content/docs/checkbox.mdx": 446,
+    "content/docs/dialog.mdx": 571,
+    "content/docs/field.mdx": 486,
     "content/docs/foundations/composition.mdx": 749,
     "content/docs/foundations/theming.mdx": 794,
-    "content/docs/getting-started.mdx": 452,
-    "content/docs/input.mdx": 473,
-    "content/docs/link.mdx": 552,
-    "content/docs/radio-group.mdx": 572,
-    "content/docs/releases.mdx": 422,
-    "content/docs/workshop.mdx": 2937,
-    "docs/deployment.md": 1254
+    "content/docs/getting-started.mdx": 450,
+    "content/docs/input.mdx": 404,
+    "content/docs/link.mdx": 437,
+    "content/docs/radio-group.mdx": 489,
+    "docs/deployment.md": 1212
   }
 }

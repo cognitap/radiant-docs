@@ -14,38 +14,25 @@ It renders a native `button` and defaults to `type="button"`. Use
 [Link](/docs/link/) when the action takes someone to another page, even when
 you want it to look like a button.
 
-Open **View source** to see and copy the files that power the preview, including
-its supporting styles. Import the compiled Radiant stylesheet once in your app.
-
-## Try the example
-
-Try a pointer, or Tab followed by Enter or Space. Variant changes the treatment;
-tone changes the semantic palette; control size changes the metrics. Theme and
-mode affect only this preview. System mode follows your browser preference.
-The version at the top identifies the installed package used by this build.
-
-**Reset preview** restores the example and its controls. Each preview keeps its
-own state, so resetting one leaves the others alone.
+Variant changes the treatment, tone changes the semantic palette and control
+size changes the metrics. Import the compiled Radiant stylesheet once in your app.
 
 ## Disabled and pending
 
 Use `disabled` when an action is temporarily unavailable. A disabled button
-cannot be activated with a pointer or keyboard. Use the control below to enable
-it and try the same example.
+cannot be activated with a pointer or keyboard.
 
 <ButtonDemo disabled />
 
 `pending` is different: it sets `aria-busy`, shows a decorative spinner and
 guards activation before your `onClick`. The button stays focusable and keeps
-its accessible name. Turn Pending on, focus the button and try activating it:
-the counter should stay still. Turn it off to resume. With reduced motion, the
+its accessible name. With reduced motion, the
 label stays visible instead of the animated spinner.
 
 <Callout title="Your application owns the work">
   Pending is a presentation and activation guard, not an async task runner. Set and clear it around
   your own operation, expose success or error feedback, and guard duplicate submissions in your
-  form's submission handler. The preview holds pending on until you turn it off; it makes no network
-  request.
+  form's submission handler.
 </Callout>
 
 ## Native host and accessible name
@@ -58,7 +45,8 @@ decorative pending indicator. Keep those resolved children intact in adapters.
 Use a short action label such as “Save changes”. For an icon-only action, set
 `iconOnly`, give the button an `aria-label` and hide a decorative icon with
 `aria-hidden`. A tooltip or `title` can help sighted users, but should not be the
-only accessible name. Preserve the visible keyboard focus indicator.
+only accessible name. Child SVG icons are sized to the button. Preserve the
+visible keyboard focus indicator.
 
 Use `type="submit"` inside a form to submit, or `type="reset"` for a native
 reset. Set `name`, `value` and `form` as needed. Application state and validation
@@ -69,8 +57,7 @@ still belong to the form; see the [profile recipe](/docs/recipes/profile-form/).
 This example returns a native button from `render`, adds an application data
 attribute and passes every resolved prop through. The arrow action uses the ref
 to focus that same button. It also demonstrates a named icon-only action and a
-full-width primary action. Try pending here to check that composition preserves
-the spinner, accessible name and guarded handler.
+full-width primary action.
 
 <ButtonCompositionDemo />
 
@@ -85,22 +72,22 @@ This example needs only React and Radiant.
 These props are available in the installed **Radiant 0.0.4**. `ButtonProps` and
 `ButtonRenderProps` are exported from `@cognitap/radiant`.
 
-| Prop                 | Values / purpose                                                      | Default         |
-| -------------------- | --------------------------------------------------------------------- | --------------- |
-| `variant`            | `solid`, `soft`, `outline`, `ghost`                                   | `solid`         |
-| `tone`               | `accent`, `neutral`, `warning`, `danger`                              | `accent`        |
-| `controlSize`        | `small`, `medium`, `large`                                            | `medium`        |
-| `disabled`           | Native disabled state; removed from the tab sequence                  | `false`         |
-| `pending`            | Busy presentation and activation guard; remains focusable             | `false`         |
-| `iconOnly`           | Square action metrics; supply an accessible name                      | `false`         |
-| `fullWidth`          | Fill the available inline space                                       | `false`         |
-| `type`               | Native `button`, `submit` or `reset`                                  | `button`        |
-| `render`             | `(props: ButtonRenderProps) => ReactElement`                          | Native `button` |
-| `ref`                | Ref to the real `HTMLButtonElement`                                   | —               |
-| `className`, `style` | Root customization; style also accepts typed `--…` tokens             | —               |
-| `data-slot`          | Additional identity tokens; retains `button`                          | `button`        |
-| Other native props   | `name`, `value`, `form`, `aria-*`, events and other button attributes | Native behavior |
+| Prop                 | Values / purpose                                                                    | Default         |
+| -------------------- | ----------------------------------------------------------------------------------- | --------------- |
+| `variant`            | `solid`, `soft`, `outline`, `ghost`                                                 | `solid`         |
+| `tone`               | `accent`, `neutral`, `warning`, `danger`                                            | `accent`        |
+| `controlSize`        | `small`, `medium`, `large`                                                          | `medium`        |
+| `disabled`           | Native disabled state; removed from the tab sequence                                | `false`         |
+| `pending`            | Busy presentation and activation guard; remains focusable                           | `false`         |
+| `iconOnly`           | Square action metrics; supply an accessible name                                    | `false`         |
+| `fullWidth`          | Fill the available inline space                                                     | `false`         |
+| `type`               | Native `button`, `submit` or `reset`; omitted stays `button` even with `formAction` | `button`        |
+| `render`             | `(props: ButtonRenderProps) => ReactElement`                                        | Native `button` |
+| `ref`                | Ref to the real `HTMLButtonElement`                                                 | —               |
+| `className`, `style` | Root customization; style also accepts typed `--…` tokens                           | —               |
+| `data-slot`          | Additional identity tokens; retains `button`                                        | `button`        |
+| Other native props   | `name`, `value`, `form`, `aria-*`, events and other button attributes               | Native behavior |
 
-Choose presets with `ThemeScope`, rather than replacing the host. The preview
-offers all published themes; preset fonts must be loaded by your application.
+Choose presets with `ThemeScope`, rather than replacing the host. Your
+application loads any preset fonts.
 Start with [System foundations](/docs/foundations/) for the shared theme model.
