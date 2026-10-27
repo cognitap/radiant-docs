@@ -294,7 +294,7 @@ export function ThemeWorkshop() {
               onChange={updateColor}
             />
           </div>
-          {editor === 'typography' && (
+          {editor === 'typography' && !documentTypesetting(document) && (
             <>
               <Choice
                 label="Body family"

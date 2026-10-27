@@ -1,3 +1,4 @@
+import { setTypographyFamily } from './typography-controls.mjs'
 import assert from 'node:assert/strict'
 import { workshopAvailable } from './radiant-package.mjs'
 
@@ -146,7 +147,7 @@ export async function verifyColorEditor(browser, baseURL) {
     assert.equal(await exact.inputValue(), selected)
     assert.equal(await apply.evaluate(node => node === document.activeElement), true)
     await frame.getByRole('button', { name: 'Typography', exact: true }).click()
-    await frame.getByRole('combobox', { name: 'Body family' }).selectOption('Georgia, serif')
+    const typographyFamily = await setTypographyFamily(frame)
     await frame.getByRole('button', { name: 'Color', exact: true }).click()
     assert.equal(await role.inputValue(), 'canvas')
     assert.equal(await family.inputValue(), 'teal')
@@ -160,7 +161,7 @@ export async function verifyColorEditor(browser, baseURL) {
     assert.equal(await role.inputValue(), 'accent')
     assert.equal(await roleMode.inputValue(), 'light')
     assert.equal(await family.inputValue(), 'brand')
-    assert.equal(await variable('--rad-typography-family'), 'Georgia, serif')
+    assert.equal(await variable(typographyFamily), 'Georgia, serif')
     assert.equal(
       await frame.getByRole('combobox', { name: 'Preview mode', exact: true }).inputValue(),
       'dark'

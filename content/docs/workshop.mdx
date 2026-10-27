@@ -10,7 +10,7 @@ import { WorkshopDemo } from '@/components/WorkshopDemo'
 ## A shared workspace
 
 Color, Typography, Spacing & surfaces and Motion edit one theme document. Color builds a complete palette, and Spacing & surfaces shapes the shared geometry.
-Typography and Motion have starting controls for the shared workspace. No edits are sent to a server.
+Typography provides independent font assignments, text styles and prose/UI rhythm; Motion has starting controls for the next chapter. No edits are sent to a server.
 
 **Reset color**, **Reset typography**, **Reset spacing & surfaces** and **Reset
 motion** restore that section's baseline (Color returns to the default purple brand,
@@ -104,7 +104,7 @@ in the editor. Use the handoff panel below for whole-theme and selective exports
 Open **Typography** for composed **Article**, **Form**, **Data** and **Landing**
 proofs. Prose and UI are text contexts; Body, Headings, UI and Code are font
 assignments. The proofs mix these contexts rather than treating them as separate
-font scales. The matching typography candidate adds the typesetting controls described below.
+font scales. The typesetting controls below edit their shared production roles.
 
 **Edit … copy** exposes the current composition’s headings, paragraphs, labels,
 links, lists and supporting copy. Changes are plain text and appear at every
@@ -125,12 +125,10 @@ Typography’s section reset retains proof copy and values, the other theme
 sections and inspection controls. The whole frame’s **Reset preview** restores
 everything. Preview mode uses the shared specimen mode below the proofs.
 
-The published 0.0.4 package does not include the DEV-163 text roles. Its proofs
-remain semantic and editable with an explicit availability notice. Verify the
-new role styling with a matching packed candidate; publication and the exact
-public pin belong to DEV-169. Product controls remain real Radiant components;
-their role adoption follows in DEV-167. The site supplies layouts and content,
-and consumes the package’s semantic text hooks without a second scale/compiler.
+The published 0.0.5 package supplies text roles and production component UI
+typography. The site owns layouts and copy; the library owns the semantic text
+hooks and calculations. Control sizes and deliberate component/caller overrides
+retain precedence.
 
 ## Typeset the theme
 
@@ -159,7 +157,7 @@ Requested unsupported weights stay visible and produce a warning. Production
 styles disable synthetic fonts; a nearby weight or missing file is not claimed
 to match exactly. The typeface lab still provides real italic and verified axis
 trials. Its **Use family in theme** also assigns the trial family to its selected
-context in the typesetting candidate. Role weights stay in the style inspector;
+context in the typesetting editor. Role weights stay in the style inspector;
 axis and sample rhythm experiments remain local to the lab.
 
 Choose a loaded normal local font in an assignment selector, or enter an installed
@@ -174,14 +172,12 @@ manual rhythm/styles and typography token/mode overrides. Other theme sections,
 component exceptions and proof copy/values stay intact. Ordinary edits preserve
 authored typography token/mode overrides; those can take precedence over recipe
 controls. An imported legacy document without a typesetting recipe keeps its
-authored typography until you explicitly choose a starting point. Body family/size
-above the lab remain installed-component defaults
-until component role adoption; they do not replace the new text-style controls.
+authored typography until you explicitly choose a starting point. Its earlier
+family/size controls are shown only while it has no recipe. Once initialized,
+font assignments and the Prose/UI controls own the typesetting decisions.
 
-The public 0.0.4 pin retains its previous controls and an availability notice.
-Use a matching packed candidate to exercise the complete editor. Chapter release
-coordinates publication and the exact public pin; no alternate scale/compiler
-runs in the website.
+The public 0.0.5 pin runs the complete editor and production roles. No alternate
+scale/compiler runs in the website.
 
 ## Try fonts
 
@@ -190,8 +186,9 @@ The site hosts pinned normal and true italic files and their complete open font
 licenses. Only selected families load; a visible status distinguishes loading,
 loaded and failed files. The sample uses the named fallback until loading succeeds.
 Changing the trial does not change your theme: choose **Use family in theme** to
-apply its family and selected weight. Existing theme sections and component
-exceptions remain. The Body family/size controls still edit the shared theme.
+assign its family to the chosen Body/Headings/UI/Code context. Set role weights
+in the text-style inspector; sample tuning remains local. Existing theme sections
+and component exceptions remain.
 
 Choose Body, Headings, UI or Code as the trial context. Studied combinations show
 their accepted starting metrics; unfamiliar fonts and unsupported contexts use
@@ -271,7 +268,7 @@ Public URLs, exact checksums and license links are in the
 **Copy typed theme** is the primary handoff: a typed `ThemeDocument` and the
 compiled Radiant `theme`, ready for `ThemeScope`. Import the package’s compiled
 styles once in your app entry and use a release that includes the document APIs.
-The optional reset is separate. Radiant 0.0.4 provides these APIs; the site header identifies the installed
+The optional reset is separate. Radiant 0.0.5 provides these APIs; the site header identifies the installed
 package used by every specimen and export.
 
 **Download configuration** saves the complete authoring document, palette/font
@@ -301,8 +298,8 @@ adapt its URLs. Local files, private file names and blobs never enter exports or
 share links. Recipients provide their own licensed font and can restore the
 preview through Typeface lab using the saved CSS family name. Available axis
 ranges describe files; trial-only axis adjustments are not typography settings.
-Axis metadata needs the coordinated typography package, while the installed
-0.0.4 path retains its supported metadata and explicit availability notices.
+The 0.0.5 native document parser retains axis metadata. Older package parsers
+reject those new keys; use matching package JavaScript and CSS.
 
 Selective files contain exactly the chosen public sections. **Merge supplied
 leaves** keeps omitted values; **Replace supplied sections** removes omitted
@@ -330,7 +327,7 @@ Font family names and requirements travel with themes, configurations and links;
 font files stay local. Load required fonts in the consuming app. The setup panel
 lists local/catalog/system descriptors, weights and styles when available. The
 same document sections retain existing typography and motion values and component
-exceptions for the later typesetting and spring tools.
+exceptions alongside typesetting decisions and the next spring chapter.
 
 ## Inspect the result
 
@@ -348,8 +345,8 @@ system's reduced-motion preference.
 
 ## Package availability
 
-The site consumes the exact published **Radiant 0.0.4** package from npm. The
-complete palette, spacing/surfaces and handoff editors use its public document,
+The site consumes the exact published **Radiant 0.0.5** package from npm. The
+complete palette, spacing/surfaces, typesetting and handoff editors use its public document,
 generation and appearance APIs. No library source, Storybook module or workspace
 alias is imported.
 

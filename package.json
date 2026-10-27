@@ -22,7 +22,7 @@
     "test:workshop": "node --test scripts/workshop-*.test.mjs"
   },
   "dependencies": {
-    "@cognitap/radiant": "0.0.4",
+    "@cognitap/radiant": "0.0.5",
     "@tanstack/react-form": "1.33.5",
     "fumadocs-core": "16.17.8",
     "fumadocs-mdx": "15.4.10",

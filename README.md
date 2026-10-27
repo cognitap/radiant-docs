@@ -5,7 +5,7 @@ with Next.js static export, Fumadocs Core + MDX and Radiant UI. This is one app
 with its own dependencies, lockfile and CI. A normal build requires no library
 checkout, workspace link or source alias.
 
-The site consumes **Radiant 0.0.4**, pinned from npm. That experimental release
+The site consumes **Radiant 0.0.5**, pinned from npm. That experimental release
 exports the harmonised ten-family component system and shared theme APIs. This
 site includes guides for all ten families, installation/foundations/release
 guidance and complete native/TanStack profile-form recipes. Setup, theming and
@@ -92,9 +92,9 @@ previews and merges to `main` publish the tested export to production.
 
 ## Workshop font trials
 
-Typography includes a website-owned font registry/trial panel (DEV-164), separate
-from the later complete typesetting editor. It consumes published Radiant 0.0.4's
-document APIs; the package pin stays unchanged. `examples/workshop/workshop-fonts.ts`
+Typography includes a website-owned font registry/trial panel alongside the
+complete typesetting editor. It consumes published Radiant 0.0.5's document and
+typography APIs. `examples/workshop/workshop-fonts.ts`
 owns contextual recommendation metadata, local OpenType metadata and requirement
 handoff. `font-runtime.ts` owns browser faces and their cleanup; `FontEditor.tsx`
 owns local sample settings. No library compiler/loading path is duplicated.
@@ -104,9 +104,8 @@ The manifest records upstream URLs/checksums, verified by `test:workshop`.
 `scripts/fixtures/InterVariable.ttf` is a licensed, pinned browser-test input,
 not a deployed font. Local user files use memory-only buffers, with no upload,
 object URLs or persistent storage. Theme/configuration/share output carries
-only public font descriptors and CSS family/selected weight. Trial axes and
-sample rhythm are intentionally local; final typesetting/handoff work retains
-its planned scope.
+portable family/weight/style requirements and available axis ranges. Binary
+files and trial-only variation/sample settings remain local.
 
 `scripts/verify-font-editor.mjs`, included in the smoke/deployment gate, verifies
 actual normal/italic loads, variable/optical controls, contextual/manual settings,
@@ -233,7 +232,7 @@ it is not imported by production code.
 
 ## Form control guides
 
-The Field, Input, Checkbox and RadioGroup pages document Radiant 0.0.4's native
+The Field, Input, Checkbox and RadioGroup pages document Radiant 0.0.5's native
 hosts, parts, props and consumer responsibilities. `examples/controls/` owns
 five focused examples: Field relationships with a native-input adapter, email
 validation/read-only behavior, checkbox payloads, controlled mixed selection,
@@ -260,7 +259,7 @@ recipe's setup and optional TanStack dependency instructions.
 
 Dialog, Collapsible, Accordion and Card use independently authored examples in
 `examples/compositions/`. The guides document named parts, public props, native
-hosts and style/ref targets against Radiant 0.0.4. `CompositionPlayground` keeps
+hosts and style/ref targets against Radiant 0.0.5. `CompositionPlayground` keeps
 website options outside copyable components; `components/CompositionDemo.tsx`
 lists their exact source and supporting files. Preserve the displayed directory
 paths when copying shared types, CSS and the existing hydration helper.
@@ -333,7 +332,7 @@ specimens. `examples/workshop/` owns the public examples, CSS and orchestration;
 `WorkshopDemo` reuses the existing source/copy/reset frame. Navigation and search
 include the page, and the homepage links to it.
 
-The exact published 0.0.4 pin enables the complete color, geometry and handoff
+The exact published 0.0.5 pin enables the complete color, geometry, typesetting and handoff
 editors in ordinary builds. The adapters import released public functions and
 types; the library parser validates opaque document state and the library owns
 all color/geometry mapping. The old pre-release declaration/capability seam has
@@ -351,7 +350,7 @@ pnpm preview:candidate /absolute/path/radiant-candidate.tgz --check
 The candidate check runs the document reset tests as well as typecheck, build and
 browser checks. Its screenshots are retained under ignored `output/candidate/`
 before the temporary installation is removed. Normal-build screenshots remain
-under `output/docs/`. Both registry and matching candidate builds run all 17 workshop tests without
+under `output/docs/`. Both registry and matching candidate builds run all 31 workshop tests without
 API-availability skips. The browser
 gate also checks all 12 agreed brand references and actual exported themes in
 compiled-CSS and Tailwind consumers, with both reset choices. Editing assertions
@@ -363,8 +362,8 @@ per-mode canvas. Reset specimen remounts only the active example; the demo frame
 Reset preview remounts the whole workshop while retaining source/toolbar focus.
 The form reuses the website-owned `NativeProfileForm` and its supporting files;
 no library Storybook code is imported. Color-wall, working-palette, spacing/surfaces and full/selective handoff editors
-share that same document. Typography and motion retain starter controls for later
-chapters. Public editing uses the registry release through a verified exact docs pin and
+share that same document. Typography owns independent font assignments, prose/UI
+rhythm and 16 styles. Motion retains starter controls for the next chapter. Public editing uses the registry release through a verified exact docs pin and
 the existing deployment workflow.
 
 ### Typography proof sheets
@@ -375,14 +374,14 @@ The Typography panel owns four editable compositions in
 800/640/390/320px frames and the 800+390 comparison. Responsive type comes from
 Radiant’s public `data-rad-text`, `data-rad-prose` and local-container hooks; the
 website stylesheet owns composition/layout only. `verify-typography-proofs.mjs`
-checks both the released semantic fallback and the packed candidate's role
-styling. Keep the exact public pin unchanged until chapter publication (DEV-169).
+checks the installed production roles and local-container styling. The chapter
+uses exact npm 0.0.5; a matching packed candidate remains available for future changes.
 
-The typography candidate adds `TypographyEditor.tsx` and the small
+The typography chapter includes `TypographyEditor.tsx` and the small
 `workshop-typography.ts` adapter. It consumes the public generator and validates
 portable section changes with the public parser before the same compiler;
-there is no fallback calculation. The temporary capability seam leaves the
-exact 0.0.4 dependency intact until chapter release. `verify-typesetting-editor.mjs`
+there is no fallback calculation. Production components consume the same shared
+UI roles; control sizes and deliberate exceptions retain precedence. `verify-typesetting-editor.mjs`
 checks assignment/rhythm/style ownership, custom fonts, fixed/fluid sizes,
 proof inspection, resets, focus, draft editing and narrow hydration. Font trials
 and assigned families share one session loader with per-family pending requests,
@@ -399,3 +398,15 @@ native document parser when supported. Trial-only axes, binary data and private
 filenames stay local. The setup CSS deduplicates variable normal/italic faces and
 includes weight/width descriptors. Missing local files retain actionable family,
 weight/style/axis requirements and fallback guidance after import/share reload.
+
+### Typography chapter acceptance (DEV-169)
+
+`verify-typography-chapter.mjs` records 128 installed cases: Inter, Source Serif,
+Plex and a normal-only custom font × Article/Form/Data/Landing × 800/640/390/320px
+× light/dark. It checks actual font availability, contextual profile/manual
+metrics and reflow. It retains 16 representative captures, a contact sheet and a
+JSON receipt in `output/docs/typography-chapter/`. These are recorded examples,
+not a universal readability/quality score or manual browser/AT certification.
+The custom case retains its requirements after local-face removal without
+exporting file bytes/private names. Legacy starter controls are shown only for
+recipe-free imported themes; the active typesetting model owns modern recipes.
