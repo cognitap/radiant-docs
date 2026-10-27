@@ -20,6 +20,7 @@ export async function verifyGeometryEditor(browser, baseURL) {
     const editor = frame.locator('.geometry-editor')
     const chooseEditor = async name => {
       const button = frame.getByRole('button', { name, exact: true })
+      await page.waitForFunction(node => !node.disabled, await button.elementHandle())
       await button.focus()
       await button.press('Enter')
       assert.equal(await button.getAttribute('aria-pressed'), 'true')
