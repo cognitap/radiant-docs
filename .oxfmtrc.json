@@ -7,5 +7,12 @@
   "singleAttributePerLine": true,
   "printWidth": 100,
   "tabWidth": 2,
-  "ignorePatterns": [".next/**", ".source/**", ".scratch/**", "out/**", "output/**"]
+  "ignorePatterns": [
+    ".next/**",
+    ".source/**",
+    ".scratch/**",
+    "out/**",
+    "output/**",
+    "public/fonts/workshop/*LICENSE*"
+  ]
 }

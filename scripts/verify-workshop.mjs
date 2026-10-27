@@ -11,7 +11,7 @@ export async function verifyWorkshop(browser, baseURL) {
   )
   const staticFrame = staticPage.getByRole('region', { name: 'Shared theme workshop', exact: true })
   await staticFrame.locator('.demo-sources > summary').press('Enter')
-  assert.equal(await staticFrame.locator('pre').count(), 18)
+  assert.equal(await staticFrame.locator('pre').count(), 22)
   await staticPage.close()
 
   const context = await browser.newContext({
@@ -182,6 +182,10 @@ export async function verifyWorkshop(browser, baseURL) {
     for (const file of [
       'workshop/ThemeWorkshop.tsx',
       'workshop/workshop-theme.ts',
+      'workshop/FontEditor.tsx',
+      'workshop/workshop-fonts.ts',
+      'workshop/font-runtime.ts',
+      'workshop/font-editor.css',
       'workshop/workshop-color.ts',
       'workshop/ColorEditor.tsx',
       'workshop/color-editor.css',

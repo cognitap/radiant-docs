@@ -90,6 +90,30 @@ browser captures and machine-readable environment evidence. Once the Cloudflare
 settings in the deployment guide are configured, trusted PRs receive verified
 previews and merges to `main` publish the tested export to production.
 
+## Workshop font trials
+
+Typography includes a website-owned font registry/trial panel (DEV-164), separate
+from the later complete typesetting editor. It consumes published Radiant 0.0.4's
+document APIs; the package pin stays unchanged. `examples/workshop/workshop-fonts.ts`
+owns contextual recommendation metadata, local OpenType metadata and requirement
+handoff. `font-runtime.ts` owns browser faces and their cleanup; `FontEditor.tsx`
+owns local sample settings. No library compiler/loading path is duplicated.
+
+Eight pinned WOFF2 faces and full licenses live in `public/fonts/workshop/`.
+The manifest records upstream URLs/checksums, verified by `test:workshop`.
+`scripts/fixtures/InterVariable.ttf` is a licensed, pinned browser-test input,
+not a deployed font. Local user files use memory-only buffers, with no upload,
+object URLs or persistent storage. Theme/configuration/share output carries
+only public font descriptors and CSS family/selected weight. Trial axes and
+sample rhythm are intentionally local; final typesetting/handoff work retains
+its planned scope.
+
+`scripts/verify-font-editor.mjs`, included in the smoke/deployment gate, verifies
+actual normal/italic loads, variable/optical controls, contextual/manual settings,
+real TTF and WOFF2 local trials, corrupted/missing font recovery, descriptor-only
+exports, face cleanup, keyboard controls and 320px/390px layouts. See the public
+[workshop guide](content/docs/workshop.mdx) for self-hosted setup and limitations.
+
 ## Coordinate an unreleased library change
 
 Normal builds consume the exact npm version in `package.json` and

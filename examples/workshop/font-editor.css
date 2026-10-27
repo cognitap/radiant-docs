@@ -1,0 +1,116 @@
+.workshop-font-panel {
+  width: 100%;
+  min-width: 0;
+}
+.font-editor {
+  display: grid;
+  gap: 1rem;
+  width: 100%;
+  min-width: 0;
+  margin-block-start: 1rem;
+}
+.font-editor *,
+.font-editor *::before,
+.font-editor *::after {
+  box-sizing: border-box;
+}
+.font-editor p {
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+.font-editor h4 {
+  margin: 0;
+}
+.font-editor-heading {
+  display: grid;
+  gap: 0.5rem;
+}
+.font-controls {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 10rem), 1fr));
+  gap: 0.75rem;
+}
+.font-editor label {
+  display: grid;
+  gap: 0.35rem;
+  font-size: 0.8125rem;
+  min-width: 0;
+}
+.font-editor input,
+.font-editor select,
+.font-editor textarea {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  padding: 0.5rem;
+  border: 1px solid var(--docs-border);
+  border-radius: 0.375rem;
+  background: var(--docs-surface);
+  color: var(--docs-foreground);
+  font: inherit;
+}
+.font-editor input:focus-visible,
+.font-editor select:focus-visible,
+.font-editor textarea:focus-visible,
+.font-editor summary:focus-visible {
+  outline: 2px solid var(--docs-accent);
+  outline-offset: 3px;
+}
+.font-editor > button {
+  justify-self: start;
+}
+.font-axes {
+  display: grid;
+  gap: 0.75rem;
+  border: 1px solid var(--docs-border);
+  padding: 1rem;
+  min-width: 0;
+}
+.font-status,
+.font-warning,
+.font-notice {
+  padding: 0.75rem;
+  border: 1px solid var(--docs-border);
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  overflow-wrap: anywhere;
+}
+.font-warning {
+  border-color: var(--docs-accent);
+}
+.font-sample {
+  width: 100%;
+  padding: 1rem;
+  border: 1px solid var(--docs-border);
+  border-radius: 0.5rem;
+  font-synthesis: none;
+  overflow-wrap: anywhere;
+}
+.font-sample p {
+  font: inherit;
+  letter-spacing: inherit;
+  white-space: pre-wrap;
+}
+.font-sample p + p {
+  margin-block-start: 1.25em;
+}
+.font-local {
+  display: grid;
+  gap: 0.75rem;
+}
+.font-local summary {
+  cursor: pointer;
+  font-weight: 600;
+  padding-block: 0.5rem;
+}
+.font-local[open] > * + * {
+  margin-block-start: 0.75rem;
+}
+.font-notice:empty {
+  display: none;
+}
+.workshop-font-panel[hidden] {
+  display: none !important;
+}
