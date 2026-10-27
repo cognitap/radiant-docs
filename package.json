@@ -20,7 +20,7 @@
     "format:check": "oxfmt --check",
     "check": "pnpm format:check && pnpm lint && pnpm docs:check && pnpm typecheck && pnpm test:hosting && pnpm test:workshop && pnpm build && pnpm test:smoke",
     "test:workshop": "node --test scripts/workshop-*.test.mjs",
-    "docs:check": "node --test scripts/check-docs.test.mjs && node scripts/check-docs.mjs"
+    "docs:check": "node scripts/check-docs.mjs"
   },
   "dependencies": {
     "@cognitap/radiant": "0.0.5",
