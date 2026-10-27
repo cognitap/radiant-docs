@@ -126,6 +126,9 @@ export async function verifyTypesettingEditor(browser, baseURL) {
     const accent = await proof.evaluate(node =>
       getComputedStyle(node).getPropertyValue('--rad-color-accent')
     )
+    await select('Text style').selectOption('ui-body')
+    await editor.getByRole('checkbox', { name: 'Responsive endpoints', exact: true }).check()
+    await number('Wide size (px)').fill('30')
     await select('Starting point').selectOption('plex')
     assert.equal(
       await proof.getByRole('textbox', { name: 'Name shown to collaborators' }).inputValue(),
@@ -137,6 +140,11 @@ export async function verifyTypesettingEditor(browser, baseURL) {
     )
     assert.equal(await number('Prose size (px)').inputValue(), '20')
     assert.equal(await editor.getByRole('alert').count(), 0)
+    assert.equal(
+      await editor.getByRole('checkbox', { name: 'Responsive endpoints', exact: true }).isChecked(),
+      false,
+      'starting points restore the fixed/fluid editor state too'
+    )
     await select('Text style').selectOption('ui-body')
     assert.equal(
       await number('Style size (px)').inputValue(),

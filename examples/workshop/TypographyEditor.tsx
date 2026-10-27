@@ -140,6 +140,7 @@ export function TypographyEditor({
   function change(next: TypesettingInput, reset = false) {
     try {
       onChange(applyTypesetting(document, next, local, reset))
+      if (reset) setFluidModes({})
       setNotice(
         reset
           ? 'Typography starting point applied. Other sections, component exceptions and proof content retained.'
