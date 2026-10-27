@@ -1,0 +1,36 @@
+{
+  "budget": 600,
+  "budgets": {
+    "README.md": 400,
+    "docs/deployment.md": 500,
+    "content/docs/workshop.mdx": 1000,
+    "content/docs/*.mdx": 400
+  },
+  "banned": ["docs/verification/**", "docs/research/**", "docs/*-audit-*.md"],
+  "legacy": {
+    "README.md": 2810,
+    "content/docs/accordion.mdx": 490,
+    "content/docs/button.mdx": 603,
+    "content/docs/card.mdx": 456,
+    "content/docs/checkbox.mdx": 506,
+    "content/docs/collapsible.mdx": 461,
+    "content/docs/dialog.mdx": 640,
+    "content/docs/field.mdx": 589,
+    "content/docs/foundations/composition.mdx": 749,
+    "content/docs/foundations/theming.mdx": 794,
+    "content/docs/getting-started.mdx": 452,
+    "content/docs/input.mdx": 473,
+    "content/docs/link.mdx": 552,
+    "content/docs/radio-group.mdx": 572,
+    "content/docs/releases.mdx": 422,
+    "content/docs/workshop.mdx": 2937,
+    "docs/deployment.md": 1254,
+    "docs/verification/2026-10-26-workshop-chapter.md": 951,
+    "docs/verification/2026-10-27-component-typography-integration.md": 247,
+    "docs/verification/2026-10-27-font-trials.md": 690,
+    "docs/verification/2026-10-27-typesetting-chapter.md": 448,
+    "docs/verification/2026-10-27-typesetting-editor.md": 737,
+    "docs/verification/2026-10-27-typography-handoff.md": 334,
+    "docs/verification/2026-10-27-typography-proofs.md": 693
+  }
+}
