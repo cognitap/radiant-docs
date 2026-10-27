@@ -377,3 +377,13 @@ Radiant’s public `data-rad-text`, `data-rad-prose` and local-container hooks; 
 website stylesheet owns composition/layout only. `verify-typography-proofs.mjs`
 checks both the released semantic fallback and the packed candidate's role
 styling. Keep the exact public pin unchanged until chapter publication (DEV-169).
+
+The typography candidate adds `TypographyEditor.tsx` and the small
+`workshop-typography.ts` adapter. It consumes the public generator and validates
+portable section changes with the public parser before the same compiler;
+there is no fallback calculation. The temporary capability seam leaves the
+exact 0.0.4 dependency intact until chapter release. `verify-typesetting-editor.mjs`
+checks assignment/rhythm/style ownership, custom fonts, fixed/fluid sizes,
+proof inspection, resets, focus, draft editing and narrow hydration. Font trials
+and assigned families share one session loader with per-family pending requests,
+caching and actual availability notifications. Whole-workshop reset disposes it.

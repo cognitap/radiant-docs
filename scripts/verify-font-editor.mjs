@@ -27,7 +27,12 @@ export async function verifyFontEditor(browser, baseURL) {
       0,
       'font assets are lazy until Typography is opened'
     )
-    await frame.getByRole('button', { name: 'Typography', exact: true }).click()
+    async function openTypography() {
+      await frame.getByRole('button', { name: 'Typography', exact: true }).click()
+      const lab = frame.locator('.workshop-typeface-lab')
+      if (!(await lab.evaluate(node => node.open))) await lab.locator(':scope > summary').click()
+    }
+    await openTypography()
     await page.waitForFunction(
       () => document.querySelector('.font-editor').dataset.fontState === 'loaded'
     )
@@ -296,7 +301,7 @@ export async function verifyFontEditor(browser, baseURL) {
       started()
       await done
     })
-    await frame.getByRole('button', { name: 'Typography', exact: true }).click()
+    await openTypography()
     await hit
     await frame.getByRole('button', { name: 'Reset preview', exact: true }).click()
     unblock()
@@ -315,7 +320,7 @@ export async function verifyFontEditor(browser, baseURL) {
       await paused
       await route.fulfill({ status: 404, body: 'missing' })
     })
-    await frame.getByRole('button', { name: 'Typography', exact: true }).click()
+    await openTypography()
     await page.waitForFunction(
       () => document.querySelector('.font-editor').dataset.fontState === 'loading'
     )
@@ -332,7 +337,7 @@ export async function verifyFontEditor(browser, baseURL) {
     await panel.getByRole('button', { name: 'Retry font', exact: true }).click()
     await loaded('Inter')
     await page.reload()
-    await frame.getByRole('button', { name: 'Typography', exact: true }).click()
+    await openTypography()
     await loaded('Inter')
     assert.equal(
       await panel

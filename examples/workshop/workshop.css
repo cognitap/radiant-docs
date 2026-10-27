@@ -208,3 +208,52 @@
 .workshop-proofs-panel[hidden] {
   display: none !important;
 }
+
+.workshop-typeface-lab {
+  width: 100%;
+}
+.workshop-typeface-lab > summary {
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 600;
+  padding-block: 0.75rem;
+}
+.workshop-proofs-panel[data-typesetting-available] {
+  display: grid;
+  gap: 1rem;
+  padding: 1rem;
+  align-items: start;
+  min-width: 0;
+}
+.workshop-proofs-panel > .typesetting-editor {
+  min-width: 0;
+}
+@media (min-width: 1400px) {
+  .workshop-proofs-panel[data-typesetting-available] {
+    grid-template-columns: minmax(15rem, 0.8fr) minmax(0, 1.5fr);
+  }
+  .workshop-proofs-panel > .typesetting-editor {
+    position: sticky;
+    top: 5rem;
+    max-height: calc(100dvh - 6rem);
+    overflow-y: auto;
+    padding: 0.25rem;
+  }
+}
+.proof-inspect-toggle {
+  display: flex;
+  gap: 0.5rem;
+  font-size: 0.8125rem;
+  margin-block: 1rem;
+}
+.proof-frames[data-proof-inspecting] .proof-page {
+  cursor: crosshair;
+}
+.typesetting-editor .typesetting-fluid {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+.typesetting-fluid input {
+  width: auto;
+}

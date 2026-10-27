@@ -1,5 +1,7 @@
 'use client'
 
+/* oxlint-disable jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events -- Optional delegated text picking has an equivalent keyboard-operable text-style selector. */
+
 import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import { Button, ThemeScope, type Theme, type ThemeMode } from '@cognitap/radiant'
 import { ProofPage, initialProofInteraction, type ProofInteraction } from './ProofPages'
@@ -98,12 +100,23 @@ function ProofFrame({
   )
 }
 
-export function TypographyProofs({ theme, mode }: { theme: Theme; mode: ThemeMode }) {
+export function TypographyProofs({
+  theme,
+  mode,
+  selectedRole = 'prose-body',
+  onSelectRole
+}: {
+  theme: Theme
+  mode: ThemeMode
+  selectedRole?: string
+  onSelectRole?: (role: string) => void
+}) {
   const [proof, setProof] = useState<Proof>('article')
   const [width, setWidth] = useState('800')
   const [edits, setEdits] = useState<CopyEdits>({})
   const [interaction, setInteraction] = useState(initialProofInteraction)
   const [spacing, setSpacing] = useState(false)
+  const [inspecting, setInspecting] = useState(false)
   const [feedback, setFeedback] = useState('')
   const roleSupport = Object.hasOwn(theme.modes.light, '--rad-typography-roles-prose-body-size')
   function updateInteraction(patch: Partial<ProofInteraction>) {
@@ -236,7 +249,55 @@ export function TypographyProofs({ theme, mode }: { theme: Theme; mode: ThemeMod
         reading comfort; the spacing probe is a layout check, not browser zoom. Preview mode follows
         the shared specimen mode below. Product controls use the installed component typography.
       </p>
+      {roleSupport && onSelectRole && (
+        <label className="proof-inspect-toggle">
+          <input
+            type="checkbox"
+            checked={inspecting}
+            onChange={event => setInspecting(event.target.checked)}
+          />
+          Inspect text styles (click text; actions pause while inspecting)
+        </label>
+      )}
+      {inspecting && (
+        <p className="proof-context">
+          Selected style: {selectedRole}. Use the text-style selector for keyboard inspection and
+          editing.
+        </p>
+      )}
+      {inspecting && (
+        <style>{`.proof-frames [data-rad-text="${/^[a-z-]+$/.test(selectedRole) ? selectedRole : 'prose-body'}"] { outline: 2px solid var(--rad-color-focus); outline-offset: 3px; }`}</style>
+      )}
       <div
+        onClickCapture={event => {
+          if (!inspecting || !onSelectRole || !(event.target instanceof Element)) return
+          const explicit = event.target.closest<HTMLElement>('[data-rad-text]')
+          const block = event.target.closest('p,ul,ol,blockquote,pre,h1,h2,h3,h4,h5,h6')
+          const automatic = block?.parentElement?.hasAttribute('data-rad-prose')
+            ? (
+                {
+                  P: 'prose-body',
+                  UL: 'prose-body',
+                  OL: 'prose-body',
+                  BLOCKQUOTE: 'prose-quote',
+                  PRE: 'code',
+                  H1: 'prose-title',
+                  H2: 'prose-heading',
+                  H3: 'prose-subheading',
+                  H4: 'prose-subheading',
+                  H5: 'prose-subheading',
+                  H6: 'prose-subheading'
+                } as Record<string, string>
+              )[block.tagName]
+            : undefined
+          const role = explicit?.dataset.radText ?? automatic
+          if (role) {
+            event.preventDefault()
+            event.stopPropagation()
+            onSelectRole(role)
+          }
+        }}
+        data-proof-inspecting={inspecting || undefined}
         className="proof-frames"
         data-proof-compare={width === 'compare' || undefined}
       >

@@ -19,7 +19,7 @@ import './font-editor.css'
 type Metrics = { size: number; leading: number; tracking: number; measure: number }
 const contexts: readonly FontContext[] = ['body', 'headings', 'ui', 'code']
 const diagnostic = 'Árvíztűrő tükörfúrógép · Ελληνικά α Ω · Кириллица Ж ж · العربية ا · 漢字'
-function FontNumber({
+export function FontNumber({
   label,
   value,
   min,
@@ -70,11 +70,17 @@ function FontNumber({
 export function FontEditor({
   active,
   document,
-  onChange
+  onChange,
+  onSession,
+  onLocalReady,
+  onAssignFont
 }: {
   active: boolean
   document: object
   onChange: (document: object) => void
+  onSession?: (loader: WorkshopFontLoader | null) => void
+  onLocalReady?: (font: TrialFont | null) => void
+  onAssignFont?: (document: object, font: TrialFont, context: FontContext) => object
 }) {
   const [selected, setSelected] = useState('inter')
   const [custom, setCustom] = useState<TrialFont | null>(null)
@@ -122,23 +128,28 @@ export function FontEditor({
   useEffect(() => {
     const next = new WorkshopFontLoader()
     loader.current = next
+    onSession?.(next)
     return () => {
       next.dispose()
       loader.current = null
+      onSession?.(null)
+      onLocalReady?.(null)
     }
-  }, [])
+  }, [onSession, onLocalReady])
   useEffect(() => {
     if (!active) return
     let cancelled = false
     loader
       .current!.load(font, font.source === 'local' ? bytes.current : undefined)
       .then(loaded => {
-        if (!cancelled && loaded)
+        if (!cancelled && loaded) {
+          if (font.source === 'local') onLocalReady?.(font)
           setLoad({
             key: requestKey,
             state: 'loaded',
             message: `${font.family} loaded · ${font.styles.join(' + ')} · weights ${font.weights.join('–')}. Glyph fallback may still occur.`
           })
+        }
       })
       .catch(() => {
         if (!cancelled)
@@ -151,7 +162,7 @@ export function FontEditor({
     return () => {
       cancelled = true
     }
-  }, [active, font, requestKey])
+  }, [active, font, requestKey, onLocalReady])
   function select(id: string) {
     setSelected(id)
     setAxes({})
@@ -173,6 +184,7 @@ export function FontEditor({
       const info = inspectLocalFont(buffer)
       const next = localFont(buffer, family, fileStyle, fileWeight)
       if (custom) loader.current!.remove(custom.family)
+      onLocalReady?.(null)
       bytes.current = buffer
       setCustom(next)
       setLocalRevision(value => value + 1)
@@ -432,9 +444,12 @@ export function FontEditor({
         }
         onClick={() => {
           try {
-            onChange(applyTrialFont(document, font, weight))
+            const next = applyTrialFont(document, font, weight)
+            onChange(onAssignFont ? onAssignFont(next, font, context) : next)
             setNotice(
-              `${font.family} and weight ${weight} applied. Sample rhythm/axes stay local; other theme settings are retained.`
+              onAssignFont
+                ? `${font.family} assigned to ${context}. Role weights are set in the text style inspector; sample rhythm/axes stay local.`
+                : `${font.family} and weight ${weight} applied. Sample rhythm/axes stay local; other theme settings are retained.`
             )
           } catch (error) {
             setNotice(error instanceof Error ? error.message : 'Unable to apply this font.')
@@ -498,6 +513,7 @@ export function FontEditor({
             onClick={() => {
               ++uploadRevision.current
               loader.current!.remove(custom.family)
+              onLocalReady?.(null)
               bytes.current = undefined
               setCustom(null)
               setFileInfo('')
