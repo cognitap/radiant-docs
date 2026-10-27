@@ -24,6 +24,11 @@ export function handoffFixture() {
   let document = create({
     id: 'handoff-proof',
     name: 'Handoff proof',
+    motion: {
+      mode: 'system',
+      spring: { stiffness: 280, damping: 22, mass: 1.2 },
+      interactions: { press: { stiffness: 410 }, follow: { damping: 18 } }
+    },
     tokens: {
       typography: { family: '"Local Display", serif', bodySize: '1rem' },
       motion: {

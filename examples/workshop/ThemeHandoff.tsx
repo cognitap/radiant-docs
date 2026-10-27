@@ -76,6 +76,8 @@ export function ThemeHandoff({
         typographyTyped: handoffAPI.typedTheme(config.document, ['typography']),
         typographyCSS,
         typographyCSSError,
+        motionTyped: handoffAPI.typedTheme(config.document, ['motion']),
+        runtime: handoffAPI.runtimeSetup(),
         setup: fontSetup(config.document),
         error: ''
       }
@@ -88,6 +90,8 @@ export function ThemeHandoff({
         typographyTyped: '',
         typographyCSS: '',
         typographyCSSError: '',
+        motionTyped: '',
+        runtime: { install: '', source: '' },
         setup: '',
         error: errorMessage(error)
       }
@@ -367,6 +371,12 @@ export function ThemeHandoff({
             <code>"dark"</code> or <code>"system"</code> on a plain wrapper. For React ThemeScope
             and nested modes, use the typed theme instead.
           </p>
+          <p>
+            This output carries CSS timing tokens, not physical spring profiles. A sampled CSS curve
+            restarts when interrupted; the runtime retains position and momentum. This release
+            provides no sampled spring CSS export. Use the typed theme and runtime setup below for
+            spring motion.
+          </p>
           {prepared?.cssError ? (
             <p>{prepared.cssError}</p>
           ) : (
@@ -395,6 +405,42 @@ export function ThemeHandoff({
               </label>
             </>
           )}
+        </details>
+        <details>
+          <summary>Motion only · typed configuration</summary>
+          <p>
+            Save this as <code>radiant-motion.ts</code>. Call <code>applyMotion(target)</code>,
+            compile the returned document and pass the theme to ThemeScope. Replace restores omitted
+            motion values to defaults; Merge retains omitted leaves. Other sections stay authored.
+            The file includes physics and legacy CSS timing; a device’s reduced-motion preference is
+            read by the runtime, never saved into the theme.
+          </p>
+          <div className="workshop-actions">
+            <Button
+              variant="outline"
+              aria-disabled={!!busy}
+              onClick={() => void copy(prepared?.motionTyped ?? '', 'Motion typed theme')}
+            >
+              Copy motion TypeScript
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() =>
+                download(prepared?.motionTyped ?? '', 'radiant-motion.ts', 'text/typescript')
+              }
+            >
+              Download motion TypeScript
+            </Button>
+          </div>
+          <label>
+            Motion TypeScript output
+            <textarea
+              readOnly
+              rows={12}
+              wrap="off"
+              value={prepared?.motionTyped ?? ''}
+            />
+          </label>
         </details>
         <details>
           <summary>Typography only · typed and CSS</summary>
@@ -467,13 +513,55 @@ export function ThemeHandoff({
       <details className="handoff-setup">
         <summary>Required setup and fonts</summary>
         <p>
-          Use a Radiant release containing <code>ThemeDocument</code> and{' '}
-          <code>compileThemeDocument</code>; the candidate header identifies the package being
-          verified. Install React and React DOM, import <code>@cognitap/radiant/styles.css</code>{' '}
-          once in your app entry, then import <code>theme</code> from the exported TypeScript file
-          and pass it to <code>ThemeScope theme={'{theme}'} mode="system"</code>. The reset
-          stylesheet is optional.
+          Install the exact package versions below. Save the full typed output as{' '}
+          <code>radiant-theme.ts</code> and the runtime setup beside it. Radiant includes the Motion
+          engine; no separate engine installation is needed. A local candidate path requires its
+          archive in the consuming app. Import matching compiled styles once; the reset is optional.
         </p>
+        <div className="workshop-actions">
+          <Button
+            variant="outline"
+            disabled={unavailable}
+            aria-disabled={!!busy}
+            onClick={() => void copy(prepared?.runtime.install ?? '', 'Install command')}
+          >
+            Copy install command
+          </Button>
+          <Button
+            variant="outline"
+            disabled={unavailable}
+            aria-disabled={!!busy}
+            onClick={() => void copy(prepared?.runtime.source ?? '', 'Runtime setup')}
+          >
+            Copy runtime setup
+          </Button>
+          <Button
+            variant="outline"
+            disabled={unavailable}
+            onClick={() =>
+              download(prepared?.runtime.source ?? '', 'RadiantMotion.tsx', 'text/typescript')
+            }
+          >
+            Download runtime setup
+          </Button>
+        </div>
+        <label>
+          Install command
+          <input
+            type="text"
+            readOnly
+            value={prepared?.runtime.install ?? ''}
+          />
+        </label>
+        <label>
+          Runtime setup TypeScript output
+          <textarea
+            readOnly
+            rows={14}
+            wrap="off"
+            value={prepared?.runtime.source ?? ''}
+          />
+        </label>
         <p>
           Font names and requirements travel with configurations and links. Font files stay local.
           Load the required fonts in the consuming app; exporting or importing a theme never loads a

@@ -96,10 +96,17 @@ transfer only chosen sections. Merge keeps omitted values, while Replace removes
 omitted values within the supplied sections. Other sections and the destination
 identity remain intact.
 
-Typography-only output includes its recipe, styles and font requirements.
-Its scoped CSS uses `radiant-typography` with a light/dark/system mode attribute;
+Selective TypeScript applies Typography or Motion to an existing document.
+Typography includes its recipe, styles and font requirements. Motion includes
+physical profiles and CSS timing tokens. Compile the returned document for
+ThemeScope. Runtime setup supplies exact dependency versions and MotionProvider;
+Radiant includes its engine. System reduced motion stays live instead of being
+saved into the theme. Local font bytes and specimen input never enter exports.
+
+Typography CSS uses `radiant-typography` with a light/dark/system mode attribute;
 load it after Radiant’s compiled styles. Nested ThemeScope modes use the typed
-route. Local font bytes and specimen input never enter exports.
+route. Full scoped CSS emits timing tokens but omits spring profiles. This release
+offers no sampled spring CSS: interruption needs the runtime to retain momentum.
 
 Share links store compressed configuration in the URL fragment without a server
 account. Imports and links preserve authored sections, even when no editor recipe
