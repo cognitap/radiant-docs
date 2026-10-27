@@ -158,7 +158,13 @@ function apply(
     delete recipes.geometry
   return configuration(document, recipes)
 }
-function typedTheme(document: PortableDocument): string {
+function typedTheme(document: PortableDocument, names?: SectionName[]): string {
+  if (names) {
+    if (names.length !== 1 || names[0] !== 'typography')
+      throw new Error('Typed partial output currently supports Typography only.')
+    const section = select(document, names).sections.typography ?? {}
+    return `import { updateThemeDocument, type ThemeDocument } from '@cognitap/radiant'\n\nexport const typography = ${JSON.stringify(section, null, 2)} satisfies NonNullable<ThemeDocument['sections']['typography']>\n\nexport function applyTypography(target: ThemeDocument, mode: 'merge' | 'replace' = 'replace') {\n  return updateThemeDocument(target, { typography }, mode)\n}\n`
+  }
   return `import { compileThemeDocument, type ThemeDocument } from '@cognitap/radiant'\n\nexport const themeDocument = ${JSON.stringify(document, null, 2)} satisfies ThemeDocument\n\nexport const theme = compileThemeDocument(themeDocument)\n`
 }
 function safeCSS(value: string): boolean {
@@ -188,7 +194,10 @@ function safeCSS(value: string): boolean {
   }
   return !quote && !escaped && stack.length === 0
 }
-function cssOutput(document: PortableDocument): string {
+function cssOutput(document: PortableDocument, names?: SectionName[]): string {
+  const partial = names !== undefined
+  if (partial && (names.length !== 1 || names[0] !== 'typography'))
+    throw new Error('CSS partial output currently supports Typography only.')
   const theme = compile(document)
   // Match the installed ThemeScope contract. The released 0.0.4 package
   // predates roles; its plain CSS wrapper retains the earlier typography.
@@ -197,6 +206,7 @@ function cssOutput(document: PortableDocument): string {
     : `  font-family: var(--rad-typography-family);\n  font-size: var(--rad-typography-body-size);\n  font-weight: var(--rad-typography-body-weight);\n  letter-spacing: var(--rad-typography-letter-spacing);`
   const declarations = (mode: 'light' | 'dark') =>
     Object.entries(theme.modes[mode])
+      .filter(([key]) => !partial || key.startsWith('--rad-typography-'))
       .map(([key, value]) => {
         // CSS is an optional text artifact, narrower than the runtime's arbitrary CSS
         // strings. Refuse declaration/style-tag delimiters instead of rewriting them.
@@ -207,6 +217,8 @@ function cssOutput(document: PortableDocument): string {
         return `  ${key}: ${value};`
       })
       .join('\n')
+  if (partial)
+    return `/* Typography only. Load Radiant styles, then apply class="radiant-typography" and data-rad-mode.\n   Color, control metrics, surfaces, motion and component exceptions inherit from your application. */\n.radiant-typography {\n${declarations('light')}\n${typography}\n}\n.radiant-typography[data-rad-mode="dark"] {\n${declarations('dark')}\n}\n@media (prefers-color-scheme: dark) {\n  .radiant-typography[data-rad-mode="system"] {\n${declarations('dark')}\n  }\n}\n`
   return `/* Load @cognitap/radiant/styles.css first. Apply class="radiant-export"\n   and data-rad-mode="light", "dark" or "system" to a plain wrapper. */\n.radiant-export {\n${declarations('light')}\n  color-scheme: light;\n  background: var(--rad-surface-canvas);\n  color: var(--rad-color-foreground);\n${typography}\n}\n.radiant-export[data-rad-mode="dark"] {\n${declarations('dark')}\n  color-scheme: dark;\n}\n@media (prefers-color-scheme: dark) {\n  .radiant-export[data-rad-mode="system"] {\n${declarations('dark')}\n    color-scheme: dark;\n  }\n}\n`
 }
 export const handoffAPI = {

@@ -49,6 +49,39 @@ export async function verifyHandoff(browser, baseURL) {
     )
     assert.equal(await page.evaluate(() => navigator.clipboard.readText()), typed)
     assert.equal(await copy.evaluate(node => node === document.activeElement), true)
+    await handoff.getByText('Typography only · typed and CSS', { exact: true }).click()
+    for (const [button, output, feedback] of [
+      [
+        'Copy typography TypeScript',
+        'Typography TypeScript output',
+        'Typography typed theme copied.'
+      ],
+      ['Copy typography CSS', 'Typography CSS output', 'Typography CSS copied.']
+    ]) {
+      const text = await field(output).inputValue()
+      const action = handoff.getByRole('button', { name: button, exact: true })
+      await action.focus()
+      await action.press('Enter')
+      await page.waitForFunction(
+        message => document.querySelector('.handoff-feedback').textContent === message,
+        feedback
+      )
+      assert.equal(await page.evaluate(() => navigator.clipboard.readText()), text)
+      assert.equal(await action.evaluate(node => node === document.activeElement), true)
+    }
+    assert.doesNotMatch(
+      await field('Typography CSS output').inputValue(),
+      /--rad-(?:color|control|surface|motion|button)-/
+    )
+    await handoff.getByText('Required setup and fonts', { exact: true }).click()
+    const setup = await field('Font setup CSS output').inputValue()
+    await handoff.getByRole('button', { name: 'Copy font setup', exact: true }).click()
+    await page.waitForFunction(
+      () => document.querySelector('.handoff-feedback').textContent === 'Font setup CSS copied.'
+    )
+    assert.equal(await page.evaluate(() => navigator.clipboard.readText()), setup)
+    assert.doesNotMatch(setup, /blob:|data:|base64/)
+    await handoff.getByText('Required setup and fonts', { exact: true }).click()
     const download = page.waitForEvent('download')
     await handoff.getByRole('button', { name: 'Download configuration', exact: true }).click()
     const file = await download

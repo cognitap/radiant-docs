@@ -61,14 +61,20 @@ export async function verifyHandoffConsumer(browser) {
           }
         })
       })
+    const typeSource =
+      cases.find(item => item.name === 'typesetting')?.document ?? cases[0].document
+    await writeFile(`${directory}/typography.ts`, handoffAPI.typedTheme(typeSource, ['typography']))
     for (const item of cases)
       await writeFile(`${directory}/${item.name}.ts`, handoffAPI.typedTheme(item.document))
     await writeFile(
       `${directory}/consumer.tsx`,
       `import { renderToStaticMarkup } from 'react-dom/server'
 import { useId } from 'react'
-import { Button, Input, Card, CardContent, ThemeScope, defaultTheme, Link, Checkbox, Radio, RadioGroup, Field, Dialog, DialogContent, DialogTitle, Collapsible, CollapsibleTrigger, CollapsibleContent, Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@cognitap/radiant'
+import { compileThemeDocument, Button, Input, Card, CardContent, ThemeScope, defaultTheme, Link, Checkbox, Radio, RadioGroup, Field, Dialog, DialogContent, DialogTitle, Collapsible, CollapsibleTrigger, CollapsibleContent, Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@cognitap/radiant'
 ${cases.map(item => `import { theme as ${item.name}Theme } from './${item.name}.js'`).join('\n')}
+import { themeDocument as partialBase } from './merge.js'
+import { applyTypography } from './typography.js'
+const typographyTheme = compileThemeDocument(applyTypography(partialBase))
 function Contents() { const name = useId(); return <>
 <Button>Installed action</Button><Button controlSize="small">Small action</Button><Button disabled>Disabled action</Button><Button pending>Busy action</Button>
 <Input aria-label="Installed input"/><Field label="Invalid field" error="Invalid value"><Input aria-label="Invalid input" aria-invalid="true"/></Field>
@@ -85,7 +91,12 @@ export const markup = renderToStaticMarkup(<>{[${cases.map(item => `{name: '${it
 (['light', 'dark', 'system'] as const).map(mode => <div key={item.name + mode}>
 <ThemeScope theme={item.theme} mode={mode} data-proof={item.name + '-typed-' + mode}><Contents/></ThemeScope>
 <div className="radiant-export" data-case={item.name} data-rad-mode={mode} data-proof={item.name + '-css-' + mode}><Contents/></div>
-</div>))}</>)
+</div>))}
+{(['light', 'dark', 'system'] as const).map(mode => <ThemeScope key={mode} theme={mergeTheme} mode={mode}>
+<ThemeScope theme={typographyTheme} mode={mode} data-proof={'typography-typed-' + mode}><Contents/></ThemeScope>
+<div className="radiant-typography" data-rad-mode={mode} data-proof={'typography-css-' + mode}><Contents/></div>
+</ThemeScope>)}
+</>)
 `
     )
     await writeFile(
@@ -100,7 +111,7 @@ export const markup = renderToStaticMarkup(<>{[${cases.map(item => `{name: '${it
           types: ['node', 'react', 'react-dom'],
           outDir: 'dist'
         },
-        files: [...cases.map(item => `${item.name}.ts`), 'consumer.tsx']
+        files: [...cases.map(item => `${item.name}.ts`), 'typography.ts', 'consumer.tsx']
       })
     )
     execFileSync(
@@ -160,13 +171,16 @@ export const markup = renderToStaticMarkup(<>{[${cases.map(item => `{name: '${it
         styles: await readFile(`${directory}/tailwind.css`, 'utf8')
       })
     }
-    const css = cases
-      .map(item =>
-        handoffAPI
-          .cssOutput(item.document)
-          .replaceAll('.radiant-export', `.radiant-export[data-case="${item.name}"]`)
-      )
-      .join('\n')
+    const css =
+      cases
+        .map(item =>
+          handoffAPI
+            .cssOutput(item.document)
+            .replaceAll('.radiant-export', `.radiant-export[data-case="${item.name}"]`)
+        )
+        .join('\n') +
+      '\n' +
+      handoffAPI.cssOutput(typeSource, ['typography'])
     const parity = new Map()
     const page = await browser.newPage({ reducedMotion: 'reduce' })
     try {
@@ -177,7 +191,7 @@ export const markup = renderToStaticMarkup(<>{[${cases.map(item => `{name: '${it
           await page.waitForFunction(() =>
             document.getAnimations().every(a => a.playState !== 'running')
           )
-          for (const item of cases)
+          for (const item of [...cases, { name: 'typography', document: typeSource }])
             for (const mode of ['light', 'dark', 'system']) {
               const measure = async kind =>
                 page.locator(`[data-proof="${item.name}-${kind}-${mode}"]`).evaluate(node => {
@@ -229,8 +243,16 @@ export const markup = renderToStaticMarkup(<>{[${cases.map(item => `{name: '${it
                   }
                 })
               const expected = await measure('typed')
+              const actual = await measure('css')
+              if (item.name === 'typography') {
+                // A typography-only wrapper inherits the painted canvas; it does
+                // not paint an additional background. All text/layout/control
+                // properties must still match applying the typed partial.
+                delete expected.root['background-color']
+                delete actual.root['background-color']
+              }
               assert.deepEqual(
-                await measure('css'),
+                actual,
                 expected,
                 `${route.name}/${item.name}/${mode}/${preference}: typed/CSS parity`
               )
@@ -242,7 +264,7 @@ export const markup = renderToStaticMarkup(<>{[${cases.map(item => `{name: '${it
                 assert.equal(expected.root['line-height'], '30.6px')
                 assert.equal(expected.root['font-weight'], '400')
               }
-              if ((mode === 'system' ? preference : mode) === 'dark')
+              if (item.name !== 'typography' && (mode === 'system' ? preference : mode) === 'dark')
                 assert.equal(expected.root['background-color'], 'rgb(17, 34, 51)')
               const key = `${route.name.includes('reset') ? 'no-reset' : 'reset'}-${item.name}-${mode}-${preference}`
               // Match the same reset choice: compiled(no reset), compiled-reset;
