@@ -13,11 +13,10 @@ Accordion coordinates [Collapsible](/docs/collapsible/) items. Each remains
 native `details` with a direct-child `summary`. The root owns selection; each
 item has a distinct `value`.
 
-Single selection opens at most one item. Open Themes and modes and Installation
-closes; activate the same summary again to leave all items closed. Multiple
-selection allows both to stay open. Change Selection in the preview to compare.
-Changing Selection or State owner starts a fresh example because Accordion's
-type and ownership stay fixed during a mount.
+Single selection opens at most one item; opening another closes the first, and
+activating the open summary again leaves all items closed. Multiple selection
+lets several stay open. Accordion's type and ownership stay fixed during a mount.
+A nested disclosure inside an item does not change the Accordion's selection.
 
 ## Keyboard, disabled state and content
 
@@ -26,14 +25,12 @@ toggle the focused summary. Native disclosures use ordinary tab order; arrow
 keys do not implement a separate Accordion focus-navigation scheme here.
 Closed content stays mounted and is hidden from normal keyboard navigation.
 
-Future integrations is disabled. Its summary has `aria-disabled`, is removed
-from the tab sequence and guards pointer/Enter/Space activation. The Disabled
-option applies that policy to every item. Disabled state prevents user changes;
+A disabled item's summary has `aria-disabled`, is removed from the tab sequence
+and guards pointer/Enter/Space activation. Disabled state prevents user changes;
 it does not replace your application's ownership of selection.
 
 Basic native details can expand without JavaScript. Coordinated single/multiple
-selection, disabled guards, controlled state and preview feedback require
-JavaScript. Import the functional compiled stylesheet to preserve closed-content
+selection, disabled guards and controlled state require JavaScript. Import the functional compiled stylesheet to preserve closed-content
 and focus behavior.
 
 ## Controlled or local selection
@@ -43,9 +40,7 @@ controlled selection. In single mode the value is a string or `null`; in
 multiple mode it is a string array. Use `null` or `[]` to clear the corresponding
 controlled selection. Do not use `undefined` to clear it: that changes ownership.
 
-The controlled example exposes Close all sections. It updates application
-state, while summaries request updates through `onValueChange`. The same
-copyable example supports both models. Give the Accordion a new key if changing
+Summaries request updates through `onValueChange`. Give the Accordion a new key if changing
 its `type` or ownership intentionally; do not control each item's `open` yourself.
 
 ## Named parts and targets
@@ -65,8 +60,11 @@ Match composed identities with token membership, such as
 AccordionTrigger places a heading **inside** the direct-child summary.
 `level` defaults to `3`; choose a level from `1`–`6` to fit your document, or
 `null` to omit the heading. Its native attributes, styles and ref still target
-the summary. Compact adjusts Collapsible padding through the Accordion root's
-inline theme token, inherited by its items. `useAccordion()` returns the nearest
+the summary. Never put a button or link inside AccordionTrigger.
+
+`components.accordion.gap` sets the spacing between items. Items inherit
+`components.collapsible` theme values, so a Collapsible token such as padding
+on the Accordion root reaches every item. `useAccordion()` returns the nearest
 owner state, or `null` outside an Accordion.
 
 ## Public props
@@ -94,10 +92,7 @@ These contracts match **Radiant 0.0.4**; each component's prop type,
 ## Use the example
 
 Install `@cognitap/radiant@0.0.4` and import `@cognitap/radiant/styles.css` once.
-View source displays the actual component, shared types and CSS; preserve the
-`compositions/` paths when copying. It needs React and Radiant only.
-
-Theme/mode and Compact preserve selection. Reset preview restores single,
-uncontrolled selection with Installation open. For an independent disclosure,
+Preserve the `compositions/` paths when copying. It needs React and Radiant
+only. For an independent disclosure,
 use [Collapsible](/docs/collapsible/); for passive grouping of content and actions,
 use [Card](/docs/card/).

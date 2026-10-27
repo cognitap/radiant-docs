@@ -13,28 +13,19 @@ Link renders a native `a`. Give it a meaningful `href` and descriptive text,
 such as “Read the installation guide”. Use [Button](/docs/button/) to change
 something on the page or submit a form.
 
-The preview really navigates. Activate it with a pointer or Enter, open it in a
-new tab with your browser's modified click, or inspect its destination with the
-browser menu. Space scrolls the page rather than activating a link. Use Back to
-return to this page.
+Enter activates a link; Space scrolls the page instead.
 
 `inline` and `subtle` fit into text. `solid`, `soft`, `outline` and `ghost` use
 action presentation while keeping anchor semantics. Tone selects the semantic
 palette. Control size affects action-shaped variants; inline and subtle links
-follow text sizing. Theme and mode apply only to the preview; system follows
-your browser preference. Reset restores that preview's defaults.
-
-Open **View source** to display and copy the actual rendered files, including
-their supporting CSS. Import `@cognitap/radiant/styles.css` once in your app.
-The basic example needs only React and Radiant.
+follow text sizing. Import `@cognitap/radiant/styles.css` once in your app.
 
 ## New tabs and unavailable destinations
 
-Turn on **Open in a new tab** to try `external`. It supplies `target="_blank"`
-and `rel="noopener noreferrer"` unless you explicitly provide those props.
-The example also announces “opens in a new tab” in its visible link text.
-Radiant does not add that text or an icon for you. Despite the prop's name,
-`external` applies these defaults to any destination, including this local guide.
+`external` supplies `target="_blank"` and `rel="noopener noreferrer"` unless
+you explicitly provide those props. Radiant does not add “opens in a new tab”
+text or an icon; write it into the link text yourself. Despite the prop's name,
+`external` applies these defaults to any destination, including local paths.
 
 There is no `disabled` or `pending` Link prop. If navigation is unavailable,
 explain why and render appropriate noninteractive text, or omit the action.
@@ -59,17 +50,18 @@ require Next.js or a router.
 The adapter spreads every resolved anchor prop into NextLink, including `ref`,
 children, handlers, target, rel and presentation. NextLink requires `href`, so
 the example supplies the same known destination as a fallback for Radiant's
-optional native `href` type. Focus the link with the helper button, then use
-Enter to navigate. Modified clicks and new-tab targets still belong to the
-browser.
+optional native `href` type. Modified clicks and new-tab targets still belong
+to the browser.
 
 <RouterLinkDemo />
 
 Return one anchor or a router component that forwards its props to one. Avoid
 nesting anchors, wrapping the result in another Radiant Link, or unconditionally
 calling `preventDefault` to drive your router. Preserve native target and
-download behavior. This page's route is a real static page, so the link also
-works without JavaScript. Adapt the destination to a route in your own app.
+download behavior.
+
+A custom adapter must call the supplied `onClick` once, before its own
+navigation. If `event.defaultPrevented` is then true, it must not navigate.
 
 ## Public props
 
@@ -90,6 +82,5 @@ These props are available in the installed **Radiant 0.0.4**. `LinkProps`,
 | `className`, `style` | Root customization; style also accepts typed `--…` tokens       | —               |
 | Other native props   | `aria-*`, events and other anchor attributes                    | Native behavior |
 
-Choose presets with `ThemeScope`. The preview offers every published theme;
-your application loads any preset fonts. See [System foundations](/docs/foundations/)
+Choose presets with `ThemeScope`. Your application loads any preset fonts. See [System foundations](/docs/foundations/)
 for shared theme and mode behavior.

@@ -17,21 +17,14 @@ Its `value` identifies the option. The group owns their shared `name` and select
 
 Tab reaches the selected radio (or an enabled option when none is selected).
 Use arrow keys to move and select within the group; Space selects a focused
-option. The disabled Phone option is skipped. There is no custom roving-tabindex
-or ARIA widget replacing the browser's radio behavior.
-
-**Save preference** reads the selected value from FormData. Reset restores the
-initial selection and clears errors and feedback. Try **Start with no selection**
-and submit to see required validation and focus. Changing this initial-state
-option starts a fresh example. Disabled applies to the whole group and removes
+option. Disabled options are skipped. There is no custom roving-tabindex
+or ARIA widget replacing the browser's radio behavior. A disabled group removes
 its values from form submission.
 
 ## Name and selection ownership
 
 Supply a stable `name` on RadioGroup and a distinct `value` on each Radio.
-The example uses `useId()` to create an instance-specific name. Its raw FormData
-key is that generated name; the feedback labels it “contact” for readability.
-Only the selected, enabled option contributes a value.
+The example uses `useId()` to create an instance-specific name. Only the selected, enabled option contributes a value.
 
 For browser-owned state, set `defaultValue`; native form reset restores that
 initial choice. For controlled state, pass `value` and update it with
@@ -46,8 +39,7 @@ Inside a group, do not give Radio a conflicting `name`, `checked` or
 its own checked state, but RadioGroup supplies the shared field relationships.
 
 Controlled form reset must reset application values and validation metadata.
-It does not automatically erase the current controlled selection. The profile
-recipe below demonstrates that reset with TanStack.
+It does not automatically erase the current controlled selection.
 
 ## Anatomy and parts
 
@@ -66,6 +58,12 @@ the fieldset; Radio's native props, styling and ref target its input. Required,
 disabled and error relationships belong to the group; keep an accessible name
 on every option and preserve visible focus. Required means one selected option,
 not every option.
+
+A required group sets native `required` on every radio; an option's
+`required={false}` cannot remove it. An invalid group styles the radio disks.
+The group never adds `aria-invalid` or `aria-required` to individual radios.
+The dot ignores pointer events. Keep the input's `appearance-none` class;
+removing it brings back the browser's own radio glyph.
 
 ## Public props
 
@@ -97,23 +95,17 @@ These contracts match **Radiant 0.0.4**. `RadioGroupProps` and `RadioProps` are 
 ## Complete recipe and controlled reset
 
 This is the same website-owned [profile recipe](/docs/recipes/profile-form/),
-starting with TanStack Form in a Card. Try RadioGroup's controlled binding,
-validation, saved feedback and Reset form. Switch to native ownership to compare,
-or Dialog placement to try dismissal and focus restoration. Dismissal retains
-unsaved edits; resetting the form clears values, errors and saved feedback.
-Each preview has independent IDs, names and state.
+starting with TanStack Form in a Card. Its reset clears the controlled
+selection, errors and saved feedback.
 
 <ProfileFormDemo compare />
 
 ## Use the examples
 
 Install `@cognitap/radiant@0.0.4` and import
-`@cognitap/radiant/styles.css` once. View source displays the real preview and
-supporting files. Preserve their `controls/` and `profile/` paths when copying.
+`@cognitap/radiant/styles.css` once. Preserve the examples' `controls/` and `profile/` paths when copying.
 The focused radio example needs React and Radiant only. The combined profile
 selector additionally imports optional `@tanstack/react-form@1.33.5`; see the
 [recipe setup](/docs/recipes/profile-form/#use-the-recipe) for both copy paths.
 
-Your form owns validation, submission and persistence. The examples display local
-feedback without a backend. Themes/modes preserve edits; Reset preview restores
-the frame's options and its whole example.
+Your form owns validation, submission and persistence.

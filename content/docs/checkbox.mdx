@@ -10,9 +10,7 @@ import { ControlDemo } from '../../components/ControlDemo'
 ## Checked state and submitted value
 
 Checkbox renders a native `input type="checkbox"` with a decorative indicator.
-In this example, Field supplies its label, help and errors. Click the label or
-focus the checkbox and press Space to toggle it. **Inspect value** reads the
-real form data and displays it locally.
+In this example, Field supplies its label, help and errors.
 
 `checked` is boolean state. `value="release-notes"` is the payload sent under
 `name="updates"` when checked. An unchecked or disabled checkbox contributes
@@ -20,23 +18,20 @@ no entry; omitting `value` uses the native payload `on`. Checkbox does not turn
 an unchecked value into `false` in FormData. Your submit handler decides how to
 represent that absence.
 
-Turn on Required and submit while unchecked to see the application's error and
-focus behavior. Disabled is inherited from Field and prevents activation.
-Reset restores the unchecked default and clears errors and submitted feedback.
+Required and disabled can be inherited from Field. A disabled checkbox cannot
+be activated.
 
 ## Mixed selection
 
 A select-all checkbox can show `indeterminate` when only some children are
-checked. This example starts with email selected and in-app notifications off.
-Toggle the parent or either child; its mixed state is derived from application
-values. FormData contains only the named child checkboxes, using `getAll` for
+checked. Derive that mixed state from your application values. FormData contains only the named child checkboxes, using `getAll` for
 their shared `channels` name. The parent has no form-data name.
 
 <ControlDemo kind="selection" />
 
 `indeterminate` sets the native DOM property and visible mixed indicator. It is
-not a third submitted value. The example owns the children's controlled
-`checked` state and resets those values explicitly to email only.
+not a third submitted value. Radiant sets it after mount, so it is not in server
+HTML. After a form reset, recompute it from your values.
 
 The [Field](/docs/field/) group is a native fieldset/legend. Each checkbox has
 its own label. A group-level requirement does not mean every checkbox must be
@@ -54,6 +49,8 @@ For one Field-wrapped checkbox, use Field's label and omit Checkbox's optional
 `label`. For individually labeled options in a group, use Checkbox's `label`.
 Do not rely on an icon or visual proximity alone for its accessible name.
 Keep the real input focusable and the indicators hidden from assistive technology.
+The indicators ignore pointer events. Keep the input's `appearance-none` class;
+removing it brings back the browser's own check glyph.
 
 ## Anatomy and public props
 
@@ -87,11 +84,9 @@ Parts accept `className` and `style` only. These contracts match **Radiant 0.0.4
 ## Use the examples in a form
 
 Install `@cognitap/radiant@0.0.4` and import
-`@cognitap/radiant/styles.css` once. View source shows the actual preview files,
-shared types, hydration helper and CSS. Preserve their `controls/` and `profile/`
-paths when copying. These focused examples need React and Radiant only.
+`@cognitap/radiant/styles.css` once. Preserve the examples' `controls/` and
+`profile/` paths when copying. These focused examples need React and Radiant only.
 
 The [profile recipe](/docs/recipes/profile-form/) uses Checkbox with native
-FormData or controlled TanStack bindings, in standalone, Card and Dialog layouts.
-It explains optional `@tanstack/react-form@1.33.5`, validation, reset, saved
-feedback and dismissal. Your application owns validation policy and persistence.
+FormData or controlled TanStack bindings. It explains optional
+`@tanstack/react-form@1.33.5`. Your application owns validation policy and persistence.
