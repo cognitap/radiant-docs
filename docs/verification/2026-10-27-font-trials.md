@@ -1,9 +1,8 @@
 # DEV-164 — Curated and local font trials
 
 27 October 2026. Complete `pnpm check` passed on clean source
-`1312b8c98e8be7fedd21ea89e44ec6dac5ce156c`, based on docs main
-`a6c1937`. Later delivery changes add this evidence record and clarify the axis
-default copy (custom files use their recorded width default). PR CI
+`62fedfb5974d42e14793d75158ccab6786950904`, based on docs main
+`a6c1937`. The later delivery commit only updates this evidence record. PR CI
 verifies the delivery/merge revision separately.
 
 ## Environment and provenance
@@ -12,8 +11,8 @@ verifies the delivery/merge revision separately.
 - Playwright 1.64.1, headless Chromium 156.0.8078.4.
 - Exact published `@cognitap/radiant@0.0.4`, unchanged manifest/lockfile, with no
   library source alias or candidate package.
-- Full static-export receipt: `2026-10-27T00:55:57.416Z` through
-  `2026-10-27T00:57:52.493Z`, status `passed`, source above.
+- Full static-export receipt: `2026-10-27T01:03:27.887Z` through
+  `2026-10-27T01:05:24.303Z`, status `passed`, source above.
 - Fonts: eight unmodified upstream WOFF2 faces, Inter v4.1 / Source Serif 4
   4.005R / pinned IBM Plex. The [manifest](../../public/fonts/workshop/manifest.json)
   records exact URLs/SHA-256; full adjacent SIL OFL licenses accompany the files.
@@ -54,6 +53,9 @@ The new [font browser verifier](../../scripts/verify-font-editor.mjs) checks:
   registration. Missing curated files expose loading/failure and recover on retry.
 - Native keyboard controls, labeled inputs, no page overflow at 390/320 CSS px,
   no hydration/runtime errors, and no local-file option after reload.
+- Actual typing of size `21` through the unfinished draft `2`, and width `90`
+  through `9`. Invalid drafts preserve the last valid sample, expose invalid
+  state and restore their value on blur.
 
 Node checks independently verify asset hashes/licenses, contextual metadata,
 actual TTF ranges/name/style, bounds/truncation/malformed-axis rejection, invalid
@@ -62,6 +64,9 @@ CSS names, and public-document preservation of unrelated theme sections.
 The browser checks found a 15px page overflow at 320px after applying a long
 custom family. The existing family selector now constrains its label and border
 box to the available width; the complete narrow checks pass after that fix.
+Final keyboard review also found that eager numeric validation could reject the
+first digit of a new value. Buffered fields now accept unfinished drafts while
+only applying valid numbers; the complete gate above includes the typing checks.
 
 Desktop and 320px font-panel captures were inspected for wrapping, control
 layout, visible loading/requirement copy and sample presentation. Captures and
