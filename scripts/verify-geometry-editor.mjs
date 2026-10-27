@@ -55,7 +55,12 @@ export async function verifyGeometryEditor(browser, baseURL) {
       await chooseEditor('Typography')
       const typographyFamily = await setTypographyFamily(frame)
       await chooseEditor('Motion')
-      await frame.getByRole('combobox', { name: 'Release timing' }).selectOption('280ms')
+      const stiffness = frame.locator('.motion-editor').getByRole('spinbutton', {
+        name: 'Stiffness',
+        exact: true,
+        includeHidden: true
+      })
+      await stiffness.fill('450')
       await specimen.selectOption('form')
       await canvas.getByRole('textbox', { name: 'Display name' }).fill('Geometry Ada')
       await chooseEditor('Spacing & surfaces')
@@ -285,7 +290,7 @@ export async function verifyGeometryEditor(browser, baseURL) {
       assert.equal(await variable('--rad-surface-radius'), '12px')
       assert.equal(await variable('--rad-surface-canvas'), '#112233')
       assert.equal(await variable(typographyFamily), 'Georgia, serif')
-      assert.equal(await variable('--rad-motion-release-duration'), '280ms')
+      assert.equal(await stiffness.inputValue(), '450')
       assert.equal(await mode.inputValue(), 'dark')
       await mode.selectOption('light')
       assert.equal(await variable('--rad-surface-canvas'), '#FFEECC')
