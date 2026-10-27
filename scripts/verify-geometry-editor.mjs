@@ -1,3 +1,4 @@
+import { setTypographyFamily } from './typography-controls.mjs'
 import assert from 'node:assert/strict'
 import { workshopAvailable } from './radiant-package.mjs'
 
@@ -52,7 +53,7 @@ export async function verifyGeometryEditor(browser, baseURL) {
       await frame.getByRole('textbox', { name: 'Exact role color', exact: true }).fill('#112233')
       const accent = await variable('--rad-color-accent')
       await chooseEditor('Typography')
-      await frame.getByRole('combobox', { name: 'Body family' }).selectOption('Georgia, serif')
+      const typographyFamily = await setTypographyFamily(frame)
       await chooseEditor('Motion')
       await frame.getByRole('combobox', { name: 'Release timing' }).selectOption('280ms')
       await specimen.selectOption('form')
@@ -283,7 +284,7 @@ export async function verifyGeometryEditor(browser, baseURL) {
       assert.equal(await preset.inputValue(), 'balanced')
       assert.equal(await variable('--rad-surface-radius'), '12px')
       assert.equal(await variable('--rad-surface-canvas'), '#112233')
-      assert.equal(await variable('--rad-typography-family'), 'Georgia, serif')
+      assert.equal(await variable(typographyFamily), 'Georgia, serif')
       assert.equal(await variable('--rad-motion-release-duration'), '280ms')
       assert.equal(await mode.inputValue(), 'dark')
       await mode.selectOption('light')

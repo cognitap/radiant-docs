@@ -1,3 +1,4 @@
+import { setTypographyFamily } from './typography-controls.mjs'
 import assert from 'node:assert/strict'
 import * as Radiant from '@cognitap/radiant'
 
@@ -165,9 +166,7 @@ export async function verifyTypographyProofs(browser, baseURL) {
     )
     await composition.selectOption('article')
     assert.deepEqual(await frames.locator('h2').allTextContents(), [title, title])
-    await workshop
-      .getByRole('combobox', { name: 'Body family', exact: true })
-      .selectOption('Georgia, serif')
+    await setTypographyFamily(workshop)
     if (supported && !(await workshop.locator('.typesetting-editor').count()))
       assert.match(
         await frames
