@@ -25,7 +25,6 @@ variable, and name native comparison figures. Formatting, lint, types, static
 builds and the full typography browser matrix were rerun for both the released
 package and packed candidate on that revision. The full general gate above
 precedes that layout-only follow-up; PR CI verifies the final delivery revision.
-This evidence-only commit does not change the implementation.
 
 ## Behavior and verification
 
@@ -87,3 +86,14 @@ actual browser zoom, full accessibility or universal font/script coverage.
 Evidence covers Chromium automation and the inspected screenshots; manual
 screen-reader, Safari and Firefox checks remain unclaimed. Product controls
 retain the installed release's typography until deliberate role adoption.
+
+## Final editing regression
+
+Final review reproduced an editable-table identity bug: setting two project names
+to `Twin`, filtering and resetting left five rows per frame instead of four
+(`10 != 8` across the comparison). Row identity now comes from the fixed source
+record before filtering, independently of editable display copy. The new browser
+regression verifies duplicate names, filtering, reset and absence of orphaned
+rows; console errors are checked too. The complete proof matrix passed on the
+released-package build after the fix at `fa0b2234dd839438f7e0f05e4c690742f28f7224`.
+The final PR CI and packed-candidate gate include this regression as well.
