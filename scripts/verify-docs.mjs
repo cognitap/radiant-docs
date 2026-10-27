@@ -17,6 +17,7 @@ import { verifyActionHydration } from './verify-action-hydration.mjs'
 import { verifyGeometryEditor } from './verify-geometry-editor.mjs'
 import { verifyColorEditor } from './verify-color-editor.mjs'
 import { verifyWorkshop } from './verify-workshop.mjs'
+import { verifyTypesettingEditor } from './verify-typesetting-editor.mjs'
 import { verifyTypographyProofs } from './verify-typography-proofs.mjs'
 import { verifyFontEditor } from './verify-font-editor.mjs'
 import { verifyFoundations } from './verify-foundations.mjs'
@@ -235,6 +236,7 @@ try {
   await verifyWorkshop(browser, baseURL)
   await verifyFontEditor(browser, baseURL)
   await verifyTypographyProofs(browser, baseURL)
+  await verifyTypesettingEditor(browser, baseURL)
   await verifyColorEditor(browser, baseURL)
   await verifyGeometryEditor(browser, baseURL)
   await verifyHandoff(browser, baseURL)

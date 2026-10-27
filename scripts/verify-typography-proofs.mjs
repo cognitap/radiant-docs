@@ -168,7 +168,7 @@ export async function verifyTypographyProofs(browser, baseURL) {
     await workshop
       .getByRole('combobox', { name: 'Body family', exact: true })
       .selectOption('Georgia, serif')
-    if (supported)
+    if (supported && !(await workshop.locator('.typesetting-editor').count()))
       assert.match(
         await frames
           .first()

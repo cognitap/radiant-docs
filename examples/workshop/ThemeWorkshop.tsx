@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useId, useMemo, useState } from 'react'
+import { useCallback, useId, useMemo, useRef, useState } from 'react'
 import { Button, ThemeScope, defaultTheme, type ThemeMode } from '@cognitap/radiant'
 import { DemoControls, DemoPreview } from '@/components/demo/DemoFrame'
 import { useHydrated } from '../profile/useHydrated'
@@ -28,6 +28,16 @@ import { GeometryEditor } from './GeometryEditor'
 import { geometryAPI, geometryPreset, type GeometryRecipe } from './workshop-geometry'
 import { ColorEditor } from './ColorEditor'
 import { FontEditor } from './FontEditor'
+import { TypographyEditor } from './TypographyEditor'
+import { WorkshopFontLoader } from './font-runtime'
+import type { TrialFont } from './workshop-fonts'
+import {
+  typesettingAvailable,
+  applyTypesetting,
+  chooseAssignment,
+  documentTypesetting,
+  resolveTypesetting
+} from './workshop-typography'
 import { TypographyProofs } from './TypographyProofs'
 import { colorAPI, defaultColorRecipe, type ColorRecipe, type ColorSession } from './workshop-color'
 import './workshop.css'
@@ -77,7 +87,9 @@ interface WorkshopState {
 export function ThemeWorkshop() {
   const [workshop, setWorkshop] = useState<WorkshopState>(() => {
     const geometry = geometryPreset()
-    const initial = initialDocument()
+    const initial = typesettingAvailable
+      ? applyTypesetting(initialDocument(), {})
+      : initialDocument()
     const document = documentAPI && geometryAPI ? geometryAPI.apply(initial, geometry) : initial
     const color = documentAPI && colorAPI ? colorAPI.create(defaultColorRecipe()) : null
     return {
@@ -93,6 +105,9 @@ export function ThemeWorkshop() {
   const [colorRevision, setColorRevision] = useState(0)
   const [geometryRevision, setGeometryRevision] = useState(0)
   const [fontRevision, setFontRevision] = useState(0)
+  const [fontLoader, setFontLoader] = useState<WorkshopFontLoader | null>(null)
+  const [localFont, setLocalFont] = useState<TrialFont | null>(null)
+  const [selectedRole, setSelectedRole] = useState('prose-body')
   const [editor, setEditor] = useState<Editor>('color')
   const [specimen, setSpecimen] = useState<Specimen>('article')
   const [mode, setMode] = useState<ThemeMode>('light')
@@ -102,6 +117,7 @@ export function ThemeWorkshop() {
   const [feedback, setFeedback] = useState('')
   const ready = useHydrated()
   const panelId = useId()
+  const workshopHost = useRef<HTMLDivElement>(null)
   const theme = useMemo(
     () => (documentAPI ? documentAPI.compile(document) : defaultTheme),
     [document]
@@ -191,6 +207,7 @@ export function ThemeWorkshop() {
   }
   return (
     <div
+      ref={workshopHost}
       className="theme-workshop"
       data-workshop-geometry={
         documentAPI && geometryAPI ? (geometry ? 'enabled' : 'imported') : 'unavailable'
@@ -241,7 +258,10 @@ export function ThemeWorkshop() {
                 if (editor === 'typography') setFontRevision(value => value + 1)
                 setWorkshop(previous => ({
                   ...previous,
-                  document: resetEditor(previous.document, editor)
+                  document:
+                    editor === 'typography' && typesettingAvailable
+                      ? applyTypesetting(resetEditor(previous.document, editor), {})
+                      : resetEditor(previous.document, editor)
                 }))
               }
               setFeedback(`${current.label} reset. Other sections and specimen state retained.`)
@@ -302,12 +322,34 @@ export function ThemeWorkshop() {
             hidden={editor !== 'typography'}
             className="workshop-font-panel"
           >
-            <FontEditor
-              key={fontRevision}
-              active={editor === 'typography'}
-              document={document}
-              onChange={next => setWorkshop(previous => ({ ...previous, document: next }))}
-            />
+            <details
+              open={!typesettingAvailable}
+              className="workshop-typeface-lab"
+            >
+              <summary>Typeface lab and local files</summary>
+              <FontEditor
+                key={fontRevision}
+                onSession={setFontLoader}
+                onLocalReady={setLocalFont}
+                onAssignFont={
+                  typesettingAvailable
+                    ? (next, font, context) =>
+                        applyTypesetting(
+                          next,
+                          chooseAssignment(
+                            documentTypesetting(next)?.input ?? resolveTypesetting().input,
+                            context,
+                            font
+                          ),
+                          font.source === 'local' ? font : localFont
+                        )
+                    : undefined
+                }
+                active={editor === 'typography'}
+                document={document}
+                onChange={next => setWorkshop(previous => ({ ...previous, document: next }))}
+              />
+            </details>
           </div>
           <div
             hidden={editor !== 'geometry'}
@@ -341,10 +383,27 @@ export function ThemeWorkshop() {
       <div
         hidden={editor !== 'typography'}
         className="workshop-proofs-panel"
+        data-typesetting-available={typesettingAvailable || undefined}
       >
+        <TypographyEditor
+          active={editor === 'typography'}
+          document={document}
+          loader={fontLoader}
+          local={localFont}
+          selectedRole={selectedRole}
+          onSelectRole={setSelectedRole}
+          onChange={next => setWorkshop(previous => ({ ...previous, document: next }))}
+        />
         <TypographyProofs
           theme={theme}
           mode={mode}
+          selectedRole={selectedRole}
+          onSelectRole={role => {
+            setSelectedRole(role)
+            workshopHost.current
+              ?.querySelector<HTMLSelectElement>('.typesetting-inspector select')
+              ?.focus()
+          }}
         />
       </div>
       <DemoControls label="Specimen inspection">

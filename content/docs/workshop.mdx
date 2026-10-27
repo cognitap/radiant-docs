@@ -104,7 +104,7 @@ in the editor. Use the handoff panel below for whole-theme and selective exports
 Open **Typography** for composed **Article**, **Form**, **Data** and **Landing**
 proofs. Prose and UI are text contexts; Body, Headings, UI and Code are font
 assignments. The proofs mix these contexts rather than treating them as separate
-font scales. Font/role/rhythm controls are the next editor step.
+font scales. The matching typography candidate adds the typesetting controls described below.
 
 **Edit … copy** exposes the current composition’s headings, paragraphs, labels,
 links, lists and supporting copy. Changes are plain text and appear at every
@@ -131,6 +131,57 @@ new role styling with a matching packed candidate; publication and the exact
 public pin belong to DEV-169. Product controls remain real Radiant components;
 their role adoption follows in DEV-167. The site supplies layouts and content,
 and consumes the package’s semantic text hooks without a second scale/compiler.
+
+## Typeset the theme
+
+With a package containing the new typography roles, **Typesetting system** starts
+from Inter, Source Serif 4 + Inter or Plex Sans + Plex Mono. Body, Headings, UI and
+Code assignments change independently. Curated files are loaded by the site, not
+by Radiant; a shared session avoids duplicate faces between the editor and the
+**Typeface lab and local files**. Missing/loading files visibly use fallback.
+
+**Prose rhythm** controls body size, leading, paragraph spacing, measure and
+heading scale. **UI rhythm** controls interface size and leading. Studied Body/UI
+combinations identify their calibrated starting metrics; unfamiliar families and
+unsupported combinations use neutral manual settings. Manual rhythm survives
+family changes. **Reset prose rhythm** / **Reset UI rhythm** restore that context’s
+automatic metrics while keeping explicit text-style overrides.
+
+The **Text style inspector** exposes all 16 production styles. Choose one using
+the keyboard, or enable **Inspect text styles** and click text in a proof; actions
+pause while inspecting. The selected style can change assignment, fixed size or
+responsive narrow/wide endpoints, weight, leading, tracking and maximum measure.
+A measure of 0 leaves width to layout. Fluid endpoints interpolate over the local
+24–56rem content container; they are not tied to the workshop viewport. A style
+reset removes only its override, so generated rhythm becomes live again.
+
+Requested unsupported weights stay visible and produce a warning. Production
+styles disable synthetic fonts; a nearby weight or missing file is not claimed
+to match exactly. The typeface lab still provides real italic and verified axis
+trials. Its **Use family in theme** also assigns the trial family to its selected
+context in the typesetting candidate. Role weights stay in the style inspector;
+axis and sample rhythm experiments remain local to the lab.
+
+Choose a loaded normal local font in an assignment selector, or enter an installed
+CSS family/fallback stack under **Use another installed family**. Custom families
+remain uncalibrated, even if their names resemble a curated font. Removing local
+bytes retains the portable family requirement and uses fallback. No font bytes,
+filenames or object URLs enter the theme. The existing handoff panel records
+required families/weights/styles; recipients provide their own files.
+
+Choosing or restoring a **Starting point** explicitly resets Typography’s recipe,
+manual rhythm/styles and typography token/mode overrides. Other theme sections,
+component exceptions and proof copy/values stay intact. Ordinary edits preserve
+authored typography token/mode overrides; those can take precedence over recipe
+controls. An imported legacy document without a typesetting recipe keeps its
+authored typography until you explicitly choose a starting point. Body family/size
+above the lab remain installed-component defaults
+until component role adoption; they do not replace the new text-style controls.
+
+The public 0.0.4 pin retains its previous controls and an availability notice.
+Use a matching packed candidate to exercise the complete editor. Chapter release
+coordinates publication and the exact public pin; no alternate scale/compiler
+runs in the website.
 
 ## Try fonts
 

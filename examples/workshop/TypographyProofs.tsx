@@ -1,6 +1,8 @@
 'use client'
 
-import { useEffect, useRef, useState, type CSSProperties } from 'react'
+/* oxlint-disable jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events -- Optional delegated text picking has an equivalent keyboard-operable text-style selector. */
+
+import { useEffect, useId, useRef, useState, type CSSProperties } from 'react'
 import { Button, ThemeScope, type Theme, type ThemeMode } from '@cognitap/radiant'
 import { ProofPage, initialProofInteraction, type ProofInteraction } from './ProofPages'
 import {
@@ -98,14 +100,33 @@ function ProofFrame({
   )
 }
 
-export function TypographyProofs({ theme, mode }: { theme: Theme; mode: ThemeMode }) {
+export function TypographyProofs({
+  theme,
+  mode,
+  selectedRole = 'prose-body',
+  onSelectRole
+}: {
+  theme: Theme
+  mode: ThemeMode
+  selectedRole?: string
+  onSelectRole?: (role: string) => void
+}) {
+  const inspectorId = useId()
   const [proof, setProof] = useState<Proof>('article')
   const [width, setWidth] = useState('800')
   const [edits, setEdits] = useState<CopyEdits>({})
   const [interaction, setInteraction] = useState(initialProofInteraction)
   const [spacing, setSpacing] = useState(false)
+  const [inspecting, setInspecting] = useState(false)
   const [feedback, setFeedback] = useState('')
   const roleSupport = Object.hasOwn(theme.modes.light, '--rad-typography-roles-prose-body-size')
+  const selectionScope = `[data-proof-inspector=${JSON.stringify(inspectorId)}] .proof-frames`
+  const automaticSelection =
+    selectedRole === 'prose-body'
+      ? '[data-rad-prose] > :is(p,ul,ol):not([data-rad-text],[data-slot],[data-rad-not-prose])'
+      : selectedRole === 'prose-quote'
+        ? '[data-rad-prose] > blockquote:not([data-rad-text],[data-slot],[data-rad-not-prose])'
+        : ''
   function updateInteraction(patch: Partial<ProofInteraction>) {
     setInteraction(previous => ({ ...previous, ...patch }))
   }
@@ -139,6 +160,7 @@ export function TypographyProofs({ theme, mode }: { theme: Theme; mode: ThemeMod
     <section
       className="typography-proofs"
       aria-label="Typography proof sheets"
+      data-proof-inspector={inspectorId}
       data-proof-roles={roleSupport ? 'supported' : 'unavailable'}
     >
       <div className="proof-heading">
@@ -236,7 +258,55 @@ export function TypographyProofs({ theme, mode }: { theme: Theme; mode: ThemeMod
         reading comfort; the spacing probe is a layout check, not browser zoom. Preview mode follows
         the shared specimen mode below. Product controls use the installed component typography.
       </p>
+      {roleSupport && onSelectRole && (
+        <label className="proof-inspect-toggle">
+          <input
+            type="checkbox"
+            checked={inspecting}
+            onChange={event => setInspecting(event.target.checked)}
+          />
+          Inspect text styles (click text; actions pause while inspecting)
+        </label>
+      )}
+      {inspecting && (
+        <p className="proof-context">
+          Selected style: {selectedRole}. Use the text-style selector for keyboard inspection and
+          editing.
+        </p>
+      )}
+      {inspecting && (
+        <style>{`${selectionScope} [data-rad-text="${/^[a-z-]+$/.test(selectedRole) ? selectedRole : 'prose-body'}"]${automaticSelection ? `, ${selectionScope} ${automaticSelection}` : ''} { outline: 2px solid var(--rad-color-focus); outline-offset: 3px; }`}</style>
+      )}
       <div
+        onClickCapture={event => {
+          if (!inspecting || !onSelectRole || !(event.target instanceof Element)) return
+          event.preventDefault()
+          event.stopPropagation()
+          const explicit = event.target.closest<HTMLElement>('[data-rad-text]')
+          const block = event.target.closest('p,ul,ol,blockquote,pre,h1,h2,h3,h4,h5,h6')
+          const automatic = block?.parentElement?.hasAttribute('data-rad-prose')
+            ? (
+                {
+                  P: 'prose-body',
+                  UL: 'prose-body',
+                  OL: 'prose-body',
+                  BLOCKQUOTE: 'prose-quote',
+                  PRE: 'code',
+                  H1: 'prose-title',
+                  H2: 'prose-heading',
+                  H3: 'prose-subheading',
+                  H4: 'prose-subheading',
+                  H5: 'prose-subheading',
+                  H6: 'prose-subheading'
+                } as Record<string, string>
+              )[block.tagName]
+            : undefined
+          const role = explicit?.dataset.radText ?? automatic
+          if (role) {
+            onSelectRole(role)
+          }
+        }}
+        data-proof-inspecting={inspecting || undefined}
         className="proof-frames"
         data-proof-compare={width === 'compare' || undefined}
       >
