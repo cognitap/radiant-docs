@@ -38,6 +38,11 @@ export async function verifyFontEditor(browser, baseURL) {
     )
     const select = panel.getByRole('combobox', { name: 'Trial typeface', exact: true })
     const sample = panel.getByTestId('font-sample')
+    // Typesetting assigns the selected trial context (Code here), independently
+    // of UI. The released 0.0.4 editor still authors the legacy shared family.
+    const appliedText = (await frame.locator('.typography-editor').count())
+      ? frame.locator('.typography-proofs [data-rad-text="code"]').first()
+      : frame.locator('.workshop-canvas')
     const loaded = async family => {
       await page.waitForFunction(
         family =>
@@ -130,10 +135,7 @@ export async function verifyFontEditor(browser, baseURL) {
     )
     await panel.getByRole('combobox', { name: 'Trial style', exact: true }).selectOption('normal')
     await panel.getByRole('button', { name: 'Use family in theme', exact: true }).click()
-    assert.match(
-      await frame.locator('.workshop-canvas').evaluate(node => getComputedStyle(node).fontFamily),
-      /Inter/
-    )
+    assert.match(await appliedText.evaluate(node => getComputedStyle(node).fontFamily), /Inter/)
 
     await panel.getByText('Try a local font file', { exact: true }).press('Enter')
     const upload = panel.getByLabel('Local font file', { exact: true })
@@ -186,6 +188,12 @@ export async function verifyFontEditor(browser, baseURL) {
       exported.document.sections.typography.fonts.find(f => f.id === 'workshop-font').source,
       'local'
     )
+    if (exported.document.sections.typography.typesetting)
+      assert.equal(
+        exported.document.sections.typography.typesetting.fonts.ui.family,
+        'Inter',
+        'Code assignment preserves the independent UI family'
+      )
     assert.doesNotMatch(JSON.stringify(exported), /my-private-font|blob:|data:|arrayBuffer|bytes/)
     await panel.getByRole('button', { name: 'Remove local font', exact: true }).click()
     await loaded('Inter')
@@ -195,7 +203,7 @@ export async function verifyFontEditor(browser, baseURL) {
       'local face removed'
     )
     assert.match(
-      await frame.locator('.workshop-canvas').evaluate(node => getComputedStyle(node).fontFamily),
+      await appliedText.evaluate(node => getComputedStyle(node).fontFamily),
       /Brand font/,
       'missing local font keeps its requirement and falls back'
     )
