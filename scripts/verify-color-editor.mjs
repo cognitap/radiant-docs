@@ -21,135 +21,220 @@ export async function verifyColorEditor(browser, baseURL) {
     const canvas = frame.locator('.preview-page').first()
     const variable = name =>
       canvas.evaluate((node, key) => getComputedStyle(node).getPropertyValue(key).trim(), name)
-    const role = frame.getByRole('combobox', { name: 'Semantic role', exact: true })
-    const roleMode = frame.getByRole('combobox', { name: 'Role mode', exact: true })
+    const chip = name => frame.getByRole('button', { name, exact: true })
+    const radio = (group, name) =>
+      frame
+        .getByRole('group', { name: group, exact: true })
+        .getByRole('radio', { name, exact: true })
+    const auto = name => frame.getByRole('button', { name: `Automatic ${name}`, exact: true })
+    const strip = name => frame.getByRole('slider', { name, exact: true })
     const exact = frame.getByRole('textbox', { name: 'Exact role color', exact: true })
     const fidelity = frame.getByTestId('color-fidelity')
+    const wallRows = () =>
+      frame.locator('.color-wall tbody tr').evaluateAll(rows => rows.map(row => row.textContent))
     assert.equal(await frame.locator('.color-wall tbody tr').count(), 18)
     assert.equal(await frame.locator('.color-swatch').count(), 198)
+    assert.equal(await frame.locator('.color-role-chip').count(), 36)
     const baseline = await variable('--rad-color-accent')
+
     await brand.fill('not a color')
     assert.equal(await brand.getAttribute('aria-invalid'), 'true')
     assert.equal(await variable('--rad-color-accent'), baseline)
     for (const seed of ['#FDE047', '#808080', '#000000', '#FFFFFF', '#166534']) {
       await brand.fill(seed)
       assert.ok((await fidelity.innerText()).includes(seed))
-      assert.ok((await fidelity.innerText()).includes('Retained exactly'))
-      assert.ok((await frame.locator('.color-wall tbody tr').first().innerText()).includes(seed))
+      assert.ok((await fidelity.innerText()).includes('kept exactly'))
+      assert.ok((await wallRows())[0].includes(seed))
     }
     assert.notEqual(await variable('--rad-color-accent'), baseline)
-    assert.equal(
-      await frame.getByRole('slider', { name: /Neutral hue direction/ }).isDisabled(),
-      true
+
+    const surface = frame.getByRole('slider', { name: 'Brand shade', exact: true })
+    await surface.scrollIntoViewIfNeeded()
+    const box = await surface.boundingBox()
+    const seen = new Set()
+    await page.mouse.move(box.x + box.width * 0.2, box.y + box.height * 0.3)
+    await page.mouse.down()
+    for (let step = 1; step <= 8; step++) {
+      await page.mouse.move(box.x + box.width * (0.2 + step * 0.09), box.y + box.height * 0.3)
+      seen.add(await variable('--rad-color-accent'))
+    }
+    await page.mouse.up()
+    assert.ok(seen.size >= 4, `the preview accent follows the drag (${seen.size} values seen)`)
+    const dragged = await brand.inputValue()
+    assert.notEqual(dragged, '#166534', 'the hex field follows the surface')
+    assert.match(
+      await surface.getAttribute('aria-valuetext'),
+      /saturation \d+%, brightness \d+%, #/
     )
-    await brand.fill('#808080')
-    const hue = frame.getByRole('slider', { name: /Neutral hue direction/ })
+    await surface.focus()
+    await surface.press('ArrowLeft')
+    assert.notEqual(await brand.inputValue(), dragged, 'arrow keys move the brand shade')
+    const hue = frame.getByRole('slider', { name: 'Brand hue', exact: true })
+    const hueBefore = Number(await hue.inputValue())
     await hue.focus()
-    await hue.press('ArrowRight')
-    assert.equal(await hue.inputValue(), '256')
-    await frame
-      .getByRole('combobox', { name: 'Brand fidelity', exact: true })
-      .selectOption('unanchored')
-    assert.ok((await fidelity.innerText()).includes('reference metadata'))
-    await frame
-      .getByRole('combobox', { name: 'Lightness model', exact: true })
-      .selectOption('shared')
-    await frame.getByRole('checkbox', { name: 'Automatic wall vividness', exact: true }).uncheck()
-    await frame.getByRole('checkbox', { name: 'Automatic brand vividness', exact: true }).uncheck()
+    await hue.press('Shift+ArrowRight')
+    assert.equal(
+      Number(await hue.inputValue()),
+      Math.min(360, hueBefore + 10),
+      'shift steps hue by 10'
+    )
+    assert.match(await hue.getAttribute('aria-valuetext'), /^\d+°, [a-z]+$/)
+
+    assert.equal(await strip('Grey hue').isDisabled(), true, 'grey hue waits for a grey brand')
+    await brand.fill('#808080')
+    const greyHue = strip('Grey hue')
+    await greyHue.focus()
+    await greyHue.press('ArrowRight')
+    assert.equal(await greyHue.inputValue(), '256')
+    assert.match(await greyHue.getAttribute('aria-valuetext'), /^toward [a-z]+ \(256°\)$/)
+    await radio('Brand fidelity', 'Regular ramp').check()
+    assert.ok((await fidelity.innerText()).includes('kept as reference'))
+    await radio('Lightness model', 'Shared stops').check()
+    assert.equal(await auto('wall vividness').getAttribute('aria-pressed'), 'true')
+    await auto('wall vividness').click()
+    assert.equal(await auto('wall vividness').getAttribute('aria-pressed'), 'false')
+    await auto('brand vividness').click()
     for (const name of [
       'Wall vividness',
       'Brand vividness',
-      'Tone distribution',
-      'Neutral tint',
-      'Hue alignment'
+      'Tone spread',
+      'Grey tint',
+      'Family hues'
     ]) {
-      const dial = frame.getByRole('slider', { name: new RegExp(name) })
-      const before = await dial.inputValue()
-      await dial.focus()
-      await dial.press('ArrowRight')
-      assert.notEqual(await dial.inputValue(), before)
+      const slider = strip(name)
+      const before = await slider.inputValue()
+      const wordsBefore = await slider.getAttribute('aria-valuetext')
+      await slider.focus()
+      await slider.press('ArrowRight')
+      assert.notEqual(await slider.inputValue(), before, `${name} moves by arrow`)
+      const words = await slider.getAttribute('aria-valuetext')
+      assert.match(words, /^[a-z][a-z ]+ \([\d.]+\)$/, `${name} speaks plain words: ${words}`)
+      assert.notEqual(words, wordsBefore)
+      await slider.press('Shift+ArrowLeft')
+      assert.ok(
+        Number(await slider.inputValue()) < Number(before),
+        `${name} shift+arrow takes a bigger step`
+      )
     }
-    await frame.getByRole('combobox', { name: 'primary family', exact: true }).selectOption('teal')
+    assert.equal(
+      await auto('wall vividness').getAttribute('aria-pressed'),
+      'false',
+      'dragging a strip keeps it explicit'
+    )
+    await page.waitForFunction(() =>
+      [...document.querySelectorAll('.color-strip-track')].every(
+        track => track.style.backgroundImage
+      )
+    )
+
+    const primary = chip('primary family')
+    await primary.click()
+    assert.equal(await primary.getAttribute('aria-expanded'), 'true')
+    await frame
+      .getByRole('button', { name: 'Use Teal for primary family', exact: true })
+      .first()
+      .click()
+    assert.equal(await primary.getAttribute('data-value'), 'teal')
+
+    await chip('Light Action fill').click()
+    assert.equal(await chip('Light Action fill').getAttribute('aria-pressed'), 'true')
     await exact.fill('#FFFFFF')
     assert.equal(await variable('--rad-color-accent'), '#FFFFFF')
-    await role.selectOption('accentForeground')
+    await chip('Light Action text').click()
     await exact.fill('#FFFFFF')
-    assert.ok((await frame.locator('.color-failures').innerText()).includes('1.0000:1'))
+    assert.ok((await frame.locator('.color-failures').innerText()).includes('1.00:1'))
+    assert.equal(await chip('Light Action text').getAttribute('data-problem'), 'true')
+    const fix = frame
+      .locator('.color-role-detail')
+      .getByRole('button', { name: 'Use the automatic color', exact: true })
+    await fix.click()
+    assert.notEqual(await variable('--rad-color-accent-foreground'), '#FFFFFF', 'the fix applied')
+    assert.equal(await chip('Light Action text').getAttribute('data-problem'), null)
+    assert.equal(
+      await variable('--rad-color-accent'),
+      '#FFFFFF',
+      'the fix left the other pin alone'
+    )
+
     await brand.fill('#7C3AED')
-    const wallPreset = frame.getByRole('combobox', { name: 'Wall preset', exact: true })
-    const rampPreset = frame.getByRole('combobox', { name: 'Brand ramp preset', exact: true })
-    await wallPreset.focus()
-    await wallPreset.press('Tab')
-    assert.equal(await rampPreset.evaluate(node => node === document.activeElement), true)
-    await wallPreset.selectOption('classic')
-    assert.equal(await wallPreset.inputValue(), 'classic')
+    const wallClassic = radio('Wall preset', 'Classic')
+    const wallBalanced = radio('Wall preset', 'Balanced')
+    await wallBalanced.focus()
+    await wallBalanced.press('Tab')
     assert.equal(
-      await frame
-        .getByRole('checkbox', { name: 'Automatic wall vividness', exact: true })
-        .isChecked(),
-      true
+      await radio('Brand ramp preset', 'Balanced').evaluate(
+        node => node === document.activeElement
+      ),
+      true,
+      'each preset group is one tab stop'
     )
-    assert.equal(
-      await frame
-        .getByRole('checkbox', { name: 'Automatic brand vividness', exact: true })
-        .isChecked(),
-      false
-    )
-    await rampPreset.selectOption('expressive')
-    assert.equal(
-      await frame
-        .getByRole('checkbox', { name: 'Automatic brand vividness', exact: true })
-        .isChecked(),
-      true
-    )
-    assert.equal(await wallPreset.inputValue(), 'classic')
+    await wallClassic.check()
+    assert.equal(await wallClassic.isChecked(), true)
+    assert.equal(await auto('wall vividness').getAttribute('aria-pressed'), 'true')
+    assert.equal(await auto('brand vividness').getAttribute('aria-pressed'), 'false')
+    await radio('Brand ramp preset', 'Expressive').check()
+    assert.equal(await auto('brand vividness').getAttribute('aria-pressed'), 'true')
+    assert.equal(await wallClassic.isChecked(), true)
     assert.equal(
       await variable('--rad-color-accent'),
       '#FFFFFF',
       'regeneration retains pinned roles'
     )
-    await frame.getByRole('combobox', { name: 'primary family', exact: true }).selectOption('blue')
+    await primary.click()
+    await frame
+      .getByRole('button', { name: 'Use Blue for primary family', exact: true })
+      .first()
+      .click()
     assert.equal(
       await variable('--rad-color-accent'),
       '#FFFFFF',
       'family changes retain pinned roles'
     )
+    await chip('Light Action fill').click()
     await exact.fill('#12')
     assert.equal(await exact.getAttribute('aria-invalid'), 'true')
-    assert.equal(await variable('--rad-color-accent-foreground'), '#FFFFFF')
+    assert.equal(await variable('--rad-color-accent'), '#FFFFFF')
     await exact.fill('#123456')
     await frame.getByRole('button', { name: 'Clear role override', exact: true }).click()
     assert.notEqual(await exact.inputValue(), '#123456')
-    await roleMode.selectOption('dark')
-    await role.selectOption('canvas')
+
+    await chip('Dark Canvas').click()
     await exact.fill('#112233')
     await frame.getByRole('combobox', { name: 'Preview mode', exact: true }).selectOption('dark')
     assert.equal(await variable('--rad-surface-canvas'), '#112233')
-    const family = frame.getByRole('combobox', { name: 'Wall family', exact: true })
-    const stop = frame.getByRole('combobox', { name: 'Wall stop', exact: true })
-    await family.selectOption('teal')
-    await stop.selectOption('700')
-    const selected = (await stop.locator('option:checked').textContent()).split(' · ')[1]
-    const apply = frame.getByRole('button', { name: 'Apply selected shade', exact: true })
-    await apply.focus()
-    await apply.press('Enter')
-    assert.equal(await exact.inputValue(), selected)
-    assert.equal(await apply.evaluate(node => node === document.activeElement), true)
+    const grid = frame.getByRole('grid', { name: 'Color wall, pick for dark canvas', exact: true })
+    assert.equal(await grid.isVisible(), true, 'picking a role opens the wall for it')
+    const active = () => grid.locator('.color-swatch[tabindex="0"]')
+    await active().focus()
+    const startCol = Number(await active().getAttribute('data-col'))
+    await page.keyboard.press('ArrowRight')
+    assert.equal(
+      Number(await active().getAttribute('data-col')),
+      startCol + 1,
+      'arrow moves the grid cursor'
+    )
+    assert.equal(await active().evaluate(node => node === document.activeElement), true)
+    await page.keyboard.press('ArrowDown')
+    const picked = (await active().getAttribute('aria-label')).match(/#[0-9A-F]{6}/)[0]
+    await page.keyboard.press('Enter')
+    assert.equal(await exact.inputValue(), picked, 'Enter picks the focused shade')
+    assert.equal(await variable('--rad-surface-canvas'), picked)
+    assert.equal(
+      await frame.locator('.color-swatch[tabindex="0"]').count(),
+      1,
+      'one tab stop in the wall'
+    )
+
     await frame.getByRole('button', { name: 'Typography', exact: true }).click()
     const typographyFamily = await setTypographyFamily(frame)
     await frame.getByRole('button', { name: 'Color', exact: true }).click()
-    assert.equal(await role.inputValue(), 'canvas')
-    assert.equal(await family.inputValue(), 'teal')
-    assert.equal(await stop.inputValue(), '700')
-    await frame.locator('.color-swatch').first().click()
-    assert.equal(await stop.inputValue(), '50')
+    assert.equal(await chip('Dark Canvas').getAttribute('aria-pressed'), 'true')
     await frame.getByRole('button', { name: 'Use automatic roles', exact: true }).click()
     await frame.getByRole('button', { name: 'Use recommended families', exact: true }).click()
     await frame.getByRole('button', { name: 'Reset color', exact: true }).click()
     assert.equal(await brand.inputValue(), '#7C3AED')
-    assert.equal(await role.inputValue(), 'accent')
-    assert.equal(await roleMode.inputValue(), 'light')
-    assert.equal(await family.inputValue(), 'brand')
+    assert.equal(await chip('Light Action fill').getAttribute('aria-pressed'), 'true')
+    assert.equal(await primary.getAttribute('data-value'), 'brand')
     assert.equal(await variable(typographyFamily), 'Georgia, serif')
     assert.equal(
       await frame.getByRole('combobox', { name: 'Preview mode', exact: true }).inputValue(),
@@ -157,8 +242,8 @@ export async function verifyColorEditor(browser, baseURL) {
     )
     await frame.getByRole('combobox', { name: 'Preview mode', exact: true }).selectOption('light')
     assert.equal(await variable('--rad-color-accent'), baseline)
-    await frame.getByText('All 44 pair measurements', { exact: true }).click()
-    await frame.getByText('Semantic light/dark roles', { exact: true }).click()
+    assert.ok((await frame.locator('.color-contrast-summary').innerText()).startsWith('All '))
+    await frame.getByText('All 44 measurements', { exact: true }).click()
     assert.equal(
       await frame
         .getByRole('region', { name: 'Contrast measurements', exact: true })
@@ -169,10 +254,11 @@ export async function verifyColorEditor(browser, baseURL) {
     assert.equal(
       await frame
         .getByRole('region', { name: 'Semantic role values', exact: true })
-        .locator('tbody tr')
+        .locator('.color-role-chip')
         .count(),
-      18
+      36
     )
+    await chip('Light Action fill').click()
     await page.screenshot({ path: 'output/docs/color-editor-desktop.png', fullPage: true })
     for (const width of [390, 320]) {
       await page.setViewportSize({ width, height: 844 })
@@ -181,7 +267,7 @@ export async function verifyColorEditor(browser, baseURL) {
         true,
         `${width}px color editor overflow`
       )
-      for (const name of ['Complete color wall', 'Contrast measurements', 'Semantic role values']) {
+      for (const name of ['Color wall', 'Contrast measurements']) {
         const region = frame.getByRole('region', { name, exact: true })
         await region.focus()
         await region.press('ArrowRight')
@@ -203,6 +289,7 @@ export async function verifyColorEditor(browser, baseURL) {
     try {
       await staticPage.goto(`${baseURL}/workshop/`)
       assert.equal(await staticPage.locator('.color-swatch').count(), 198)
+      assert.equal(await staticPage.locator('.color-role-chip').count(), 36)
       assert.equal(
         await staticPage.getByRole('textbox', { name: 'Brand color', exact: true }).isDisabled(),
         true
@@ -211,7 +298,7 @@ export async function verifyColorEditor(browser, baseURL) {
       await staticPage.close()
     }
     console.log(
-      'Color editor passed: production 198-swatch wall, brand fidelity, all generator controls, pinned roles, contrast failures, keyboard alternatives/scrolling, resets, static rendering and 320px/390px layouts.'
+      'Color editor passed: production 198-swatch wall, brand drag and keys, brand fidelity, all generator strips by keyboard with spoken values, preset cards, pinned roles, contrast warnings with a working fix, wall grid keys, resets, static rendering and 320px/390px layouts.'
     )
   } catch (error) {
     await page

@@ -86,11 +86,15 @@ export async function verifyInspect(browser, baseURL) {
         .getAttribute('aria-pressed'),
       'true'
     )
-    const roleColor = workshop.getByRole('textbox', { name: 'Exact role color', exact: true })
-    assert.equal(await roleColor.evaluate(node => node === document.activeElement), true)
+    const roleChip = workshop.getByRole('button', { name: 'Light Action fill', exact: true })
+    assert.equal(await roleChip.evaluate(node => node === document.activeElement), true)
+    assert.equal(await roleChip.getAttribute('aria-pressed'), 'true', 'the jump selects the role')
     assert.equal(
-      await workshop.getByRole('combobox', { name: 'Semantic role', exact: true }).inputValue(),
-      'accent'
+      await workshop
+        .locator('.color-role-detail')
+        .innerText()
+        .then(text => text.includes('Light Action fill')),
+      true
     )
 
     await item(/Button press physics/).click()

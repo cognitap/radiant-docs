@@ -20,6 +20,9 @@ export async function verifyHandoff(browser, baseURL) {
     const frame = page.getByRole('region', { name: 'Shared theme workshop', exact: true })
     const handoff = frame.getByRole('region', { name: 'Theme handoff', exact: true })
     const field = label => handoff.getByRole('textbox', { name: label, exact: true })
+    /** The outputs follow theme changes at low priority; read them once they have caught up. */
+    const settled = () =>
+      page.waitForFunction(() => !document.querySelector('.theme-handoff[data-settling]'))
     const canvas = frame.locator('.preview-page').first()
     const variable = key =>
       canvas.evaluate((node, key) => getComputedStyle(node).getPropertyValue(key).trim(), key)
@@ -88,6 +91,7 @@ export async function verifyHandoff(browser, baseURL) {
     const apply = handoff.getByRole('button', { name: 'Import JSON', exact: true })
     await input.fill(text)
     await apply.click()
+    await settled()
     await page.waitForFunction(() =>
       document
         .querySelector('.handoff-import-result')
@@ -106,18 +110,14 @@ export async function verifyHandoff(browser, baseURL) {
       '"Local Display", serif'
     )
     await frame.getByRole('button', { name: 'Color', exact: true }).click()
-    assert.equal(
-      await frame.getByRole('combobox', { name: 'Brand fidelity', exact: true }).inputValue(),
-      'unanchored'
-    )
-    assert.equal(
-      await frame.getByRole('combobox', { name: 'Wall preset', exact: true }).inputValue(),
-      'expressive'
-    )
-    assert.equal(
-      await frame.getByRole('combobox', { name: 'Brand ramp preset', exact: true }).inputValue(),
-      'classic'
-    )
+    const checked = (scope, group) =>
+      scope
+        .getByRole('group', { name: group, exact: true })
+        .locator('input:checked')
+        .getAttribute('value')
+    assert.equal(await checked(frame, 'Brand fidelity'), 'unanchored')
+    assert.equal(await checked(frame, 'Wall preset'), 'expressive')
+    assert.equal(await checked(frame, 'Brand ramp preset'), 'classic')
     await frame.getByRole('button', { name: 'Spacing & surfaces', exact: true }).click()
     assert.equal(
       await frame.getByRole('combobox', { name: 'Starting preset', exact: true }).inputValue(),
@@ -145,14 +145,8 @@ export async function verifyHandoff(browser, baseURL) {
         document.querySelector('.theme-handoff textarea[readonly]')?.value.includes('handoff-proof')
       )
       assert.equal(await exported.inputValue(), text)
-      assert.equal(
-        await shared.getByRole('combobox', { name: 'Wall preset', exact: true }).inputValue(),
-        'expressive'
-      )
-      assert.equal(
-        await shared.getByRole('combobox', { name: 'Brand ramp preset', exact: true }).inputValue(),
-        'classic'
-      )
+      assert.equal(await checked(shared, 'Wall preset'), 'expressive')
+      assert.equal(await checked(shared, 'Brand ramp preset'), 'classic')
       await shared.reload()
       await shared.getByText('Reusable configuration JSON', { exact: true }).click()
       await shared.waitForFunction(() =>
@@ -174,6 +168,7 @@ export async function verifyHandoff(browser, baseURL) {
     )
     await input.fill('{ broken')
     await apply.click()
+    await settled()
     assert.ok((await handoff.locator('.handoff-import-error').innerText()).includes('Invalid JSON'))
     assert.equal(await handoff.getByRole('status').filter({ hasText: 'Invalid JSON' }).count(), 1)
     assert.equal(
@@ -183,12 +178,14 @@ export async function verifyHandoff(browser, baseURL) {
     assert.equal(await field('Configuration output').inputValue(), text)
     await input.fill(jsonText({ ...config, version: 99 }))
     await apply.click()
+    await settled()
     assert.ok((await handoff.locator('.handoff-import-error').innerText()).includes('version'))
     assert.equal(await field('Configuration output').inputValue(), text)
     await frame.getByRole('button', { name: 'Typography', exact: true }).click()
     await frame
       .getByRole('combobox', { name: 'Body family', exact: true })
       .selectOption('system-ui, sans-serif')
+    await settled()
     assert.notEqual(await field('Configuration output').inputValue(), text)
     await handoff.getByLabel('Import configuration file', { exact: true }).setInputFiles({
       name: 'saved.json',
@@ -218,6 +215,7 @@ export async function verifyHandoff(browser, baseURL) {
     }
     await input.fill(jsonText(partial))
     await apply.click()
+    await settled()
     let current = JSON.parse(await field('Configuration output').inputValue())
     assert.equal(current.document.sections.typography.values.family, '"Local Display", serif')
     assert.deepEqual(current.document.sections.components, config.document.sections.components)
@@ -226,11 +224,13 @@ export async function verifyHandoff(browser, baseURL) {
       .getByRole('combobox', { name: 'Section apply mode', exact: true })
       .selectOption('replace')
     await apply.click()
+    await settled()
     current = JSON.parse(await field('Configuration output').inputValue())
     assert.deepEqual(current.document.sections.typography, partial.sections.typography)
     assert.deepEqual(current.document.sections.components, config.document.sections.components)
     await input.fill(jsonText(config.document))
     await apply.click()
+    await settled()
     assert.deepEqual(JSON.parse(await field('Configuration output').inputValue()).recipes, {})
     await frame.getByRole('button', { name: 'Color', exact: true }).click()
     assert.equal(
@@ -339,6 +339,7 @@ export async function verifyHandoff(browser, baseURL) {
     )
     await input.fill(jsonText(modern))
     await apply.click()
+    await settled()
     await page.waitForFunction(() =>
       document
         .querySelector('.handoff-import-result')

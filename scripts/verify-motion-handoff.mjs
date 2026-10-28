@@ -24,6 +24,10 @@ export async function verifyMotionHandoff(browser, baseURL) {
     await editor.getByRole('combobox', { name: 'Theme motion' }).selectOption('off')
     await handoff.getByText('Reusable configuration JSON', { exact: true }).click()
     const configField = handoff.getByRole('textbox', { name: 'Configuration output', exact: true })
+    /** The outputs follow theme changes at low priority; read them once they have caught up. */
+    const settled = () =>
+      page.waitForFunction(() => !document.querySelector('.theme-handoff[data-settling]'))
+    await settled()
     const config = JSON.parse(await configField.inputValue())
     assert.equal(config.document.sections.motion.profile.mode, 'off')
     await handoff.getByText('Motion only · typed configuration', { exact: true }).click()
@@ -80,6 +84,7 @@ export async function verifyMotionHandoff(browser, baseURL) {
     await page.waitForFunction(
       () => document.querySelector('.motion-editor').dataset.motionMode === 'off'
     )
+    await settled()
     assert.equal(
       await configField.inputValue(),
       jsonText(config),
@@ -110,6 +115,7 @@ export async function verifyMotionHandoff(browser, baseURL) {
     await input.fill(jsonText(invalid))
     await handoff.getByRole('button', { name: 'Import JSON', exact: true }).click()
     await handoff.locator('.handoff-import-error').waitFor()
+    await settled()
     assert.equal(await configField.inputValue(), jsonText(config))
     const badLink = `${baseURL}/workshop/#workshop=${await encodeShare(jsonText(invalid))}`
     await shared.goto(badLink)
@@ -121,6 +127,7 @@ export async function verifyMotionHandoff(browser, baseURL) {
       jsonText(invalid)
     )
     await editor.getByRole('combobox', { name: 'Theme motion' }).selectOption('system')
+    await settled()
     assert.equal(
       JSON.parse(await configField.inputValue()).document.sections.motion.profile.mode,
       'system',

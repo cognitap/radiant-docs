@@ -2,12 +2,10 @@
 
 /* oxlint-disable jsx-a11y/no-noninteractive-tabindex -- Named scrolling data regions need keyboard access. */
 
-import { useId, useState } from 'react'
-import { Button, Checkbox, Field, Input } from '@cognitap/radiant'
+import { useId, useMemo, useState } from 'react'
+import { Button } from '@cognitap/radiant'
 import {
   chooseWorkingFamily,
-  colorPresets,
-  selectColorPreset,
   overrideRole,
   roleNames,
   roleValue,
@@ -16,8 +14,22 @@ import {
   type ColorRecipe,
   type ColorSession,
   type Mode,
-  type Role
+  type Role,
+  type WorkingRole
 } from './workshop-color'
+import {
+  choiceGroups,
+  contrastProblems,
+  readableOn,
+  stripInputs,
+  strips,
+  type ContrastProblem
+} from './workshop-color-view'
+import { useWallSamples } from './useWallSamples'
+import { BrandPicker } from './BrandPicker'
+import { HexField } from './HexField'
+import { ChoiceCards, ColorStrip } from './ColorStrip'
+import { ColorWallGrid, type WallPick } from './ColorWallGrid'
 import { Changed } from './ControlChange'
 import type { ControlTarget } from './workshop-inspect'
 import type { Change } from './workshop-history'
@@ -27,118 +39,37 @@ import './color-editor.css'
 const automatic = (value: number | string | undefined) =>
   value === undefined ? 'automatic' : String(value)
 const recommended = (value: string | undefined) => value ?? 'recommended'
-const presetName = (id: string) => colorPresets.find(preset => preset.id === id)?.name ?? id
+const title = (text: string) => text.charAt(0).toUpperCase() + text.slice(1)
+const modes: readonly Mode[] = ['light', 'dark']
+const roles = Object.keys(roleNames) as Role[]
+/** The field a wall pick writes, so the picker opens where the marker and Inspect point. */
+type Picking = { kind: 'role'; mode: Mode; role: Role } | { kind: 'family'; name: WorkingRole }
 
-function HexField({
-  label,
-  value,
-  disabled,
-  describedBy,
-  onValid
-}: {
-  label: string
-  value: string
-  disabled?: boolean
-  describedBy?: string
-  onValid: (value: string) => void
-}) {
-  const [draft, setDraft] = useState(value)
-  const [previousValue, setPreviousValue] = useState(value)
-  if (previousValue !== value) {
-    setPreviousValue(value)
-    setDraft(value)
-  }
-  const valid = /^#[0-9a-f]{6}$/i.test(draft)
-  return (
-    <div className="color-hex-field">
-      <Field
-        label={label}
-        error={
-          !valid
-            ? 'Use six-digit sRGB hex, such as #7C3AED. The last valid theme is still shown.'
-            : undefined
-        }
-      >
-        <Input
-          value={draft}
-          disabled={disabled}
-          aria-describedby={describedBy}
-          spellCheck={false}
-          maxLength={80}
-          onChange={event => {
-            setDraft(event.target.value)
-            if (/^#[0-9a-f]{6}$/i.test(event.target.value)) onValid(event.target.value)
-          }}
-        />
-      </Field>
-      <label className="color-picker-label">
-        Pick {label.toLowerCase()}
-        <input
-          type="color"
-          aria-label={`${label} picker`}
-          aria-describedby={describedBy}
-          value={value}
-          disabled={disabled}
-          onChange={event => {
-            setDraft(event.target.value)
-            onValid(event.target.value)
-          }}
-        />
-      </label>
-    </div>
-  )
-}
-function Dial({
-  label,
-  value,
-  min,
-  max,
-  step,
-  disabled,
-  describedBy,
+function Fix({
+  problem,
   onChange
 }: {
-  label: string
-  value: number
-  min: number
-  max: number
-  step: number
-  disabled?: boolean
-  describedBy?: string
-  onChange: (value: number) => void
+  problem: ContrastProblem
+  onChange: (recipe: ColorRecipe, change: Change) => void
 }) {
-  const id = useId()
+  const { check, fix } = problem
   return (
-    <label
-      className="color-dial"
-      htmlFor={id}
-    >
-      <span>
-        {label}: <strong>{Number(value.toFixed(3))}</strong>
-      </span>
-      <input
-        id={id}
-        type="range"
-        min={min}
-        max={max}
-        step={step}
-        value={value}
-        disabled={disabled}
-        aria-describedby={describedBy}
-        onChange={event => onChange(Number(event.target.value))}
-      />
-    </label>
-  )
-}
-function Chip({ value }: { value: string }) {
-  return (
-    <span className="color-chip">
-      <i
-        style={{ backgroundColor: value }}
-        aria-hidden="true"
-      />
-      <code>{value}</code>
-    </span>
+    <>
+      <strong>
+        {title(check.mode)}: {roleNames[check.foregroundRole as Role] ?? check.foregroundRole} on{' '}
+        {roleNames[check.backgroundRole as Role] ?? check.backgroundRole}
+      </strong>{' '}
+      {check.ratio.toFixed(2)}:1, needs {check.minimum}:1.
+      {fix && (
+        <button
+          type="button"
+          className="color-fix"
+          onClick={() => onChange(fix.recipe, { label: fix.label.toLowerCase() })}
+        >
+          {fix.label}
+        </button>
+      )}
+    </>
   )
 }
 
@@ -155,9 +86,9 @@ export function ColorEditor({
   target?: ControlTarget
   onChange: (recipe: ColorRecipe, change: Change) => void
 }) {
-  const presetsId = useId()
-  const [mode, setMode] = useState<Mode>('light')
-  const [role, setRole] = useState<Role>('accent')
+  const id = useId()
+  const [picking, setPicking] = useState<Picking>({ kind: 'role', mode: 'light', role: 'accent' })
+  const [wallOpen, setWallOpen] = useState(false)
   const [seen, setSeen] = useState(target)
   if (target !== seen) {
     setSeen(target)
@@ -166,74 +97,67 @@ export function ColorEditor({
       (targetMode === 'light' || targetMode === 'dark') &&
       targetRole &&
       Object.hasOwn(roleNames, targetRole)
-    ) {
-      setMode(targetMode)
-      setRole(targetRole as Role)
-    }
+    )
+      setPicking({ kind: 'role', mode: targetMode, role: targetRole as Role })
   }
-  const [family, setFamily] = useState('brand')
-  const [stop, setStop] = useState(500)
-  if (!session)
+  const input = session?.wall.input
+  const sampleInputs = useMemo(
+    () =>
+      input
+        ? [
+            ...strips.flatMap(strip => stripInputs(strip, input)),
+            ...choiceGroups.flatMap(group =>
+              group.choices.map(choice => group.input(input, choice.value))
+            )
+          ]
+        : [],
+    [input]
+  )
+  const wallFor = useWallSamples(sampleInputs)
+  if (!session || !input)
     return (
       <div className="color-editor">
-        <p>
-          Imported colors are preserved exactly. This document has no matching generator recipe. Use
-          Reset color to start the default brand recipe; this replaces the imported color system
-          while retaining other sections.
+        <p className="color-lead">
+          Imported colors are kept exactly. Reset color starts the generator from the default brand;
+          other sections stay.
         </p>
       </div>
     )
   const { recipe, wall, palette } = session
-  const { input } = recipe
   const changeInput = (patch: Partial<ColorRecipe['input']>, change: Change) =>
-    onChange({ ...recipe, input: { ...input, ...patch } }, change)
-  const roleField = `role.${mode}.${role}` as const
-  const choose = (value: string | undefined, coalesce?: string) =>
+    onChange({ ...recipe, input: { ...recipe.input, ...patch } }, change)
+  const setRole = (mode: Mode, role: Role, value: string | undefined, coalesce?: string) =>
     onChange(overrideRole(recipe, mode, role, value), {
       label: `${mode} ${roleNames[role].toLowerCase()}`,
       coalesce
     })
-  const dial = (
-    field: 'distribution' | 'neutralTint' | 'hueAlignment',
-    label: string,
-    min: number,
-    max: number,
-    step: number
-  ) => {
-    const set = (value: number) =>
-      changeInput({ [field]: value }, { label: label.toLowerCase(), coalesce: field })
-    return (
-      <Changed
-        changes={changes}
-        field={field}
-        label={label}
-        set={set}
-      >
-        {describedBy => (
-          <Dial
-            label={label}
-            value={wall.input[field]}
-            min={min}
-            max={max}
-            step={step}
-            describedBy={describedBy}
-            onChange={set}
-          />
-        )}
-      </Changed>
-    )
-  }
-  const selectedPalette = wall.color.palettes.find(p => p.id === family)!
-  const selectedSwatch = selectedPalette.swatches.find(s => s.stop === stop)!
+  const setFamily = (name: WorkingRole, paletteId: string | undefined) =>
+    onChange(chooseWorkingFamily(recipe, name, paletteId), { label: `${name} family` })
+  const problems = contrastProblems(session)
+  const problemsFor = (mode: Mode, role: Role) =>
+    problems.filter(p => p.mode === mode && p.role === role)
+  const brandProblems = problems.filter(p => p.brandDerived)
   const failures = palette.checks.filter(check => check.pass === false)
   const required = palette.checks.filter(check => check.minimum !== null)
+  const selected = picking.kind === 'role' ? picking : null
+  const wallPick: WallPick =
+    picking.kind === 'role'
+      ? { ...picking, value: recipe.modes?.[picking.mode]?.[picking.role] }
+      : { ...picking, paletteId: palette.working[picking.name].paletteId }
+  const openWall = (next: Picking) => {
+    setPicking(next)
+    setWallOpen(true)
+  }
+  const roleColumns = [roles.slice(0, 9), roles.slice(9)]
   return (
     <div className="color-editor">
-      <fieldset
-        disabled={disabled}
-        className="color-generator"
+      <p className="color-lead">Drag the brand color; everything else follows. sRGB only.</p>
+
+      <section
+        className="color-section color-brand"
+        aria-labelledby={`${id}-brand`}
       >
-        <legend>Brand and generator</legend>
+        <h4 id={`${id}-brand`}>Brand</h4>
         <Changed
           changes={changes}
           field="brand"
@@ -241,527 +165,438 @@ export function ColorEditor({
           set={brand => changeInput({ brand }, { label: 'brand color', coalesce: 'brand' })}
         >
           {describedBy => (
-            <HexField
-              label="Brand color"
-              value={input.brand}
-              describedBy={describedBy}
-              onValid={brand => changeInput({ brand }, { label: 'brand color', coalesce: 'brand' })}
-            />
+            <div className="color-brand-row">
+              <BrandPicker
+                value={input.brand}
+                disabled={disabled}
+                describedBy={describedBy}
+                onChange={brand =>
+                  changeInput({ brand }, { label: 'brand color', coalesce: 'brand' })
+                }
+              />
+              <div className="color-brand-side">
+                <HexField
+                  label="Brand color"
+                  value={input.brand}
+                  describedBy={describedBy}
+                  onValid={brand =>
+                    changeInput({ brand }, { label: 'brand color', coalesce: 'brand' })
+                  }
+                />
+                <small
+                  className="color-fidelity"
+                  data-testid="color-fidelity"
+                >
+                  {wall.color.anchor
+                    ? `${wall.color.brand.value} kept exactly at ${wall.color.anchor.paletteId} ${wall.color.anchor.stop}`
+                    : `${wall.color.brand.value} kept as reference`}
+                </small>
+                {brandProblems.length > 0 && (
+                  <ul
+                    className="color-problems"
+                    aria-label="Brand contrast problems"
+                  >
+                    {brandProblems.map(problem => (
+                      <li
+                        key={`${problem.mode}:${problem.check.foregroundRole}:${problem.check.backgroundRole}`}
+                      >
+                        <Fix
+                          problem={problem}
+                          onChange={onChange}
+                        />
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            </div>
           )}
         </Changed>
-        <p>
-          sRGB input and output. Alpha and Display P3 sources are not supported by this version.
-        </p>
-        <p>
-          Choose wall and brand-ramp presets independently. Dials customize the selected treatment;
-          choosing a preset resets its own dials and keeps your pinned semantic colors. Action fills
-          use the nearest readable brand shade in each mode.
-        </p>
-        <div className="color-controls">
-          {(['wall', 'ramp'] as const).map(section => {
-            const label = section === 'wall' ? 'Wall preset' : 'Brand ramp preset'
-            const field = section === 'wall' ? 'wallPreset' : 'rampPreset'
-            const select = (preset: string) =>
-              onChange(
-                selectColorPreset(recipe, section, colorPresets.find(p => p.id === preset)!.id),
-                { label: label.toLowerCase() }
+      </section>
+
+      <section
+        className="color-section"
+        aria-labelledby={`${id}-shape`}
+      >
+        <h4 id={`${id}-shape`}>Shape</h4>
+        <div className="color-strips">
+          {strips.map(strip => {
+            const explicit = recipe.input[strip.field]
+            const value = input[strip.field]
+            const isAutomatic = strip.automatic && explicit === undefined
+            const set = (next: number | undefined) =>
+              changeInput(
+                { [strip.field]: next },
+                { label: strip.label.toLowerCase(), coalesce: strip.field }
               )
             return (
               <Changed
-                key={section}
+                key={strip.field}
                 changes={changes}
-                field={field}
-                label={label}
-                format={presetName}
-                set={select}
+                field={strip.field}
+                label={strip.label}
+                format={automatic}
+                set={set}
               >
                 {describedBy => (
-                  <label className="color-preset">
-                    {label}
-                    <select
-                      aria-label={label}
-                      aria-describedby={[`${presetsId}-${section}`, describedBy]
-                        .filter(Boolean)
-                        .join(' ')}
-                      value={wall.input[field]}
-                      onChange={event => select(event.target.value)}
-                    >
-                      {colorPresets.map(preset => (
-                        <option
-                          key={preset.id}
-                          value={preset.id}
-                        >
-                          {preset.name}
-                        </option>
-                      ))}
-                    </select>
-                    <small id={`${presetsId}-${section}`}>
-                      {colorPresets.find(p => p.id === wall.input[field])?.description}
-                    </small>
-                  </label>
+                  <ColorStrip
+                    strip={strip}
+                    value={value}
+                    automatic={isAutomatic}
+                    walls={stripInputs(strip, input).map(wallFor)}
+                    disabled={disabled || (strip.field === 'neutralHue' && !wall.neutralInput)}
+                    describedBy={describedBy}
+                    onChange={set}
+                    onAutomatic={
+                      strip.automatic
+                        ? auto =>
+                            changeInput(
+                              { [strip.field]: auto ? undefined : value },
+                              { label: strip.label.toLowerCase() }
+                            )
+                        : undefined
+                    }
+                  />
                 )}
               </Changed>
             )
           })}
-          <Changed
-            changes={changes}
-            field="fidelity"
-            label="Brand fidelity"
-            set={fidelity => changeInput({ fidelity }, { label: 'brand fidelity' })}
-          >
-            {describedBy => (
-              <label>
-                Brand fidelity
-                <select
-                  value={wall.input.fidelity}
-                  aria-describedby={describedBy}
-                  onChange={event =>
-                    changeInput(
-                      { fidelity: event.target.value === 'unanchored' ? 'unanchored' : 'anchored' },
-                      { label: 'brand fidelity' }
-                    )
-                  }
-                >
-                  <option value="anchored">Exact brand anchor</option>
-                  <option value="unanchored">Regular ramp</option>
-                </select>
-              </label>
-            )}
-          </Changed>
-          <Changed
-            changes={changes}
-            field="lightness"
-            label="Lightness model"
-            set={lightness => changeInput({ lightness }, { label: 'lightness model' })}
-          >
-            {describedBy => (
-              <label>
-                Lightness model
-                <select
-                  value={wall.input.lightness}
-                  aria-describedby={describedBy}
-                  onChange={event =>
-                    changeInput(
-                      { lightness: event.target.value === 'shared' ? 'shared' : 'hue-aware' },
-                      { label: 'lightness model' }
-                    )
-                  }
-                >
-                  <option value="hue-aware">Hue aware</option>
-                  <option value="shared">Shared stops</option>
-                </select>
-              </label>
-            )}
-          </Changed>
-          <Changed
-            changes={changes}
-            field="vividness"
-            label="Wall vividness"
-            format={automatic}
-            set={vividness =>
-              changeInput({ vividness }, { label: 'wall vividness', coalesce: 'vividness' })
-            }
-          >
-            {describedBy => (
-              <>
-                <Checkbox
-                  label="Automatic wall vividness"
-                  checked={input.vividness === undefined}
-                  aria-describedby={describedBy}
-                  onChange={event =>
-                    changeInput(
-                      { vividness: event.target.checked ? undefined : wall.input.vividness },
-                      { label: 'wall vividness' }
-                    )
-                  }
-                />
-                <Dial
-                  label="Wall vividness"
-                  value={wall.input.vividness}
-                  min={0}
-                  max={1}
-                  step={0.01}
-                  disabled={input.vividness === undefined}
-                  describedBy={describedBy}
-                  onChange={vividness =>
-                    changeInput({ vividness }, { label: 'wall vividness', coalesce: 'vividness' })
-                  }
-                />
-              </>
-            )}
-          </Changed>
-          <Changed
-            changes={changes}
-            field="brandVividness"
-            label="Brand vividness"
-            format={automatic}
-            set={brandVividness =>
-              changeInput(
-                { brandVividness },
-                { label: 'brand vividness', coalesce: 'brandVividness' }
-              )
-            }
-          >
-            {describedBy => (
-              <>
-                <Checkbox
-                  label="Automatic brand vividness"
-                  checked={input.brandVividness === undefined}
-                  aria-describedby={describedBy}
-                  onChange={event =>
-                    changeInput(
-                      {
-                        brandVividness: event.target.checked ? undefined : wall.input.brandVividness
-                      },
-                      { label: 'brand vividness' }
-                    )
-                  }
-                />
-                <Dial
-                  label="Brand vividness"
-                  value={wall.input.brandVividness}
-                  min={0}
-                  max={1}
-                  step={0.01}
-                  disabled={input.brandVividness === undefined}
-                  describedBy={describedBy}
-                  onChange={brandVividness =>
-                    changeInput(
-                      { brandVividness },
-                      { label: 'brand vividness', coalesce: 'brandVividness' }
-                    )
-                  }
-                />
-              </>
-            )}
-          </Changed>
-          {dial('distribution', 'Tone distribution', 0.75, 1.35, 0.01)}
-          {dial('neutralTint', 'Neutral tint', 0, 0.035, 0.001)}
-          {dial('hueAlignment', 'Hue alignment', 0, 1, 0.05)}
-          <Changed
-            changes={changes}
-            field="neutralHue"
-            label="Neutral hue direction"
-            set={neutralHue =>
-              changeInput(
-                { neutralHue },
-                { label: 'neutral hue direction', coalesce: 'neutralHue' }
-              )
-            }
-          >
-            {describedBy => (
-              <Dial
-                label="Neutral hue direction"
-                value={wall.input.neutralHue}
-                min={0}
-                max={359}
-                step={1}
-                disabled={!wall.neutralInput}
-                describedBy={describedBy}
-                onChange={neutralHue =>
-                  changeInput(
-                    { neutralHue },
-                    { label: 'neutral hue direction', coalesce: 'neutralHue' }
-                  )
-                }
-              />
-            )}
-          </Changed>
         </div>
-      </fieldset>
-      <p
-        className="color-fidelity"
-        data-testid="color-fidelity"
-      >
-        <strong>
-          Original <code>{wall.color.brand.value}</code>.
-        </strong>{' '}
-        {wall.color.anchor ? (
-          <>
-            Retained exactly at {wall.color.anchor.paletteId} {wall.color.anchor.stop}; neighboring
-            shades reshape around it.
-          </>
-        ) : (
-          <>Retained as reference metadata; the regular ramp follows its own stops.</>
-        )}{' '}
-        Semantic roles can use related shades for contrast.{' '}
-        {wall.neutralInput && 'Neutral hue direction sets the wall’s low-chroma hue.'}
-      </p>
-      <details
-        className="color-working"
-        open
-      >
-        <summary>Working palette · six families</summary>
-        <p>
-          Family choices guide automatic roles. Exact role overrides stay pinned until you clear
-          them. Support and success are working colors; they do not add component tones.
-        </p>
-        <div className="color-working-grid">
-          {workingRoles.map(name => (
-            <div
-              className="color-working-choice"
-              key={name}
+        <div className="color-choice-groups">
+          {choiceGroups.map(group => (
+            <Changed
+              key={group.field}
+              changes={changes}
+              field={group.field}
+              label={group.label}
+              format={value => group.choices.find(c => c.value === value)?.label ?? String(value)}
+              set={value =>
+                onChange(
+                  { ...recipe, input: group.input(recipe.input, value) },
+                  { label: group.label.toLowerCase() }
+                )
+              }
             >
+              {describedBy => (
+                <ChoiceCards
+                  group={group}
+                  value={input[group.field]}
+                  wallFor={choice => wallFor(group.input(input, choice))}
+                  describedBy={describedBy}
+                  onChange={value =>
+                    onChange(
+                      { ...recipe, input: group.input(recipe.input, value) },
+                      { label: group.label.toLowerCase() }
+                    )
+                  }
+                />
+              )}
+            </Changed>
+          ))}
+        </div>
+      </section>
+
+      <section
+        className="color-section"
+        aria-labelledby={`${id}-palette`}
+      >
+        <div className="color-section-head">
+          <h4 id={`${id}-palette`}>Working palette</h4>
+          <Button
+            variant="outline"
+            controlSize="small"
+            disabled={disabled || !recipe.working}
+            onClick={() =>
+              onChange({ ...recipe, working: undefined }, { label: 'recommended families' })
+            }
+          >
+            Use recommended families
+          </Button>
+        </div>
+        <div className="color-families">
+          {workingRoles.map(name => {
+            const family = palette.working[name]
+            const paletteName = wall.color.palettes.find(p => p.id === family.paletteId)?.name
+            const active = picking.kind === 'family' && picking.name === name && wallOpen
+            return (
               <Changed
+                key={name}
                 changes={changes}
                 field={`working.${name}`}
                 label={`${name} family`}
                 format={recommended}
-                set={paletteId =>
-                  onChange(chooseWorkingFamily(recipe, name, paletteId), {
-                    label: `${name} family`
-                  })
-                }
+                set={paletteId => setFamily(name, paletteId)}
               >
                 {describedBy => (
-                  <label>
-                    {name} family
-                    <select
-                      aria-label={`${name} family`}
-                      aria-describedby={describedBy}
-                      disabled={disabled}
-                      value={palette.working[name].paletteId}
-                      onChange={event =>
-                        onChange(chooseWorkingFamily(recipe, name, event.target.value), {
-                          label: `${name} family`
-                        })
-                      }
-                    >
-                      {wall.color.palettes.map(p => (
-                        <option
-                          key={p.id}
-                          value={p.id}
-                        >
-                          {p.name}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
+                  <button
+                    type="button"
+                    className="color-family"
+                    aria-label={`${name} family`}
+                    aria-describedby={describedBy}
+                    aria-expanded={active}
+                    aria-controls={`${id}-wall`}
+                    data-value={family.paletteId}
+                    disabled={disabled}
+                    onClick={() =>
+                      active ? setWallOpen(false) : openWall({ kind: 'family', name })
+                    }
+                  >
+                    <span className="color-family-name">{title(name)}</span>
+                    <span className="color-family-value">{paletteName}</span>
+                    {modes.map(mode => (
+                      <span
+                        key={mode}
+                        className="color-pair"
+                        style={{
+                          background: family[mode].background,
+                          color: family[mode].foreground
+                        }}
+                      >
+                        Aa
+                      </span>
+                    ))}
+                  </button>
                 )}
               </Changed>
-              {(['light', 'dark'] as const).map(m => (
-                <div key={m}>
-                  <small>{m}</small>
-                  <Chip value={palette.working[name][m].background} />
-                  <span className="color-on-value">text {palette.working[name][m].foreground}</span>
-                </div>
-              ))}
-            </div>
-          ))}
+            )
+          })}
         </div>
-        <Button
-          variant="outline"
-          disabled={disabled || !recipe.working}
-          onClick={() =>
-            onChange({ ...recipe, working: undefined }, { label: 'recommended families' })
-          }
-        >
-          Use recommended families
-        </Button>
-      </details>
-      <fieldset
-        disabled={disabled}
-        className="color-role-editor"
+      </section>
+
+      <section
+        className="color-section"
+        aria-labelledby={`${id}-roles`}
       >
-        <legend>Semantic role adjustment</legend>
-        <p>
-          Choose a role and mode, then enter hex or choose a wall shade. Role mode is separate from
-          specimen preview mode.
-        </p>
-        <div className="color-controls">
-          <label>
-            Role mode
-            <select
-              value={mode}
-              onChange={event => setMode(event.target.value === 'dark' ? 'dark' : 'light')}
-            >
-              <option value="light">Light</option>
-              <option value="dark">Dark</option>
-            </select>
-          </label>
-          <label>
-            Semantic role
-            <select
-              value={role}
-              onChange={event => {
-                if (Object.hasOwn(roleNames, event.target.value))
-                  setRole(event.target.value as Role)
-              }}
-            >
-              {Object.entries(roleNames).map(([key, name]) => (
-                <option
-                  value={key}
-                  key={key}
-                >
-                  {name}
-                </option>
-              ))}
-            </select>
-          </label>
-        </div>
-        <Changed
-          changes={changes}
-          field={roleField}
-          label="Exact role color"
-          format={automatic}
-          set={value => choose(value)}
-        >
-          {describedBy => (
-            <HexField
-              key={`${mode}:${role}`}
-              label="Exact role color"
-              value={roleValue(session, mode, role)}
-              describedBy={describedBy}
-              onValid={value => choose(value, roleField)}
-            />
-          )}
-        </Changed>
-        <p>
-          <strong>{recipe.modes?.[mode]?.[role] ? 'Explicit override' : 'Automatic choice'}</strong>{' '}
-          · {mode} {roleNames[role]} <Chip value={roleValue(session, mode, role)} />
-        </p>
-        <div className="workshop-actions">
+        <div className="color-section-head">
+          <h4 id={`${id}-roles`}>Roles</h4>
           <Button
             variant="outline"
-            disabled={!recipe.modes?.[mode]?.[role]}
-            onClick={() => choose(undefined)}
-          >
-            Clear role override
-          </Button>
-          <Button
-            variant="outline"
-            disabled={!recipe.modes}
+            controlSize="small"
+            disabled={disabled || !recipe.modes}
             onClick={() => onChange({ ...recipe, modes: undefined }, { label: 'automatic roles' })}
           >
             Use automatic roles
           </Button>
         </div>
-        <div className="color-controls color-wall-choice">
-          <label>
-            Wall family
-            <select
-              value={family}
-              onChange={event => setFamily(event.target.value)}
+        <section
+          className="color-roles"
+          aria-label="Semantic role values"
+        >
+          {roleColumns.map((column, index) => (
+            <div
+              key={index}
+              className="color-roles-column"
             >
-              {wall.color.palettes.map(p => (
-                <option
-                  value={p.id}
-                  key={p.id}
+              <div
+                className="color-role color-role-head"
+                aria-hidden="true"
+              >
+                <span />
+                <span>Light</span>
+                <span>Dark</span>
+              </div>
+              {column.map(role => (
+                <div
+                  key={role}
+                  className="color-role"
                 >
-                  {p.name}
-                </option>
+                  <span className="color-role-name">{roleNames[role]}</span>
+                  {modes.map(mode => {
+                    const value = roleValue(session, mode, role)
+                    const pinned = recipe.modes?.[mode]?.[role] !== undefined
+                    const failing = problemsFor(mode, role)
+                    const isSelected = selected?.mode === mode && selected.role === role
+                    const stateId = `${id}-${mode}-${role}`
+                    return (
+                      <Changed
+                        key={mode}
+                        changes={changes}
+                        field={`role.${mode}.${role}`}
+                        label={`${mode} ${roleNames[role].toLowerCase()}`}
+                        format={automatic}
+                        set={next => setRole(mode, role, next)}
+                      >
+                        {describedBy => (
+                          <>
+                            <button
+                              type="button"
+                              className="color-role-chip"
+                              aria-label={`${title(mode)} ${roleNames[role]}`}
+                              aria-describedby={[stateId, describedBy].filter(Boolean).join(' ')}
+                              aria-pressed={isSelected}
+                              data-value={value}
+                              data-pinned={pinned || undefined}
+                              data-problem={failing.length > 0 || undefined}
+                              disabled={disabled}
+                              style={{ background: value, color: readableOn(value) }}
+                              onClick={() => openWall({ kind: 'role', mode, role })}
+                            >
+                              <code aria-hidden="true">{value}</code>
+                              {pinned && (
+                                <span
+                                  className="color-role-pin"
+                                  aria-hidden="true"
+                                />
+                              )}
+                              {failing.length > 0 && (
+                                <span
+                                  className="color-role-warning"
+                                  aria-hidden="true"
+                                >
+                                  !
+                                </span>
+                              )}
+                            </button>
+                            <span
+                              id={stateId}
+                              className="workshop-sr-only"
+                            >
+                              {value}, {pinned ? 'pinned' : 'automatic'}
+                              {failing.length > 0 &&
+                                `, contrast fails: ${failing.map(p => p.check.message || `${p.check.ratio.toFixed(2)}:1`).join('; ')}`}
+                            </span>
+                          </>
+                        )}
+                      </Changed>
+                    )
+                  })}
+                </div>
               ))}
-            </select>
-          </label>
-          <label>
-            Wall stop
-            <select
-              value={stop}
-              onChange={event => setStop(Number(event.target.value))}
-            >
-              {selectedPalette.swatches.map(s => (
-                <option
-                  key={s.stop}
-                  value={s.stop}
-                >
-                  {s.stop} · {s.value}
-                </option>
-              ))}
-            </select>
-          </label>
-          <Button onClick={() => choose(selectedSwatch.value)}>Apply selected shade</Button>
-        </div>
-      </fieldset>
+            </div>
+          ))}
+        </section>
+        {selected && (
+          <div className="color-role-detail">
+            <div className="color-role-detail-head">
+              <span
+                className="color-role-swatch"
+                aria-hidden="true"
+                style={{ background: roleValue(session, selected.mode, selected.role) }}
+              />
+              <strong>
+                {title(selected.mode)} {roleNames[selected.role]}
+              </strong>
+              <span className="color-role-state">
+                {recipe.modes?.[selected.mode]?.[selected.role] ? 'pinned' : 'automatic'}
+              </span>
+            </div>
+            {problemsFor(selected.mode, selected.role).length > 0 && (
+              <ul
+                className="color-problems"
+                aria-label="Role contrast problems"
+              >
+                {problemsFor(selected.mode, selected.role).map(problem => (
+                  <li key={`${problem.check.foregroundRole}:${problem.check.backgroundRole}`}>
+                    <Fix
+                      problem={problem}
+                      onChange={onChange}
+                    />
+                  </li>
+                ))}
+              </ul>
+            )}
+            <div className="color-role-detail-controls">
+              <HexField
+                key={`${selected.mode}:${selected.role}`}
+                label="Exact role color"
+                value={roleValue(session, selected.mode, selected.role)}
+                disabled={disabled}
+                onValid={value =>
+                  setRole(
+                    selected.mode,
+                    selected.role,
+                    value,
+                    `role.${selected.mode}.${selected.role}`
+                  )
+                }
+              />
+              <Button
+                variant="outline"
+                controlSize="small"
+                disabled={disabled}
+                aria-expanded={wallOpen}
+                aria-controls={`${id}-wall`}
+                onClick={() => setWallOpen(open => !open)}
+              >
+                {wallOpen ? 'Hide wall' : 'Pick from wall'}
+              </Button>
+              <Button
+                variant="outline"
+                controlSize="small"
+                disabled={disabled || !recipe.modes?.[selected.mode]?.[selected.role]}
+                onClick={() => setRole(selected.mode, selected.role, undefined)}
+              >
+                Clear role override
+              </Button>
+            </div>
+          </div>
+        )}
+      </section>
+
       <details
+        id={`${id}-wall`}
         className="color-wall-details"
-        open
+        open={wallOpen}
+        onToggle={event => setWallOpen(event.currentTarget.open)}
       >
-        <summary>Complete color wall · {wall.color.palettes.length} families</summary>
-        <p>
-          Use the family and stop selectors above for keyboard selection, or click any swatch to set
-          the selected semantic role. Original and all supporting colors remain available.
-        </p>
+        <summary>
+          Color wall · {wall.color.palettes.length} families ·{' '}
+          {picking.kind === 'role'
+            ? `pick for ${picking.mode} ${roleNames[picking.role].toLowerCase()}`
+            : `pick the ${picking.name} family`}
+        </summary>
         <section
           className="color-wall-scroll"
-          aria-label="Complete color wall"
+          aria-label="Color wall"
           tabIndex={0}
         >
-          <table className="color-wall">
-            <caption>
-              All generated shades · choose for {mode} {roleNames[role]}
-            </caption>
-            <thead>
-              <tr>
-                <th scope="col">Family</th>
-                {wall.color.palettes[0].swatches.map(s => (
-                  <th
-                    scope="col"
-                    key={s.stop}
-                  >
-                    {s.stop}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {wall.color.palettes.map(p => (
-                <tr key={p.id}>
-                  <th scope="row">{p.name}</th>
-                  {p.swatches.map(s => (
-                    <td key={s.stop}>
-                      <button
-                        type="button"
-                        tabIndex={-1}
-                        disabled={disabled}
-                        className="color-swatch"
-                        style={{ backgroundColor: s.value }}
-                        aria-label={`Use ${p.name} ${s.stop} ${s.value} for ${mode} ${roleNames[role]}`}
-                        aria-pressed={recipe.modes?.[mode]?.[role] === s.value}
-                        onClick={() => {
-                          setFamily(p.id)
-                          setStop(s.stop)
-                          choose(s.value)
-                        }}
-                      />
-                      <code>{s.value}</code>
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <ColorWallGrid
+            wall={wall}
+            pick={wallPick}
+            disabled={disabled}
+            onPick={(paletteId, _stop, value) => {
+              if (picking.kind === 'role') setRole(picking.mode, picking.role, value)
+              else setFamily(picking.name, paletteId)
+            }}
+          />
         </section>
       </details>
+
       <section
-        className="color-contrast"
+        className="color-section color-contrast"
         aria-label="Color contrast report"
       >
-        <h4>Contrast for actual semantic pairs</h4>
-        <output className="color-contrast-summary">
-          {failures.length
-            ? `${failures.length} required pairs need attention.`
-            : `${required.length} required pairs pass.`}{' '}
-          {palette.checks.length - required.length} inactive-control observations.
-        </output>
-        <p>
-          Checks use final opaque sRGB values and unrounded thresholds. Apply color and canvas
-          together. Component overrides, translucent surfaces and rendered effects need inspection
-          in the real specimens. Pending actions remain subject to contrast requirements.
-        </p>
+        <div className="color-section-head">
+          <h4>Contrast</h4>
+          <output className="color-contrast-summary">
+            {failures.length
+              ? `${failures.length} of ${required.length} required pairs fail.`
+              : `All ${required.length} required pairs pass.`}
+          </output>
+        </div>
         {failures.length > 0 && (
-          <ul className="color-failures">
-            {failures.map(check => (
-              <li key={`${check.mode}:${check.foregroundRole}:${check.backgroundRole}`}>
-                <strong>
-                  {check.mode} · {check.foregroundRole} on {check.backgroundRole}
-                </strong>
-                : {check.ratio.toFixed(4)}:1. {check.message}
+          <ul className="color-failures color-problems">
+            {problems.map(problem => (
+              <li
+                key={`${problem.mode}:${problem.check.foregroundRole}:${problem.check.backgroundRole}`}
+              >
+                <Fix
+                  problem={problem}
+                  onChange={onChange}
+                />
+                <button
+                  type="button"
+                  className="color-fix"
+                  onClick={() => openWall({ kind: 'role', mode: problem.mode, role: problem.role })}
+                >
+                  Show {roleNames[problem.role].toLowerCase()}
+                </button>
               </li>
             ))}
           </ul>
         )}
         <details>
-          <summary>All {palette.checks.length} pair measurements</summary>
+          <summary>All {palette.checks.length} measurements</summary>
           <section
             className="color-data-scroll"
             aria-label="Contrast measurements"
@@ -786,7 +621,7 @@ export function ColorEditor({
                     <td>
                       {c.foreground} / {c.background}
                     </td>
-                    <td>{c.ratio.toFixed(4)}:1</td>
+                    <td>{c.ratio.toFixed(2)}:1</td>
                     <td>
                       {c.pass === null
                         ? 'Informational: inactive control'
@@ -801,38 +636,6 @@ export function ColorEditor({
           </section>
         </details>
       </section>
-      <details className="color-role-values">
-        <summary>Semantic light/dark roles</summary>
-        <section
-          className="color-data-scroll"
-          aria-label="Semantic role values"
-          tabIndex={0}
-        >
-          <table>
-            <caption>Applied semantic role values</caption>
-            <thead>
-              <tr>
-                <th>Role</th>
-                <th>Light</th>
-                <th>Dark</th>
-              </tr>
-            </thead>
-            <tbody>
-              {(Object.keys(roleNames) as Role[]).map(name => (
-                <tr key={name}>
-                  <th scope="row">{roleNames[name]}</th>
-                  <td>
-                    <Chip value={roleValue(session, 'light', name)} />
-                  </td>
-                  <td>
-                    <Chip value={roleValue(session, 'dark', name)} />
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </section>
-      </details>
     </div>
   )
 }
