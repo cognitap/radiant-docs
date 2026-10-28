@@ -17,91 +17,436 @@
   gap: 1rem;
   font-size: 0.875rem;
 }
-.geometry-editor p {
-  line-height: 1.6;
-  margin-block: 0.5rem;
+.geometry-lead {
+  margin: 0;
+  color: var(--docs-muted);
 }
 .geometry-settings {
+  display: grid;
+  gap: 1rem;
   min-width: 0;
-  border: 1px solid var(--docs-border);
-  border-radius: 0.5rem;
-  padding: 1rem;
   margin: 0;
+  padding: 0;
+  border: 0;
 }
-.geometry-toolbar {
+.geometry-section {
+  display: grid;
+  gap: 0.6rem;
+  min-width: 0;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--docs-border);
+}
+.geometry-section h4 {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 650;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--docs-muted);
+}
+.geometry-head {
   display: flex;
   flex-wrap: wrap;
-  align-items: start;
-  gap: 1rem;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.25rem 1rem;
 }
-.geometry-editor label {
-  min-width: 0;
+.geometry-link {
+  margin: 0;
+  padding: 0.1rem 0.6rem;
+  font: inherit;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--docs-accent);
+  background: transparent;
+  border: 1px solid currentColor;
+  border-radius: 1em;
+  cursor: pointer;
 }
-.geometry-grid {
+.geometry-link:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.geometry-editor :is(input, summary, button, [role='slider']):focus-visible {
+  outline: 2px solid var(--docs-accent);
+  outline-offset: 2px;
+}
+.geometry-editor .control-change-marker {
+  font-size: 0.7rem;
+}
+
+/* Option cards: presets, border style and depth, each card a sample of its option */
+.option-cards {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr));
-  gap: 1rem;
-  margin-top: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(6.5rem, 1fr));
+  gap: 0.4rem;
+}
+.option-card {
+  position: relative;
+  display: grid;
+  gap: 0.3rem;
+  margin: 0;
+  padding: 0.4rem;
+  border: 1px solid var(--docs-border);
+  border-radius: 0.5rem;
+  background: var(--docs-surface);
+  cursor: pointer;
+}
+.option-card input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+.option-card:has(input:focus-visible) {
+  outline: 2px solid var(--docs-accent);
+  outline-offset: 2px;
+}
+.option-card:has(input:checked) {
+  border-color: var(--docs-accent);
+  box-shadow: inset 0 0 0 1px var(--docs-accent);
+}
+.option-sample {
+  display: grid;
+  place-items: center;
+  height: 3.5rem;
+  padding: 0.3rem;
+  border-radius: 0.3rem;
+  background: var(--docs-background);
+  overflow: hidden;
+}
+.option-name {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--docs-muted);
+  text-align: center;
+}
+.option-card:has(input:checked) .option-name {
+  color: var(--docs-foreground);
+}
+/* A preset's mock: a card holding a button and an input, drawn at that preset's metrics */
+.preset-mock {
+  display: grid;
+  width: 100%;
+  height: 100%;
+  place-items: center;
+}
+.preset-card {
+  display: flex;
+  align-items: center;
+  gap: calc(0.3rem * var(--p-spacing));
+  padding: calc(0.3rem * var(--p-spacing));
+  border: var(--p-surface-border) var(--p-border-style) var(--docs-border);
+  border-radius: calc(var(--p-surface-radius) * 0.6);
+  background: var(--docs-surface);
+  box-shadow: var(--p-shadow);
+}
+.preset-button,
+.preset-input {
+  display: block;
+  width: 1.5rem;
+  height: calc(0.9rem * var(--p-density));
+  border-radius: calc(var(--p-control-radius) * 0.6);
+}
+.preset-button {
+  background: var(--docs-accent);
+}
+.preset-input {
+  width: 1.75rem;
+  border: var(--p-control-border) var(--p-border-style) var(--docs-muted);
+  background: var(--docs-background);
+}
+.depth-card {
+  display: block;
+  width: 70%;
+  height: 60%;
+  border-radius: 0.3rem;
+  background: var(--docs-surface);
+  border: 1px solid var(--docs-border);
+  box-shadow: var(--p-shadow);
+}
+.border-line {
+  display: block;
+  width: 80%;
+  height: 0;
+  border-top: 2px var(--p-border-style) var(--docs-foreground);
+}
+
+/* Dials: a sample on the left drawn from --v, its grip, and the exact number on the right */
+/* One decision per row: the sample, the exact number, then its override status */
+.geometry-dials {
+  display: grid;
+  gap: 0.4rem;
 }
 .geometry-setting {
   min-width: 0;
-  padding: 0.75rem;
-  border: 1px solid var(--docs-border);
-  border-radius: 0.5rem;
 }
-.geometry-number {
+.geometry-dial {
+  display: grid;
+  grid-template-columns: 6rem minmax(0, 13.5rem) minmax(0, auto);
+  gap: 0.5rem;
+  align-items: center;
   min-width: 0;
 }
-.geometry-range {
-  margin-top: 0.75rem;
+.geometry-dial-value {
+  display: contents;
 }
-.geometry-range input {
+.geometry-dial .scrub-field input[type='number'] {
+  min-width: 2.75rem;
+}
+.geometry-sample {
+  position: relative;
+  height: 3.5rem;
+  border-radius: 0.4rem;
+  background: var(--docs-background);
+  border: 1px solid var(--docs-border);
+  overflow: visible;
+}
+.geometry-sample-art {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  border-radius: inherit;
+  overflow: hidden;
+}
+.geometry-grip {
+  position: absolute;
+  z-index: 1;
+  width: 0.9rem;
+  height: 0.9rem;
+  translate: -50% -50%;
+  background: var(--docs-background, #fff);
+  border: 2px solid var(--docs-accent);
+  border-radius: 50%;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.35);
+  touch-action: none;
+}
+.geometry-dial[data-dragging] .geometry-grip,
+.geometry-grip:active {
+  background: var(--docs-accent);
+}
+.geometry-readout {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 0.3rem);
+  translate: -50% 0;
+  display: none;
+  padding: 0.15rem 0.45rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  line-height: 1.4;
+  white-space: nowrap;
+  color: var(--docs-background, #fff);
+  background: var(--docs-foreground, #111);
+  border-radius: 0.3rem;
+  pointer-events: none;
+}
+.geometry-dial[data-dragging] .geometry-readout,
+.geometry-sample:focus-within .geometry-readout {
+  display: block;
+}
+/* Corner: a control-shaped box whose top-right corner rounds by --v pixels; the grip rides the curve */
+.geometry-dial[data-kind='corner'] .geometry-sample-art {
+  padding: 0.45rem 0.9rem 0.45rem 0.5rem;
+  justify-items: end;
+}
+.geometry-corner {
+  display: block;
+  width: 3.75rem;
+  height: 100%;
+  background: var(--docs-accent);
+  border-radius: calc(var(--v) * 1px);
+}
+.geometry-dial[data-kind='corner'] .geometry-grip {
+  cursor: nesw-resize;
+  right: calc(0.9rem + var(--v) * 0.293px);
+  top: calc(0.45rem + var(--v) * 0.293px);
+  translate: 50% -50%;
+}
+/* Density: small, medium and large control heights scaled by --v; the grip tops the large one */
+.geometry-dial[data-kind='density'] .geometry-sample-art {
+  grid-auto-flow: column;
+  align-items: end;
+  gap: 0.35rem;
+  padding: 0.3rem 0.5rem 0.4rem;
+}
+.geometry-bar {
+  display: block;
+  width: 1.1rem;
+  border-radius: 0.2rem;
+  background: var(--docs-accent);
+}
+.geometry-bar:nth-child(1) {
+  height: calc(var(--v) * 16px);
+  opacity: 0.6;
+}
+.geometry-bar:nth-child(2) {
+  height: calc(var(--v) * 21px);
+  opacity: 0.8;
+}
+.geometry-bar:nth-child(3) {
+  height: calc(var(--v) * 26px);
+}
+.geometry-dial[data-kind='density'] .geometry-grip {
+  cursor: ns-resize;
+  left: calc(50% + 1.1rem + 0.35rem);
+  bottom: calc(0.4rem + var(--v) * 26px);
+  translate: -50% 50%;
+}
+/* Spacing: four rows whose gaps grow with --v; the grip hangs under the stack */
+.geometry-dial[data-kind='spacing'] .geometry-sample-art {
+  align-content: start;
+  justify-items: start;
+  gap: calc(var(--v) * 6px);
+  padding: 0.35rem 1rem;
+}
+.geometry-block {
+  display: block;
   width: 100%;
-  max-width: 100%;
-  accent-color: var(--docs-accent);
+  height: 4px;
+  border-radius: 2px;
+  background: var(--docs-accent);
 }
-.geometry-editor input:focus-visible,
+.geometry-block:nth-child(2) {
+  width: 70%;
+}
+.geometry-block:nth-child(4) {
+  width: 55%;
+}
+.geometry-dial[data-kind='spacing'] .geometry-grip {
+  cursor: ns-resize;
+  left: 50%;
+  top: calc(0.35rem + 4 * 4px + 3 * var(--v) * 6px);
+  translate: -50% 0;
+}
+/* Line: a border drawn at its real thickness; the grip sits on its lower edge */
+.geometry-dial[data-kind='line'] .geometry-sample-art {
+  padding: 0 1rem;
+}
+.geometry-line {
+  display: block;
+  width: 100%;
+  height: calc(var(--v) * 1px);
+  background: var(--docs-foreground);
+}
+.geometry-dial[data-kind='line'] .geometry-grip {
+  cursor: ns-resize;
+  left: 50%;
+  top: calc(50% + var(--v) * 0.5px);
+  translate: -50% 0;
+}
+/* Backdrop: a page under a dim of --v with a small modal; the grip slides along the bottom edge */
+.geometry-dial[data-kind='backdrop'] .geometry-sample-art {
+  display: block;
+}
+.geometry-page {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(to bottom, var(--docs-border) 0 3px, transparent 3px 9px)
+    0.6rem 0.6rem / calc(100% - 1.2rem) calc(100% - 1.2rem) no-repeat;
+}
+.geometry-dim {
+  position: absolute;
+  inset: 0;
+  background: #000;
+  opacity: var(--v);
+}
+.geometry-modal {
+  position: absolute;
+  left: 22%;
+  top: 22%;
+  width: 56%;
+  height: 56%;
+  border-radius: 0.3rem;
+  background: var(--docs-surface);
+  box-shadow: 0 4px 12px rgb(0 0 0 / 0.2);
+}
+.geometry-dial[data-kind='backdrop'] .geometry-grip {
+  cursor: ew-resize;
+  left: calc(var(--v) / 0.9 * 100%);
+  bottom: 0;
+  translate: -50% 50%;
+}
+
+/* Overrides */
+.geometry-override,
+.geometry-differs {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.7rem;
+  white-space: nowrap;
+  color: var(--docs-muted);
+}
+.geometry-override .geometry-link {
+  padding: 0 0.4rem;
+  font-size: 0.7rem;
+  line-height: 1.4;
+}
+.geometry-override-dot {
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 50%;
+  background: var(--docs-accent);
+}
+.geometry-setting[data-overridden] .geometry-sample,
+.geometry-choice[data-overridden] .option-card:has(input:checked) {
+  border-color: var(--docs-accent);
+}
+.geometry-choice {
+  display: grid;
+  gap: 0.3rem;
+}
+
+/* Resolved values */
+.geometry-editor summary {
+  cursor: pointer;
+  font-size: 0.8125rem;
+  color: var(--docs-muted);
+}
+.geometry-resolved[open] summary {
+  margin-bottom: 0.4rem;
+}
+.geometry-table-scroll {
+  max-width: 100%;
+  max-height: 20rem;
+  overflow: auto;
+}
 .geometry-table-scroll:focus-visible {
   outline: 2px solid var(--docs-accent);
   outline-offset: 3px;
 }
-.geometry-override {
-  display: grid;
-  gap: 0.5rem;
-  justify-items: start;
-  margin-top: 0.75rem;
-  font-size: 0.75rem;
-}
-.geometry-override button {
-  max-width: 100%;
-  white-space: normal;
-}
-.geometry-guidance {
-  padding-inline-start: 0.75rem;
-  border-inline-start: 3px solid var(--docs-accent);
-}
-.geometry-editor summary {
-  cursor: pointer;
-  padding-block: 0.5rem;
-  font-weight: 600;
-}
-.geometry-table-scroll {
-  max-width: 100%;
-  max-height: 28rem;
-  overflow: auto;
-}
 .geometry-table-scroll table {
   width: 100%;
-  min-width: 32rem;
+  min-width: 28rem;
   border-collapse: collapse;
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   text-align: left;
 }
 .geometry-table-scroll th,
 .geometry-table-scroll td {
-  padding: 0.5rem;
+  padding: 0.2rem 0.4rem;
   border-bottom: 1px solid var(--docs-border);
 }
 .geometry-table-scroll code {
   overflow-wrap: anywhere;
+}
+@media (width < 30rem) {
+  .geometry-dial {
+    grid-template-columns: 6rem minmax(0, 1fr);
+  }
+  .geometry-override,
+  .geometry-differs {
+    grid-column: 2;
+  }
+}
+@media (forced-colors: active) {
+  .geometry-grip {
+    forced-color-adjust: none;
+    border-color: Highlight;
+  }
 }
