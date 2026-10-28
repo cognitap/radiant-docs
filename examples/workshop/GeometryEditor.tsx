@@ -2,7 +2,7 @@
 
 /* oxlint-disable jsx-a11y/no-noninteractive-tabindex -- The named resolved-values table needs keyboard scrolling. */
 
-import { useId, useState } from 'react'
+import { useId, useState, type ReactNode } from 'react'
 import { Button, Field, Input, type Theme } from '@cognitap/radiant'
 import {
   changeGeometry,
@@ -13,20 +13,34 @@ import {
   geometryPresets,
   geometryValues,
   matchingGeometryPreset,
+  type GeometryFields,
   type GeometryRecipe,
   type GeometryScope,
   type GeometrySettings
 } from './workshop-geometry'
+import { Changed } from './ControlChange'
+import type { Change } from './workshop-history'
+import type { Changes } from './workshop-fields'
 import './geometry-editor.css'
 
 type Dial = (typeof geometryDials)[number]
+const presetName = (id: string) => geometryPresets.find(preset => preset.id === id)?.name ?? id
+const elevationNames = ['Flat', 'Baseline shadows', 'Raised', 'Floating']
+const setting = (key: keyof GeometrySettings) => (value: number | string | undefined) =>
+  value === undefined
+    ? 'the shared value'
+    : key === 'elevation'
+      ? elevationNames[Number(value)]
+      : String(value)
 function NumberControl({
   dial,
   value,
+  describedBy,
   onValid
 }: {
   dial: Dial
   value: number
+  describedBy?: string
   onValid: (value: number) => void
 }) {
   const [draft, setDraft] = useState(String(value))
@@ -55,6 +69,7 @@ function NumberControl({
           min={dial.min}
           max={dial.max}
           step="any"
+          aria-describedby={describedBy}
           value={draft}
           onChange={event => {
             const text = event.target.value
@@ -77,6 +92,7 @@ function NumberControl({
           min={dial.min}
           max={dial.max}
           step={dial.step}
+          aria-describedby={describedBy}
           onChange={event => {
             setDraft(event.target.value)
             onValid(Number(event.target.value))
@@ -87,22 +103,51 @@ function NumberControl({
   )
 }
 
+const settingNames: Record<keyof GeometrySettings, string> = {
+  ...Object.fromEntries(geometryDials.map(dial => [dial.key, dial.label])),
+  borderStyle: 'Border style',
+  elevation: 'Surface elevation'
+} as Record<keyof GeometrySettings, string>
 export function GeometryEditor({
   recipe,
+  changes,
   theme,
   disabled,
   onChange
 }: {
   recipe: GeometryRecipe | null
+  changes: Changes<GeometryFields> | null
   theme: Theme
   disabled: boolean
-  onChange: (recipe: GeometryRecipe) => void
+  onChange: (recipe: GeometryRecipe, change: Change) => void
 }) {
   const [scope, setScope] = useState<GeometryScope>('shared')
   const values = geometryValues(recipe ?? geometryPreset(), scope)
   const overrides = scope === 'shared' ? undefined : recipe?.modes?.[scope]
-  const update = (patch: Partial<GeometrySettings>) =>
-    onChange(changeGeometry(recipe ?? geometryPreset(), scope, patch))
+  const name = (key: keyof GeometrySettings) =>
+    scope === 'shared' ? settingNames[key] : `${scope} ${settingNames[key].toLowerCase()}`
+  const update = (patch: Partial<GeometrySettings>, change: Change) =>
+    onChange(changeGeometry(recipe ?? geometryPreset(), scope, patch), change)
+  const set = <K extends keyof GeometrySettings>(key: K, value: GeometrySettings[K] | undefined) =>
+    value === undefined && scope !== 'shared'
+      ? onChange(clearGeometryOverride(recipe ?? geometryPreset(), scope, key), {
+          label: name(key).toLowerCase()
+        })
+      : update({ [key]: value }, { label: name(key).toLowerCase(), coalesce: `${scope}.${key}` })
+  const changed = <K extends keyof GeometrySettings>(
+    key: K,
+    children: (describedBy: string | undefined) => ReactNode
+  ) => (
+    <Changed
+      changes={changes}
+      field={`${scope}.${key}`}
+      label={name(key)}
+      format={setting(key)}
+      set={value => set(key, value as GeometrySettings[K] | undefined)}
+    >
+      {children}
+    </Changed>
+  )
   const overrideControl = (key: keyof GeometrySettings) =>
     scope !== 'shared' && (
       <div className="geometry-override">
@@ -110,7 +155,7 @@ export function GeometryEditor({
         <Button
           variant="outline"
           disabled={overrides?.[key] === undefined}
-          onClick={() => onChange(clearGeometryOverride(recipe ?? geometryPreset(), scope, key))}
+          onClick={() => set(key, undefined)}
         >
           Use shared{' '}
           {key === 'borderStyle'
@@ -137,28 +182,41 @@ export function GeometryEditor({
       >
         <legend>Spacing and surface decisions</legend>
         <div className="geometry-toolbar">
-          <label>
-            Starting preset
-            <select
-              value={matchingGeometryPreset(recipe ?? geometryPreset())}
-              onChange={event => onChange(geometryPreset(event.target.value))}
-            >
-              <option
-                value="custom"
-                disabled
-              >
-                Custom settings
-              </option>
-              {geometryPresets.map(preset => (
-                <option
-                  key={preset.id}
-                  value={preset.id}
+          <Changed
+            changes={changes}
+            field="preset"
+            label="Starting preset"
+            format={presetName}
+            set={id => onChange(geometryPreset(id), { label: 'starting preset' })}
+          >
+            {describedBy => (
+              <label>
+                Starting preset
+                <select
+                  value={matchingGeometryPreset(recipe ?? geometryPreset())}
+                  aria-describedby={describedBy}
+                  onChange={event =>
+                    onChange(geometryPreset(event.target.value), { label: 'starting preset' })
+                  }
                 >
-                  {preset.name}
-                </option>
-              ))}
-            </select>
-          </label>
+                  <option
+                    value="custom"
+                    disabled
+                  >
+                    Custom settings
+                  </option>
+                  {geometryPresets.map(preset => (
+                    <option
+                      key={preset.id}
+                      value={preset.id}
+                    >
+                      {preset.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            )}
+          </Changed>
           <label>
             Geometry scope
             <select
@@ -187,7 +245,11 @@ export function GeometryEditor({
           <Button
             variant="outline"
             disabled={!overrides}
-            onClick={() => onChange(clearGeometryOverride(recipe ?? geometryPreset(), scope))}
+            onClick={() =>
+              onChange(clearGeometryOverride(recipe ?? geometryPreset(), scope), {
+                label: `${scope} overrides`
+              })
+            }
           >
             Clear all {scope} overrides
           </Button>
@@ -198,50 +260,59 @@ export function GeometryEditor({
               className="geometry-setting"
               key={`${scope}:${dial.key}`}
             >
-              <NumberControl
-                dial={dial}
-                value={values[dial.key]}
-                onValid={value => update({ [dial.key]: value })}
-              />
+              {changed(dial.key, describedBy => (
+                <NumberControl
+                  dial={dial}
+                  value={values[dial.key]}
+                  describedBy={describedBy}
+                  onValid={value => set(dial.key, value)}
+                />
+              ))}
               {overrideControl(dial.key)}
             </div>
           ))}
           <div className="geometry-setting">
-            <label>
-              Border style
-              <select
-                value={values.borderStyle}
-                onChange={event => {
-                  const value = event.target.value
-                  if (value === 'solid' || value === 'dashed' || value === 'dotted')
-                    update({ borderStyle: value })
-                }}
-              >
-                <option value="solid">Solid</option>
-                <option value="dashed">Dashed</option>
-                <option value="dotted">Dotted</option>
-              </select>
-            </label>
+            {changed('borderStyle', describedBy => (
+              <label>
+                Border style
+                <select
+                  value={values.borderStyle}
+                  aria-describedby={describedBy}
+                  onChange={event => {
+                    const value = event.target.value
+                    if (value === 'solid' || value === 'dashed' || value === 'dotted')
+                      set('borderStyle', value)
+                  }}
+                >
+                  <option value="solid">Solid</option>
+                  <option value="dashed">Dashed</option>
+                  <option value="dotted">Dotted</option>
+                </select>
+              </label>
+            ))}
             <p>Applies to both control and surface borders.</p>
             {overrideControl('borderStyle')}
           </div>
           <div className="geometry-setting">
-            <label>
-              Surface elevation
-              <select
-                value={values.elevation}
-                onChange={event => {
-                  const value = Number(event.target.value)
-                  if (value === 0 || value === 1 || value === 2 || value === 3)
-                    update({ elevation: value })
-                }}
-              >
-                <option value={0}>Flat · no shadows</option>
-                <option value={1}>Baseline shadows</option>
-                <option value={2}>Raised</option>
-                <option value={3}>Floating</option>
-              </select>
-            </label>
+            {changed('elevation', describedBy => (
+              <label>
+                Surface elevation
+                <select
+                  value={values.elevation}
+                  aria-describedby={describedBy}
+                  onChange={event => {
+                    const value = Number(event.target.value)
+                    if (value === 0 || value === 1 || value === 2 || value === 3)
+                      set('elevation', value)
+                  }}
+                >
+                  <option value={0}>Flat · no shadows</option>
+                  <option value={1}>Baseline shadows</option>
+                  <option value={2}>Raised</option>
+                  <option value={3}>Floating</option>
+                </select>
+              </label>
+            ))}
             <p>
               Panel and overlay shadows use mode-specific opacity. Action shadows and dialog panel
               filters remain component exceptions.

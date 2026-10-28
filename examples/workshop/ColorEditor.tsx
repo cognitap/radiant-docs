@@ -5,28 +5,40 @@
 import { useId, useState } from 'react'
 import { Button, Checkbox, Field, Input } from '@cognitap/radiant'
 import {
+  chooseWorkingFamily,
   colorPresets,
   selectColorPreset,
   overrideRole,
   roleNames,
   roleValue,
   workingRoles,
+  type ColorFields,
   type ColorRecipe,
   type ColorSession,
   type Mode,
   type Role
 } from './workshop-color'
+import { Changed } from './ControlChange'
+import type { Change } from './workshop-history'
+import type { Changes } from './workshop-fields'
 import './color-editor.css'
+
+const automatic = (value: number | string | undefined) =>
+  value === undefined ? 'automatic' : String(value)
+const recommended = (value: string | undefined) => value ?? 'recommended'
+const presetName = (id: string) => colorPresets.find(preset => preset.id === id)?.name ?? id
 
 function HexField({
   label,
   value,
   disabled,
+  describedBy,
   onValid
 }: {
   label: string
   value: string
   disabled?: boolean
+  describedBy?: string
   onValid: (value: string) => void
 }) {
   const [draft, setDraft] = useState(value)
@@ -49,6 +61,7 @@ function HexField({
         <Input
           value={draft}
           disabled={disabled}
+          aria-describedby={describedBy}
           spellCheck={false}
           maxLength={80}
           onChange={event => {
@@ -62,6 +75,7 @@ function HexField({
         <input
           type="color"
           aria-label={`${label} picker`}
+          aria-describedby={describedBy}
           value={value}
           disabled={disabled}
           onChange={event => {
@@ -80,6 +94,7 @@ function Dial({
   max,
   step,
   disabled,
+  describedBy,
   onChange
 }: {
   label: string
@@ -88,6 +103,7 @@ function Dial({
   max: number
   step: number
   disabled?: boolean
+  describedBy?: string
   onChange: (value: number) => void
 }) {
   const id = useId()
@@ -107,6 +123,7 @@ function Dial({
         step={step}
         value={value}
         disabled={disabled}
+        aria-describedby={describedBy}
         onChange={event => onChange(Number(event.target.value))}
       />
     </label>
@@ -126,12 +143,14 @@ function Chip({ value }: { value: string }) {
 
 export function ColorEditor({
   session,
+  changes,
   disabled,
   onChange
 }: {
   session: ColorSession | null
+  changes: Changes<ColorFields> | null
   disabled: boolean
-  onChange: (recipe: ColorRecipe) => void
+  onChange: (recipe: ColorRecipe, change: Change) => void
 }) {
   const presetsId = useId()
   const [mode, setMode] = useState<Mode>('light')
@@ -150,9 +169,44 @@ export function ColorEditor({
     )
   const { recipe, wall, palette } = session
   const { input } = recipe
-  const changeInput = (patch: Partial<ColorRecipe['input']>) =>
-    onChange({ ...recipe, input: { ...input, ...patch } })
-  const choose = (value: string) => onChange(overrideRole(recipe, mode, role, value))
+  const changeInput = (patch: Partial<ColorRecipe['input']>, change: Change) =>
+    onChange({ ...recipe, input: { ...input, ...patch } }, change)
+  const roleField = `role.${mode}.${role}` as const
+  const choose = (value: string | undefined, coalesce?: string) =>
+    onChange(overrideRole(recipe, mode, role, value), {
+      label: `${mode} ${roleNames[role].toLowerCase()}`,
+      coalesce
+    })
+  const dial = (
+    field: 'distribution' | 'neutralTint' | 'hueAlignment',
+    label: string,
+    min: number,
+    max: number,
+    step: number
+  ) => {
+    const set = (value: number) =>
+      changeInput({ [field]: value }, { label: label.toLowerCase(), coalesce: field })
+    return (
+      <Changed
+        changes={changes}
+        field={field}
+        label={label}
+        set={set}
+      >
+        {describedBy => (
+          <Dial
+            label={label}
+            value={wall.input[field]}
+            min={min}
+            max={max}
+            step={step}
+            describedBy={describedBy}
+            onChange={set}
+          />
+        )}
+      </Changed>
+    )
+  }
   const selectedPalette = wall.color.palettes.find(p => p.id === family)!
   const selectedSwatch = selectedPalette.swatches.find(s => s.stop === stop)!
   const failures = palette.checks.filter(check => check.pass === false)
@@ -164,11 +218,21 @@ export function ColorEditor({
         className="color-generator"
       >
         <legend>Brand and generator</legend>
-        <HexField
+        <Changed
+          changes={changes}
+          field="brand"
           label="Brand color"
-          value={input.brand}
-          onValid={brand => changeInput({ brand })}
-        />
+          set={brand => changeInput({ brand }, { label: 'brand color', coalesce: 'brand' })}
+        >
+          {describedBy => (
+            <HexField
+              label="Brand color"
+              value={input.brand}
+              describedBy={describedBy}
+              onValid={brand => changeInput({ brand }, { label: 'brand color', coalesce: 'brand' })}
+            />
+          )}
+        </Changed>
         <p>
           sRGB input and output. Alpha and Display P3 sources are not supported by this version.
         </p>
@@ -178,133 +242,215 @@ export function ColorEditor({
           use the nearest readable brand shade in each mode.
         </p>
         <div className="color-controls">
-          {(['wall', 'ramp'] as const).map(section => (
-            <label
-              key={section}
-              className="color-preset"
-            >
-              {section === 'wall' ? 'Wall preset' : 'Brand ramp preset'}
-              <select
-                aria-label={section === 'wall' ? 'Wall preset' : 'Brand ramp preset'}
-                aria-describedby={`${presetsId}-${section}`}
-                value={section === 'wall' ? wall.input.wallPreset : wall.input.rampPreset}
-                onChange={event => {
-                  const preset = colorPresets.find(p => p.id === event.target.value)!
-                  onChange(selectColorPreset(recipe, section, preset.id))
-                }}
+          {(['wall', 'ramp'] as const).map(section => {
+            const label = section === 'wall' ? 'Wall preset' : 'Brand ramp preset'
+            const field = section === 'wall' ? 'wallPreset' : 'rampPreset'
+            const select = (preset: string) =>
+              onChange(
+                selectColorPreset(recipe, section, colorPresets.find(p => p.id === preset)!.id),
+                { label: label.toLowerCase() }
+              )
+            return (
+              <Changed
+                key={section}
+                changes={changes}
+                field={field}
+                label={label}
+                format={presetName}
+                set={select}
               >
-                {colorPresets.map(preset => (
-                  <option
-                    key={preset.id}
-                    value={preset.id}
-                  >
-                    {preset.name}
-                  </option>
-                ))}
-              </select>
-              <small id={`${presetsId}-${section}`}>
-                {
-                  colorPresets.find(
-                    p =>
-                      p.id === (section === 'wall' ? wall.input.wallPreset : wall.input.rampPreset)
-                  )?.description
-                }
-              </small>
-            </label>
-          ))}
-          <label>
-            Brand fidelity
-            <select
-              value={wall.input.fidelity}
-              onChange={event =>
-                changeInput({
-                  fidelity: event.target.value === 'unanchored' ? 'unanchored' : 'anchored'
-                })
-              }
-            >
-              <option value="anchored">Exact brand anchor</option>
-              <option value="unanchored">Regular ramp</option>
-            </select>
-          </label>
-          <label>
-            Lightness model
-            <select
-              value={wall.input.lightness}
-              onChange={event =>
-                changeInput({ lightness: event.target.value === 'shared' ? 'shared' : 'hue-aware' })
-              }
-            >
-              <option value="hue-aware">Hue aware</option>
-              <option value="shared">Shared stops</option>
-            </select>
-          </label>
-          <Checkbox
-            label="Automatic wall vividness"
-            checked={input.vividness === undefined}
-            onChange={event =>
-              changeInput({ vividness: event.target.checked ? undefined : wall.input.vividness })
-            }
-          />
-          <Dial
+                {describedBy => (
+                  <label className="color-preset">
+                    {label}
+                    <select
+                      aria-label={label}
+                      aria-describedby={[`${presetsId}-${section}`, describedBy]
+                        .filter(Boolean)
+                        .join(' ')}
+                      value={wall.input[field]}
+                      onChange={event => select(event.target.value)}
+                    >
+                      {colorPresets.map(preset => (
+                        <option
+                          key={preset.id}
+                          value={preset.id}
+                        >
+                          {preset.name}
+                        </option>
+                      ))}
+                    </select>
+                    <small id={`${presetsId}-${section}`}>
+                      {colorPresets.find(p => p.id === wall.input[field])?.description}
+                    </small>
+                  </label>
+                )}
+              </Changed>
+            )
+          })}
+          <Changed
+            changes={changes}
+            field="fidelity"
+            label="Brand fidelity"
+            set={fidelity => changeInput({ fidelity }, { label: 'brand fidelity' })}
+          >
+            {describedBy => (
+              <label>
+                Brand fidelity
+                <select
+                  value={wall.input.fidelity}
+                  aria-describedby={describedBy}
+                  onChange={event =>
+                    changeInput(
+                      { fidelity: event.target.value === 'unanchored' ? 'unanchored' : 'anchored' },
+                      { label: 'brand fidelity' }
+                    )
+                  }
+                >
+                  <option value="anchored">Exact brand anchor</option>
+                  <option value="unanchored">Regular ramp</option>
+                </select>
+              </label>
+            )}
+          </Changed>
+          <Changed
+            changes={changes}
+            field="lightness"
+            label="Lightness model"
+            set={lightness => changeInput({ lightness }, { label: 'lightness model' })}
+          >
+            {describedBy => (
+              <label>
+                Lightness model
+                <select
+                  value={wall.input.lightness}
+                  aria-describedby={describedBy}
+                  onChange={event =>
+                    changeInput(
+                      { lightness: event.target.value === 'shared' ? 'shared' : 'hue-aware' },
+                      { label: 'lightness model' }
+                    )
+                  }
+                >
+                  <option value="hue-aware">Hue aware</option>
+                  <option value="shared">Shared stops</option>
+                </select>
+              </label>
+            )}
+          </Changed>
+          <Changed
+            changes={changes}
+            field="vividness"
             label="Wall vividness"
-            value={wall.input.vividness}
-            min={0}
-            max={1}
-            step={0.01}
-            disabled={input.vividness === undefined}
-            onChange={vividness => changeInput({ vividness })}
-          />
-          <Checkbox
-            label="Automatic brand vividness"
-            checked={input.brandVividness === undefined}
-            onChange={event =>
-              changeInput({
-                brandVividness: event.target.checked ? undefined : wall.input.brandVividness
-              })
+            format={automatic}
+            set={vividness =>
+              changeInput({ vividness }, { label: 'wall vividness', coalesce: 'vividness' })
             }
-          />
-          <Dial
+          >
+            {describedBy => (
+              <>
+                <Checkbox
+                  label="Automatic wall vividness"
+                  checked={input.vividness === undefined}
+                  aria-describedby={describedBy}
+                  onChange={event =>
+                    changeInput(
+                      { vividness: event.target.checked ? undefined : wall.input.vividness },
+                      { label: 'wall vividness' }
+                    )
+                  }
+                />
+                <Dial
+                  label="Wall vividness"
+                  value={wall.input.vividness}
+                  min={0}
+                  max={1}
+                  step={0.01}
+                  disabled={input.vividness === undefined}
+                  describedBy={describedBy}
+                  onChange={vividness =>
+                    changeInput({ vividness }, { label: 'wall vividness', coalesce: 'vividness' })
+                  }
+                />
+              </>
+            )}
+          </Changed>
+          <Changed
+            changes={changes}
+            field="brandVividness"
             label="Brand vividness"
-            value={wall.input.brandVividness}
-            min={0}
-            max={1}
-            step={0.01}
-            disabled={input.brandVividness === undefined}
-            onChange={brandVividness => changeInput({ brandVividness })}
-          />
-          <Dial
-            label="Tone distribution"
-            value={wall.input.distribution}
-            min={0.75}
-            max={1.35}
-            step={0.01}
-            onChange={distribution => changeInput({ distribution })}
-          />
-          <Dial
-            label="Neutral tint"
-            value={wall.input.neutralTint}
-            min={0}
-            max={0.035}
-            step={0.001}
-            onChange={neutralTint => changeInput({ neutralTint })}
-          />
-          <Dial
-            label="Hue alignment"
-            value={wall.input.hueAlignment}
-            min={0}
-            max={1}
-            step={0.05}
-            onChange={hueAlignment => changeInput({ hueAlignment })}
-          />
-          <Dial
+            format={automatic}
+            set={brandVividness =>
+              changeInput(
+                { brandVividness },
+                { label: 'brand vividness', coalesce: 'brandVividness' }
+              )
+            }
+          >
+            {describedBy => (
+              <>
+                <Checkbox
+                  label="Automatic brand vividness"
+                  checked={input.brandVividness === undefined}
+                  aria-describedby={describedBy}
+                  onChange={event =>
+                    changeInput(
+                      {
+                        brandVividness: event.target.checked ? undefined : wall.input.brandVividness
+                      },
+                      { label: 'brand vividness' }
+                    )
+                  }
+                />
+                <Dial
+                  label="Brand vividness"
+                  value={wall.input.brandVividness}
+                  min={0}
+                  max={1}
+                  step={0.01}
+                  disabled={input.brandVividness === undefined}
+                  describedBy={describedBy}
+                  onChange={brandVividness =>
+                    changeInput(
+                      { brandVividness },
+                      { label: 'brand vividness', coalesce: 'brandVividness' }
+                    )
+                  }
+                />
+              </>
+            )}
+          </Changed>
+          {dial('distribution', 'Tone distribution', 0.75, 1.35, 0.01)}
+          {dial('neutralTint', 'Neutral tint', 0, 0.035, 0.001)}
+          {dial('hueAlignment', 'Hue alignment', 0, 1, 0.05)}
+          <Changed
+            changes={changes}
+            field="neutralHue"
             label="Neutral hue direction"
-            value={wall.input.neutralHue}
-            min={0}
-            max={359}
-            step={1}
-            disabled={!wall.neutralInput}
-            onChange={neutralHue => changeInput({ neutralHue })}
-          />
+            set={neutralHue =>
+              changeInput(
+                { neutralHue },
+                { label: 'neutral hue direction', coalesce: 'neutralHue' }
+              )
+            }
+          >
+            {describedBy => (
+              <Dial
+                label="Neutral hue direction"
+                value={wall.input.neutralHue}
+                min={0}
+                max={359}
+                step={1}
+                disabled={!wall.neutralInput}
+                describedBy={describedBy}
+                onChange={neutralHue =>
+                  changeInput(
+                    { neutralHue },
+                    { label: 'neutral hue direction', coalesce: 'neutralHue' }
+                  )
+                }
+              />
+            )}
+          </Changed>
         </div>
       </fieldset>
       <p
@@ -340,29 +486,43 @@ export function ColorEditor({
               className="color-working-choice"
               key={name}
             >
-              <label>
-                {name} family
-                <select
-                  aria-label={`${name} family`}
-                  disabled={disabled}
-                  value={palette.working[name].paletteId}
-                  onChange={event =>
-                    onChange({
-                      ...recipe,
-                      working: { ...recipe.working, [name]: event.target.value }
-                    })
-                  }
-                >
-                  {wall.color.palettes.map(p => (
-                    <option
-                      key={p.id}
-                      value={p.id}
+              <Changed
+                changes={changes}
+                field={`working.${name}`}
+                label={`${name} family`}
+                format={recommended}
+                set={paletteId =>
+                  onChange(chooseWorkingFamily(recipe, name, paletteId), {
+                    label: `${name} family`
+                  })
+                }
+              >
+                {describedBy => (
+                  <label>
+                    {name} family
+                    <select
+                      aria-label={`${name} family`}
+                      aria-describedby={describedBy}
+                      disabled={disabled}
+                      value={palette.working[name].paletteId}
+                      onChange={event =>
+                        onChange(chooseWorkingFamily(recipe, name, event.target.value), {
+                          label: `${name} family`
+                        })
+                      }
                     >
-                      {p.name}
-                    </option>
-                  ))}
-                </select>
-              </label>
+                      {wall.color.palettes.map(p => (
+                        <option
+                          key={p.id}
+                          value={p.id}
+                        >
+                          {p.name}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                )}
+              </Changed>
               {(['light', 'dark'] as const).map(m => (
                 <div key={m}>
                   <small>{m}</small>
@@ -376,7 +536,9 @@ export function ColorEditor({
         <Button
           variant="outline"
           disabled={disabled || !recipe.working}
-          onClick={() => onChange({ ...recipe, working: undefined })}
+          onClick={() =>
+            onChange({ ...recipe, working: undefined }, { label: 'recommended families' })
+          }
         >
           Use recommended families
         </Button>
@@ -421,12 +583,23 @@ export function ColorEditor({
             </select>
           </label>
         </div>
-        <HexField
-          key={`${mode}:${role}`}
+        <Changed
+          changes={changes}
+          field={roleField}
           label="Exact role color"
-          value={roleValue(session, mode, role)}
-          onValid={choose}
-        />
+          format={automatic}
+          set={value => choose(value)}
+        >
+          {describedBy => (
+            <HexField
+              key={`${mode}:${role}`}
+              label="Exact role color"
+              value={roleValue(session, mode, role)}
+              describedBy={describedBy}
+              onValid={value => choose(value, roleField)}
+            />
+          )}
+        </Changed>
         <p>
           <strong>{recipe.modes?.[mode]?.[role] ? 'Explicit override' : 'Automatic choice'}</strong>{' '}
           · {mode} {roleNames[role]} <Chip value={roleValue(session, mode, role)} />
@@ -435,14 +608,14 @@ export function ColorEditor({
           <Button
             variant="outline"
             disabled={!recipe.modes?.[mode]?.[role]}
-            onClick={() => onChange(overrideRole(recipe, mode, role))}
+            onClick={() => choose(undefined)}
           >
             Clear role override
           </Button>
           <Button
             variant="outline"
             disabled={!recipe.modes}
-            onClick={() => onChange({ ...recipe, modes: undefined })}
+            onClick={() => onChange({ ...recipe, modes: undefined }, { label: 'automatic roles' })}
           >
             Use automatic roles
           </Button>

@@ -7,22 +7,32 @@ import {
   authoredMotion,
   changeMotion,
   chooseMotionPreset,
+  clearMotionOverride,
   inheritMotion,
   matchingMotionPreset,
   motionDials,
   motionPresets,
   motionScopes,
+  type MotionFields,
   type MotionScope
 } from './workshop-motion'
+import { Changed } from './ControlChange'
+import type { Change } from './workshop-history'
+import type { Changes } from './workshop-fields'
 import './motion-editor.css'
 
+const inherited = (value: number | undefined) =>
+  value === undefined ? 'common physics' : String(value)
+const presetName = (id: string) => motionPresets.find(preset => preset.id === id)?.name ?? id
 function PhysicsDial({
   dial,
   value,
+  describedBy,
   onChange
 }: {
   dial: (typeof motionDials)[number]
   value: number
+  describedBy?: string
   onChange: (value: number) => void
 }) {
   const [draft, setDraft] = useState(String(value))
@@ -53,6 +63,7 @@ function PhysicsDial({
           min={0}
           max={dial.max}
           step="any"
+          aria-describedby={describedBy}
           value={draft}
           onChange={event => {
             setDraft(event.target.value)
@@ -80,6 +91,7 @@ function PhysicsDial({
           step={1}
           value={toPosition(value)}
           aria-valuetext={String(value)}
+          aria-describedby={describedBy}
           onChange={event => {
             const number = Number(
               (minimum * (dial.max / minimum) ** (Number(event.target.value) / 1000)).toPrecision(4)
@@ -94,10 +106,12 @@ function PhysicsDial({
 }
 export function MotionEditor({
   document,
+  changes,
   onChange
 }: {
   document: object
-  onChange: (document: object) => void
+  changes: Changes<MotionFields> | null
+  onChange: (document: object, change: Change) => void
 }) {
   const [scope, setScope] = useState<MotionScope>('shared')
   const input = authoredMotion(document)
@@ -105,51 +119,87 @@ export function MotionEditor({
   const parameters = scope === 'shared' ? resolved.spring : resolved.interactions[scope]
   const override = scope === 'shared' ? input.spring : input.interactions?.[scope]
   const ratio = parameters.damping / (2 * Math.sqrt(parameters.stiffness * parameters.mass))
+  const scopeName = motionScopes.find(item => item.id === scope)!.label.toLowerCase()
+  const setDial = (key: keyof SpringParameters, value: number | undefined) =>
+    onChange(
+      value === undefined && scope !== 'shared'
+        ? clearMotionOverride(document, scope, key)
+        : changeMotion(document, scope, { [key]: value } as Partial<SpringParameters>),
+      { label: `${scopeName} ${key}`, coalesce: `${scope}.${key}` }
+    )
   return (
     <div
       className="motion-editor"
       data-motion-mode={resolved.mode}
     >
       <div className="motion-toolbar">
-        <label>
-          Starting point
-          <select
-            value={matchingMotionPreset(document)}
-            onChange={event => onChange(chooseMotionPreset(document, event.target.value))}
-          >
-            <option
-              value="custom"
-              disabled
-            >
-              Custom profile
-            </option>
-            {motionPresets.map(preset => (
-              <option
-                key={preset.id}
-                value={preset.id}
+        <Changed
+          changes={changes}
+          field="preset"
+          label="Starting point"
+          format={presetName}
+          set={id => onChange(chooseMotionPreset(document, id), { label: 'motion starting point' })}
+        >
+          {describedBy => (
+            <label>
+              Starting point
+              <select
+                value={matchingMotionPreset(document)}
+                aria-describedby={describedBy}
+                onChange={event =>
+                  onChange(chooseMotionPreset(document, event.target.value), {
+                    label: 'motion starting point'
+                  })
+                }
               >
-                {preset.name}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label>
-          Theme motion
-          <select
-            value={resolved.mode}
-            onChange={event =>
-              onChange(
-                applyMotion(document, {
-                  ...input,
-                  mode: event.target.value === 'off' ? 'off' : 'system'
-                })
-              )
-            }
-          >
-            <option value="system">Follow system preference</option>
-            <option value="off">Motion off</option>
-          </select>
-        </label>
+                <option
+                  value="custom"
+                  disabled
+                >
+                  Custom profile
+                </option>
+                {motionPresets.map(preset => (
+                  <option
+                    key={preset.id}
+                    value={preset.id}
+                  >
+                    {preset.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
+        </Changed>
+        <Changed
+          changes={changes}
+          field="mode"
+          label="Theme motion"
+          set={mode =>
+            onChange(applyMotion(document, { ...input, mode }), { label: 'theme motion' })
+          }
+        >
+          {describedBy => (
+            <label>
+              Theme motion
+              <select
+                value={resolved.mode}
+                aria-describedby={describedBy}
+                onChange={event =>
+                  onChange(
+                    applyMotion(document, {
+                      ...input,
+                      mode: event.target.value === 'off' ? 'off' : 'system'
+                    }),
+                    { label: 'theme motion' }
+                  )
+                }
+              >
+                <option value="system">Follow system preference</option>
+                <option value="off">Motion off</option>
+              </select>
+            </label>
+          )}
+        </Changed>
         <label>
           Profile scope
           <select
@@ -179,16 +229,23 @@ export function MotionEditor({
       </p>
       <div className="motion-dials">
         {motionDials.map(dial => (
-          <PhysicsDial
+          <Changed
             key={`${scope}:${dial.key}`}
-            dial={dial}
-            value={parameters[dial.key]}
-            onChange={number =>
-              onChange(
-                changeMotion(document, scope, { [dial.key]: number } as Partial<SpringParameters>)
-              )
-            }
-          />
+            changes={changes}
+            field={`${scope}.${dial.key}`}
+            label={scope === 'shared' ? dial.label : `${scopeName} ${dial.label.toLowerCase()}`}
+            format={inherited}
+            set={value => setDial(dial.key, value)}
+          >
+            {describedBy => (
+              <PhysicsDial
+                dial={dial}
+                value={parameters[dial.key]}
+                describedBy={describedBy}
+                onChange={number => setDial(dial.key, number)}
+              />
+            )}
+          </Changed>
         ))}
       </div>
       <div className="motion-physics-summary">
@@ -201,7 +258,11 @@ export function MotionEditor({
         <Button
           variant="outline"
           disabled={!override || !Object.keys(override).length}
-          onClick={() => onChange(inheritMotion(document, scope))}
+          onClick={() =>
+            onChange(inheritMotion(document, scope), {
+              label: scope === 'shared' ? 'default physics' : `${scopeName} physics`
+            })
+          }
         >
           {scope === 'shared' ? 'Use default physics' : 'Use common physics'}
         </Button>
