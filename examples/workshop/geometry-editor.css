@@ -229,26 +229,6 @@
 .geometry-grip:active {
   background: var(--docs-accent);
 }
-.geometry-readout {
-  position: absolute;
-  left: 50%;
-  bottom: calc(100% + 0.3rem);
-  translate: -50% 0;
-  display: none;
-  padding: 0.15rem 0.45rem;
-  font-size: 0.7rem;
-  font-weight: 600;
-  line-height: 1.4;
-  white-space: nowrap;
-  color: var(--docs-background, #fff);
-  background: var(--docs-foreground, #111);
-  border-radius: 0.3rem;
-  pointer-events: none;
-}
-.geometry-dial[data-dragging] .geometry-readout,
-.geometry-sample:focus-within .geometry-readout {
-  display: block;
-}
 /* Corner: a control-shaped box whose top-right corner rounds by --v pixels; the grip rides the curve */
 .geometry-dial[data-kind='corner'] .geometry-sample-art {
   padding: 0.45rem 0.9rem 0.45rem 0.5rem;

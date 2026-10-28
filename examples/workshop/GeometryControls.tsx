@@ -4,7 +4,6 @@
 
 import { useId, useRef, useState, type CSSProperties, type ReactNode } from 'react'
 import { ScrubField } from './ScrubField'
-import { formatValue } from './workshop-typography-view'
 import { dragDial, stepDial, type GeometryDial as Dial } from './workshop-geometry-view'
 
 const samples: Record<Dial['kind'], ReactNode> = {
@@ -139,12 +138,6 @@ export function GeometryDial({
           onChange={onChange}
           onDragging={setDragging}
         />
-        <output
-          className="geometry-readout"
-          aria-hidden="true"
-        >
-          {formatValue(value, dial.unit)}
-        </output>
       </div>
       <div className="geometry-dial-value">
         <ScrubField
