@@ -1,79 +1,90 @@
 ---
 title: Link
-description: A real anchor for navigation, from an inline reference to a prominent next step.
+description: Native navigation, with shared action styling and optional spring feedback.
 ---
 
-import { LinkDemo, RouterLinkDemo } from '../../components/LinkDemo'
+import { LinkDemo, MotionLinkDemo, RouterLinkDemo } from '../../components/LinkDemo'
 
 <LinkDemo />
 
-## Navigate with an anchor
+## Choose the right link
 
-Link renders a native `a`. Give it a meaningful `href` and descriptive text,
-such as “Read the installation guide”. Use [Button](/docs/button/) to change
-something on the page or submit a form.
+`Link` renders a native anchor and stays server-renderable. Give it a meaningful
+`href` and descriptive text. Enter follows the destination; Space scrolls.
+Without `href`, an anchor is not a normal keyboard navigation target.
 
-Enter activates a link; Space scrolls the page instead.
+`inline` and `subtle` inherit surrounding text size. The action treatments
+`solid`, `soft`, `outline` and `ghost` share [Button](/docs/button/)'s `tone`
+and `controlSize`. Use Button to change something or submit a form.
 
-`inline` and `subtle` fit into text and follow text sizing. `solid`, `soft`,
-`outline` and `ghost` look like actions but stay anchors.
+## Spring feedback
 
-## New tabs and unavailable destinations
+<MotionLinkDemo />
 
-`external` supplies `target="_blank"` and `rel="noopener noreferrer"` unless
-you set those props. It does this for any destination, including local paths.
-Radiant adds no “opens in a new tab” text or icon; write it into the link text.
+Use `MotionLink` for an action-shaped anchor with Button's press/release spring:
 
-There is no `disabled` or `pending` Link prop. If navigation is unavailable,
-explain why and render noninteractive text, or omit the link. Do not leave a
-live `href` behind `aria-disabled`. For an async action with busy feedback,
-use Button.
+```tsx
+import { MotionProvider, MotionLink } from '@cognitap/radiant/motion/react'
 
-## Native host and accessible name
+;<MotionProvider>
+  <MotionLink
+    href="/account"
+    variant="solid"
+  >
+    Open account
+  </MotionLink>
+</MotionProvider>
+```
 
-Native attributes, handlers, `className`, `style` and `ref` reach the anchor.
-The root exposes `data-slot="link"`, `data-variant`, `data-tone` and
-`data-control-size`. Its children supply the accessible name, so name the
-destination in the text. Hide decorative icons from assistive technology and
-keep visible focus. Without `href`, an anchor is not a normal
-keyboard navigation target.
+The provider adds no DOM. `motion="inherit"` uses the theme profile;
+`motion="off"` suppresses spatial feedback. System reduced motion always wins.
+Inline/subtle links never compress. Caller scale styling keeps ownership;
+use local off for custom external scale styles. Navigation is never delayed.
 
-## Router adapter and ref
+## New tabs, downloads and unavailable destinations
+
+`external` supplies `target="_blank"` and `rel="noopener noreferrer"` for any
+URL, unless you set those props. Write “opens in a new tab” in the link text.
+Modified and middle clicks, targets and `download` retain native behavior.
+
+Links have no `disabled` or `pending` prop. For an unavailable destination,
+explain why and render noninteractive text, or omit the link. `aria-disabled`
+does not stop navigation. Use Button for asynchronous actions.
+
+## Router adapter
 
 <RouterLinkDemo />
 
-This adapter depends on Next.js `next/link`; a plain Radiant Link needs no
-router. It spreads every resolved anchor prop into NextLink, including `ref`,
-children, handlers, target and rel. NextLink requires `href`, which is optional
-in Radiant's type, so the example supplies a fallback. Modified clicks and
-new-tab targets still belong to the browser.
+The example uses Next.js `next/link`; plain Link needs no router. Forward all
+resolved `LinkRenderProps`, including children, ref, handlers, target and rel,
+to one anchor. The same `render` callback works with MotionLink. The fallback
+`href` satisfies NextLink's required destination.
 
-Return one anchor, or a router component that forwards its props to one. Do not
-nest anchors, wrap the result in another Radiant Link, or always call
-`preventDefault` to drive your router. Preserve native target and download
-behavior.
-
-A custom adapter must call the supplied `onClick` once, before its own
-navigation. If `event.defaultPrevented` is then true, it must not navigate.
+A custom router calls the supplied `onClick` once before navigation and honors
+`event.defaultPrevented`. It intercepts only ordinary same-origin navigation;
+modified clicks, downloads and other targets belong to the browser. Do not nest
+anchors or pass resolved props through another Radiant Link.
 
 ## Public props
 
-`LinkProps`, `LinkRenderProps` and `LinkVariant` are exported from
-`@cognitap/radiant`.
+Root `className`, `style`, native attributes and ref reach the real anchor.
+Children provide its accessible name; hide decorative icons and keep focus visible.
 
-| Prop                 | Values / purpose                                                | Default         |
-| -------------------- | --------------------------------------------------------------- | --------------- |
-| `href`               | Native destination, including paths, fragments or external URLs | —               |
-| `variant`            | `inline`, `subtle`, `solid`, `soft`, `outline`, `ghost`         | `inline`        |
-| `tone`               | Semantic palette: `accent`, `neutral`, `warning`, `danger`      | `accent`        |
-| `controlSize`        | `small`, `medium`, `large`; metrics for action-shaped variants  | `medium`        |
-| `external`           | Supplies a new-tab target and safe rel defaults                 | `false`         |
-| `target`, `rel`      | Explicit native values override external defaults               | —               |
-| `download`           | Native anchor download behavior                                 | —               |
-| `render`             | `(props: LinkRenderProps) => ReactElement`                      | Native `a`      |
-| `ref`                | Ref to the real `HTMLAnchorElement`                             | —               |
-| `className`, `style` | Root customization; style also accepts typed `--…` tokens       | —               |
-| Other native props   | `aria-*`, events and other anchor attributes                    | Native behavior |
+`LinkProps`, `LinkRenderProps` and `LinkVariant` come from `@cognitap/radiant`.
+`MotionLinkProps` comes from `@cognitap/radiant/motion/react`.
 
-Choose presets with `ThemeScope`; your application loads their fonts. See
-[System foundations](/docs/foundations/) for theme and mode behavior.
+| Prop                        | Purpose                                                 | Default    |
+| --------------------------- | ------------------------------------------------------- | ---------- |
+| `href`                      | Native path, fragment or URL                            | —          |
+| `variant`                   | `inline`, `subtle`, `solid`, `soft`, `outline`, `ghost` | `inline`   |
+| `tone`                      | `accent`, `neutral`, `warning`, `danger`                | `accent`   |
+| `controlSize`               | `small`, `medium`, `large`; action dimensions           | `medium`   |
+| `external`                  | New-tab target and safe rel defaults                    | `false`    |
+| `target`, `rel`, `download` | Native anchor behavior                                  | Native     |
+| `render`                    | Forward resolved props to one native/router anchor      | Native `a` |
+| `motion`                    | MotionLink only: `inherit` or `off`                     | `inherit`  |
+| `ref`                       | Real `HTMLAnchorElement`                                | —          |
+| `className`, `style`        | Anchor customization, including typed tokens            | —          |
+| Other native props          | Events, `aria-*`, data attributes                       | Native     |
+
+Choose themes and modes through [System foundations](/docs/foundations/).
