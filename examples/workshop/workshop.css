@@ -10,9 +10,6 @@
     'editor';
   min-width: 0;
 }
-.workshop-editor-tabs {
-  display: contents;
-}
 .workshop-editor-nav {
   grid-area: nav;
 }
@@ -46,7 +43,6 @@
     scrollbar-width: thin;
   }
 }
-.workshop-editor-nav,
 .workshop-editor-heading,
 .workshop-options {
   display: flex;
@@ -54,9 +50,22 @@
   align-items: center;
   gap: 0.75rem;
 }
+/* Tabs and history share one row; the tabs scroll sideways before anything wraps. */
 .workshop-editor-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
   padding: 1rem;
   border-bottom: 1px solid var(--docs-border);
+}
+.workshop-editor-tabs {
+  display: flex;
+  gap: 0.5rem;
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  padding-block: 2px;
 }
 .workshop-editor {
   padding: 1rem;
@@ -68,12 +77,9 @@
   margin: 0;
   font-size: 1rem;
 }
-.workshop-editor > p,
 .workshop-notice {
   font-size: 0.875rem;
   color: var(--docs-muted);
-}
-.workshop-notice {
   margin: 1rem;
   padding: 1rem;
   border: 1px solid var(--docs-border);
@@ -84,11 +90,6 @@
   padding: 0;
   margin: 0.75rem 0;
   align-items: start;
-}
-.workshop-options legend {
-  font-size: 0.8125rem;
-  font-weight: 600;
-  margin-bottom: 0.5rem;
 }
 .workshop-options label {
   display: grid;
@@ -146,11 +147,27 @@
 }
 .workshop-history {
   display: flex;
+  flex: none;
   gap: 0.5rem;
-  margin-inline-start: auto;
+  --rad-button-padding: 0.6rem;
 }
 .workshop-history-icon {
-  display: none;
+  display: block;
+  width: 1.125rem;
+  height: 1.125rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.workshop-history-label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 .workshop-nav-count {
   display: inline-block;
@@ -274,40 +291,8 @@
     position: sticky;
     top: var(--workshop-strip);
     z-index: 2;
-    flex-wrap: nowrap;
-    gap: 0.5rem;
     padding: 0.5rem 1rem;
     background: var(--docs-surface);
     --rad-button-padding: 0.75rem;
-  }
-  .workshop-editor-tabs {
-    display: flex;
-    gap: 0.5rem;
-    flex: 1 1 auto;
-    min-width: 0;
-    overflow-x: auto;
-    scrollbar-width: thin;
-    padding-block: 2px;
-  }
-  .workshop-history {
-    flex: none;
-  }
-  .workshop-history-icon {
-    display: block;
-    width: 1.125rem;
-    height: 1.125rem;
-    fill: none;
-    stroke: currentColor;
-    stroke-width: 2;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-  }
-  .workshop-history-label {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip-path: inset(50%);
-    white-space: nowrap;
   }
 }

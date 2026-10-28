@@ -151,8 +151,6 @@ export function ColorEditor({
   const roleColumns = [roles.slice(0, 9), roles.slice(9)]
   return (
     <div className="color-editor">
-      <p className="color-lead">Drag the brand color; everything else follows. sRGB only.</p>
-
       <section
         className="color-section color-brand"
         aria-labelledby={`${id}-brand`}

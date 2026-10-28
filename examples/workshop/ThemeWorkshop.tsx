@@ -79,12 +79,6 @@ function Choice({
   )
 }
 
-const descriptions: Record<Editor, string> = {
-  color: 'Build a complete color system and inspect its roles in the preview.',
-  typography: 'Pick faces here, then drag the selected text in the preview or scrub a value.',
-  geometry: 'Shape shared spacing, control sizes and surfaces across the same scenes.',
-  motion: 'Tune a physical response, then feel it in real interactions.'
-}
 const themeHistory: Reducer<History<ThemeSnapshot>, HistoryAction<ThemeSnapshot>> = historyReducer
 
 /** Native text editing keeps its own undo; the workshop shortcut yields to it. */
@@ -334,6 +328,7 @@ export function ThemeWorkshop() {
           <div className="workshop-history">
             <Button
               variant="outline"
+              title="Undo"
               disabled={!ready || !canUndo}
               onClick={undo}
             >
@@ -348,6 +343,7 @@ export function ThemeWorkshop() {
             </Button>
             <Button
               variant="outline"
+              title="Redo"
               disabled={!ready || !canRedo}
               onClick={redo}
             >
@@ -378,12 +374,10 @@ export function ThemeWorkshop() {
                 Reset {current.label.toLowerCase()}
               </Button>
             </div>
-            <p>{descriptions[editor]}</p>
             <fieldset
               disabled={!ready}
               className="workshop-options"
             >
-              <legend>{current.label} settings</legend>
               <div
                 hidden={editor !== 'color'}
                 className="workshop-color-panel"

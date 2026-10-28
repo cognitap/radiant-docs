@@ -160,6 +160,7 @@ export function GeometryEditor({
       className="geometry-choice"
       data-overridden={overrides?.[key] !== undefined || undefined}
     >
+      <h4>{label}</h4>
       {changed(key, describedBy => (
         <OptionCards
           label={label}
@@ -176,8 +177,7 @@ export function GeometryEditor({
     <div className="geometry-editor">
       {!recipe && (
         <p className="geometry-lead">
-          Imported spacing and surface values are preserved exactly. Reset spacing &amp; surfaces
-          starts Balanced settings and keeps the other sections.
+          Imported spacing and surface values are kept exactly. Reset to start from Balanced.
         </p>
       )}
       <fieldset
