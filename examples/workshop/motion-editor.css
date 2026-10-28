@@ -226,8 +226,13 @@
   line-height: 1.6;
 }
 .motion-status {
+  display: inline-block;
   margin: 0 0 1rem;
+  padding: 0.1rem 0.6rem;
+  border: 1px solid var(--rad-color-border);
+  border-radius: 1em;
   font-size: 0.75rem;
+  font-weight: 600;
   color: var(--rad-color-muted-foreground);
 }
 .motion-scene {
@@ -346,6 +351,9 @@
 }
 .motion-inspector-heading {
   font-weight: 600;
+}
+.motion-inspector > .chip-group {
+  margin-bottom: 0.75rem;
 }
 .motion-inspector svg {
   display: block;

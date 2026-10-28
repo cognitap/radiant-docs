@@ -2,7 +2,7 @@
 
 /* oxlint-disable jsx-a11y/prefer-tag-over-role -- Inline SVG needs its accessible graphic role. */
 
-import { useEffect, useRef, useState, type RefObject } from 'react'
+import { useEffect, useRef, useState, type ReactNode, type RefObject } from 'react'
 import { Button } from '@cognitap/radiant'
 import type { Movement } from './motion-trace'
 
@@ -18,11 +18,14 @@ export type MotionReader = () => MotionReading | null
 /** Inspection samples real presentation. It never calculates a spring trajectory. */
 export function MotionInspector({
   sourceRef,
-  onMovement
+  onMovement,
+  children
 }: {
   sourceRef: RefObject<MotionReader | null>
   /** Each movement from rest to rest, once it ends. */
   onMovement?: (movement: Movement) => void
+  /** A choice of what to measure, shown above the graph. */
+  children?: ReactNode
 }) {
   const [paused, setPaused] = useState(false)
   const actual = useRef<SVGPathElement>(null)
@@ -146,6 +149,7 @@ export function MotionInspector({
       className="motion-inspector"
       aria-label="Motion inspection"
     >
+      {children}
       <div className="motion-inspector-heading">
         <span ref={label}>Live position</span>
         <span ref={status}>At rest</span>

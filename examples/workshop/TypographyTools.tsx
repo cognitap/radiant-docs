@@ -1,35 +1,26 @@
 'use client'
 
-import { pageContexts, pageNames, readCopy, sceneCopy } from './page-copy'
+import { Button } from '@cognitap/radiant'
+import { pageNames, readCopy, sceneCopy } from './page-copy'
 import type { ToolProps } from './preview-tools'
 
-export function TypographyTools({ view, session, dispatch, disabled, role }: ToolProps) {
+export function TypographyTools({ view, session, dispatch, disabled }: ToolProps) {
   const page = view.scene.kind === 'page' ? view.scene.page : undefined
+  const spacing = view.probes.textSpacing
   return (
     <div className="preview-tools">
-      <div className="preview-probes">
-        <label>
-          <input
-            type="checkbox"
-            disabled={disabled}
-            checked={view.probes.textSpacing}
-            onChange={event =>
-              dispatch({ type: 'probe', probe: 'textSpacing', on: event.target.checked })
-            }
-          />
-          Text spacing probe
-        </label>
-      </div>
-      <p className="preview-note">
-        {view.probes.inspect ? `Selected style: ${role}. ` : ''}
-        {page ? `${pageContexts[page]}.` : 'Component controls use the installed UI styles.'}
-      </p>
+      <Button
+        variant={spacing ? 'solid' : 'outline'}
+        controlSize="small"
+        aria-pressed={spacing}
+        disabled={disabled}
+        onClick={() => dispatch({ type: 'probe', probe: 'textSpacing', on: !spacing })}
+      >
+        Text spacing
+      </Button>
       {page && (
         <details className="preview-copy-editor">
-          <summary>Edit {pageNames[page].toLowerCase()} copy</summary>
-          <p className="preview-note">
-            Plain text only. Changes appear in every frame and stay in this session.
-          </p>
+          <summary>Edit copy</summary>
           <div className="preview-copy-fields">
             {Object.entries(sceneCopy[page]).map(([key, fallback]) => (
               <label key={`${page}:${key}`}>

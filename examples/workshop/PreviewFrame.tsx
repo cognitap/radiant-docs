@@ -5,12 +5,14 @@ import { ThemeScope, type Theme, type ThemeMode } from '@cognitap/radiant'
 import { MotionProvider } from '@cognitap/radiant/motion/react'
 import { widthId, type PreviewWidth } from './workshop-preview'
 
-/** Fixed widths keep their real CSS width and scale only the displayed frame. */
+/** Fixed widths keep their real CSS width and scale only the displayed frame. A lone frame at
+    full size needs no caption; the toolbar already shows its width. */
 export function PreviewFrame({
   theme,
   mode,
   width,
   label,
+  captioned,
   spacing = false,
   footer,
   children
@@ -19,6 +21,7 @@ export function PreviewFrame({
   mode: ThemeMode
   width: PreviewWidth
   label: string
+  captioned: boolean
   spacing?: boolean
   footer?: ReactNode
   children: ReactNode
@@ -58,10 +61,12 @@ export function PreviewFrame({
       data-preview-width={widthId(width)}
       aria-label={label}
     >
-      <figcaption>
-        {label}
-        {scale < 1 ? ` · shown at ${Math.round(scale * 100)}%` : ''}
-      </figcaption>
+      {(captioned || scale < 1) && (
+        <figcaption>
+          {label}
+          {scale < 1 ? ` · shown at ${Math.round(scale * 100)}%` : ''}
+        </figcaption>
+      )}
       <div
         ref={viewport}
         className="preview-viewport"
