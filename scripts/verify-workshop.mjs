@@ -293,9 +293,12 @@ export async function verifyWorkshop(browser, baseURL) {
               ? []
               : [...document.querySelectorAll('body *')]
                   .filter(node => node.getBoundingClientRect().right > innerWidth + 0.5)
-                  .filter(
-                    node => node.parentElement.getBoundingClientRect().right <= innerWidth + 0.5
-                  )
+                  .filter(node => {
+                    for (let parent = node.parentElement; parent; parent = parent.parentElement) {
+                      if (getComputedStyle(parent).overflowX !== 'visible') return false
+                    }
+                    return true
+                  })
                   .slice(0, 6)
                   .map(node => {
                     const box = node.getBoundingClientRect()
