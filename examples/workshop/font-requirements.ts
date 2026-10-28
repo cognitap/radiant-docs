@@ -20,14 +20,13 @@ export function fontRequirements(document: object): FontRequirement[] {
   return fonts.map(font => {
     const catalog =
       font.source === 'catalog' ? curatedFonts.find(item => item.family === font.family) : undefined
-    const storedAxes = Reflect.get(font, 'axes') as readonly FontAxis[] | undefined
     return {
       id: font.id,
       family: font.family,
       source: font.source,
       weights: font.weights ?? [],
       styles: font.styles ?? [],
-      axes: catalog?.axes ?? storedAxes ?? [],
+      axes: catalog?.axes ?? font.axes ?? [],
       files: Object.entries(catalog?.files ?? {}).map(([style, url]) => ({
         style,
         url,

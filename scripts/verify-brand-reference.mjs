@@ -19,7 +19,6 @@ const brands = [
 ]
 
 export async function verifyBrandReference(browser, baseURL) {
-  if (!colorAPI) return
   const page = await browser.newPage({
     viewport: { width: 1280, height: 1000 },
     reducedMotion: 'reduce'

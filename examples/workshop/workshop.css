@@ -218,7 +218,7 @@
   font-weight: 600;
   padding-block: 0.75rem;
 }
-.workshop-proofs-panel[data-typesetting-available] {
+.workshop-proofs-panel {
   display: grid;
   gap: 1rem;
   padding: 1rem;
@@ -229,7 +229,7 @@
   min-width: 0;
 }
 @media (min-width: 1400px) {
-  .workshop-proofs-panel[data-typesetting-available] {
+  .workshop-proofs-panel {
     grid-template-columns: minmax(15rem, 0.8fr) minmax(0, 1.5fr);
   }
   .workshop-proofs-panel > .typesetting-editor {

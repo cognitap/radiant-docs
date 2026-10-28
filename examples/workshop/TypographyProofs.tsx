@@ -119,7 +119,6 @@ export function TypographyProofs({
   const [spacing, setSpacing] = useState(false)
   const [inspecting, setInspecting] = useState(false)
   const [feedback, setFeedback] = useState('')
-  const roleSupport = Object.hasOwn(theme.modes.light, '--rad-typography-roles-prose-body-size')
   const selectionScope = `[data-proof-inspector=${JSON.stringify(inspectorId)}] .proof-frames`
   const automaticSelection =
     selectedRole === 'prose-body'
@@ -161,7 +160,6 @@ export function TypographyProofs({
       className="typography-proofs"
       aria-label="Typography proof sheets"
       data-proof-inspector={inspectorId}
-      data-proof-roles={roleSupport ? 'supported' : 'unavailable'}
     >
       <div className="proof-heading">
         <div>
@@ -221,13 +219,6 @@ export function TypographyProofs({
         {proofContexts[proof]}. Body / Headings / UI / Code assignments are distinct from the text
         styles.
       </p>
-      {!roleSupport && (
-        <p className="proof-availability">
-          This installed release does not contain the new typography roles. These are semantic,
-          editable content proofs; responsive role styling requires the matching packed candidate.
-          The public package update will accompany the typesetting chapter release.
-        </p>
-      )}
       <details className="proof-copy-editor">
         <summary>Edit {proofNames[proof].toLowerCase()} copy</summary>
         <p>
@@ -258,7 +249,7 @@ export function TypographyProofs({
         reading comfort; the spacing probe is a layout check, not browser zoom. Preview mode follows
         the shared specimen mode below. Product controls use the installed component typography.
       </p>
-      {roleSupport && onSelectRole && (
+      {onSelectRole && (
         <label className="proof-inspect-toggle">
           <input
             type="checkbox"

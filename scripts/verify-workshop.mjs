@@ -1,7 +1,6 @@
 import { setTypographyFamily } from './typography-controls.mjs'
 import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
-import { workshopAvailable } from './radiant-package.mjs'
 
 export async function verifyWorkshop(browser, baseURL) {
   const staticPage = await browser.newPage({ javaScriptEnabled: false })
@@ -28,14 +27,11 @@ export async function verifyWorkshop(browser, baseURL) {
   try {
     await page.goto(`${baseURL}/docs/workshop/`)
     const frame = page.getByRole('region', { name: 'Shared theme workshop', exact: true })
-    const shell = frame.locator('.theme-workshop')
     const canvas = frame.locator('.workshop-canvas')
     await frame.getByRole('button', { name: 'Reset specimen', exact: true }).waitFor()
     await page.waitForFunction(
       () => !document.querySelector('.theme-workshop .demo-controls button').disabled
     )
-    const editable = (await shell.getAttribute('data-workshop-editing')) === 'enabled'
-    assert.equal(editable, workshopAvailable, 'editing follows installed package capabilities')
     const specimen = frame.getByRole('combobox', { name: 'Specimen', exact: true })
     const mode = frame.getByRole('combobox', { name: 'Preview mode', exact: true })
     const width = frame.getByRole('combobox', { name: 'Preview width', exact: true })
@@ -58,48 +54,39 @@ export async function verifyWorkshop(browser, baseURL) {
       .filter({ hasText: 'Saved locally for Workshop Ada.' })
       .waitFor()
 
-    if (editable) {
-      await frame.getByRole('textbox', { name: 'Brand color', exact: true }).fill('#166534')
-      assert.notEqual(await variable('--rad-color-accent'), baseline)
-      await selectEditor('Typography')
-      const typographyFamily = await setTypographyFamily(frame, 18)
-      await selectEditor('Spacing & surfaces')
-      await frame.getByRole('spinbutton', { name: 'Surface radius (px)', exact: true }).fill('24')
-      await selectEditor('Motion')
+    await frame.getByRole('textbox', { name: 'Brand color', exact: true }).fill('#166534')
+    assert.notEqual(await variable('--rad-color-accent'), baseline)
+    await selectEditor('Typography')
+    const typographyFamily = await setTypographyFamily(frame, 18)
+    await selectEditor('Spacing & surfaces')
+    await frame.getByRole('spinbutton', { name: 'Surface radius (px)', exact: true }).fill('24')
+    await selectEditor('Motion')
+    await frame
+      .locator('.motion-editor')
+      .getByRole('spinbutton', { name: 'Stiffness', exact: true })
+      .fill('450')
+    assert.equal(
+      await form.getByRole('textbox', { name: 'Display name' }).inputValue(),
+      'Workshop Ada'
+    )
+    assert.equal(await variable('--rad-surface-radius'), '24px')
+    assert.equal(
       await frame
         .locator('.motion-editor')
         .getByRole('spinbutton', { name: 'Stiffness', exact: true })
-        .fill('450')
-      assert.equal(
-        await form.getByRole('textbox', { name: 'Display name' }).inputValue(),
-        'Workshop Ada'
-      )
-      assert.equal(await variable('--rad-surface-radius'), '24px')
-      assert.equal(
-        await frame
-          .locator('.motion-editor')
-          .getByRole('spinbutton', { name: 'Stiffness', exact: true })
-          .inputValue(),
-        '450'
-      )
-      await selectEditor('Color')
-      await frame.getByRole('button', { name: 'Reset color', exact: true }).click()
-      assert.equal(await variable('--rad-color-accent'), baseline)
-      assert.equal(await variable('--rad-surface-radius'), '24px')
-      assert.equal(await variable(typographyFamily), 'Georgia, serif')
-      assert.equal(
-        await form.getByRole('textbox', { name: 'Display name' }).inputValue(),
-        'Workshop Ada'
-      )
-      await frame.getByRole('textbox', { name: 'Brand color', exact: true }).fill('#166534')
-    } else {
-      assert.equal(
-        await frame.getByRole('textbox', { name: 'Brand color', exact: true }).isDisabled(),
-        true
-      )
-      await selectEditor('Typography')
-      assert.equal(await frame.getByRole('combobox', { name: 'Body family' }).isDisabled(), true)
-    }
+        .inputValue(),
+      '450'
+    )
+    await selectEditor('Color')
+    await frame.getByRole('button', { name: 'Reset color', exact: true }).click()
+    assert.equal(await variable('--rad-color-accent'), baseline)
+    assert.equal(await variable('--rad-surface-radius'), '24px')
+    assert.equal(await variable(typographyFamily), 'Georgia, serif')
+    assert.equal(
+      await form.getByRole('textbox', { name: 'Display name' }).inputValue(),
+      'Workshop Ada'
+    )
+    await frame.getByRole('textbox', { name: 'Brand color', exact: true }).fill('#166534')
     await specimen.selectOption('dashboard')
     await canvas.getByRole('textbox', { name: 'Filter projects' }).fill('Design')
     assert.equal(await canvas.locator('tbody tr').count(), 2)
@@ -247,7 +234,7 @@ export async function verifyWorkshop(browser, baseURL) {
     await page.getByRole('heading', { name: 'Make room for the useful things.' }).waitFor()
     assert.deepEqual(errors, [], 'no workshop hydration/runtime/asset errors')
     console.log(
-      `Workshop passed: ${editable ? 'installed document editing and section resets' : 'published read-only inspection'}, five isolated specimens, mode/viewport/state inspection, keyboard modal/table/reset, actual copied source, static/direct loads and 320px/390px layouts.`
+      'Workshop passed: installed document editing and section resets, five isolated specimens, mode/viewport/state inspection, keyboard modal/table/reset, actual copied source, static/direct loads and 320px/390px layouts.'
     )
   } catch (error) {
     await page

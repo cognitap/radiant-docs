@@ -91,13 +91,11 @@ export function GeometryEditor({
   recipe,
   theme,
   disabled,
-  available,
   onChange
 }: {
   recipe: GeometryRecipe | null
   theme: Theme
   disabled: boolean
-  available: boolean
   onChange: (recipe: GeometryRecipe) => void
 }) {
   const [scope, setScope] = useState<GeometryScope>('shared')
@@ -125,14 +123,7 @@ export function GeometryEditor({
     )
   return (
     <div className="geometry-editor">
-      {!available && (
-        <p className="workshop-notice">
-          Spacing &amp; surfaces editing needs a package with the production appearance API. The
-          installed release still supports specimen inspection. Use the labeled candidate preview
-          described below for editing.
-        </p>
-      )}
-      {!recipe && available && (
+      {!recipe && (
         <p>
           Imported spacing and surface values are preserved exactly. This document has no matching
           geometry recipe. Use Reset spacing &amp; surfaces to start Balanced settings while
@@ -140,7 +131,7 @@ export function GeometryEditor({
         </p>
       )}
       <fieldset
-        hidden={!recipe && available}
+        hidden={!recipe}
         disabled={disabled}
         className="geometry-settings"
       >

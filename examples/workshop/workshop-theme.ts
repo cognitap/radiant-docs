@@ -1,5 +1,14 @@
-import * as Radiant from '@cognitap/radiant'
-import type { Theme, ThemeDefinition, ThemeTokens, ThemeDocument } from '@cognitap/radiant'
+import {
+  compileThemeDocument,
+  defaultTheme,
+  parseThemeDocument,
+  themeDocumentFromDefinition,
+  updateThemeDocument,
+  type Theme,
+  type ThemeDefinition,
+  type ThemeTokens,
+  type ThemeDocument
+} from '@cognitap/radiant'
 
 export type Editor = 'color' | 'typography' | 'geometry' | 'motion'
 export const editors: { id: Editor; label: string }[] = [
@@ -8,8 +17,8 @@ export const editors: { id: Editor; label: string }[] = [
   { id: 'geometry', label: 'Spacing & surfaces' },
   { id: 'motion', label: 'Motion' }
 ]
-// The shell treats library documents as opaque data. It neither duplicates the
-// document schema nor implements a fallback compiler for an older package.
+// The shell treats library documents as opaque data and does not duplicate the
+// document schema.
 export type WorkshopDocument = object
 export type SectionPatch = {
   [K in keyof ThemeTokens]?: {
@@ -19,20 +28,19 @@ export type SectionPatch = {
 }
 /** Validate opaque application state with the released library parser. */
 export function readThemeDocument(value: unknown): ThemeDocument {
-  const document = Radiant.parseThemeDocument(value)
+  const document = parseThemeDocument(value)
   if (document.kind !== 'radiant-theme') throw new TypeError('Expected a full theme document.')
   return document
 }
 export const documentAPI = {
   create: (definition: ThemeDefinition): WorkshopDocument =>
-    Radiant.themeDocumentFromDefinition(definition),
+    themeDocumentFromDefinition(definition),
   update: (
     document: WorkshopDocument,
     sections: SectionPatch,
     mode: 'merge' | 'replace' = 'merge'
-  ): WorkshopDocument => Radiant.updateThemeDocument(readThemeDocument(document), sections, mode),
-  compile: (document: WorkshopDocument): Theme =>
-    Radiant.compileThemeDocument(readThemeDocument(document))
+  ): WorkshopDocument => updateThemeDocument(readThemeDocument(document), sections, mode),
+  compile: (document: WorkshopDocument): Theme => compileThemeDocument(readThemeDocument(document))
 }
 
 export function initialDocument(): WorkshopDocument {
@@ -64,8 +72,8 @@ export function resetEditor(document: WorkshopDocument, editor: Editor): Worksho
     return documentAPI.update(next, {
       surface: {
         modes: {
-          light: { canvas: String(Radiant.defaultTheme.modes.light['--rad-surface-canvas']) },
-          dark: { canvas: String(Radiant.defaultTheme.modes.dark['--rad-surface-canvas']) }
+          light: { canvas: String(defaultTheme.modes.light['--rad-surface-canvas']) },
+          dark: { canvas: String(defaultTheme.modes.dark['--rad-surface-canvas']) }
         }
       }
     })

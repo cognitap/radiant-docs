@@ -1,25 +1,6 @@
 import { updateThemeDocument, type ThemeFontMetadata } from '@cognitap/radiant'
 import { readThemeDocument } from './workshop-theme.ts'
 
-// A capability probe keeps the released 0.0.4 path working until promotion.
-// The public parser owns validation; the editor never strips imported metadata.
-export const fontAxesAvailable = (() => {
-  try {
-    readThemeDocument({
-      kind: 'radiant-theme',
-      version: 1,
-      id: 'font-axis-probe',
-      name: 'Font axis probe',
-      sections: {
-        typography: { fonts: [{ id: 'probe', family: 'system-ui', source: 'system', axes: [] }] }
-      }
-    })
-    return true
-  } catch {
-    return false
-  }
-})()
-
 export type FontContext = 'body' | 'headings' | 'ui' | 'code'
 export type FontStyle = 'normal' | 'italic'
 export interface FontAxis {
@@ -153,7 +134,7 @@ export function applyTrialFont(document: object, font: TrialFont, selectedWeight
     source: font.source,
     weights: [selectedWeight],
     styles: [...font.styles],
-    ...(fontAxesAvailable ? { axes: font.axes } : {})
+    axes: font.axes
   }
   return updateThemeDocument(current, {
     typography: {

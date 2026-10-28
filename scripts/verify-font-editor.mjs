@@ -38,11 +38,8 @@ export async function verifyFontEditor(browser, baseURL) {
     )
     const select = panel.getByRole('combobox', { name: 'Trial typeface', exact: true })
     const sample = panel.getByTestId('font-sample')
-    // Typesetting assigns the selected trial context (Code here), independently
-    // of UI. The released 0.0.4 editor still authors the legacy shared family.
-    const appliedText = (await frame.locator('.typesetting-editor').count())
-      ? frame.locator('.typography-proofs [data-rad-text="code"]').first()
-      : frame.locator('.workshop-canvas')
+    // Typesetting assigns the selected trial context (Code here), independently of UI.
+    const appliedText = frame.locator('.typography-proofs [data-rad-text="code"]').first()
     const loaded = async family => {
       await page.waitForFunction(
         family =>

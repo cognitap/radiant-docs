@@ -1,94 +1,47 @@
-import * as Radiant from '@cognitap/radiant'
-import type { ThemeFontMetadata } from '@cognitap/radiant'
-import { readThemeDocument } from './workshop-theme.ts'
 import {
-  curatedFonts,
-  fontAxesAvailable,
-  fontFamily,
-  type FontContext,
-  type TrialFont
-} from './workshop-fonts.ts'
+  generateTypography,
+  typographyPresets,
+  updateThemeDocument,
+  type ThemeFontMetadata,
+  type TypographyAssignment,
+  type TypographyFont,
+  type TypographyInput,
+  type TypographyPreset,
+  type TypographyProfile,
+  type TypographyResult,
+  type TypographyRole
+} from '@cognitap/radiant'
+import { readThemeDocument } from './workshop-theme.ts'
+import { curatedFonts, fontFamily, type TrialFont } from './workshop-fonts.ts'
 
-// Editor-facing shape of the consumed public generator. This temporary capability
-// seam keeps npm 0.0.4 builds valid until chapter publication; no calculation or
-// validation is reimplemented here. The matching package owns both.
-export type Assignment = FontContext
-export type ProseRhythm = {
-  size: number
-  lineHeight: number
-  paragraphSpacing: number
-  measure: number
-  headingScale: number
-}
-export type UIRhythm = { size: number; lineHeight: number }
-export type TextStyle = {
-  assignment: Assignment
-  narrow: number
-  wide: number
-  weight: number
-  lineHeight: number
-  tracking: number
-  measure: number
-}
-export type AssignedFont = { family: string; profile: string }
-export interface TypesettingInput {
-  preset?: string
-  fonts?: Partial<Record<Assignment, AssignedFont>>
-  prose?: Partial<ProseRhythm>
-  ui?: Partial<UIRhythm>
-  styles?: Record<string, Partial<TextStyle>>
-}
-export interface TypesettingResult {
-  input: TypesettingInput
-  prose: ProseRhythm
-  ui: UIRhythm
-  styles: Record<string, TextStyle>
-  recommendations: { body: boolean; ui: boolean }
-  warnings: readonly {
-    role: string
-    requestedWeight: number
-    supportedWeights: readonly [number, number]
-  }[]
-}
-const generate = Reflect.get(Radiant, 'generateTypography') as
-  | undefined
-  | ((input?: unknown) => TypesettingResult)
-const presets = Reflect.get(Radiant, 'typographyPresets') as
-  | undefined
-  | Record<string, { name: string }>
-export const typesettingAvailable = typeof generate === 'function' && !!presets
-export const startingPoints = Object.entries(presets ?? {}).map(([id, value]) => ({
+export const startingPoints = (Object.keys(typographyPresets) as TypographyPreset[]).map(id => ({
   id,
-  name: value.name
+  name: typographyPresets[id].name
 }))
-export const assignments: readonly Assignment[] = ['body', 'headings', 'ui', 'code']
-export const assignmentName = (value: Assignment) =>
+export const assignments: readonly TypographyAssignment[] = ['body', 'headings', 'ui', 'code']
+export const assignmentName = (value: TypographyAssignment) =>
   value === 'ui' ? 'UI' : value[0].toUpperCase() + value.slice(1)
 export const styleName = (role: string) =>
   role
     .split('-')
     .map(word => (word === 'ui' ? 'UI' : word[0].toUpperCase() + word.slice(1)))
     .join(' / ')
-export function resolveTypesetting(input: unknown = {}): TypesettingResult {
-  if (!typesettingAvailable)
-    throw new Error('This installed package does not provide typography roles.')
-  return generate!(input)
+export function documentTypesetting(document: object): TypographyResult | null {
+  const input = readThemeDocument(document).sections.typography?.typesetting
+  return input === undefined ? null : generateTypography(input)
 }
-export function documentTypesetting(document: object): TypesettingResult | null {
-  if (!typesettingAvailable) return null
-  const section = readThemeDocument(document).sections.typography
-  const input = section ? Reflect.get(section, 'typesetting') : undefined
-  return input === undefined ? null : resolveTypesetting(input)
-}
-export function assignedTrial(font: AssignedFont, local?: TrialFont | null): TrialFont | undefined {
+export function assignedTrial(
+  font: TypographyFont,
+  local?: TrialFont | null
+): TrialFont | undefined {
   if (font.profile !== 'manual') return curatedFonts.find(item => item.id === font.profile)
   return local && font.family === fontFamily(local) ? local : undefined
 }
 export function chooseAssignment(
-  input: TypesettingInput,
-  assignment: Assignment,
+  input: TypographyInput,
+  assignment: TypographyAssignment,
   font: TrialFont
-): TypesettingInput {
+): TypographyInput {
   if (!font.styles.includes('normal'))
     throw new Error('A normal file is required for an assignment.')
   return {
@@ -97,29 +50,30 @@ export function chooseAssignment(
       ...input.fonts,
       [assignment]: {
         family: fontFamily(font),
-        profile: font.source === 'catalog' ? font.id : 'manual'
+        profile: font.source === 'catalog' ? (font.id as TypographyProfile) : 'manual'
       }
     }
   }
 }
-export function resetRhythm(input: TypesettingInput, context: 'prose' | 'ui'): TypesettingInput {
-  const next = { ...input }
+type Mutable<T> = { -readonly [K in keyof T]: T[K] }
+export function resetRhythm(input: TypographyInput, context: 'prose' | 'ui'): TypographyInput {
+  const next: Mutable<TypographyInput> = { ...input }
   delete next[context]
   return next
 }
-export function resetTextStyle(input: TypesettingInput, role: string): TypesettingInput {
-  const styles = { ...input.styles }
+export function resetTextStyle(input: TypographyInput, role: TypographyRole): TypographyInput {
+  const styles: Mutable<NonNullable<TypographyInput['styles']>> = { ...input.styles }
   delete styles[role]
   return { ...input, styles }
 }
 export function applyTypesetting(
   document: object,
-  input: TypesettingInput,
+  input: TypographyInput,
   local?: TrialFont | null,
   reset = false
 ): object {
   const current = readThemeDocument(document)
-  const result = resolveTypesetting(input)
+  const result = generateTypography(input)
   const fonts = result.input.fonts!
   const metadata: ThemeFontMetadata[] = []
   for (const assignment of assignments) {
@@ -147,9 +101,7 @@ export function applyTypesetting(
       source: known?.source ?? samePrevious?.source ?? 'system',
       weights,
       styles: known?.styles ?? samePrevious?.styles ?? ['normal'],
-      ...(fontAxesAvailable
-        ? { axes: known?.axes ?? (samePrevious && Reflect.get(samePrevious, 'axes')) ?? [] }
-        : {})
+      axes: known?.axes ?? samePrevious?.axes ?? []
     })
   }
   const previous = current.sections.typography ?? {}
@@ -166,5 +118,5 @@ export function applyTypesetting(
     }
   }
   const parsed = readThemeDocument({ ...current, sections: { ...current.sections, ...sections } })
-  return Radiant.updateThemeDocument(current, { typography: parsed.sections.typography }, 'replace')
+  return updateThemeDocument(current, { typography: parsed.sections.typography }, 'replace')
 }

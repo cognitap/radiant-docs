@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback, useId, useMemo, useRef, useState } from 'react'
-import { Button, ThemeScope, defaultTheme, type ThemeMode } from '@cognitap/radiant'
+import { Button, ThemeScope, generateTypography, type ThemeMode } from '@cognitap/radiant'
 import { DemoControls, DemoPreview } from '@/components/demo/DemoFrame'
 import { useHydrated } from '../profile/useHydrated'
 import {
@@ -31,13 +31,7 @@ import { FontEditor } from './FontEditor'
 import { TypographyEditor } from './TypographyEditor'
 import { WorkshopFontLoader } from './font-runtime'
 import type { TrialFont } from './workshop-fonts'
-import {
-  typesettingAvailable,
-  applyTypesetting,
-  chooseAssignment,
-  documentTypesetting,
-  resolveTypesetting
-} from './workshop-typography'
+import { applyTypesetting, chooseAssignment, documentTypesetting } from './workshop-typography'
 import { MotionProvider } from '@cognitap/radiant/motion/react'
 import { MotionEditor } from './MotionEditor'
 import { MotionProofs } from './MotionProofs'
@@ -90,13 +84,10 @@ interface WorkshopState {
 export function ThemeWorkshop() {
   const [workshop, setWorkshop] = useState<WorkshopState>(() => {
     const geometry = geometryPreset()
-    const initial = typesettingAvailable
-      ? applyTypesetting(initialDocument(), {})
-      : initialDocument()
-    const document = documentAPI && geometryAPI ? geometryAPI.apply(initial, geometry) : initial
-    const color = documentAPI && colorAPI ? colorAPI.create(defaultColorRecipe()) : null
+    const document = geometryAPI.apply(applyTypesetting(initialDocument(), {}), geometry)
+    const color = colorAPI.create(defaultColorRecipe())
     return {
-      document: color ? colorAPI!.apply(document, color) : document,
+      document: colorAPI.apply(document, color),
       color,
       geometry,
       importResult: null,
@@ -121,24 +112,19 @@ export function ThemeWorkshop() {
   const ready = useHydrated()
   const panelId = useId()
   const workshopHost = useRef<HTMLDivElement>(null)
-  const theme = useMemo(
-    () => (documentAPI ? documentAPI.compile(document) : defaultTheme),
-    [document]
-  )
+  const theme = useMemo(() => documentAPI.compile(document), [document])
   const recipes = useMemo(
     () => ({ color: color?.recipe, geometry: geometry ?? undefined }),
     [color, geometry]
   )
   const importConfiguration = useCallback((data: ImportData, applyMode: 'merge' | 'replace') => {
-    const api = handoffAPI
-    if (!api) return
     setWorkshop(previous => {
       try {
-        const current = api.configuration(previous.document, {
+        const current = handoffAPI.configuration(previous.document, {
           color: previous.color?.recipe,
           geometry: previous.geometry ?? undefined
         })
-        const next = api.apply(current, data, applyMode)
+        const next = handoffAPI.apply(current, data, applyMode)
         const affected =
           data.kind === 'radiant-workshop'
             ? ['color', 'surface', 'control', 'spacing']
@@ -146,7 +132,7 @@ export function ThemeWorkshop() {
         return {
           ...previous,
           document: next.document,
-          color: next.recipes.color && colorAPI ? colorAPI.create(next.recipes.color) : null,
+          color: next.recipes.color ? colorAPI.create(next.recipes.color) : null,
           geometry: next.recipes.geometry ?? null,
           colorImportRevision:
             previous.colorImportRevision +
@@ -182,28 +168,25 @@ export function ThemeWorkshop() {
   const current = editors.find(item => item.id === editor)!
   const token = (name: `--rad-${string}`) => String(values[name])
   function edit(patch: SectionPatch) {
-    const api = documentAPI
-    if (!api) return
-    setWorkshop(previous => ({ ...previous, document: api.update(previous.document, patch) }))
+    setWorkshop(previous => ({
+      ...previous,
+      document: documentAPI.update(previous.document, patch)
+    }))
     setFeedback(`${current.label} updated. Specimen state retained.`)
   }
   function updateColor(recipe: ColorRecipe) {
-    const api = colorAPI
-    if (!api) return
-    const next: ColorSession = api.create(recipe)
+    const next: ColorSession = colorAPI.create(recipe)
     setWorkshop(previous => ({
       ...previous,
-      document: api.apply(previous.document, next),
+      document: colorAPI.apply(previous.document, next),
       color: next
     }))
     setFeedback('Color updated. Other sections and specimen state retained.')
   }
   function updateGeometry(recipe: GeometryRecipe) {
-    const api = geometryAPI
-    if (!api) return
     setWorkshop(previous => ({
       ...previous,
-      document: api.apply(previous.document, recipe),
+      document: geometryAPI.apply(previous.document, recipe),
       geometry: recipe
     }))
     setFeedback('Spacing & surfaces updated. Other sections and specimen state retained.')
@@ -212,18 +195,9 @@ export function ThemeWorkshop() {
     <div
       ref={workshopHost}
       className="theme-workshop"
-      data-workshop-geometry={
-        documentAPI && geometryAPI ? (geometry ? 'enabled' : 'imported') : 'unavailable'
-      }
-      data-workshop-color={color ? 'enabled' : documentAPI && colorAPI ? 'imported' : 'unavailable'}
-      data-workshop-editing={documentAPI ? 'enabled' : 'unavailable'}
+      data-workshop-geometry={geometry ? 'enabled' : 'imported'}
+      data-workshop-color={color ? 'enabled' : 'imported'}
     >
-      {!documentAPI && (
-        <p className="workshop-notice">
-          Theme editing is in preview and needs a Radiant package with theme-document support. You
-          can inspect all specimens below with the installed release.
-        </p>
-      )}
       <nav
         className="workshop-editor-nav"
         aria-label="Theme editors"
@@ -250,12 +224,12 @@ export function ThemeWorkshop() {
           <h3>{current.label}</h3>
           <Button
             variant="outline"
-            disabled={!ready || !documentAPI || (editor === 'geometry' && !geometryAPI)}
+            disabled={!ready}
             onClick={() => {
-              if (editor === 'color' && colorAPI) {
+              if (editor === 'color') {
                 updateColor(defaultColorRecipe())
                 setColorRevision(n => n + 1)
-              } else if (editor === 'geometry' && geometryAPI) {
+              } else if (editor === 'geometry') {
                 updateGeometry(geometryPreset())
                 setGeometryRevision(n => n + 1)
               } else {
@@ -263,7 +237,7 @@ export function ThemeWorkshop() {
                 setWorkshop(previous => ({
                   ...previous,
                   document:
-                    editor === 'typography' && typesettingAvailable
+                    editor === 'typography'
                       ? applyTypesetting(resetEditor(previous.document, editor), {})
                       : resetEditor(previous.document, editor)
                 }))
@@ -284,7 +258,7 @@ export function ThemeWorkshop() {
                 : 'All five specimens use these same decisions.'}
         </p>
         <fieldset
-          disabled={!ready || !documentAPI}
+          disabled={!ready}
           className="workshop-options"
         >
           <legend>{current.label} settings</legend>
@@ -295,8 +269,7 @@ export function ThemeWorkshop() {
             <ColorEditor
               key={`${colorRevision}:${workshop.colorImportRevision}`}
               session={color}
-              imported={!!documentAPI && !!colorAPI && !color}
-              disabled={!ready || !documentAPI}
+              disabled={!ready}
               onChange={updateColor}
             />
           </div>
@@ -328,28 +301,22 @@ export function ThemeWorkshop() {
             hidden={editor !== 'typography'}
             className="workshop-font-panel"
           >
-            <details
-              open={!typesettingAvailable}
-              className="workshop-typeface-lab"
-            >
+            <details className="workshop-typeface-lab">
               <summary>Typeface lab and local files</summary>
               <FontEditor
                 key={fontRevision}
                 onSession={setFontLoader}
                 onLocalReady={setLocalFont}
-                onAssignFont={
-                  typesettingAvailable
-                    ? (next, font, context) =>
-                        applyTypesetting(
-                          next,
-                          chooseAssignment(
-                            documentTypesetting(next)?.input ?? resolveTypesetting().input,
-                            context,
-                            font
-                          ),
-                          font.source === 'local' ? font : localFont
-                        )
-                    : undefined
+                onAssignFont={(next, font, context) =>
+                  applyTypesetting(
+                    next,
+                    chooseAssignment(
+                      documentTypesetting(next)?.input ?? generateTypography().input,
+                      context,
+                      font
+                    ),
+                    font.source === 'local' ? font : localFont
+                  )
                 }
                 active={editor === 'typography'}
                 document={document}
@@ -365,8 +332,7 @@ export function ThemeWorkshop() {
               key={`${geometryRevision}:${workshop.geometryImportRevision}`}
               recipe={geometry}
               theme={theme}
-              disabled={!ready || !documentAPI || !geometryAPI}
-              available={!!documentAPI && !!geometryAPI}
+              disabled={!ready}
               onChange={updateGeometry}
             />
           </div>
@@ -386,7 +352,6 @@ export function ThemeWorkshop() {
       <div
         hidden={editor !== 'typography'}
         className="workshop-proofs-panel"
-        data-typesetting-available={typesettingAvailable || undefined}
       >
         <TypographyEditor
           active={editor === 'typography'}
