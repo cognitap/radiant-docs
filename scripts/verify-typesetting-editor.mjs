@@ -94,7 +94,7 @@ export async function verifyTypesettingEditor(browser, baseURL) {
     assert.equal(await number('Prose size (px)').getAttribute('aria-invalid'), 'true')
     await number('Prose size (px)').press('Tab')
     assert.equal(await number('Prose size (px)').inputValue(), '21')
-    await preview.getByRole('checkbox', { name: /Inspect text styles/ }).check()
+    await preview.getByRole('button', { name: 'Inspect', exact: true }).click()
     await proof.locator('[data-rad-text="prose-title"]').click()
     assert.equal(await select('Text style').inputValue(), 'prose-title')
     await body().click()
@@ -113,7 +113,7 @@ export async function verifyTypesettingEditor(browser, baseURL) {
       1,
       'inspection pauses actions even when clicking button padding'
     )
-    await preview.getByRole('checkbox', { name: /Inspect text styles/ }).uncheck()
+    await preview.getByRole('button', { name: 'Inspect', exact: true }).click()
     await scene.selectOption('page:form')
     await proof
       .getByRole('textbox', { name: 'Name shown to collaborators' })
