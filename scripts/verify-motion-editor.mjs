@@ -241,18 +241,17 @@ export async function verifyMotionEditor(browser, baseURL) {
     const x = box.x + box.width / 2,
       y = box.y + box.height / 2
     await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x, y }] })
+    let touched = 0
     for (let i = 1; i <= 4; i++) {
       await cdp.send('Input.dispatchTouchEvent', {
         type: 'touchMove',
         touchPoints: [{ x: x + i * 15, y }]
       })
+      touched = Math.max(touched, await position(handle))
       await page.waitForTimeout(20)
     }
     await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
-    await page.waitForFunction(
-      node => (parseFloat(getComputedStyle(node).translate) || 0) > 1,
-      await handle.elementHandle()
-    )
+    assert.ok(touched > 1, `a sideways touch moves the handle: ${touched}px`)
     await cdp.detach()
     await compare.selectOption('none')
     await scene.selectOption('motion:follow')
