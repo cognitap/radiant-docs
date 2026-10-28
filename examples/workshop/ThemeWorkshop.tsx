@@ -121,9 +121,25 @@ function WorkshopShell({
   const [confirming, setConfirming] = useState(false)
   const editorHeading = useRef<HTMLHeadingElement>(null)
   const handoffHeading = useRef<HTMLHeadingElement>(null)
+  const editorNav = useRef<HTMLElement>(null)
   useEffect(() => {
     if (focusOnEnter) editorHeading.current?.focus()
   }, [focusOnEnter])
+  /* The nav wraps differently with each platform's system font, so scroll padding reads its
+     real height instead of assuming one. */
+  useEffect(() => {
+    const nav = editorNav.current
+    if (!nav) return
+    const root = document.documentElement
+    const observer = new ResizeObserver(() =>
+      root.style.setProperty('--workshop-nav', `${nav.offsetHeight}px`)
+    )
+    observer.observe(nav)
+    return () => {
+      observer.disconnect()
+      root.style.removeProperty('--workshop-nav')
+    }
+  }, [])
   const present = history.present.state
   const presentRef = useRef(present)
   useEffect(() => {
@@ -320,6 +336,7 @@ function WorkshopShell({
     >
       <div className="workshop-columns">
         <nav
+          ref={editorNav}
           className="workshop-editor-nav"
           aria-label="Theme editors"
         >
