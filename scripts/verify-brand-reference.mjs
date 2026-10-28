@@ -37,12 +37,21 @@ export async function verifyBrandReference(browser, baseURL) {
     const mode = frame.getByRole('combobox', { name: 'Preview mode', exact: true })
     const scene = frame.getByRole('combobox', { name: 'Scene', exact: true })
     const canvas = frame.locator('.preview-page').first()
-    const wallPreset = frame.getByRole('combobox', { name: 'Wall preset', exact: true })
-    const rampPreset = frame.getByRole('combobox', { name: 'Brand ramp preset', exact: true })
+    const preset = (group, value) =>
+      frame.getByRole('group', { name: group, exact: true }).locator(`input[value="${value}"]`)
+    const checkedPreset = group =>
+      frame
+        .getByRole('group', { name: group, exact: true })
+        .locator('input:checked')
+        .getAttribute('value')
+    const auto = name =>
+      frame
+        .getByRole('button', { name: `Automatic ${name}`, exact: true })
+        .getAttribute('aria-pressed')
     for (const wall of ['classic', 'balanced', 'expressive'])
       for (const ramp of ['classic', 'balanced', 'expressive']) {
-        await wallPreset.selectOption(wall)
-        await rampPreset.selectOption(ramp)
+        await preset('Wall preset', wall).check()
+        await preset('Brand ramp preset', ramp).check()
         const expected = colorAPI.create({
           input: { brand: '#7C3AED', wallPreset: wall, rampPreset: ramp }
         })
@@ -52,22 +61,13 @@ export async function verifyBrandReference(browser, baseURL) {
             p.swatches.every(s => rows[i].textContent.includes(s.value))
           )
         }, expected.wall.color.palettes)
-        assert.equal(
-          await frame
-            .getByRole('checkbox', { name: 'Automatic wall vividness', exact: true })
-            .isChecked(),
-          true
-        )
-        assert.equal(
-          await frame
-            .getByRole('checkbox', { name: 'Automatic brand vividness', exact: true })
-            .isChecked(),
-          true
-        )
+        assert.equal(await auto('wall vividness'), 'true')
+        assert.equal(await auto('brand vividness'), 'true')
       }
     await frame.getByRole('button', { name: 'Reset color', exact: true }).click()
-    assert.equal(await wallPreset.inputValue(), 'balanced')
-    assert.equal(await rampPreset.inputValue(), 'balanced')
+    assert.equal(await checkedPreset('Wall preset'), 'balanced')
+    assert.equal(await checkedPreset('Brand ramp preset'), 'balanced')
+    await frame.getByText(/^Color wall · /).click()
     for (const value of brands) {
       const session = colorAPI.create({ input: { brand: value } })
       const { wall, palette } = session
@@ -79,7 +79,9 @@ export async function verifyBrandReference(browser, baseURL) {
         value
       )
       assert.equal(await frame.locator('.color-swatch').count(), 198)
-      const rows = await frame.locator('.color-wall tbody tr').allTextContents()
+      const rows = await frame
+        .locator('.color-wall tbody tr')
+        .evaluateAll(rows => rows.map(row => row.textContent))
       for (const [index, family] of wall.color.palettes.entries())
         for (const swatch of family.swatches)
           assert.ok(
@@ -88,7 +90,9 @@ export async function verifyBrandReference(browser, baseURL) {
           )
       for (const [role, family] of Object.entries(palette.working))
         assert.equal(
-          await frame.getByRole('combobox', { name: `${role} family`, exact: true }).inputValue(),
+          await frame
+            .getByRole('button', { name: `${role} family`, exact: true })
+            .getAttribute('data-value'),
           family.paletteId
         )
       const slug = value.slice(1).toLowerCase()
@@ -97,7 +101,7 @@ export async function verifyBrandReference(browser, baseURL) {
         style: '.color-wall-scroll { max-height: none !important; overflow: visible !important; }'
       })
       await frame
-        .locator('.color-working')
+        .locator('.color-families')
         .screenshot({ path: `output/docs/brand-${slug}-working.png` })
       for (const selectedMode of ['light', 'dark']) {
         await mode.selectOption(selectedMode)
