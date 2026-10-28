@@ -446,6 +446,7 @@ export function ThemeWorkshop() {
                   changes={changes.motion.changes}
                   target={jump?.editor === 'motion' ? jump : undefined}
                   onChange={updateDocument}
+                  onScene={scene => dispatch({ type: 'scene', scene: { kind: 'motion', scene } })}
                 />
               </div>
               <div
