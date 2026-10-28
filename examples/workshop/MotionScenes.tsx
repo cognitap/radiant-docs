@@ -150,7 +150,7 @@ function ActionScene({
       >
         <CollapsibleTrigger>Open and reverse this disclosure</CollapsibleTrigger>
         <CollapsibleContent ref={content}>
-          <p>Change direction before the height settles. Content and controls remain real.</p>
+          <p>Change direction before the height settles.</p>
           {model.expanded && (
             <p>
               More content changes the measured destination. Keep opening and closing while it

@@ -118,8 +118,7 @@ export function ColorEditor({
     return (
       <div className="color-editor">
         <p className="color-lead">
-          Imported colors are kept exactly. Reset color starts the generator from the default brand;
-          other sections stay.
+          Imported colors are kept exactly. Reset to start from the default brand.
         </p>
       </div>
     )
