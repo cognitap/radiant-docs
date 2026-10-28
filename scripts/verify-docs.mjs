@@ -16,6 +16,7 @@ import { verifyRadio } from './verify-radio.mjs'
 import { verifyDialog } from './verify-dialog.mjs'
 import { verifyCollapsible } from './verify-collapsible.mjs'
 import { verifyAccordion } from './verify-accordion.mjs'
+import { verifyCard } from './verify-card.mjs'
 import { verifyCompositions } from './verify-compositions.mjs'
 import { verifyHandoff } from './verify-handoff.mjs'
 import { verifyHandoffConsumer } from './verify-handoff-consumer.mjs'
@@ -250,6 +251,7 @@ try {
   await verifyDialog(browser, baseURL)
   await verifyCollapsible(browser, baseURL)
   await verifyAccordion(browser, baseURL)
+  await verifyCard(browser, baseURL)
   await verifyCompositions(browser, baseURL)
   await verifyFoundations(browser, baseURL)
   await verifyWorkshop(browser, baseURL)

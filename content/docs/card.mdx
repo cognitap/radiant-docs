@@ -1,73 +1,128 @@
 ---
 title: Card
-description: Group a heading, content and explicit actions on a shared surface.
+description: Group content and explicit actions on a passive surface, with opt-in measured layout motion.
 ---
 
 import { CompositionDemo } from '../../components/CompositionDemo'
 import { ProfileFormDemo } from '../../components/ProfileFormDemo'
+import { CardDashboardDemo, CardStaticDemo } from '../../components/CardDemo'
+
+<CardDashboardDemo />
+
+## Give content a home
+
+```tsx
+<Card>
+  <CardHeader>
+    <CardTitle level={2}>Studio notes</CardTitle>
+    <CardDescription>Keep the next step close.</CardDescription>
+  </CardHeader>
+  <CardContent>A little room for a good idea.</CardContent>
+  <CardFooter>
+    <Button onClick={save}>Save note</Button>
+    <Link href="/projects">All projects</Link>
+  </CardFooter>
+</Card>
+```
+
+Card is a passive div. Its named parts organize content without adding
+selection, focus management or click behavior. Put [Button](/docs/button/)
+actions and [Link](/docs/link/) destinations inside. Keep controls out of
+clickable wrappers. Compose an article or named region around Card when needed.
+
+CardTitle defaults to h2; choose `level` for the surrounding page outline,
+independently of visual size. Cards in a list often use h3 beneath a section h2.
 
 <CompositionDemo kind="card" />
 
-## Content with explicit actions
+## Add measured layout motion
 
-Card is a passive `div` surface. Header, Content and Footer organize its
-children; they add no click behavior, selection or focus management. The whole
-Card is not an interactive target.
+```tsx
+import { useRef } from 'react'
+import { Card } from '@cognitap/radiant'
+import { useSpringLayout } from '@cognitap/radiant/motion/react'
 
-Use [Button](/docs/button/) for actions and [Link](/docs/link/) for
-destinations inside it. Avoid putting controls inside a clickable card wrapper.
-If the grouping needs an article or region role, compose that semantic HTML
-around it; Card does not assign one.
+function Projects({ items }: { items: { id: string; title: string }[] }) {
+  const root = useRef<HTMLDivElement>(null)
+  useSpringLayout(root)
 
-## Anatomy and customization
+  return (
+    <div
+      ref={root}
+      style={{ display: 'grid', gap: '1rem' }}
+    >
+      {items.map(item => (
+        <div
+          key={item.id}
+          data-rad-layout-slot=""
+          style={{ display: 'flow-root' }}
+        >
+          <div data-rad-layout-part="">
+            <Card>{item.title}</Card>
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
+```
 
-| Component       | Native host / style and ref target | `data-slot` token  |
-| --------------- | ---------------------------------- | ------------------ |
-| Card            | `div` surface                      | `card`             |
-| CardHeader      | `div`                              | `card-header`      |
-| CardTitle       | Heading, default `h2`              | `card-title`       |
-| CardDescription | `p`                                | `card-description` |
-| CardContent     | `div`                              | `card-content`     |
-| CardFooter      | `div` with wrapping action layout  | `card-footer`      |
+The hook measures natural-flow slots together and animates resize and reorder.
+Use stable keys and one dedicated part per slot. Text reflows without scaling;
+inputs, selection and form submission stay native. Content appears or hides
+immediately. The application restores focus after reordering.
 
-CardTitle's `level` accepts `1`–`6` and changes the heading host. Each part
-accepts native attributes/events, `className`, typed theme `style`, ref and
-additive `data-slot` identities. These are separate named components, not a
-root `parts` object.
+Only the dedicated part animates size and translation;
+Card's styles and refs still belong to its div. Keep slots borderless and
+unpadded, and both wrappers free of transforms, transitions and outer margins.
+Avoid scaled or rotated ancestors and nested layout groups. See the
+[shared layout contract](/docs/foundations/motion/#animate-layout).
 
-Set `--rad-card-padding` in Card's inline style to change its padding. Shared
-surface tokens set its background, shape, spacing and shadow; child actions
-keep their own family contracts.
+Theme motion off and live reduced motion settle layout immediately. Server
+markup stays in natural flow. Card needs no motion prop or provider; the
+optional provider enhances child actions separately.
 
-## Public props
+<CardStaticDemo />
 
-Every part's prop type and `CardHeadingLevel` are exported.
+## Parts and customization
 
-| Prop                 | Applies to / purpose                                             |
-| -------------------- | ---------------------------------------------------------------- |
-| `children`           | Content for each named part                                      |
-| `level`              | CardTitle only; `1`–`6`, default `2`                             |
-| `className`, `style` | Each component's actual host, including local theme tokens       |
-| `ref`                | Each component's native host; not redirected to a child control  |
-| `data-slot`          | Additional identity tokens; retains the part's base identity     |
-| Other native props   | Attributes/events of the corresponding div, heading or paragraph |
+| Component       | Native style/ref target | Identity         |
+| --------------- | ----------------------- | ---------------- |
+| Card            | div                     | card             |
+| CardHeader      | div                     | card-header      |
+| CardTitle       | Heading, default h2     | card-title       |
+| CardDescription | p                       | card-description |
+| CardContent     | div                     | card-content     |
+| CardFooter      | div, wrapping actions   | card-footer      |
 
-Card has no open, selected or disabled state. Put those on the form, action,
-[Dialog](/docs/dialog/) or [disclosure](/docs/collapsible/) that owns the
-interaction. Styling a passive surface does not disable its children.
+Each named part accepts native props, className, typed theme style, ref and
+additive `data-slot` tokens. Caller classes and styles override defaults.
+These are components, not a root parts map. Set `--rad-card-padding` or
+`--rad-card-gap` locally; shared surface and typography roles supply defaults.
+Preserve visible focus and leave room around child controls.
 
-## Reuse the profile form
+## Forms and state
 
-The [profile recipe](/docs/recipes/profile-form/), with TanStack Form in a Card.
-CardContent holds the same form used in standalone and Dialog placements. Card
-supplies the surface; the form owns values, validation, submission and reset.
+Put a form in CardContent and give it explicit submit/reset actions. The form
+owns validation, values and persistence. Card has no open, selected, pending or
+disabled state; disabling a surface cannot disable its children. Use
+[Dialog](/docs/dialog/) or [Collapsible](/docs/collapsible/) for those behaviors.
+The same [profile recipe](/docs/recipes/profile-form/) works in all three placements.
 
 <ProfileFormDemo compare />
 
-## Use the examples
+## Public props
 
-Keep the `compositions/` and `profile/` paths when copying. The focused Card
-example needs only React and Radiant. Its native link works without JavaScript;
-the bookmark feedback needs it. The profile selector also imports optional
-TanStack Form; the [recipe setup](/docs/recipes/profile-form/#use-the-recipe)
-covers native-only and TanStack copies. No example persists or sends data.
+Every part's prop type and CardHeadingLevel are exported.
+
+| Prop               | Applies to / purpose                       |
+| ------------------ | ------------------------------------------ |
+| children           | Every named part                           |
+| level              | CardTitle heading 1–6; default 2           |
+| className, style   | Actual host, including local theme tokens  |
+| ref                | Actual div, heading or paragraph           |
+| data-slot          | Additional identity tokens                 |
+| Other native props | Corresponding host's attributes and events |
+
+Copy the dashboard file on its own. Existing composition/profile examples keep
+their accompanying paths; the profile recipe documents its optional form adapter.
