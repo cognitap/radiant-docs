@@ -9,10 +9,13 @@ Semantic tokens describe your system; component overrides express exceptions.
 Apply a theme to the subtree that needs it, after the
 [stylesheet setup](/docs/getting-started/#choose-a-styling-route).
 
-## Supported presets
+## Example themes
 
-Choose any of the eight presets from the readonly public `themes` registry.
-Changing presentation preserves a form's state.
+Radiant's core entry ships `defaultTheme`. The other presets are examples to
+use or copy, from `@cognitap/radiant/examples`, and the
+[theme workshop](/docs/workshop/) starts from the same ones. Its readonly
+`themes` registry lists all eight. Changing presentation preserves a form's
+state.
 
 <FoundationDemo kind="presets" />
 
@@ -27,7 +30,7 @@ Changing presentation preserves a form's state.
 | `jelly`         | Jelly         | `jelly`        | Baloo 2          | Baloo 2 700                     |
 | `ticket`        | Ticket        | `ticket`       | Barlow Condensed | Barlow Condensed 600, uppercase |
 
-Import a preset by its named export. Store a selection by its stable `id`, not
+Import a preset by its named export from `@cognitap/radiant/examples`. Store a selection by its stable `id`, not
 its name. A theme does not install fonts or change a control's semantic role.
 
 ### Fonts and browser fallbacks

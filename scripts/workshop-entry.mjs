@@ -18,11 +18,15 @@ export async function waitForEditors(page) {
 }
 
 /** Choose a starting theme by name on the start screen already shown. */
-export async function enterWorkshop(page, { start = 'Radiant' } = {}) {
+/** Without `start`, enter through the default brand color: the recipe every editor can edit. */
+export async function enterWorkshop(page, { start } = {}) {
   await waitForStartScreen(page)
-  await workshopFrame(page)
-    .getByRole('button', { name: new RegExp(`^Start from ${start}:`) })
-    .click()
+  const frame = workshopFrame(page)
+  await (
+    start
+      ? frame.getByRole('button', { name: new RegExp(`^Start from ${start}:`) })
+      : frame.getByRole('button', { name: 'Start with this color', exact: true })
+  ).click()
   await waitForEditors(page)
   return workshopFrame(page)
 }

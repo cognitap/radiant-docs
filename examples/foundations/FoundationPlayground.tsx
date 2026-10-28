@@ -2,7 +2,8 @@
 
 import { useState } from 'react'
 import dynamic from 'next/dynamic'
-import { sharp, jelly, type ThemeMode } from '@cognitap/radiant'
+import { type ThemeMode } from '@cognitap/radiant'
+import { sharp, jelly } from '@cognitap/radiant/examples'
 import { DemoControls, DemoPreview } from '@/components/demo/DemoFrame'
 import { PreviewThemeControls, SelectControl } from '@/components/demo/ActionControls'
 import { garden, gardenWithButtonCorners } from './garden'

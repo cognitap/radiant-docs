@@ -11,11 +11,11 @@ import {
   CardFooter,
   Link,
   ThemeScope,
-  radiant,
   type ButtonProps,
   type Theme,
   type ThemeMode
 } from '@cognitap/radiant'
+import { radiant } from '@cognitap/radiant/examples'
 import { MotionProvider, MotionLink } from '@cognitap/radiant/motion/react'
 import '@cognitap/radiant/styles.css'
 import './link-example.css'

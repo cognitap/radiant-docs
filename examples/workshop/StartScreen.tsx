@@ -18,8 +18,8 @@ import type { ThemeSnapshot } from './workshop-snapshot'
 import {
   brandSnapshot,
   defaultRecipe,
+  exampleSnapshot,
   readSharedTheme,
-  startingSnapshot,
   startingThemes,
   type StartingTheme
 } from './workshop-start'
@@ -94,8 +94,7 @@ export function StartScreen({
   const ticket = useRef(0)
   const deferredBrand = useDeferredValue(brand)
   const themes = useMemo(
-    () =>
-      startingThemes.map(theme => ({ theme, compiled: compiled(startingSnapshot(theme.recipe)) })),
+    () => startingThemes.map(theme => ({ theme, compiled: compiled(exampleSnapshot(theme)) })),
     []
   )
   const brandTheme = useMemo(() => compiled(brandSnapshot(deferredBrand)), [deferredBrand])
@@ -104,7 +103,7 @@ export function StartScreen({
   }, [focusOnMount])
   const message = error ?? notice
   function start(theme: StartingTheme) {
-    onStart(startingSnapshot(theme.recipe), theme.name)
+    onStart(exampleSnapshot(theme), theme.name)
   }
   function open(text: string, source: string) {
     try {

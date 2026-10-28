@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
-import { themes } from '@cognitap/radiant'
+import { themes } from '@cognitap/radiant/examples'
 
 async function verifySources(page, frame, files) {
   await frame.locator('summary').click()

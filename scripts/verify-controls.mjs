@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
-import { sharp, themes } from '@cognitap/radiant'
+import { sharp, themes } from '@cognitap/radiant/examples'
 
 const examples = [
   ['field', 'Field relationships', 'FieldExample.tsx', 'Save project'],

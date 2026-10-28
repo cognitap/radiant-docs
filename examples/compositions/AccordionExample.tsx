@@ -8,9 +8,9 @@ import {
   AccordionTrigger,
   Button,
   Link,
-  ThemeScope,
-  radiant
+  ThemeScope
 } from '@cognitap/radiant'
+import { radiant } from '@cognitap/radiant/examples'
 import type { CompositionOptions } from './composition-types'
 import '@cognitap/radiant/styles.css'
 import './composition-example.css'

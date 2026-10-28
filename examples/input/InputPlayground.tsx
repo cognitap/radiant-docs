@@ -2,7 +2,8 @@
 
 import { useState } from 'react'
 import dynamic from 'next/dynamic'
-import { radiant, type ControlSize, type ThemeMode } from '@cognitap/radiant'
+import { type ControlSize, type ThemeMode } from '@cognitap/radiant'
+import { radiant } from '@cognitap/radiant/examples'
 import { PreviewThemeControls, SelectControl } from '@/components/demo/ActionControls'
 import { DemoControls, DemoPreview } from '@/components/demo/DemoFrame'
 

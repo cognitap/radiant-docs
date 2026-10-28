@@ -12,12 +12,12 @@ import {
   Field,
   Input,
   ThemeScope,
-  radiant,
   type ControlSize,
   type Theme,
   type ThemeMode,
   type ThemeStyle
 } from '@cognitap/radiant'
+import { radiant } from '@cognitap/radiant/examples'
 import { MotionProvider, useReducedMotion, useSpringLayout } from '@cognitap/radiant/motion/react'
 
 import '@cognitap/radiant/styles.css'

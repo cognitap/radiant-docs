@@ -1,7 +1,6 @@
 import assert from 'node:assert/strict'
 import { startingThemes } from '../examples/workshop/workshop-start.ts'
-import { geometryPreset } from '../examples/workshop/workshop-geometry.ts'
-import { motionPresets } from '../examples/workshop/workshop-motion.ts'
+import { themes } from '@cognitap/radiant/examples'
 import {
   copyShareLink,
   enterWorkshop,
@@ -11,9 +10,11 @@ import {
 } from './workshop-entry.mjs'
 
 const headline = 'Make a Radiant theme for your app'
-const bodyFamily = { inter: 'Inter', 'source-serif': 'Source Serif 4', plex: 'IBM Plex Sans' }
+const published = theme => themes.find(({ id }) => id === theme.id).modes.light
+// A custom property set to `initial` computes to the empty string.
+const computed = value => (value === 'initial' ? '' : String(value))
 
-/** The start screen: six finished themes, a brand color and a shared theme, each entering the
+/** The start screen: Radiant's example themes, a brand color and a shared theme, each entering the
     editors as the baseline with nothing changed. */
 export async function verifyStart(browser, baseURL) {
   const context = await browser.newContext({
@@ -71,28 +72,14 @@ export async function verifyStart(browser, baseURL) {
       const label = theme.name
       assert.equal(await focused(), 'Color', `${label}: focus lands on the editor heading`)
       await assertFresh(label)
-      assert.equal(await variable('--rad-color-accent'), theme.recipe.brand, `${label}: accent`)
-      assert.ok(
-        (await variable('--rad-typography-roles-prose-body-family')).includes(
-          bodyFamily[theme.recipe.typography]
-        ),
-        `${label}: body family`
-      )
-      assert.equal(
-        await variable('--rad-surface-radius'),
-        `${geometryPreset(theme.recipe.geometry).values.surfaceRadius}px`,
-        `${label}: surface radius`
-      )
-      await frame.getByRole('button', { name: 'Motion', exact: true }).click()
-      assert.equal(
-        await frame
-          .locator('.motion-editor')
-          .getByRole('spinbutton', { name: 'Stiffness', exact: true })
-          .inputValue(),
-        String(motionPresets.find(preset => preset.id === theme.recipe.motion).spring.stiffness),
-        `${label}: motion preset`
-      )
-      if (theme.id === 'editorial')
+      for (const name of [
+        '--rad-color-accent',
+        '--rad-typography-family',
+        '--rad-surface-radius',
+        '--rad-button-font-weight'
+      ])
+        assert.equal(await variable(name), computed(published(theme)[name]), `${label}: ${name}`)
+      if (theme.id === 'jelly')
         await page.screenshot({ path: 'output/docs/workshop-start-entered.png' })
       await startOver()
       assert.equal(await focused(), headline, `${label}: focus returns to the start heading`)
@@ -180,7 +167,7 @@ export async function verifyStart(browser, baseURL) {
     await waitForEditors(page)
     assert.equal(
       await variable('--rad-color-accent'),
-      startingThemes[1].recipe.brand,
+      published(startingThemes[1])['--rad-color-accent'],
       'the keyboard enters the second theme'
     )
     assert.equal(await focused(), 'Color')
@@ -229,7 +216,7 @@ export async function verifyStart(browser, baseURL) {
         )
       assert.deepEqual(
         accents,
-        startingThemes.map(theme => theme.recipe.brand),
+        startingThemes.map(theme => published(theme)['--rad-color-accent']),
         'each static card is rendered with its own theme'
       )
       assert.equal(await staticFrame.locator('.start-card-button').first().isDisabled(), true)
@@ -243,7 +230,7 @@ export async function verifyStart(browser, baseURL) {
       await staticPage.close()
     }
     console.log(
-      'Start screen passed: six live themes entering as the baseline with their accent, family, radius and motion and no markers, brand color entry, share link in the URL and pasted, invalid link error, New theme confirm with keep/Escape/confirm, keyboard entry and focus, 320px/390px one-column layout, dark mode and static render.'
+      'Start screen passed: every Radiant example theme entering as the baseline with its published accent, family, radius and button weight and no markers, brand color entry, share link in the URL and pasted, invalid link error, New theme confirm with keep/Escape/confirm, keyboard entry and focus, 320px/390px one-column layout, dark mode and static render.'
     )
   } catch (error) {
     await page
