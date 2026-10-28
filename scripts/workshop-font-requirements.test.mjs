@@ -1,7 +1,11 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { defineThemeDocument, updateThemeDocument } from '@cognitap/radiant'
-import { fontFamilies, fontRequirements, fontSetup } from '../examples/workshop/font-requirements.ts'
+import {
+  fontFamilies,
+  fontRequirements,
+  fontSetup
+} from '../examples/workshop/font-requirements.ts'
 import { curatedFonts, applyTrialFont } from '../examples/workshop/workshop-fonts.ts'
 import { handoffAPI } from '../examples/workshop/workshop-handoff.ts'
 

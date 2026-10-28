@@ -218,7 +218,7 @@ export function ThemeHandoff({
   }
   const unavailable = !ready || !prepared.config
   const guide = prepared.guide
-  const families = fontFamilies(guide.fonts)
+  const families = guide ? fontFamilies(guide.fonts) : []
   const other = prepared.other
   const outputField = (item: SetupGuide) => `${item.output.label} output`
   /** Copy and download for one text, named after it. */
