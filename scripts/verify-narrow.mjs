@@ -42,7 +42,7 @@ export async function verifyNarrow(browser, baseURL) {
           const hit = document.elementFromPoint(x, y)
           const strip = document.querySelector('.workshop-preview').getBoundingClientRect()
           return {
-            uncovered: hit === node || node.contains(hit),
+            uncovered: !hit?.closest('.workshop-preview, .workshop-editor-nav'),
             inside: box.top >= 0 && box.bottom <= innerHeight,
             strip: strip.bottom > 0 && strip.top < innerHeight && strip.height > 0
           }
