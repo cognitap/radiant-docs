@@ -6,23 +6,21 @@ description: Match the examples you read to the Radiant version you install.
 Radiant is experimental. The header identifies the exact installed package used
 by this site. Keep package JavaScript and CSS on the same version.
 
-## Radiant 0.0.6
+## Radiant 0.0.7
 
-Install `@cognitap/radiant@0.0.6` for the complete [theme workshop](/workshop/):
-Color, Typography, Spacing & surfaces and Motion share one portable theme.
-Copy a full theme or selected sections, save editable configuration, or share a
-link. Font requirements travel with the theme; applications supply font files.
-
-The opt-in spring runtime covers native press/disclosure/Dialog presentation,
-bounded drag/snap, following values and layout resize/reorder. MotionProvider
-enables native component feedback. Profiles configure physical behavior;
-legacy duration/easing tokens continue to control CSS transitions. Live system
-reduced motion always applies. See [motion setup](/docs/foundations/motion/) and
-the [release notes](https://github.com/cognitap/radiant/releases/tag/v0.0.6).
+Install `@cognitap/radiant@0.0.7`. The styled presets are now
+[example themes](/docs/foundations/theming/#example-themes) at
+`@cognitap/radiant/examples`, and the [theme workshop](/workshop/) starts from
+the same ones. The core entry keeps `defaultTheme`. See the
+[release notes](https://github.com/cognitap/radiant/releases/tag/v0.0.7).
 
 ## Upgrade existing themes
 
-Version 0.0.6 adds explicit motion entrypoints. Import the runtime where needed
+Version 0.0.7 moves `themes`, `radiant`, `soft`, `expressive`, `glass`,
+`sharp`, `jelly` and `ticket` to `@cognitap/radiant/examples`. Change those
+imports; the themes themselves are unchanged.
+
+Version 0.0.6 added the complete theme workshop and explicit motion entrypoints. Import the runtime where needed
 and use the exported setup alongside your typed theme. Layout motion uses
 dedicated slots/parts; review its geometry requirements before adopting it.
 
