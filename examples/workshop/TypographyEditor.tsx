@@ -238,7 +238,9 @@ export function TypographyEditor({
             >
               <span className="typesetting-assignment-name">
                 {assignmentName(assignment)}
-                {!known && <small className="typesetting-badge">Uncalibrated</small>}
+                {value.profile === 'manual' && (
+                  <small className="typesetting-badge">Uncalibrated</small>
+                )}
               </span>
               <Changed
                 changes={changes}

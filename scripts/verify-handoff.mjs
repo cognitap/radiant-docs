@@ -1,5 +1,6 @@
 import { updateThemeDocument } from '@cognitap/radiant'
 import assert from 'node:assert/strict'
+import { pickRadio } from './typography-controls.mjs'
 import { readFile } from 'node:fs/promises'
 import { handoffFixture } from './handoff-fixture.mjs'
 import { handoffAPI, jsonText } from '../examples/workshop/workshop-handoff.ts'
@@ -383,9 +384,7 @@ export async function verifyHandoff(browser, baseURL) {
         await system.getByRole('spinbutton', { name: 'Prose leading', exact: true }).inputValue(),
         '1.75'
       )
-      await system
-        .getByRole('combobox', { name: 'Text style', exact: true })
-        .selectOption('prose-title')
+      await pickRadio(system, 'Text style', 'prose-title')
       assert.equal(
         await system
           .getByRole('spinbutton', { name: 'Narrow size (px)', exact: true })

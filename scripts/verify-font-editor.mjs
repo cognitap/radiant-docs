@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict'
 import { readFile, mkdir } from 'node:fs/promises'
+import { pickRadio, pickedRadio, radioGroup } from './typography-controls.mjs'
 
 export async function verifyFontEditor(browser, baseURL) {
   await mkdir(new URL('../output/docs/', import.meta.url), { recursive: true })
@@ -36,7 +37,8 @@ export async function verifyFontEditor(browser, baseURL) {
     await page.waitForFunction(
       () => document.querySelector('.font-editor').dataset.fontState === 'loaded'
     )
-    const select = panel.getByRole('combobox', { name: 'Trial typeface', exact: true })
+    const trial = value => pickRadio(panel, 'Trial typeface', value)
+    const trialPicked = () => pickedRadio(panel, 'Trial typeface')
     const sample = panel.getByTestId('font-sample')
     // Typesetting assigns the selected trial context (Code here), independently of UI.
     const appliedText = frame.locator('.preview-page [data-rad-text="code"]').first()
@@ -75,7 +77,7 @@ export async function verifyFontEditor(browser, baseURL) {
     await panel.getByRole('button', { name: 'Reset context sample', exact: true }).click()
     await panel.getByRole('spinbutton', { name: 'Sample line height', exact: true }).fill('1.85')
     await panel.getByRole('spinbutton', { name: 'Trial weight', exact: true }).fill('850')
-    await select.selectOption('plex-sans')
+    await trial('plex-sans')
     await loaded('IBM Plex Sans')
     assert.equal(
       await panel.getByRole('spinbutton', { name: 'Trial weight', exact: true }).inputValue(),
@@ -97,7 +99,7 @@ export async function verifyFontEditor(browser, baseURL) {
     assert.equal(await sample.evaluate(node => getComputedStyle(node).fontStretch), '90%')
     await panel.getByRole('combobox', { name: 'Trial style', exact: true }).selectOption('italic')
     assert.equal(await sample.evaluate(node => getComputedStyle(node).fontStyle), 'italic')
-    await select.selectOption('source-serif-4')
+    await trial('source-serif-4')
     await loaded('Source Serif 4')
     await panel.getByRole('button', { name: 'Reset context sample', exact: true }).click()
     assert.equal(
@@ -114,14 +116,14 @@ export async function verifyFontEditor(browser, baseURL) {
     )
     await panel.getByRole('combobox', { name: 'Optical sizing', exact: true }).selectOption('auto')
     assert.equal(await sample.evaluate(node => getComputedStyle(node).fontOpticalSizing), 'auto')
-    await select.selectOption('plex-mono')
+    await trial('plex-mono')
     await loaded('IBM Plex Mono')
     await panel.getByRole('combobox', { name: 'Trial context', exact: true }).selectOption('code')
     assert.equal(
       await panel.getByRole('spinbutton', { name: 'Sample size', exact: true }).inputValue(),
       '14'
     )
-    await select.selectOption('inter')
+    await trial('inter')
     await loaded('Inter')
     assert.equal(
       (await faces()).filter(face =>
@@ -142,7 +144,7 @@ export async function verifyFontEditor(browser, baseURL) {
       buffer: Buffer.from('not a font')
     })
     await panel.locator('.font-notice').filter({ hasText: 'Choose a font file' }).waitFor()
-    assert.equal(await select.inputValue(), 'inter', 'bad input retains the prior trial/theme')
+    assert.equal(await trialPicked(), 'inter', 'bad input retains the prior trial/theme')
     const localBytes = await readFile(
       new URL('../scripts/fixtures/InterVariable.ttf', import.meta.url)
     )
@@ -339,10 +341,7 @@ export async function verifyFontEditor(browser, baseURL) {
     await openTypography()
     await loaded('Inter')
     assert.equal(
-      await panel
-        .getByRole('combobox', { name: 'Trial typeface', exact: true })
-        .locator('option[value=local]')
-        .count(),
+      await radioGroup(panel, 'Trial typeface').locator('input[value=local]').count(),
       0,
       'reload discards local files'
     )

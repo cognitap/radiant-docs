@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict'
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
+import { pickRadio } from './typography-controls.mjs'
 
 // Recorded font/layout examples, not a synthetic readability or quality score.
 export async function verifyTypographyChapter(browser, baseURL) {
@@ -57,9 +58,7 @@ export async function verifyTypographyChapter(browser, baseURL) {
       }
     ]
     for (const model of definitions) {
-      await editor
-        .getByRole('combobox', { name: 'Starting point', exact: true })
-        .selectOption(model.id === 'custom' ? 'inter' : model.id)
+      await pickRadio(editor, 'Starting point', model.id === 'custom' ? 'inter' : model.id)
       if (model.id === 'custom') {
         const lab = workshop.locator('.workshop-typeface-lab')
         if (!(await lab.evaluate(node => node.open))) await lab.locator(':scope > summary').click()
@@ -76,9 +75,7 @@ export async function verifyTypographyChapter(browser, baseURL) {
         await page.waitForFunction(
           () => document.querySelector('.font-editor').dataset.fontState === 'loaded'
         )
-        await editor
-          .getByRole('combobox', { name: 'Body assignment', exact: true })
-          .selectOption('local')
+        await pickRadio(editor, 'Body assignment', 'local')
       }
       await page.waitForFunction(
         families =>
