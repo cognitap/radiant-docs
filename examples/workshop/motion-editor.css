@@ -204,18 +204,19 @@
 }
 .motion-dial {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 0.5rem;
+  justify-items: start;
+  gap: 0.2rem;
   min-width: 0;
+}
+.motion-dial > .control-change {
+  width: 100%;
 }
 .motion-editor .chip {
   display: inline-flex;
   white-space: nowrap;
 }
 .motion-dial[data-overridden] .scrub-field {
-  box-shadow: inset 2px 0 0 var(--docs-accent);
-  padding-left: 0.35rem;
+  border-color: var(--docs-accent);
 }
 .motion-fine-print {
   margin: 0;
