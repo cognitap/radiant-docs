@@ -93,7 +93,8 @@ export function readSelection(start: Element): Selection | null {
   }
 }
 
-const automaticSelection: Record<string, string> = {
+/** Prose blocks that take a role without naming it, so the role's outline and handles find them. */
+export const automaticSelection: Record<string, string> = {
   'prose-body':
     '[data-rad-prose] > :is(p,ul,ol):not([data-rad-text],[data-slot],[data-rad-not-prose])',
   'prose-quote':

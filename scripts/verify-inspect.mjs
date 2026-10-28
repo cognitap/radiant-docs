@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict'
+import { pickedRadio, radioGroup } from './typography-controls.mjs'
 
 /** Inspect mode: pick an element by pointer or keyboard, read what styles it, jump to the control. */
 export async function verifyInspect(browser, baseURL) {
@@ -117,19 +118,19 @@ export async function verifyInspect(browser, baseURL) {
     assert.equal(await item(/Prose \/ Title/).count(), 1, 'and its text style')
     assert.doesNotMatch(await inspector.innerText(), /--rad-|No workshop control/)
     await workshop.getByRole('button', { name: 'Typography', exact: true }).click()
-    const style = workshop.getByRole('combobox', { name: 'Text style', exact: true })
-    assert.equal(await style.inputValue(), 'prose-title', 'clicking text selects its style')
+    const style = () => pickedRadio(workshop, 'Text style')
+    assert.equal(await style(), 'prose-title', 'clicking text selects its style')
     await proof.locator('[data-rad-prose] > p:not([data-rad-text])').first().click()
-    assert.equal(await style.inputValue(), 'prose-body')
+    assert.equal(await style(), 'prose-body')
     assert.equal(await item(/Prose \/ Body/).count(), 1)
     await item(/Prose \/ Body/).click()
-    assert.equal(await style.inputValue(), 'prose-body')
+    assert.equal(await style(), 'prose-body')
     assert.equal(
-      await workshop
-        .getByRole('combobox', { name: 'Style assignment', exact: true })
+      await radioGroup(workshop, 'Style assignment')
+        .locator('input:checked')
         .evaluate(node => node === document.activeElement),
       true,
-      'typography items focus the style assignment'
+      'typography items focus the checked style assignment chip'
     )
 
     await scene.selectOption('page:landing')

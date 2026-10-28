@@ -12,7 +12,10 @@ export function focusControl(root: ParentNode, field: string): HTMLElement | nul
   if (!control) return null
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
   control.scrollIntoView({ block: 'center', behavior: reduced ? 'auto' : 'smooth' })
-  control.querySelector<HTMLElement>(focusable)?.focus({ preventScroll: true })
+  ;(
+    control.querySelector<HTMLElement>('input:checked') ??
+    control.querySelector<HTMLElement>(focusable)
+  )?.focus({ preventScroll: true })
   control.setAttribute('data-jumped', '')
   window.setTimeout(() => control.removeAttribute('data-jumped'), 1500)
   return control

@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useId, useRef, useState, type Dispatch } from 'react'
-import { Button, type Theme, type ThemeMode } from '@cognitap/radiant'
+import { Button, type Theme, type ThemeMode, type TypographyResult } from '@cognitap/radiant'
 import type { Editor } from './workshop-theme'
 import type { ColorRecipe } from './workshop-color'
 import { authoredMotion } from './workshop-motion'
@@ -27,6 +27,7 @@ import { ComponentScene } from './ComponentScene'
 import { MotionFrame } from './MotionScenes'
 import { PreviewFrame } from './PreviewFrame'
 import { Inspection, Inspector, type Selection } from './PreviewInspection'
+import { TextHandles, type HandleEdit } from './TextHandles'
 import { previewTools } from './preview-tools'
 import './preview.css'
 
@@ -86,8 +87,10 @@ export function Preview({
   dispatch,
   ready,
   role,
+  typography,
   onRole,
-  onJump
+  onJump,
+  onTypography
 }: {
   editor: Editor
   theme: Theme
@@ -97,8 +100,11 @@ export function Preview({
   dispatch: Dispatch<PreviewAction>
   ready: boolean
   role: string
+  /** The typesetting result while Typography is active; its handles draw on the selected role. */
+  typography: TypographyResult | null
   onRole: (role: string) => void
   onJump: (target: ControlTarget) => void
+  onTypography: (edit: HandleEdit) => void
 }) {
   const { view, session } = preview
   const [feedback, setFeedback] = useState('')
@@ -362,6 +368,14 @@ export function Preview({
               )
             )}
           </div>
+          {editor === 'typography' && typography && scene.kind !== 'motion' && (
+            <TextHandles
+              role={role}
+              result={typography}
+              picked={selection?.element ?? null}
+              onEdit={onTypography}
+            />
+          )}
         </Inspection>
       </div>
     </section>
