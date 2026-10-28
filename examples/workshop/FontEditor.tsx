@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState, type CSSProperties } from 'react'
+import { useEffect, useRef, useState, useSyncExternalStore, type CSSProperties } from 'react'
 import { Button } from '@cognitap/radiant'
 import { WorkshopFontLoader } from './font-runtime'
 import {
@@ -14,61 +14,38 @@ import {
   type FontStyle,
   type TrialFont
 } from './workshop-fonts'
+import { ScrubField } from './ScrubField'
+import { FaceCards } from './TypographyPickers'
+import { trialFace, type Scrub } from './workshop-typography-view'
 import './font-editor.css'
 
 type Metrics = { size: number; leading: number; tracking: number; measure: number }
 const contexts: readonly FontContext[] = ['body', 'headings', 'ui', 'code']
 const diagnostic = 'Árvíztűrő tükörfúrógép · Ελληνικά α Ω · Кириллица Ж ж · العربية ا · 漢字'
-export function FontNumber({
+const scrub = (
+  name: string,
+  label: string,
+  min: number,
+  max: number,
+  step: number,
+  unit = ''
+): Scrub => ({
+  key: name,
+  name,
   label,
-  value,
   min,
   max,
-  step = 1,
-  describedBy,
-  onValid
-}: {
-  label: string
-  value: number
-  min: number
-  max: number
-  step?: number
-  describedBy?: string
-  onValid: (value: number) => void
-}) {
-  const [draft, setDraft] = useState(String(value))
-  const [previous, setPrevious] = useState(value)
-  if (previous !== value) {
-    setPrevious(value)
-    setDraft(String(value))
-  }
-  const number = Number(draft)
-  const valid = draft.trim() !== '' && Number.isFinite(number) && number >= min && number <= max
-  return (
-    <label>
-      {label}
-      <input
-        type="number"
-        min={min}
-        max={max}
-        step={step}
-        value={draft}
-        aria-invalid={!valid || undefined}
-        aria-describedby={describedBy}
-        onChange={event => {
-          const text = event.target.value
-          setDraft(text)
-          const next = Number(text)
-          if (text.trim() && Number.isFinite(next) && next >= min && next <= max) onValid(next)
-        }}
-        onBlur={() => setDraft(String(value))}
-        onKeyDown={event => {
-          if (event.key === 'Enter') setDraft(String(value))
-        }}
-      />
-    </label>
-  )
-}
+  step,
+  unit
+})
+const sampleScrubs: readonly (Scrub & { key: keyof Metrics })[] = [
+  { ...scrub('Sample size', 'Size', 12, 40, 0.5, 'px'), key: 'size' },
+  { ...scrub('Sample line height', 'Leading', 1, 3, 0.05), key: 'leading' },
+  { ...scrub('Sample tracking (em)', 'Tracking', -0.2, 0.5, 0.01, 'em'), key: 'tracking' },
+  { ...scrub('Sample measure (ch)', 'Measure', 0, 120, 1, 'ch'), key: 'measure' }
+]
+const weightScrub = scrub('Trial weight', 'Weight', 1, 1000, 1)
+const fileWeightScrub = scrub('Declared file weight', 'File weight', 1, 1000, 1)
 
 export function FontEditor({
   active,
@@ -109,9 +86,29 @@ export function FontEditor({
   const [retry, setRetry] = useState(0)
   const [localRevision, setLocalRevision] = useState(0)
   const loader = useRef<WorkshopFontLoader | null>(null)
+  const watchers = useRef(new Set<() => void>())
   const bytes = useRef<ArrayBuffer | undefined>(undefined)
   const uploadRevision = useRef(0)
   const fileInput = useRef<HTMLInputElement>(null)
+  const seen = useRef<{ version: number; loader: WorkshopFontLoader | null }>({
+    version: -1,
+    loader: null
+  })
+  /** The faces the sample and the cards may draw in: the session loader at its current version. */
+  const session = useSyncExternalStore(
+    listener => {
+      watchers.current.add(listener)
+      return () => watchers.current.delete(listener)
+    },
+    () => {
+      const current = loader.current
+      const version = current?.snapshot() ?? 0
+      if (seen.current.loader !== current || seen.current.version !== version)
+        seen.current = { version, loader: current }
+      return seen.current
+    },
+    () => seen.current
+  ).loader
   const font =
     selected === 'local' && custom
       ? custom
@@ -131,8 +128,12 @@ export function FontEditor({
   useEffect(() => {
     const next = new WorkshopFontLoader()
     loader.current = next
+    const unsubscribe = next.subscribe(() => {
+      for (const listener of watchers.current) listener()
+    })
     onSession?.(next)
     return () => {
+      unsubscribe()
       next.dispose()
       loader.current = null
       onSession?.(null)
@@ -150,7 +151,7 @@ export function FontEditor({
           setLoad({
             key: requestKey,
             state: 'loaded',
-            message: `${font.family} loaded · ${font.styles.join(' + ')} · weights ${font.weights.join('–')}. Glyph fallback may still occur.`
+            message: `${font.family} loaded · ${font.styles.join(' + ')} · weights ${font.weights.join('–')}.`
           })
         }
       })
@@ -159,7 +160,7 @@ export function FontEditor({
           setLoad({
             key: requestKey,
             state: 'failed',
-            message: `${font.family} could not load. The sample uses ${font.fallback}. Retry or choose another font; your theme is unchanged.`
+            message: `${font.family} could not load. The sample uses ${font.fallback}; retry or choose another font.`
           })
       })
     return () => {
@@ -172,9 +173,8 @@ export function FontEditor({
     setOptical('auto')
     setNotice('')
   }
-  function editMetric(key: keyof Metrics, value: number, min: number, max: number) {
-    if (Number.isFinite(value) && value >= min && value <= max)
-      setManual(previous => ({ ...previous, [context]: { ...previous[context], [key]: value } }))
+  function editMetric(key: keyof Metrics, value: number) {
+    setManual(previous => ({ ...previous, [context]: { ...previous[context], [key]: value } }))
   }
   async function chooseFile(file: File | undefined) {
     if (!file) return
@@ -195,11 +195,9 @@ export function FontEditor({
       setWeight(info.axes.find(axis => axis.tag === 'wght')?.default ?? info.weight ?? fileWeight)
       setStyle(next.styles[0])
       setFileInfo(
-        `${info.format}${info.family ? ` · file family ${info.family}` : ''}. ${info.format.startsWith('WOFF') ? 'Compressed metadata is not read here: declared file weight/style are manual and no axes are inferred.' : 'OpenType weight/style and variation axes read from this file.'}`
+        `${info.format}${info.family ? ` · file family ${info.family}` : ''} · ${info.format.startsWith('WOFF') ? 'declared weight/style used, no axes are inferred' : 'weight, style and axes read from the file'}.`
       )
-      setNotice(
-        'Local trial only. This file is held in memory, never uploaded or included in a theme.'
-      )
+      setNotice('Local trial only: held in memory, never uploaded or included in a theme.')
     } catch (error) {
       if (revision === uploadRevision.current && loader.current === owner)
         setNotice(error instanceof Error ? error.message : 'Unable to read this font.')
@@ -223,36 +221,59 @@ export function FontEditor({
     fontStretch: `${axes.wdth ?? font.axes.find(axis => axis.tag === 'wdth')?.default ?? 100}%`,
     fontVariationSettings: variation.join(', ') || 'normal'
   }
+  const options = [...curatedFonts, ...(custom ? [custom] : [])].map(item => ({
+    value: item.id,
+    name: item.family,
+    faces: [trialFace(item, session)],
+    note: item.source === 'local' ? 'local' : undefined
+  }))
+  const extraAxes = font.axes.filter(
+    axis => axis.tag !== 'wght' && (axis.tag !== 'opsz' || optical === 'manual')
+  )
   return (
     <div
       className="font-editor"
       data-font-state={load.state}
     >
-      <div className="font-editor-heading">
-        <h4>Try a typeface</h4>
+      <div
+        className="font-sample"
+        data-testid="font-sample"
+        data-face={load.state === 'loaded' ? undefined : load.state}
+        style={sample}
+      >
+        <p>{text}</p>
         <p>
-          Explore a studied family or bring your own font. Only “Use family in theme” changes the
-          shared theme.
+          <strong>Strong ideas.</strong> <em>Real italic when available.</em> 0123456789 · 0O 1Il
         </p>
+        <p lang="und">{diagnostic}</p>
       </div>
-      <div className="font-controls">
-        <label>
-          Trial typeface
-          <select
-            value={font.id}
-            onChange={event => select(event.target.value)}
+      <div className="font-status-row">
+        <output className="font-status">{load.message}</output>
+        <span className="font-fit">
+          {recommendation.supported
+            ? `Studied for ${context}`
+            : `Uncalibrated for ${context} · manual metrics`}
+        </span>
+        {load.state === 'failed' && (
+          <Button
+            variant="outline"
+            controlSize="small"
+            onClick={() => {
+              loader.current!.remove(font.family)
+              setRetry(value => value + 1)
+            }}
           >
-            {curatedFonts.map(item => (
-              <option
-                key={item.id}
-                value={item.id}
-              >
-                {item.family}
-              </option>
-            ))}
-            {custom && <option value="local">{custom.family} · local</option>}
-          </select>
-        </label>
+            Retry font
+          </Button>
+        )}
+      </div>
+      <FaceCards
+        label="Trial typeface"
+        options={options}
+        value={font.id}
+        onChange={select}
+      />
+      <div className="font-controls">
         <label>
           Trial context
           <select
@@ -269,13 +290,6 @@ export function FontEditor({
             ))}
           </select>
         </label>
-        <FontNumber
-          label="Trial weight"
-          value={weight}
-          min={1}
-          max={1000}
-          onValid={setWeight}
-        />
         <label>
           Trial style
           <select
@@ -294,92 +308,11 @@ export function FontEditor({
             ))}
           </select>
         </label>
-      </div>
-      <output className="font-status">{load.message}</output>
-      {load.state === 'failed' && (
-        <Button
-          variant="outline"
-          onClick={() => {
-            loader.current!.remove(font.family)
-            setRetry(value => value + 1)
-          }}
-        >
-          Retry font
-        </Button>
-      )}
-      <p>
-        {recommendation.supported
-          ? 'Studied starting point for this context.'
-          : 'Uncalibrated font/context — tune manually and review the sample.'}{' '}
-        Sizes are reference pixels at a 16px root; measure is a maximum, not a character count.
-      </p>
-      {(unsupportedWeight || unsupportedStyle) && (
-        <p
-          className="font-warning"
-          role="alert"
-        >
-          {unsupportedWeight
-            ? `Weight ${weight} is outside ${font.weights.join('–')}; the browser may choose a nearby weight. `
-            : ''}
-          {unsupportedStyle ? 'The selected style has no file. ' : ''}The requested setting is
-          retained; it cannot be applied to the theme.
-        </p>
-      )}
-      <div className="font-controls">
-        <FontNumber
-          label="Sample size"
-          value={metrics.size}
-          min={12}
-          max={40}
-          step={0.5}
-          onValid={value => editMetric('size', value, 12, 40)}
+        <ScrubField
+          scrub={weightScrub}
+          value={weight}
+          onChange={setWeight}
         />
-        <FontNumber
-          label="Sample line height"
-          value={metrics.leading}
-          min={1}
-          max={3}
-          step={0.05}
-          onValid={value => editMetric('leading', value, 1, 3)}
-        />
-        <FontNumber
-          label="Sample tracking (em)"
-          value={metrics.tracking}
-          min={-0.2}
-          max={0.5}
-          step={0.01}
-          onValid={value => editMetric('tracking', value, -0.2, 0.5)}
-        />
-        <FontNumber
-          label="Sample measure (ch)"
-          value={metrics.measure}
-          min={0}
-          max={120}
-          onValid={value => editMetric('measure', value, 0, 120)}
-        />
-      </div>
-      <p>
-        Unfinished or out-of-range number drafts keep the last valid sample. Leaving the field
-        restores its last valid value.
-      </p>
-      <Button
-        variant="outline"
-        onClick={() =>
-          setManual(previous => {
-            const next = { ...previous }
-            delete next[context]
-            return next
-          })
-        }
-      >
-        Reset context sample
-      </Button>
-      <fieldset className="font-axes">
-        <legend>Available axes</legend>
-        <p>
-          Weight uses the weight field above. Other controls appear only for axes verified in the
-          chosen files. Plex Sans starts at 100% width; custom files use their recorded default.
-        </p>
         {font.axes.some(axis => axis.tag === 'opsz') && (
           <label>
             Optical sizing
@@ -387,85 +320,103 @@ export function FontEditor({
               value={optical}
               onChange={e => setOptical(e.target.value)}
             >
-              <option value="auto">Automatic · follow text size</option>
+              <option value="auto">Automatic</option>
               <option value="manual">Manual optical size</option>
             </select>
           </label>
         )}
-        {font.axes
-          .filter(axis => axis.tag !== 'wght' && (axis.tag !== 'opsz' || optical === 'manual'))
-          .map(axis => (
-            <FontNumber
-              key={axis.tag}
-              label={`${axis.tag} · ${axis.min}–${axis.max}`}
-              value={axes[axis.tag] ?? axis.default}
-              min={axis.min}
-              max={axis.max}
-              step={0.1}
-              onValid={value => setAxes(previous => ({ ...previous, [axis.tag]: value }))}
-            />
-          ))}
-        {font.axes.filter(axis => axis.tag !== 'wght').length === 0 && (
-          <p>No additional verified axes. Optical sizing does not create an optical axis.</p>
-        )}
-      </fieldset>
-      <label>
-        Sample copy
-        <textarea
-          rows={4}
-          value={text}
-          onChange={e => setText(e.target.value)}
-        />
-      </label>
-      <div
-        className="font-sample"
-        data-testid="font-sample"
-        style={sample}
-      >
-        <p>{text}</p>
-        <p>
-          <strong>Strong ideas.</strong> <em>Real italic when available.</em> 0123456789 · 0O 1Il
-        </p>
-        <p lang="und">{diagnostic}</p>
+        {extraAxes.map(axis => (
+          <ScrubField
+            key={axis.tag}
+            scrub={scrub(
+              `${axis.tag} · ${axis.min}–${axis.max}`,
+              axis.tag,
+              axis.min,
+              axis.max,
+              0.1
+            )}
+            value={axes[axis.tag] ?? axis.default}
+            onChange={value => setAxes(previous => ({ ...previous, [axis.tag]: value }))}
+          />
+        ))}
       </div>
-      <p>
-        {font.coverage} Italic script coverage has not been separately verified. A loaded face does
-        not prove every glyph avoids fallback.
-      </p>
-      {font.license && (
-        <p>
-          <a href={font.license}>Full SIL Open Font License</a> · pinned, unmodified font files
-          hosted by this site.
+      {(unsupportedWeight || unsupportedStyle) && (
+        <p
+          className="font-warning"
+          role="alert"
+        >
+          {unsupportedWeight
+            ? `Weight ${weight} is outside ${font.weights.join('–')}; the browser may use a nearby weight. `
+            : ''}
+          {unsupportedStyle ? 'The selected style has no file. ' : ''}
+          It cannot be applied to the theme.
         </p>
       )}
-      <Button
-        disabled={
-          load.state !== 'loaded' ||
-          unsupportedWeight ||
-          unsupportedStyle ||
-          !font.styles.includes('normal')
-        }
-        onClick={() => {
-          try {
-            const next = applyTrialFont(document, font, weight)
-            onChange(onAssignFont(next, font, context))
-            setNotice(
-              `${font.family} assigned to ${context}. Role weights are set in the text style inspector; sample rhythm/axes stay local.`
-            )
-          } catch (error) {
-            setNotice(error instanceof Error ? error.message : 'Unable to apply this font.')
+      <div className="font-controls">
+        {sampleScrubs.map(item => (
+          <ScrubField
+            key={item.key}
+            scrub={item}
+            value={metrics[item.key]}
+            onChange={value => editMetric(item.key, value)}
+          />
+        ))}
+        <button
+          type="button"
+          className="typesetting-link"
+          onClick={() =>
+            setManual(previous => {
+              const next = { ...previous }
+              delete next[context]
+              return next
+            })
           }
-        }}
-      >
-        Use family in theme
-      </Button>
+        >
+          Reset context sample
+        </button>
+      </div>
+      <div className="font-actions">
+        <Button
+          disabled={
+            load.state !== 'loaded' ||
+            unsupportedWeight ||
+            unsupportedStyle ||
+            !font.styles.includes('normal')
+          }
+          onClick={() => {
+            try {
+              const next = applyTrialFont(document, font, weight)
+              onChange(onAssignFont(next, font, context))
+              setNotice(`${font.family} assigned to ${context}.`)
+            } catch (error) {
+              setNotice(error instanceof Error ? error.message : 'Unable to apply this font.')
+            }
+          }}
+        >
+          Use family in theme
+        </Button>
+        {font.license && (
+          <a
+            className="font-license"
+            href={font.license}
+          >
+            SIL Open Font License
+          </a>
+        )}
+      </div>
+      <details className="font-copy">
+        <summary>Sample copy</summary>
+        <label>
+          Sample copy
+          <textarea
+            rows={3}
+            value={text}
+            onChange={e => setText(e.target.value)}
+          />
+        </label>
+      </details>
       <details className="font-local">
         <summary>Try a local font file</summary>
-        <p>
-          Files stay in memory for this workshop session. Choose WOFF2, WOFF, TTF or OTF, up to 10
-          MiB. Collections are unsupported. Reloading or resetting typography discards local files;
-          recipients must provide their own copies.
-        </p>
         <div className="font-controls">
           <label>
             Local CSS family
@@ -475,12 +426,10 @@ export function FontEditor({
               onChange={e => setFamily(e.target.value)}
             />
           </label>
-          <FontNumber
-            label="Declared file weight"
+          <ScrubField
+            scrub={fileWeightScrub}
             value={fileWeight}
-            min={1}
-            max={1000}
-            onValid={setFileWeight}
+            onChange={setFileWeight}
           />
           <label>
             Declared file style
@@ -493,11 +442,6 @@ export function FontEditor({
             </select>
           </label>
         </div>
-        <p>
-          Family is the CSS name you will use in your app. For compressed web fonts, declare the
-          actual file weight/style before choosing a file. Use TTF/OTF to inspect available variable
-          axes. An italic file alone is trial-only; the shared theme needs a normal face.
-        </p>
         <label>
           Local font file
           <input
@@ -507,7 +451,9 @@ export function FontEditor({
             onChange={e => void chooseFile(e.target.files?.[0])}
           />
         </label>
-        <p>{fileInfo}</p>
+        <span className="font-file-info">
+          {fileInfo || 'WOFF2, WOFF, TTF or OTF up to 10 MiB, kept in memory for this session.'}
+        </span>
         {custom && (
           <Button
             variant="outline"
@@ -520,7 +466,7 @@ export function FontEditor({
               setFileInfo('')
               select('inter')
               setNotice(
-                'Local file removed. A theme referencing it keeps its requirement and uses fallback until that font is provided again.'
+                'Local file removed. A theme referencing it falls back until it is provided again.'
               )
             }}
           >

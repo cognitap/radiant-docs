@@ -40,6 +40,7 @@ import { ColorEditor } from './ColorEditor'
 import { FontEditor } from './FontEditor'
 import { TypographyEditor } from './TypographyEditor'
 import { WorkshopFontLoader } from './font-runtime'
+import type { HandleEdit } from './TextHandles'
 import type { TrialFont } from './workshop-fonts'
 import { applyTypesetting, chooseAssignment, documentTypesetting } from './workshop-typography'
 import { MotionEditor } from './MotionEditor'
@@ -80,7 +81,7 @@ function Choice({
 
 const descriptions: Record<Editor, string> = {
   color: 'Build a complete color system and inspect its roles in the preview.',
-  typography: 'Assign families, text styles and rhythm, then read them in composed pages.',
+  typography: 'Pick faces here, then drag the selected text in the preview or scrub a value.',
   geometry: 'Shape shared spacing, control sizes and surfaces across the same scenes.',
   motion: 'Tune a physical response, then feel it in real interactions.'
 }
@@ -250,7 +251,13 @@ export function ThemeWorkshop() {
   }
   function selectRole(role: string) {
     setSelectedRole(role)
-    workshopHost.current?.querySelector<HTMLSelectElement>('.typesetting-inspector select')?.focus()
+    workshopHost.current
+      ?.querySelector<HTMLInputElement>('.typesetting-roles input:checked')
+      ?.focus({ preventScroll: true })
+  }
+  /** A preview handle writes typesetting input through the same path as the editor's controls. */
+  function editTypography({ input, change }: HandleEdit) {
+    updateDocument(applyTypesetting(document, input, localFont), change)
   }
   /** The preview names an editor field; the editors open its scope during render, then the shell focuses it. */
   function jumpTo(target: ControlTarget) {
@@ -417,33 +424,6 @@ export function ThemeWorkshop() {
                 </>
               )}
               <div
-                hidden={editor !== 'typography'}
-                className="workshop-font-panel"
-              >
-                <details className="workshop-typeface-lab">
-                  <summary>Typeface lab and local files</summary>
-                  <FontEditor
-                    key={fontRevision}
-                    onSession={setFontLoader}
-                    onLocalReady={setLocalFont}
-                    onAssignFont={(next, font, context) =>
-                      applyTypesetting(
-                        next,
-                        chooseAssignment(
-                          documentTypesetting(next)?.input ?? generateTypography().input,
-                          context,
-                          font
-                        ),
-                        font.source === 'local' ? font : localFont
-                      )
-                    }
-                    active={editor === 'typography'}
-                    document={document}
-                    onChange={next => updateDocument(next, { label: 'font assignment' })}
-                  />
-                </details>
-              </div>
-              <div
                 hidden={editor !== 'geometry'}
                 className="workshop-geometry-panel"
               >
@@ -468,23 +448,50 @@ export function ThemeWorkshop() {
                   onChange={updateDocument}
                 />
               </div>
+              <div
+                hidden={editor !== 'typography'}
+                className="workshop-typesetting-panel"
+              >
+                <TypographyEditor
+                  active={editor === 'typography'}
+                  document={document}
+                  result={view.typography}
+                  changes={changes.typography.changes}
+                  loader={fontLoader}
+                  local={localFont}
+                  selectedRole={selectedRole}
+                  onSelectRole={setSelectedRole}
+                  onChange={updateDocument}
+                />
+              </div>
+              <div
+                hidden={editor !== 'typography'}
+                className="workshop-font-panel"
+              >
+                <details className="workshop-typeface-lab">
+                  <summary>Try a font</summary>
+                  <FontEditor
+                    key={fontRevision}
+                    onSession={setFontLoader}
+                    onLocalReady={setLocalFont}
+                    onAssignFont={(next, font, context) =>
+                      applyTypesetting(
+                        next,
+                        chooseAssignment(
+                          documentTypesetting(next)?.input ?? generateTypography().input,
+                          context,
+                          font
+                        ),
+                        font.source === 'local' ? font : localFont
+                      )
+                    }
+                    active={editor === 'typography'}
+                    document={document}
+                    onChange={next => updateDocument(next, { label: 'font assignment' })}
+                  />
+                </details>
+              </div>
             </fieldset>
-            <div
-              hidden={editor !== 'typography'}
-              className="workshop-typesetting-panel"
-            >
-              <TypographyEditor
-                active={editor === 'typography'}
-                document={document}
-                result={view.typography}
-                changes={changes.typography.changes}
-                loader={fontLoader}
-                local={localFont}
-                selectedRole={selectedRole}
-                onSelectRole={setSelectedRole}
-                onChange={updateDocument}
-              />
-            </div>
           </section>
           <output className="workshop-feedback">{feedback}</output>
           {importResult && <p className="workshop-notice">{importResult.message}</p>}
@@ -498,8 +505,10 @@ export function ThemeWorkshop() {
           dispatch={dispatch}
           ready={ready}
           role={selectedRole}
+          typography={view.typography}
           onRole={selectRole}
           onJump={jumpTo}
+          onTypography={editTypography}
         />
       </div>
       <ThemeHandoff

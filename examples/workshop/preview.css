@@ -497,3 +497,90 @@
     transition: none;
   }
 }
+
+/* Typography handles: drag the selected text's measure, size and leading on the text itself. */
+.text-handles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.text-handle {
+  position: absolute;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+.text-handle-grip {
+  position: absolute;
+  translate: -50% -50%;
+  box-sizing: border-box;
+  background: var(--docs-background, #fff);
+  border: 2px solid var(--docs-accent);
+  border-radius: 0.2rem;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.35);
+  pointer-events: auto;
+  touch-action: none;
+}
+.text-handle[data-handle='measure'] .text-handle-grip {
+  width: 0.6rem;
+  height: 1.75rem;
+  cursor: ew-resize;
+}
+.text-handle[data-handle='size'] .text-handle-grip {
+  width: 0.9rem;
+  height: 0.9rem;
+  border-radius: 50%;
+  cursor: nwse-resize;
+}
+.text-handle[data-handle='lineHeight'] .text-handle-grip {
+  width: 1.75rem;
+  height: 0.6rem;
+  translate: 0 -50%;
+  cursor: ns-resize;
+}
+.text-handle-grip:focus-visible {
+  outline: 2px solid var(--docs-accent);
+  outline-offset: 2px;
+}
+.text-handle-readout {
+  position: absolute;
+  left: 0.75rem;
+  top: -1.9rem;
+  display: none;
+  padding: 0.15rem 0.45rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  line-height: 1.4;
+  white-space: nowrap;
+  color: var(--docs-background, #fff);
+  background: var(--docs-foreground, #111);
+  border-radius: 0.3rem;
+  pointer-events: none;
+}
+.text-handle[data-handle='lineHeight'] .text-handle-readout {
+  left: 2rem;
+  top: -0.75rem;
+}
+.text-handle[data-handle='measure'] .text-handle-readout {
+  left: -0.75rem;
+  translate: -100% 0;
+  top: -0.75rem;
+}
+.text-handle:hover .text-handle-readout,
+.text-handle:focus-within .text-handle-readout,
+.text-handles[data-dragging='measure'] .text-handle[data-handle='measure'] .text-handle-readout,
+.text-handles[data-dragging='size'] .text-handle[data-handle='size'] .text-handle-readout,
+.text-handles[data-dragging='lineHeight']
+  .text-handle[data-handle='lineHeight']
+  .text-handle-readout {
+  display: block;
+}
+.text-handles[data-dragging] .text-handle-grip {
+  background: var(--docs-accent);
+}
+@media (forced-colors: active) {
+  .text-handle-grip {
+    forced-color-adjust: none;
+    border-color: Highlight;
+  }
+}
