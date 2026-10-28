@@ -51,18 +51,18 @@ export async function verifyInspect(browser, baseURL) {
     )
     assert.equal(await item(/Action fill/).count(), 1, 'accent color item')
     assert.match(await item(/Action fill/).innerText(), /#7C3AED/)
-    assert.equal(await item(/Control radius/).count(), 1, 'control radius item')
-    assert.match(await item(/Control radius/).innerText(), /8px/)
+    assert.equal(await item(/Control roundness/).count(), 1, 'control roundness item')
+    assert.match(await item(/Control roundness/).innerText(), /8px/)
     assert.equal(await item(/Button press physics/).count(), 1, 'motion item')
     assert.match(await item(/Button press physics/).innerText(), /stiffness 320/)
     assert.equal(await page.locator('.inspect-outline[data-state="selected"]').count(), 1)
 
-    await item(/Control radius/).click()
+    await item(/Control roundness/).click()
     const geometry = workshop.getByRole('button', { name: 'Spacing & surfaces', exact: true })
     assert.equal(await geometry.getAttribute('aria-pressed'), 'true', 'switched editor')
-    const radius = workshop.getByRole('spinbutton', { name: 'Control radius (px)', exact: true })
+    const radius = workshop.getByRole('spinbutton', { name: 'Control roundness', exact: true })
     await page.waitForFunction(
-      () => document.activeElement?.getAttribute('aria-describedby')?.includes('description'),
+      () => document.activeElement?.getAttribute('aria-label') === 'Control roundness',
       null,
       { timeout: 2000 }
     )
