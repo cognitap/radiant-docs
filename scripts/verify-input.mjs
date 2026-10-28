@@ -41,6 +41,21 @@ export async function verifyInput(browser, baseURL) {
     await page.waitForFunction(
       () => Number(document.querySelector('[data-focus-cue]').style.opacity) > 0.99
     )
+    assert.equal(
+      await name.evaluate(node => {
+        const style = getComputedStyle(node)
+        const extent = parseFloat(style.outlineWidth) + parseFloat(style.outlineOffset)
+        const input = node.getBoundingClientRect()
+        for (let parent = node.parentElement; parent; parent = parent.parentElement) {
+          if (getComputedStyle(parent).overflowX === 'visible') continue
+          const bounds = parent.getBoundingClientRect()
+          if (input.left - extent < bounds.left || input.right + extent > bounds.right) return false
+        }
+        return true
+      }),
+      true,
+      'The whole native focus outline fits inside every clipping boundary'
+    )
     const height = (await name.boundingBox()).height
     await name.fill('  Ada raw  ')
     await name.evaluate(node => node.setSelectionRange(2, 5))

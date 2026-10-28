@@ -57,7 +57,13 @@ export function InputProfileExample({
     <ThemeScope
       theme={selected}
       mode={mode}
-      style={{ maxWidth: '42rem', minWidth: 0, overflowX: 'clip', overflowClipMargin: '.5rem' }}
+      style={{
+        maxWidth: '42rem',
+        minWidth: 0,
+        boxSizing: 'border-box',
+        paddingInline: '.5rem',
+        overflowX: 'clip'
+      }}
     >
       <MotionProvider>
         <Checkbox
@@ -163,7 +169,7 @@ function ProfileEditor({ controlSize, off }: { controlSize: ControlSize; off: bo
           ref={form}
           aria-label="Edit public profile"
           noValidate
-          style={{ display: 'grid', gap: '1.5rem', overflowX: 'clip', overflowClipMargin: '.5rem' }}
+          style={{ display: 'grid', gap: '1.5rem' }}
           onReset={() => {
             setName('Ada Lovelace')
             setTouched(false)
