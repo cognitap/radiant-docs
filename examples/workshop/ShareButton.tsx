@@ -27,12 +27,12 @@ export function ShareButton({
   const [busy, setBusy] = useState(false)
   const host = useRef<HTMLDivElement>(null)
   const trigger = useRef<HTMLButtonElement>(null)
-  const link = useRef<HTMLInputElement>(null)
+  const panel = useRef<HTMLDialogElement>(null)
   const id = useId()
   const open = popover.kind !== 'closed'
   useEffect(() => {
     if (!open) return
-    link.current?.focus()
+    panel.current?.querySelector<HTMLElement>('input, button')?.focus()
     const outside = (event: PointerEvent) => {
       if (!host.current?.contains(event.target as Node)) setPopover({ kind: 'closed' })
     }
@@ -108,6 +108,7 @@ export function ShareButton({
         <span className="workshop-history-label">Share</span>
       </Button>
       <dialog
+        ref={panel}
         id={id}
         aria-label="Share link"
         className="share-popover"
@@ -120,7 +121,6 @@ export function ShareButton({
               {popover.copied ? 'Link copied' : 'Copy failed. Select the link below.'}
             </output>
             <input
-              ref={link}
               type="text"
               readOnly
               aria-label="Share link"
