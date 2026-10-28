@@ -1,4 +1,5 @@
 import { setTypographyFamily } from './typography-controls.mjs'
+import { openPreviewOptions } from './preview-options.mjs'
 import assert from 'node:assert/strict'
 
 export async function verifyTypographyProofs(browser, baseURL) {
@@ -238,6 +239,7 @@ export async function verifyTypographyProofs(browser, baseURL) {
 
     for (const viewport of [1440, 390, 320]) {
       await page.setViewportSize({ width: viewport, height: 1000 })
+      await openPreviewOptions(preview)
       for (const id of ['page:article', 'page:form', 'page:data', 'page:landing']) {
         await scene.selectOption(id)
         for (const choice of ['800', '640', '390', '320', 'compare']) {
@@ -294,6 +296,7 @@ export async function verifyTypographyProofs(browser, baseURL) {
     assert.equal(await frames.first().evaluate(node => node.scrollWidth <= node.clientWidth), true)
     await page.reload()
     await workshop.getByRole('button', { name: 'Typography', exact: true }).click()
+    await openPreviewOptions(preview)
     assert.equal(await width.inputValue(), 'fill')
     assert.equal(await frames.locator('em').count(), 1, 'reload restores default copy')
     assert.deepEqual(errors, [], 'no hydration, runtime or ResizeObserver errors')

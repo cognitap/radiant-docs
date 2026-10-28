@@ -1,4 +1,5 @@
 import { setTypographyFamily } from './typography-controls.mjs'
+import { closePreviewOptions, openPreviewOptions } from './preview-options.mjs'
 import assert from 'node:assert/strict'
 
 export async function verifyGeometryEditor(browser, baseURL) {
@@ -237,6 +238,7 @@ export async function verifyGeometryEditor(browser, baseURL) {
     await number('Surface border width (px)').fill('4')
     for (const width of [390, 320]) {
       await page.setViewportSize({ width, height: 844 })
+      await openPreviewOptions(frame)
       for (const next of ['light', 'dark']) {
         await mode.selectOption(next)
         for (const name of [
@@ -254,6 +256,7 @@ export async function verifyGeometryEditor(browser, baseURL) {
           )
         }
       }
+      await closePreviewOptions(frame)
       await editor.getByText('Resolved spacing and surface values', { exact: true }).click()
       const table = editor.getByRole('region', { name: 'Resolved geometry values', exact: true })
       await table.focus()

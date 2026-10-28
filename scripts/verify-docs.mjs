@@ -31,6 +31,7 @@ import { verifyMotionChapter } from './verify-motion-chapter.mjs'
 import { verifyWorkshop } from './verify-workshop.mjs'
 import { verifyHistory } from './verify-history.mjs'
 import { verifyInspect } from './verify-inspect.mjs'
+import { verifyNarrow } from './verify-narrow.mjs'
 import { verifyTypographyChapter } from './verify-typography-chapter.mjs'
 import { verifyTypesettingEditor } from './verify-typesetting-editor.mjs'
 import { verifyTypographyProofs } from './verify-typography-proofs.mjs'
@@ -259,6 +260,7 @@ try {
   await verifyWorkshop(browser, baseURL)
   await verifyHistory(browser, baseURL)
   await verifyInspect(browser, baseURL)
+  await verifyNarrow(browser, baseURL)
   await verifyMotionEditor(browser, baseURL)
   await verifyFontEditor(browser, baseURL)
   await verifyTypographyProofs(browser, baseURL)

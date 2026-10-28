@@ -1,3 +1,4 @@
+import { closePreviewOptions, openPreviewOptions } from './preview-options.mjs'
 import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 
@@ -193,9 +194,11 @@ export async function verifyTypesettingEditor(browser, baseURL) {
         true,
         `${width}px editor reflows`
       )
+      await openPreviewOptions(workshop)
       await workshop
         .getByRole('combobox', { name: 'Preview mode', exact: true })
         .selectOption('dark')
+      await closePreviewOptions(workshop)
       await editor.screenshot({ path: `output/docs/typesetting-${width}.png` })
     }
     await workshop.getByRole('button', { name: 'Color', exact: true }).click()

@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useState, type Dispatch } from 'react'
+import { useEffect, useId, useRef, useState, type Dispatch } from 'react'
 import { Button, type Theme, type ThemeMode } from '@cognitap/radiant'
 import type { Editor } from './workshop-theme'
 import type { ColorRecipe } from './workshop-color'
@@ -75,7 +75,8 @@ const widthChoices: readonly [string, string][] = [
 ]
 const componentStates = ['rest', 'invalid', 'disabled', 'pending'] as const
 
-/** The one preview: a toolbar over one or two frames of the same scene. */
+/** The one preview: a toolbar over one or two frames of the same scene. Below the two-column
+    breakpoint it is a sticky strip whose options fold behind one button and which can expand. */
 export function Preview({
   editor,
   theme,
@@ -116,10 +117,39 @@ export function Preview({
   const key = sceneKey(scene)
   const revision = session.revisions[key] ?? 0
   const shown = frames(view)
+  const [expanded, setExpanded] = useState(false)
+  const [optionsOpen, setOptionsOpen] = useState(false)
+  const region = useRef<HTMLElement>(null)
+  const optionsToggle = useRef<HTMLButtonElement>(null)
+  const options = useRef<HTMLDivElement>(null)
+  const optionsId = useId()
+  const regionId = useId()
+  useEffect(() => {
+    if (!optionsOpen) return
+    const close = (event: KeyboardEvent) => {
+      const target = event.target instanceof Node ? event.target : null
+      const inside = [optionsToggle.current, options.current].some(node => node?.contains(target))
+      if (event.key !== 'Escape' || !inside) return
+      setOptionsOpen(false)
+      optionsToggle.current?.focus()
+    }
+    window.addEventListener('keydown', close)
+    return () => window.removeEventListener('keydown', close)
+  }, [optionsOpen])
+  const expand = (on: boolean) => {
+    setExpanded(on)
+    const top = region.current?.getBoundingClientRect().top ?? 0
+    if (on && top > 0) window.scrollBy({ top })
+  }
   return (
     <section
+      ref={region}
+      id={regionId}
       className="workshop-preview"
       aria-label="Theme preview"
+      data-expanded={expanded || undefined}
+      data-inspecting={inspecting || undefined}
+      data-scene={scene.kind}
     >
       <fieldset
         className="preview-toolbar"
@@ -127,92 +157,137 @@ export function Preview({
       >
         <legend>Preview</legend>
         <div className="preview-choices">
-          <label>
-            Scene
-            <select
-              value={key}
-              disabled={!ready}
-              onChange={event => {
-                const next = parseScene(event.target.value)
-                if (next) dispatch({ type: 'scene', scene: next })
-              }}
-            >
-              {sceneGroups.map(group => (
-                <optgroup
-                  key={group.label}
-                  label={group.label}
-                >
-                  {group.scenes.map(item => (
-                    <option
-                      key={sceneKey(item)}
-                      value={sceneKey(item)}
-                    >
-                      {sceneName(item)}
-                    </option>
-                  ))}
-                </optgroup>
-              ))}
-            </select>
-          </label>
-          <Choice
-            label="Preview mode"
-            value={view.mode}
-            choices={modes}
+          <Button
+            ref={optionsToggle}
+            className="preview-strip-control"
+            variant={optionsOpen ? 'solid' : 'outline'}
+            controlSize="small"
+            aria-expanded={optionsOpen}
+            aria-controls={optionsId}
             disabled={!ready}
-            onChange={value => {
-              const mode = modes.find(([id]) => id === value)?.[0]
-              if (mode) dispatch({ type: 'mode', mode })
-            }}
-          />
-          <Choice
-            label="Preview width"
-            value={widthId(view.width)}
-            choices={widthChoices}
-            disabled={!ready}
-            onChange={value => {
-              const width = parseWidth(value)
-              if (width) dispatch({ type: 'width', width })
-            }}
-          />
-          <Choice
-            label="Compare"
-            value={compareId(view.compare)}
-            choices={compareChoices(view)}
-            disabled={!ready}
-            onChange={value => dispatch({ type: 'compare', compare: parseCompare(value, scene) })}
-          />
-          {scene.kind === 'components' && (
+            onClick={() => setOptionsOpen(!optionsOpen)}
+          >
+            Preview options
+          </Button>
+          <div
+            ref={options}
+            id={optionsId}
+            className="preview-options"
+            data-open={optionsOpen || undefined}
+          >
+            <label>
+              Scene
+              <select
+                value={key}
+                disabled={!ready}
+                onChange={event => {
+                  const next = parseScene(event.target.value)
+                  if (next) dispatch({ type: 'scene', scene: next })
+                }}
+              >
+                {sceneGroups.map(group => (
+                  <optgroup
+                    key={group.label}
+                    label={group.label}
+                  >
+                    {group.scenes.map(item => (
+                      <option
+                        key={sceneKey(item)}
+                        value={sceneKey(item)}
+                      >
+                        {sceneName(item)}
+                      </option>
+                    ))}
+                  </optgroup>
+                ))}
+              </select>
+            </label>
             <Choice
-              label="Component state"
-              value={scene.state}
-              choices={componentStates.map(state => [
-                state,
-                state[0]!.toUpperCase() + state.slice(1)
-              ])}
+              label="Preview mode"
+              value={view.mode}
+              choices={modes}
               disabled={!ready}
               onChange={value => {
-                const state = componentStates.find(item => item === value)
-                if (state) dispatch({ type: 'component-state', state })
+                const mode = modes.find(([id]) => id === value)?.[0]
+                if (mode) dispatch({ type: 'mode', mode })
               }}
             />
-          )}
+            <Choice
+              label="Preview width"
+              value={widthId(view.width)}
+              choices={widthChoices}
+              disabled={!ready}
+              onChange={value => {
+                const width = parseWidth(value)
+                if (width) dispatch({ type: 'width', width })
+              }}
+            />
+            <Choice
+              label="Compare"
+              value={compareId(view.compare)}
+              choices={compareChoices(view)}
+              disabled={!ready}
+              onChange={value => dispatch({ type: 'compare', compare: parseCompare(value, scene) })}
+            />
+            {scene.kind === 'components' && (
+              <Choice
+                label="Component state"
+                value={scene.state}
+                choices={componentStates.map(state => [
+                  state,
+                  state[0]!.toUpperCase() + state.slice(1)
+                ])}
+                disabled={!ready}
+                onChange={value => {
+                  const state = componentStates.find(item => item === value)
+                  if (state) dispatch({ type: 'component-state', state })
+                }}
+              />
+            )}
+            <Button
+              variant="outline"
+              disabled={!ready}
+              onClick={() => {
+                dispatch({ type: 'reset-scene' })
+                setFeedback(`${sceneName(scene)} reset. Theme and other scenes retained.`)
+              }}
+            >
+              Reset scene
+            </Button>
+            {Tools && (
+              <Tools
+                view={view}
+                session={session}
+                dispatch={dispatch}
+                disabled={!ready}
+                replay={() => {
+                  replays.primary.current?.()
+                  replays.secondary.current?.()
+                }}
+                role={role}
+                onRole={onRole}
+              />
+            )}
+          </div>
           <Button
-            variant="outline"
-            disabled={!ready}
-            onClick={() => {
-              dispatch({ type: 'reset-scene' })
-              setFeedback(`${sceneName(scene)} reset. Theme and other scenes retained.`)
-            }}
-          >
-            Reset scene
-          </Button>
-          <Button
+            className="preview-inspect"
             variant={inspecting ? 'solid' : 'outline'}
             aria-pressed={inspecting}
             disabled={!ready}
             onClick={() => setInspecting(!inspecting)}
           >
             Inspect
+          </Button>
+          <Button
+            className="preview-strip-control preview-expand"
+            variant="outline"
+            controlSize="small"
+            aria-expanded={expanded}
+            aria-controls={regionId}
+            disabled={!ready}
+            onClick={() => expand(!expanded)}
+          >
+            {expanded ? 'Collapse' : 'Expand'}
           </Button>
         </div>
         {inspecting && (
@@ -224,21 +299,10 @@ export function Preview({
               color,
               motion: authoredMotion(document)
             }}
-            onJump={onJump}
-          />
-        )}
-        {Tools && (
-          <Tools
-            view={view}
-            session={session}
-            dispatch={dispatch}
-            disabled={!ready}
-            replay={() => {
-              replays.primary.current?.()
-              replays.secondary.current?.()
+            onJump={target => {
+              setExpanded(false)
+              onJump(target)
             }}
-            role={role}
-            onRole={onRole}
           />
         )}
         <output className="preview-feedback">{feedback}</output>

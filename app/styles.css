@@ -146,6 +146,15 @@ body {
   margin-block: 2rem 0;
 }
 
+/* On a phone the workshop runs edge to edge so the preview strip and controls get the width. */
+@media (width < 600px) {
+  .workshop-page .demo-frame {
+    margin-inline: calc(-1 * clamp(1rem, 3vw, 3rem));
+    border-inline: 0;
+    border-radius: 0;
+  }
+}
+
 /* The page h1 already names the workshop; keep the region name for assistive tech. */
 .workshop-page .demo-heading h2 {
   position: absolute;
