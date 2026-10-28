@@ -364,7 +364,7 @@ export function ThemeHandoff({
                 <p>{step.text}</p>
                 {step.fonts && (
                   <>
-                    {families.some(font => font.files.length > 0) && <p>{fontPlacement}</p>}
+                    {families.some(font => font.files.length > 0) && <div>{fontPlacement}</div>}
                     <ul>
                       {families.map(font => (
                         <li key={`${font.source}/${font.family}`}>
