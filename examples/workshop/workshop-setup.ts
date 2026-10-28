@@ -23,6 +23,8 @@ export interface SetupStep {
   /** Names the snippet for its copy button and field; absent when the step is text only. */
   label?: string
   code?: string
+  /** The step lists the theme's font requirements beside its code. */
+  fonts?: boolean
 }
 export interface SetupGuide {
   setup: Setup
@@ -57,7 +59,8 @@ export function setupGuide(setup: Setup, document: PortableDocument): SetupGuide
         {
           text: 'Load the theme’s fonts in your app. Font files stay local.',
           label: 'Font setup CSS',
-          code: fontSetup(document)
+          code: fontSetup(document),
+          fonts: true
         }
       ]
     : []

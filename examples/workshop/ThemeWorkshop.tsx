@@ -46,6 +46,7 @@ import { Preview } from './Preview'
 import { focusControl } from './ControlChange'
 import type { ControlTarget } from './workshop-inspect'
 import { ThemeHandoff, type ImportResult } from './ThemeHandoff'
+import { ShareButton } from './ShareButton'
 import { handoffAPI, errorMessage, type ImportData } from './workshop-handoff'
 import { GeometryEditor } from './GeometryEditor'
 import { geometryAPI, type GeometryRecipe } from './workshop-geometry'
@@ -119,6 +120,7 @@ function WorkshopShell({
   const [history, dispatchHistory] = useReducer(themeHistory, baseline, createHistory)
   const [confirming, setConfirming] = useState(false)
   const editorHeading = useRef<HTMLHeadingElement>(null)
+  const handoffHeading = useRef<HTMLHeadingElement>(null)
   useEffect(() => {
     if (focusOnEnter) editorHeading.current?.focus()
   }, [focusOnEnter])
@@ -164,6 +166,11 @@ function WorkshopShell({
   function startOver() {
     if (unsaved) setConfirming(true)
     else onStartOver()
+  }
+  /** The export section sits below the editors; the shell brings it into view and hands it focus. */
+  function useTheme() {
+    handoffHeading.current?.scrollIntoView({ block: 'start' })
+    handoffHeading.current?.focus({ preventScroll: true })
   }
   const undo = useCallback(() => {
     if (!history.past.length) return
@@ -422,6 +429,20 @@ function WorkshopShell({
               </DialogContent>
             </Dialog>
           </div>
+          <div className="workshop-handoff-actions">
+            <ShareButton
+              document={document}
+              recipes={recipes}
+              disabled={!ready}
+            />
+            <Button
+              className="workshop-use"
+              disabled={!ready}
+              onClick={useTheme}
+            >
+              Use this theme
+            </Button>
+          </div>
         </nav>
         <div className="workshop-editing">
           <section
@@ -582,6 +603,7 @@ function WorkshopShell({
         document={document}
         recipes={recipes}
         result={importResult}
+        headingRef={handoffHeading}
         onImport={importConfiguration}
         onError={importError}
       />
