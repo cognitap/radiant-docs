@@ -1,16 +1,14 @@
-import { resolve } from 'node:path'
-import { exampleSources } from '@/lib/demo-sources.mjs'
-import { Demo } from './demo/Demo'
+import { DemoFrame } from './demo/DemoFrame'
 import { ThemeWorkshop } from '@/examples/workshop/ThemeWorkshop'
 
-export async function WorkshopDemo() {
+export function WorkshopDemo() {
   return (
-    <Demo
+    <DemoFrame
       title="Shared theme workshop"
       reset={false}
-      files={await exampleSources(resolve('examples'), 'workshop')}
+      sources="/demo-sources/workshop.json"
     >
       <ThemeWorkshop />
-    </Demo>
+    </DemoFrame>
   )
 }
