@@ -12,9 +12,10 @@ const travel = 44
 export function SpringSample({ parameters }: { parameters: SpringParameters }) {
   const reduced = useReducedMotion()
   const dot = useRef<HTMLSpanElement>(null)
+  const { stiffness, damping, mass } = parameters
   useEffect(() => {
     if (reduced || !dot.current) return
-    const spring = createSpring(0, { parameters })
+    const spring = createSpring(0, { parameters: { stiffness, damping, mass } })
     const unbind = bindSpringStyle(dot.current, spring, 'translateX')
     let far = false
     const cross = () => {
@@ -29,7 +30,7 @@ export function SpringSample({ parameters }: { parameters: SpringParameters }) {
       unbind()
       spring.destroy()
     }
-  }, [reduced, parameters])
+  }, [reduced, stiffness, damping, mass])
   if (reduced) {
     const horizon = curveHorizon(springSummary(parameters).settleTime)
     const d = curvePoints(parameters, horizon, 60)
