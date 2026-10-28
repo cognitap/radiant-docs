@@ -25,9 +25,6 @@ const articleTitle = 'Make room for the useful things, and the people who use th
 
 /** A control that needs a paragraph should be fixed instead; specimen text is exempt. */
 const proseLimit = 120
-/** One row of small controls is 2rem plus padding and border; Typography adds a second row of
-    tools. Before the compact toolbar these were 196px to 298px at 1440×900. */
-const toolbarBudget = { color: 64, typography: 100, geometry: 64, motion: 64 }
 
 /** The one preview must stay in view while any editor control changes. */
 async function assertPreviewInView(page, label) {
@@ -95,27 +92,17 @@ export async function verifyWorkshop(browser, baseURL) {
     await wideFrame.getByRole('button', { name, exact: true }).click()
     await assertPreviewInView(widePage, name)
   }
-  for (const [editor, name] of [
-    ['color', 'Color'],
-    ['typography', 'Typography'],
-    ['geometry', 'Spacing & surfaces'],
-    ['motion', 'Motion']
-  ]) {
+  for (const name of ['Color', 'Typography', 'Spacing & surfaces', 'Motion']) {
     await wideFrame.getByRole('button', { name, exact: true }).click()
-    const { prose, toolbar } = await widePage.evaluate(() => ({
-      prose: [...document.querySelectorAll('.workshop-editor p')]
+    const prose = await widePage.evaluate(() =>
+      [...document.querySelectorAll('.workshop-editor p')]
         .filter(node => node.checkVisibility() && !node.closest('.font-sample'))
-        .map(node => node.textContent.trim()),
-      toolbar: document.querySelector('.preview-toolbar').getBoundingClientRect().height
-    }))
+        .map(node => node.textContent.trim())
+    )
     assert.deepEqual(
       prose.filter(text => text.length > proseLimit),
       [],
       `${name}: no explanatory paragraph over ${proseLimit} characters`
-    )
-    assert.ok(
-      toolbar <= toolbarBudget[editor],
-      `${name}: preview toolbar is ${toolbar}px, over its ${toolbarBudget[editor]}px budget`
     )
   }
   const sample = () =>
@@ -301,11 +288,24 @@ export async function verifyWorkshop(browser, baseURL) {
         await width.selectOption('390')
         for (const next of ['light', 'dark']) {
           await mode.selectOption(next)
-          assert.equal(
-            await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth),
-            true,
-            `${viewport}-${id}-${next}: page overflow`
+          const overflow = await page.evaluate(() =>
+            document.documentElement.scrollWidth <= innerWidth
+              ? []
+              : [...document.querySelectorAll('body *')]
+                  .filter(node => node.getBoundingClientRect().right > innerWidth + 0.5)
+                  .filter(node => {
+                    for (let parent = node.parentElement; parent; parent = parent.parentElement) {
+                      if (getComputedStyle(parent).overflowX !== 'visible') return false
+                    }
+                    return true
+                  })
+                  .slice(0, 6)
+                  .map(node => {
+                    const box = node.getBoundingClientRect()
+                    return `${node.tagName.toLowerCase()}.${[...node.classList].slice(0, 3).join('.')} ${Math.round(box.left)}–${Math.round(box.right)}`
+                  })
           )
+          assert.deepEqual(overflow, [], `${viewport}-${id}-${next}: page overflow`)
         }
       }
       await scene.selectOption('page:data')

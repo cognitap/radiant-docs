@@ -443,8 +443,8 @@
     gap: 0.5rem;
     padding: 0.5rem 0.75rem;
   }
+  /* Wider system fonts (Linux, Windows) don't fit three buttons in 320px, so let them wrap. */
   .preview-choices {
-    flex-wrap: nowrap;
     align-items: center;
     gap: 0.5rem;
   }
