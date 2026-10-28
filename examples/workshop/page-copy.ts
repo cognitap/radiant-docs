@@ -83,12 +83,6 @@ export const pageNames: Record<PageScene, string> = {
   data: 'Data',
   landing: 'Landing'
 }
-export const pageContexts: Record<PageScene, string> = {
-  article: 'Prose · Body and Headings, with UI captions and Code',
-  form: 'UI · labels, controls and supporting text, with a prose aside',
-  data: 'UI · dense data, metrics and supporting text',
-  landing: 'Prose and UI · display, paragraphs, navigation and actions'
-}
 
 export function readCopy<P extends PageScene>(
   edits: CopyEdits,

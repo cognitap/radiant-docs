@@ -25,6 +25,7 @@ import {
   useSpringLayout
 } from '@cognitap/radiant/motion/react'
 import { MotionInspector, type MotionReader } from './MotionInspector'
+import { Chips } from './TypographyPickers'
 import { publishMovement } from './motion-trace'
 import { PreviewFrame } from './PreviewFrame'
 import { motionPreview } from './workshop-motion'
@@ -33,6 +34,21 @@ import type { ToolProps } from './preview-tools'
 import './motion-editor.css'
 
 export type Replay = RefObject<(() => void) | null>
+
+/** What the inspector graphs in a scene with more than one moving part. */
+const measures = {
+  actions: [
+    { value: 'press', label: 'Button scale' },
+    { value: 'disclosure', label: 'Disclosure height' }
+  ],
+  layout: [
+    { value: 'width', label: 'Card width' },
+    { value: 'height', label: 'Card height' },
+    { value: 'y', label: 'Card position' }
+  ]
+} as const
+type Measures = { [K in keyof typeof measures]: (typeof measures)[K][number]['value'] }
+const initialMeasures: Measures = { actions: 'press', layout: 'width' }
 export type MotionUpdate = (sessions: MotionSceneSessions) => void
 
 function useTravel(track: RefObject<HTMLElement | null>, handle: RefObject<HTMLElement | null>) {
@@ -52,11 +68,13 @@ function useTravel(track: RefObject<HTMLElement | null>, handle: RefObject<HTMLE
 
 function ActionScene({
   model,
+  metric,
   onChange,
   sourceRef,
   replayRef
 }: {
   model: MotionSceneSessions['actions']
+  metric: Measures['actions']
   onChange: (next: MotionSceneSessions['actions']) => void
   sourceRef: RefObject<MotionReader | null>
   replayRef: Replay
@@ -64,7 +82,6 @@ function ActionScene({
   const button = useRef<HTMLButtonElement>(null)
   const details = useRef<HTMLDetailsElement>(null)
   const content = useRef<HTMLDivElement>(null)
-  const [metric, setMetric] = useState('press')
   useEffect(() => {
     sourceRef.current = () => {
       if (metric === 'press' && button.current)
@@ -117,7 +134,6 @@ function ActionScene({
   }, [replayRef, metric, model, onChange])
   return (
     <div className="motion-scene motion-actions-scene">
-      <p>Press again during rebound. Click, touch, Enter and Space use the real Button.</p>
       <Button
         ref={button}
         onClick={() => onChange({ ...model, count: model.count + 1 })}
@@ -134,7 +150,7 @@ function ActionScene({
       >
         <CollapsibleTrigger>Open and reverse this disclosure</CollapsibleTrigger>
         <CollapsibleContent ref={content}>
-          <p>Change direction before the height settles. Content and controls remain real.</p>
+          <p>Change direction before the height settles.</p>
           {model.expanded && (
             <p>
               More content changes the measured destination. Keep opening and closing while it
@@ -158,20 +174,6 @@ function ActionScene({
           <DialogClose>Close modal</DialogClose>
         </DialogContent>
       </Dialog>
-      <label>
-        Inspect action
-        <select
-          value={metric}
-          onChange={event => setMetric(event.target.value)}
-        >
-          <option value="press">Button scale</option>
-          <option value="disclosure">Disclosure height</option>
-        </select>
-      </label>
-      <p className="motion-fine-print">
-        Replay samples press feedback without activating the action. Action velocity is measured
-        from rendered presentation.
-      </p>
     </div>
   )
 }
@@ -239,10 +241,6 @@ function DragScene({
   }
   return (
     <div className="motion-scene">
-      <p>
-        Release with speed, catch it mid-flight, or use arrows, Home, End and Escape. Vertical touch
-        scrolling stays available.
-      </p>
       <div
         ref={track}
         className="motion-track motion-drag-track"
@@ -268,7 +266,7 @@ function DragScene({
         id={id}
         className="motion-fine-print"
       >
-        Drag sideways. Start, Middle and End provide the same destinations without dragging.
+        Drag sideways, or use the arrow keys.
       </p>
       <div className="motion-inline-actions">
         <Button
@@ -366,9 +364,8 @@ function FollowScene({
   }, [model.running, target, extent])
   return (
     <div className="motion-scene">
-      <p>
-        The outlined marker is the destination. The filled marker follows it. Move across the track
-        or interrupt with the slider.
+      <p className="motion-fine-print">
+        The filled dot follows the outlined one. Move across the track.
       </p>
       <div
         ref={track}
@@ -421,11 +418,13 @@ function FollowScene({
 
 function LayoutScene({
   model,
+  metric,
   onChange,
   sourceRef,
   replayRef
 }: {
   model: MotionSceneSessions['layout']
+  metric: Measures['layout']
   onChange: (next: MotionSceneSessions['layout']) => void
   sourceRef: RefObject<MotionReader | null>
   replayRef: Replay
@@ -433,7 +432,6 @@ function LayoutScene({
   const root = useRef<HTMLDivElement>(null),
     first = useRef<HTMLDivElement>(null)
   const layout = useSpringLayout(root)
-  const [metric, setMetric] = useState<'y' | 'width' | 'height'>('width')
   useEffect(() => {
     sourceRef.current = () => {
       if (!root.current || !first.current) return null
@@ -464,10 +462,6 @@ function LayoutScene({
   }, [layout, metric, model, onChange, sourceRef, replayRef])
   return (
     <div className="motion-scene">
-      <p>
-        Resize, reorder or change content while the cards move. Text reflows and borders keep their
-        thickness.
-      </p>
       <div className="motion-inline-actions">
         <Button
           variant="outline"
@@ -531,20 +525,6 @@ function LayoutScene({
           ))}
         </div>
       </div>
-      <label>
-        Inspect coordinate
-        <select
-          value={metric}
-          onChange={event => {
-            const next = event.target.value
-            if (next === 'y' || next === 'width' || next === 'height') setMetric(next)
-          }}
-        >
-          <option value="width">Card width</option>
-          <option value="height">Card height</option>
-          <option value="y">Card vertical position</option>
-        </select>
-      </label>
     </div>
   )
 }
@@ -554,6 +534,7 @@ export function MotionFrame({
   document,
   mode,
   frame,
+  captioned,
   scene,
   session,
   revision,
@@ -563,6 +544,7 @@ export function MotionFrame({
   document: object
   mode: ThemeMode
   frame: Frame
+  captioned: boolean
   scene: MotionScene
   session: MotionSceneSessions
   revision: number
@@ -573,28 +555,41 @@ export function MotionFrame({
   const reduced = useReducedMotion()
   const sourceRef = useRef<MotionReader | null>(null)
   const key = `${scene}:${revision}`
+  const [measured, setMeasured] = useState(initialMeasures)
+  const status = reduced ? 'Reduced motion: on' : theme.motion.mode === 'off' ? 'Motion off' : null
   return (
     <PreviewFrame
       theme={theme}
       mode={mode}
       width={frame.width}
       label={frame.label}
+      captioned={captioned}
       footer={
         <MotionInspector
           key={key}
           sourceRef={sourceRef}
           onMovement={frame.slot === 'primary' ? publishMovement : undefined}
-        />
+        >
+          {(scene === 'actions' || scene === 'layout') && (
+            <Chips
+              label="Measure"
+              options={measures[scene]}
+              value={measured[scene]}
+              onChange={value => {
+                const next = measures[scene].find(option => option.value === value)
+                if (next) setMeasured({ ...measured, [scene]: next.value })
+              }}
+            />
+          )}
+        </MotionInspector>
       }
     >
-      <p className="motion-status">
-        {theme.motion.mode === 'off' || reduced ? 'Spatial motion off' : 'Spring motion active'}
-        {reduced ? ' · system reduced motion' : ''}
-      </p>
+      {status && <p className="motion-status">{status}</p>}
       <div key={key}>
         {scene === 'actions' ? (
           <ActionScene
             model={session.actions}
+            metric={measured.actions}
             onChange={value => onUpdate({ ...session, actions: value })}
             sourceRef={sourceRef}
             replayRef={replayRef}
@@ -616,6 +611,7 @@ export function MotionFrame({
         ) : (
           <LayoutScene
             model={session.layout}
+            metric={measured.layout}
             onChange={value => onUpdate({ ...session, layout: value })}
             sourceRef={sourceRef}
             replayRef={replayRef}
@@ -627,21 +623,16 @@ export function MotionFrame({
 }
 
 export function MotionTools({ view, disabled, replay }: ToolProps) {
-  const reduced = useReducedMotion()
   return (
     <div className="preview-tools">
       <Button
         variant="outline"
+        controlSize="small"
         disabled={disabled}
         onClick={replay}
       >
         {view.compare.kind === 'treatments' ? 'Replay both' : 'Replay'}
       </Button>
-      <p className="preview-note">
-        System preference: <strong>{reduced ? 'Reduce motion' : 'No preference'}</strong>. Reduced
-        motion preview uses the runtime’s spatial-off policy without changing your theme. Graphs
-        show the last two seconds.
-      </p>
     </div>
   )
 }

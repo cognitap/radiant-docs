@@ -380,6 +380,7 @@
 .geometry-choice {
   display: grid;
   gap: 0.3rem;
+  margin-top: 0.6rem;
 }
 
 /* Resolved values */

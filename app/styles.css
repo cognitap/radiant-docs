@@ -139,7 +139,12 @@ body {
 }
 
 .workshop-intro .lede {
+  max-width: none;
   margin-bottom: 0;
+}
+
+.workshop-intro .lede a {
+  white-space: nowrap;
 }
 
 .workshop-page .demo-frame {
@@ -155,7 +160,12 @@ body {
   }
 }
 
-/* The page h1 already names the workshop; keep the region name for assistive tech. */
+/* The page h1 already names the workshop; keep the region name for assistive tech, without
+   the heading band. */
+.workshop-page .demo-heading {
+  padding: 0;
+}
+
 .workshop-page .demo-heading h2 {
   position: absolute;
   width: 1px;

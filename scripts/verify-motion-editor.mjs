@@ -163,7 +163,7 @@ export async function verifyMotionEditor(browser, baseURL) {
       'Activated 1 time',
       'replay does not activate the native action'
     )
-    await primary().getByRole('combobox', { name: 'Inspect action' }).selectOption('disclosure')
+    await pickRadio(primary(), 'Measure', 'disclosure')
     await replay()
     const disclosure = primary().locator('details[data-slot~="collapsible"]')
     await page.waitForFunction(node => node.open, await disclosure.elementHandle())
@@ -241,18 +241,17 @@ export async function verifyMotionEditor(browser, baseURL) {
     const x = box.x + box.width / 2,
       y = box.y + box.height / 2
     await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x, y }] })
+    let touched = 0
     for (let i = 1; i <= 4; i++) {
       await cdp.send('Input.dispatchTouchEvent', {
         type: 'touchMove',
         touchPoints: [{ x: x + i * 15, y }]
       })
+      touched = Math.max(touched, await position(handle))
       await page.waitForTimeout(20)
     }
     await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
-    await page.waitForFunction(
-      node => (parseFloat(getComputedStyle(node).translate) || 0) > 1,
-      await handle.elementHandle()
-    )
+    assert.ok(touched > 1, `a sideways touch moves the handle: ${touched}px`)
     await cdp.detach()
     await compare.selectOption('none')
     await scene.selectOption('motion:follow')
@@ -304,25 +303,25 @@ export async function verifyMotionEditor(browser, baseURL) {
     await page.waitForTimeout(100)
     assert.equal(await primary().locator('.motion-readouts').innerText(), readout)
     await primary().getByRole('button', { name: 'Resume inspection', exact: true }).click()
+    const status = () => primary().locator('.motion-status')
+    assert.equal(await status().count(), 0, 'spring motion needs no status')
     await page.emulateMedia({ reducedMotion: 'reduce' })
-    await primary().getByText('Spatial motion off', { exact: false }).waitFor()
+    await status().filter({ hasText: 'Reduced motion: on' }).waitFor()
     await scene.selectOption('motion:actions')
     await press().focus()
     await page.keyboard.down('Space')
     assert.equal(await press().evaluate(node => getComputedStyle(node).scale), '1')
     await page.keyboard.up('Space')
     await page.emulateMedia({ reducedMotion: 'no-preference' })
-    await primary().getByText('Spring motion active', { exact: false }).waitFor()
+    await status().waitFor({ state: 'detached' })
     await compare.selectOption('reduced')
     assert.equal(
-      await frameOf('Reduced motion preview')
-        .getByText('Spatial motion off', { exact: false })
-        .isVisible(),
-      true
+      await frameOf('Reduced motion preview').locator('.motion-status').innerText(),
+      'Motion off'
     )
     await compare.selectOption('none')
     await pickRadio(editor, 'Theme motion', 'off')
-    await primary().getByText('Spatial motion off', { exact: false }).waitFor()
+    await status().filter({ hasText: 'Motion off' }).waitFor()
     await pickRadio(editor, 'Theme motion', 'system')
     await page.emulateMedia({ reducedMotion: 'reduce' })
     await editor.locator('.spring-sample-still').first().waitFor()

@@ -2,50 +2,25 @@ import { setTypographyFamily } from './typography-controls.mjs'
 import { openPreviewOptions } from './preview-options.mjs'
 import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
+import { fileURLToPath } from 'node:url'
+import { exampleSources } from '../lib/demo-sources.mjs'
 
-const workshopFiles = [
-  'workshop/ThemeWorkshop.tsx',
-  'workshop/workshop-theme.ts',
-  'workshop/workshop-snapshot.ts',
-  'workshop/workshop-history.ts',
-  'workshop/workshop-fields.ts',
-  'workshop/ControlChange.tsx',
-  'workshop/workshop-preview.ts',
-  'workshop/Preview.tsx',
-  'workshop/PreviewFrame.tsx',
-  'workshop/preview-tools.tsx',
-  'workshop/PageScenes.tsx',
-  'workshop/page-copy.ts',
-  'workshop/ComponentScene.tsx',
-  'workshop/TypographyTools.tsx',
-  'workshop/preview.css',
-  'workshop/MotionEditor.tsx',
-  'workshop/MotionScenes.tsx',
-  'workshop/MotionInspector.tsx',
-  'workshop/workshop-motion.ts',
-  'workshop/motion-editor.css',
-  'workshop/TypographyEditor.tsx',
-  'workshop/workshop-typography.ts',
-  'workshop/typography-editor.css',
-  'workshop/FontEditor.tsx',
-  'workshop/workshop-fonts.ts',
-  'workshop/font-requirements.ts',
-  'workshop/font-runtime.ts',
-  'workshop/font-editor.css',
-  'workshop/workshop-color.ts',
-  'workshop/ColorEditor.tsx',
-  'workshop/color-editor.css',
-  'workshop/GeometryEditor.tsx',
-  'workshop/workshop-geometry.ts',
-  'workshop/geometry-editor.css',
-  'workshop/ThemeHandoff.tsx',
-  'workshop/workshop-handoff.ts',
-  'workshop/workshop-share.ts',
-  'workshop/theme-handoff.css',
-  'workshop/workshop.css',
-  'profile/useHydrated.ts'
-]
+const workshopFiles = await exampleSources(
+  fileURLToPath(new URL('../examples/', import.meta.url)),
+  'workshop'
+)
+assert.ok(
+  workshopFiles.includes('workshop/GeometryControls.tsx') &&
+    workshopFiles.includes('profile/useHydrated.ts'),
+  'the source listing covers the directory and its cross-directory imports'
+)
 const articleTitle = 'Make room for the useful things, and the people who use them.'
+
+/** A control that needs a paragraph should be fixed instead; specimen text is exempt. */
+const proseLimit = 120
+/** One row of small controls is 2rem plus padding and border; Typography adds a second row of
+    tools. Before the compact toolbar these were 196px to 298px at 1440×900. */
+const toolbarBudget = { color: 64, typography: 100, geometry: 64, motion: 64 }
 
 /** The one preview must stay in view while any editor control changes. */
 async function assertPreviewInView(page, label) {
@@ -81,6 +56,45 @@ export async function verifyWorkshop(browser, baseURL) {
     await wideFrame.getByRole('button', { name, exact: true }).click()
     await assertPreviewInView(widePage, name)
   }
+  for (const [editor, name] of [
+    ['color', 'Color'],
+    ['typography', 'Typography'],
+    ['geometry', 'Spacing & surfaces'],
+    ['motion', 'Motion']
+  ]) {
+    await wideFrame.getByRole('button', { name, exact: true }).click()
+    const { prose, toolbar } = await widePage.evaluate(() => ({
+      prose: [...document.querySelectorAll('.workshop-editor p')]
+        .filter(node => node.checkVisibility() && !node.closest('.font-sample'))
+        .map(node => node.textContent.trim()),
+      toolbar: document.querySelector('.preview-toolbar').getBoundingClientRect().height
+    }))
+    assert.deepEqual(
+      prose.filter(text => text.length > proseLimit),
+      [],
+      `${name}: no explanatory paragraph over ${proseLimit} characters`
+    )
+    assert.ok(
+      toolbar <= toolbarBudget[editor],
+      `${name}: preview toolbar is ${toolbar}px, over its ${toolbarBudget[editor]}px budget`
+    )
+  }
+  const sample = () =>
+    widePage
+      .locator('.spring-sample-dot')
+      .first()
+      .evaluate(node => node.style.cssText)
+  const moving = await sample()
+  await widePage.waitForFunction(
+    before => document.querySelector('.spring-sample-dot').style.cssText !== before,
+    moving,
+    { timeout: 4000 }
+  )
+  await wideFrame.getByRole('button', { name: 'Color', exact: true }).click()
+  await widePage.waitForTimeout(1000)
+  const resting = await sample()
+  await widePage.waitForTimeout(1600)
+  assert.equal(await sample(), resting, 'starting-point samples pause while Motion is hidden')
   await wideFrame.getByRole('textbox', { name: 'Brand color', exact: true }).fill('#166534')
   await assertPreviewInView(widePage, 'brand color')
   const editorBox = await wideFrame.locator('.workshop-editor').boundingBox()

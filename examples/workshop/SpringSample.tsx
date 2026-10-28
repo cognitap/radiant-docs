@@ -7,8 +7,9 @@ import { useReducedMotion } from '@cognitap/radiant/motion/react'
 import { curveHorizon, curvePoints, springSummary } from './workshop-motion-view'
 
 const travel = 44
-/** A dot that keeps crossing its track on the real runtime spring with these parameters. Under
-    reduced motion it is the step response drawn still. */
+/** A dot that keeps crossing its track on the real runtime spring with these parameters while
+    it is on screen, so a hidden editor or a scrolled-away card costs nothing. Under reduced
+    motion it is the step response drawn still. */
 export function SpringSample({ parameters }: { parameters: SpringParameters }) {
   const reduced = useReducedMotion()
   const dot = useRef<HTMLSpanElement>(null)
@@ -18,14 +19,22 @@ export function SpringSample({ parameters }: { parameters: SpringParameters }) {
     const spring = createSpring(0, { parameters: { stiffness, damping, mass } })
     const unbind = bindSpringStyle(dot.current, spring, 'translateX')
     let far = false
+    let timer: ReturnType<typeof setInterval> | undefined
     const cross = () => {
       if (document.hidden) return
       far = !far
       spring.to(far ? travel : 0)
     }
-    cross()
-    const timer = setInterval(cross, 1500)
+    const observer = new IntersectionObserver(([entry]) => {
+      clearInterval(timer)
+      timer = undefined
+      if (!entry?.isIntersecting) return
+      cross()
+      timer = setInterval(cross, 1500)
+    })
+    observer.observe(dot.current)
     return () => {
+      observer.disconnect()
       clearInterval(timer)
       unbind()
       spring.destroy()

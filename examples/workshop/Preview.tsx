@@ -18,6 +18,7 @@ import {
   sceneKey,
   sceneName,
   widthId,
+  widthName,
   widthNames,
   type Preview as PreviewModel,
   type PreviewAction
@@ -38,17 +39,19 @@ function Choice({
   value,
   choices,
   disabled,
+  className,
   onChange
 }: {
   label: string
   value: string
   choices: readonly (readonly [string, string])[]
   disabled: boolean
+  className: string
   onChange: (value: string) => void
 }) {
   return (
-    <label>
-      {label}
+    <label className={className}>
+      <span className="preview-control-label">{label}</span>
       <select
         value={value}
         disabled={disabled}
@@ -68,12 +71,12 @@ function Choice({
 }
 
 const modes: readonly [ThemeMode, string][] = [
-  ['light', 'Light'],
-  ['dark', 'Dark'],
-  ['system', 'System']
+  ['light', 'Light mode'],
+  ['dark', 'Dark mode'],
+  ['system', 'System mode']
 ]
 const widthChoices: readonly [string, string][] = [
-  ['fill', 'Available width'],
+  ['fill', widthName({ kind: 'fill' })],
   ...fixedWidths.map((px): [string, string] => [String(px), widthNames[px]])
 ]
 const componentStates = ['rest', 'invalid', 'disabled', 'pending'] as const
@@ -168,7 +171,7 @@ export function Preview({
         className="preview-toolbar"
         disabled={!ready}
       >
-        <legend>Preview</legend>
+        <legend className="workshop-sr-only">Preview</legend>
         <div className="preview-choices">
           <Button
             ref={optionsToggle}
@@ -188,8 +191,8 @@ export function Preview({
             className="preview-options"
             data-open={optionsOpen || undefined}
           >
-            <label>
-              Scene
+            <label className="preview-scene">
+              <span className="preview-control-label">Scene</span>
               <select
                 value={key}
                 disabled={!ready}
@@ -217,6 +220,7 @@ export function Preview({
             </label>
             <Choice
               label="Preview mode"
+              className="preview-mode"
               value={view.mode}
               choices={modes}
               disabled={!ready}
@@ -227,6 +231,7 @@ export function Preview({
             />
             <Choice
               label="Preview width"
+              className="preview-width"
               value={widthId(view.width)}
               choices={widthChoices}
               disabled={!ready}
@@ -237,6 +242,7 @@ export function Preview({
             />
             <Choice
               label="Compare"
+              className="preview-compare"
               value={compareId(view.compare)}
               choices={compareChoices(view)}
               disabled={!ready}
@@ -245,6 +251,7 @@ export function Preview({
             {scene.kind === 'components' && (
               <Choice
                 label="Component state"
+                className="preview-state"
                 value={scene.state}
                 choices={componentStates.map(state => [
                   state,
@@ -258,14 +265,24 @@ export function Preview({
               />
             )}
             <Button
+              className="preview-reset"
               variant="outline"
+              controlSize="small"
+              title="Reset scene"
               disabled={!ready}
               onClick={() => {
                 dispatch({ type: 'reset-scene' })
                 setFeedback(`${sceneName(scene)} reset. Theme and other scenes retained.`)
               }}
             >
-              Reset scene
+              <svg
+                className="preview-icon"
+                aria-hidden="true"
+                viewBox="0 0 24 24"
+              >
+                <path d="M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5" />
+              </svg>
+              <span className="preview-control-label">Reset scene</span>
             </Button>
             {Tools && (
               <Tools
@@ -277,14 +294,13 @@ export function Preview({
                   replays.primary.current?.()
                   replays.secondary.current?.()
                 }}
-                role={role}
-                onRole={onRole}
               />
             )}
           </div>
           <Button
             className="preview-inspect"
             variant={inspecting ? 'solid' : 'outline'}
+            controlSize="small"
             aria-pressed={inspecting}
             disabled={!ready}
             onClick={() => setInspecting(!inspecting)}
@@ -318,7 +334,7 @@ export function Preview({
             }}
           />
         )}
-        <output className="preview-feedback">{feedback}</output>
+        <output className="preview-feedback workshop-sr-only">{feedback}</output>
       </fieldset>
       <div className="preview-body">
         <Inspection
@@ -340,6 +356,7 @@ export function Preview({
                   document={document}
                   mode={view.mode}
                   frame={frame}
+                  captioned={shown.length > 1}
                   scene={scene.scene}
                   session={session.motion[frame.slot]}
                   revision={revision}
@@ -353,6 +370,7 @@ export function Preview({
                   mode={view.mode}
                   width={frame.width}
                   label={frame.label}
+                  captioned={shown.length > 1}
                   spacing={view.probes.textSpacing}
                 >
                   <div key={`${key}:${revision}`}>

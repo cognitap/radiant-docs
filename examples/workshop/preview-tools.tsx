@@ -10,8 +10,6 @@ export interface ToolProps {
   dispatch: Dispatch<PreviewAction>
   disabled: boolean
   replay: () => void
-  role: string
-  onRole: (role: string) => void
 }
 
 /** Each editor contributes its inspection controls to the one preview toolbar. */

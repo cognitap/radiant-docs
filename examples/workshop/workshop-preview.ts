@@ -160,7 +160,7 @@ export function parseScene(key: string): Scene | undefined {
 
 export const widthId = (width: PreviewWidth) => (width.kind === 'fill' ? 'fill' : String(width.px))
 export const widthName = (width: PreviewWidth) =>
-  width.kind === 'fill' ? 'Available width' : widthNames[width.px]
+  width.kind === 'fill' ? 'Fit width' : widthNames[width.px]
 export function parseWidth(id: string): PreviewWidth | undefined {
   if (id === 'fill') return { kind: 'fill' }
   const px = fixedWidths.find(value => String(value) === id)
@@ -190,17 +190,17 @@ export function parseCompare(id: string, scene: Scene): Compare {
 export function compareChoices(view: PreviewState): readonly [string, string][] {
   if (view.scene.kind === 'motion')
     return [
-      ['none', 'None'],
-      ['character', 'Restrained + Expressive'],
-      ['off', 'Your theme + Motion off'],
-      ['reduced', 'Your theme + Reduced motion']
+      ['none', 'No comparison'],
+      ['character', 'Restrained / Expressive'],
+      ['off', '+ Motion off'],
+      ['reduced', '+ Reduced motion']
     ]
   const widths: PreviewWidth[] = [
     { kind: 'fill' },
     ...fixedWidths.map((px): PreviewWidth => ({ kind: 'fixed', px }))
   ]
   return [
-    ['none', 'None'],
+    ['none', 'No comparison'],
     ...widths
       .filter(width => !sameWidth(width, view.width))
       .map((width): [string, string] => [widthId(width), `+ ${widthName(width)}`])
