@@ -30,7 +30,7 @@ export async function verifyBrandReference(browser, baseURL) {
   })
   const cases = []
   try {
-    await page.goto(`${baseURL}/docs/workshop/`)
+    await page.goto(`${baseURL}/workshop/`)
     const frame = page.getByRole('region', { name: 'Shared theme workshop', exact: true })
     await page.waitForFunction(
       () => !document.querySelector('.theme-workshop .demo-controls button').disabled

@@ -3,116 +3,37 @@ title: Theme workshop
 description: Build a color system, typeset pages and tune physical motion in one theme.
 ---
 
-import { WorkshopDemo } from '@/components/WorkshopDemo'
+**[Open the theme workshop](/workshop/)**
 
-<WorkshopDemo />
+## What it makes
 
-## One theme, four editors
+The workshop edits one Radiant theme. Color, Typography, Spacing & surfaces and
+Motion each own a section of that document. Preview mode, width and specimen data
+are for inspection and never become theme settings. Editing stays in your browser.
 
-Color, Typography, Spacing & surfaces and Motion edit the same Radiant theme
-document. Try changes in the article, form, dashboard, landing page and component
-specimens. Preview mode, width and example data belong to inspection; they never
-become theme settings. Editing stays in your browser.
-
-Each section reset restores its own defaults and retains the other sections and
-specimen data. Color owns canvas colors, so resetting geometry preserves them.
-Reset specimen restores one specimen. Reset preview restores the entire workspace.
-
-## Color
-
-Start with an opaque six-digit sRGB brand color. Radiant generates a complete
-wall of 18 families and 11 shades. The exact-anchor treatment keeps your brand
-unchanged at its identified stop and reshapes nearby swatches. A regular ramp
-keeps the original as reference metadata.
-
-Wall and brand-ramp presets are independent: Classic, Balanced or Expressive.
-Balanced starts both. Vividness, hue alignment, neutral tint and tone controls
-refine the result. The working palette recommends six families for everyday use;
-you can choose others from the wall.
-
-Semantic roles map the palette into light and dark themes. Automatic roles choose
-readable colors; explicit role overrides stay authored. The contrast report
-measures the resulting pairs, including canvas boundaries. Inspect the actual
-specimens when choosing translucent effects or component exceptions.
-
-## Typography
-
-Body, Headings, UI and Code are independent font assignments. Prose and UI rhythms
-supply starting metrics; the text-style inspector refines the 16 production roles.
-Choose fixed sizes or responsive endpoints that follow each proof’s local width.
-Manual styles survive rhythm changes; resetting a style returns it to generated
-values.
-
-Article, Form, Data and Landing proofs use real layouts at 800, 640, 390 and 320px.
-Comparison frames share edited copy and interaction state. Text spacing and style
-inspection affect only the preview. Evaluate reading comfort at 100% display size;
-tables and code scroll within their own regions.
-
-The typeface lab includes hosted normal and italic files for Inter, Source Serif,
-Plex Sans and Plex Mono. Verified variation axes appear where available. Local
-font files stay in memory and are never uploaded or included in exports. Custom
-families keep portable font requirements while the application supplies the files.
-Use the handoff’s font setup output for matching face descriptors and asset links.
-
-## Spacing and surfaces
-
-Balanced, Compact, Spacious and Square & flat are starting recipes for control
-metrics, gaps, panel geometry, borders, shadows and backdrop opacity. Shared
-settings can have deliberate light/dark overrides. Color, typography, motion and
-component exceptions retain their own values.
-
-Sizes derive from the neutral baseline, so repeated adjustments do not compound.
-Inspect small, medium and large controls and their real focus, disabled and modal
-states when changing density or boundaries. These settings shape components;
-they do not compose a page layout.
-
-## Motion
-
-Tune common stiffness, damping and mass, then override individual interactions
-where needed. Restrained provides a firm response; Expressive allows more
-overshoot. New destinations preserve in-flight position and momentum. Edited
-physics takes effect when a running spring rests.
-
-The proof bench includes native Button and disclosure feedback, a real modal,
-bounded drag/snap, a moving destination and measured layout resize/reorder.
-Repeat an input before motion finishes. Side-by-side treatments let you compare
-character, motion off and a reduced-motion preview while retaining the saved theme.
-The operating system’s reduced-motion preference always applies.
-
-Live graphs show rendered position and destination over two seconds. Numeric
-examples report runtime velocity; Button/disclosure velocity is measured from
-presentation. Pausing inspection leaves the example operable. Reset example
-restores only its values; resetting Motion retains the examples.
-
-Spring profiles need the stateful runtime. CSS timing tokens continue to describe
-CSS transitions. See [motion setup and ownership](/docs/foundations/motion/) for
-production usage and layout requirements.
+Each section reset restores its own defaults. Reset specimen restores one
+specimen. Reset preview restores the whole workspace.
 
 ## Take your theme
 
-Copy typed theme produces a portable document and compiled theme for ThemeScope.
-Download configuration includes supported editor recipes; selective exports
-transfer only chosen sections. Merge keeps omitted values, while Replace removes
-omitted values within the supplied sections. Other sections and the destination
-identity remain intact.
+Copy typed theme produces a portable document and compiled theme for
+ThemeScope. Download configuration includes supported editor recipes. Selective
+exports transfer only chosen sections. Merge keeps omitted values, while Replace
+removes omitted values within the supplied sections.
 
 Selective TypeScript applies Typography or Motion to an existing document.
-Typography includes its recipe, styles and font requirements. Motion includes
-physical profiles and CSS timing tokens. Compile the returned document for
-ThemeScope. Runtime setup supplies exact dependency versions and MotionProvider;
-Radiant includes its engine. System reduced motion stays live instead of being
-saved into the theme. Local font bytes and specimen input never enter exports.
+Compile the returned document for ThemeScope. Runtime setup supplies exact
+dependency versions and MotionProvider. System reduced motion stays live instead
+of being saved into the theme.
 
 Typography CSS uses `radiant-typography` with a light/dark/system mode attribute;
-load it after Radiant’s compiled styles. Nested ThemeScope modes use the typed
-route. Full scoped CSS emits timing tokens but omits spring profiles. This release
-offers no sampled spring CSS: interruption needs the runtime to retain momentum.
+load it after Radiant’s compiled styles. Full scoped CSS emits timing tokens but
+omits spring profiles, so use the typed route when motion needs interruption.
+Local font files are never uploaded or exported. Applications supply the files.
 
 Share links store compressed configuration in the URL fragment without a server
-account. Imports and links preserve authored sections, even when no editor recipe
-is available. A configuration file handles themes too large for a link.
+account. A configuration file handles themes too large for a link.
 
+See [motion setup and ownership](/docs/foundations/motion/) for production usage.
 The header identifies the installed package. JavaScript and CSS must use matching
-versions. Local candidate previews are labeled explicitly and use the same public
-package interfaces as a release. View source contains the website-owned examples;
-Radiant owns their document compiler, color/typography calculations and motion.
+versions.
