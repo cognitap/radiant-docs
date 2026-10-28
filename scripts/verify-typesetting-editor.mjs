@@ -1,5 +1,4 @@
 import assert from 'node:assert/strict'
-import * as Radiant from '@cognitap/radiant'
 import { readFile } from 'node:fs/promises'
 
 export async function verifyTypesettingEditor(browser, baseURL) {
@@ -18,15 +17,6 @@ export async function verifyTypesettingEditor(browser, baseURL) {
     const workshop = page.locator('.theme-workshop')
     await workshop.getByRole('button', { name: 'Typography', exact: true }).click()
     const editor = workshop.locator('.typesetting-editor')
-    if (typeof Reflect.get(Radiant, 'generateTypography') !== 'function') {
-      assert.equal(await editor.count(), 0)
-      assert.equal(await workshop.locator('.typesetting-availability').isVisible(), true)
-      await context.close()
-      console.log(
-        'Typesetting editor passed: released-package availability notice; no fallback scale or disabled pretend editor.'
-      )
-      return
-    }
     await editor.waitFor()
     const proofs = workshop.locator('.typography-proofs')
     const proof = proofs.locator('.proof-page').first()

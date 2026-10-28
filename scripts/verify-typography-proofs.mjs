@@ -1,6 +1,5 @@
 import { setTypographyFamily } from './typography-controls.mjs'
 import assert from 'node:assert/strict'
-import * as Radiant from '@cognitap/radiant'
 
 export async function verifyTypographyProofs(browser, baseURL) {
   const context = await browser.newContext({
@@ -21,12 +20,6 @@ export async function verifyTypographyProofs(browser, baseURL) {
     const composition = proofs.getByRole('combobox', { name: 'Proof composition' })
     const layout = proofs.getByRole('combobox', { name: 'Proof layout' })
     const frames = proofs.locator('.proof-page')
-    const supported = typeof Reflect.get(Radiant, 'generateTypography') === 'function'
-    assert.equal(
-      await proofs.getAttribute('data-proof-roles'),
-      supported ? 'supported' : 'unavailable'
-    )
-    assert.equal(await proofs.locator('.proof-availability').count(), supported ? 0 : 1)
     await layout.selectOption('compare')
     assert.deepEqual(
       await proofs
@@ -34,36 +27,32 @@ export async function verifyTypographyProofs(browser, baseURL) {
         .evaluateAll(nodes => nodes.map(node => node.offsetWidth)),
       [800, 390]
     )
-    if (supported) {
-      const sizes = await frames
-        .locator('[data-rad-text="prose-title"]')
-        .evaluateAll(nodes => nodes.map(node => parseFloat(getComputedStyle(node).fontSize)))
-      assert.ok(sizes[0] > sizes[1], `headings respond to their own content widths: ${sizes}`)
-      assert.equal(
-        await frames
-          .first()
-          .locator('[data-rad-prose] > p:not([data-rad-text])')
-          .first()
-          .evaluate(node => getComputedStyle(node).fontSize),
-        '20px'
-      )
-    }
-    if (supported) {
-      assert.equal(
-        await frames
-          .first()
-          .locator('pre')
-          .evaluate(node => getComputedStyle(node).fontSize),
-        '14px',
-        'site code styling cannot override the production role'
-      )
-      const flow = await frames
+    const sizes = await frames
+      .locator('[data-rad-text="prose-title"]')
+      .evaluateAll(nodes => nodes.map(node => parseFloat(getComputedStyle(node).fontSize)))
+    assert.ok(sizes[0] > sizes[1], `headings respond to their own content widths: ${sizes}`)
+    assert.equal(
+      await frames
         .first()
         .locator('[data-rad-prose] > p:not([data-rad-text])')
         .first()
-        .evaluate(node => parseFloat(getComputedStyle(node).marginBlockStart))
-      assert.equal(flow, 25, 'paragraph flow comes from the production rhythm')
-    }
+        .evaluate(node => getComputedStyle(node).fontSize),
+      '20px'
+    )
+    assert.equal(
+      await frames
+        .first()
+        .locator('pre')
+        .evaluate(node => getComputedStyle(node).fontSize),
+      '14px',
+      'site code styling cannot override the production role'
+    )
+    const flow = await frames
+      .first()
+      .locator('[data-rad-prose] > p:not([data-rad-text])')
+      .first()
+      .evaluate(node => parseFloat(getComputedStyle(node).marginBlockStart))
+    assert.equal(flow, 25, 'paragraph flow comes from the production rhythm')
     const copy = proofs.locator('.proof-copy-editor')
     await copy.locator('summary').press('Enter')
     assert.equal(await frames.locator('em').count(), 2, 'unedited inline emphasis survives')
@@ -167,7 +156,7 @@ export async function verifyTypographyProofs(browser, baseURL) {
     await composition.selectOption('article')
     assert.deepEqual(await frames.locator('h2').allTextContents(), [title, title])
     await setTypographyFamily(workshop)
-    if (supported && !(await workshop.locator('.typesetting-editor').count()))
+    if (!(await workshop.locator('.typesetting-editor').count()))
       assert.match(
         await frames
           .first()
@@ -297,7 +286,7 @@ export async function verifyTypographyProofs(browser, baseURL) {
     assert.equal(await frames.locator('em').count(), 1, 'reload restores default copy')
     assert.deepEqual(errors, [], 'no hydration, runtime or ResizeObserver errors')
     console.log(
-      `Typography proofs passed: ${supported ? 'packed production roles and local-container sizing' : 'released semantic fallback with availability notice'}, editable shared copy/form/data state, safe text, isolated resets, 4 compositions × 5 layouts × 2 modes × 3 viewports, keyboard scrolling and reload.`
+      'Typography proofs passed: packed production roles and local-container sizing, editable shared copy/form/data state, safe text, isolated resets, 4 compositions × 5 layouts × 2 modes × 3 viewports, keyboard scrolling and reload.'
     )
   } catch (error) {
     await page

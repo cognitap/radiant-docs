@@ -1,14 +1,8 @@
 import assert from 'node:assert/strict'
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
-import * as Radiant from '@cognitap/radiant'
 
 // Recorded font/layout examples, not a synthetic readability or quality score.
 export async function verifyTypographyChapter(browser, baseURL) {
-  assert.equal(
-    typeof Reflect.get(Radiant, 'generateTypography'),
-    'function',
-    'Chapter promotion requires the coordinated typography package.'
-  )
   const output = new URL('../output/docs/typography-chapter/', import.meta.url)
   await mkdir(output, { recursive: true })
   const context = await browser.newContext({

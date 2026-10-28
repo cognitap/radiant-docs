@@ -1,7 +1,6 @@
-import * as Radiant from '@cognitap/radiant'
+import { updateThemeDocument } from '@cognitap/radiant'
 import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
-import { workshopAvailable } from './radiant-package.mjs'
 import { handoffFixture } from './handoff-fixture.mjs'
 import { handoffAPI, jsonText } from '../examples/workshop/workshop-handoff.ts'
 
@@ -27,17 +26,6 @@ export async function verifyHandoff(browser, baseURL) {
     await page.waitForFunction(
       () => !document.querySelector('.theme-workshop .demo-controls button').disabled
     )
-    if (!workshopAvailable) {
-      assert.equal(
-        await handoff.getByRole('button', { name: 'Copy typed theme', exact: true }).isDisabled(),
-        true
-      )
-      assert.equal(await field('Configuration JSON').isDisabled(), true)
-      console.log(
-        'Handoff: published pin explicitly unavailable; no substituted compiler or exports.'
-      )
-      return
-    }
     await handoff.getByText('Reusable configuration JSON', { exact: true }).click()
     const baseline = await field('Configuration output').inputValue()
     assert.equal(JSON.parse(baseline).kind, 'radiant-workshop')
@@ -317,116 +305,109 @@ export async function verifyHandoff(browser, baseURL) {
       )
       await page.screenshot({ path: `output/docs/handoff-${width}.png`, fullPage: true })
     }
-    if (typeof Reflect.get(Radiant, 'generateTypography') === 'function') {
-      await page.setViewportSize({ width: 1600, height: 1000 })
-      const modern = handoffAPI.configuration(
-        Radiant.updateThemeDocument(
-          config.document,
-          {
-            typography: {
-              typesetting: {
-                preset: 'source-serif',
-                fonts: { body: { family: '"Missing brand", serif', profile: 'manual' } },
-                prose: { size: 22, lineHeight: 1.75, paragraphSpacing: 1.4 },
-                styles: {
-                  'prose-title': { narrow: 40, wide: 72, weight: 650 },
-                  'ui-label': { weight: 620 }
-                }
-              },
-              fonts: [
-                {
-                  id: 'typesetting-body',
-                  family: 'Missing brand',
-                  source: 'local',
-                  weights: [400, 650],
-                  styles: ['normal'],
-                  axes: [{ tag: 'wght', min: 100, default: 400, max: 900 }]
-                }
-              ],
-              modes: { dark: { roles: { 'ui-caption': { letterSpacing: '0.03em' } } } }
-            }
-          },
-          'replace'
-        ),
-        config.recipes
-      )
-      await input.fill(jsonText(modern))
-      await apply.click()
-      await page.waitForFunction(() =>
+    await page.setViewportSize({ width: 1600, height: 1000 })
+    const modern = handoffAPI.configuration(
+      updateThemeDocument(
+        config.document,
+        {
+          typography: {
+            typesetting: {
+              preset: 'source-serif',
+              fonts: { body: { family: '"Missing brand", serif', profile: 'manual' } },
+              prose: { size: 22, lineHeight: 1.75, paragraphSpacing: 1.4 },
+              styles: {
+                'prose-title': { narrow: 40, wide: 72, weight: 650 },
+                'ui-label': { weight: 620 }
+              }
+            },
+            fonts: [
+              {
+                id: 'typesetting-body',
+                family: 'Missing brand',
+                source: 'local',
+                weights: [400, 650],
+                styles: ['normal'],
+                axes: [{ tag: 'wght', min: 100, default: 400, max: 900 }]
+              }
+            ],
+            modes: { dark: { roles: { 'ui-caption': { letterSpacing: '0.03em' } } } }
+          }
+        },
+        'replace'
+      ),
+      config.recipes
+    )
+    await input.fill(jsonText(modern))
+    await apply.click()
+    await page.waitForFunction(() =>
+      document
+        .querySelector('.handoff-import-result')
+        ?.textContent.includes('Configuration restored')
+    )
+    const modernText = await field('Configuration output').inputValue()
+    assert.deepEqual(JSON.parse(modernText), modern)
+    const previousLink = await field('Share link').inputValue()
+    await handoff.getByRole('button', { name: 'Copy share link', exact: true }).click()
+    await page.waitForFunction(previous => {
+      const link = document.querySelector('.theme-handoff input[readonly]').value
+      return link !== previous && link.includes('#workshop=1.')
+    }, previousLink)
+    const modernLink = await field('Share link').inputValue()
+    const reopened = await context.newPage()
+    try {
+      await reopened.goto(modernLink)
+      const restored = reopened.locator('.theme-handoff')
+      await reopened.waitForFunction(() =>
         document
           .querySelector('.handoff-import-result')
           ?.textContent.includes('Configuration restored')
       )
-      const modernText = await field('Configuration output').inputValue()
-      assert.deepEqual(JSON.parse(modernText), modern)
-      const previousLink = await field('Share link').inputValue()
-      await handoff.getByRole('button', { name: 'Copy share link', exact: true }).click()
-      await page.waitForFunction(previous => {
-        const link = document.querySelector('.theme-handoff input[readonly]').value
-        return link !== previous && link.includes('#workshop=1.')
-      }, previousLink)
-      const shared = await field('Share link').inputValue()
-      const reopened = await context.newPage()
-      try {
-        await reopened.goto(shared)
-        const restored = reopened.locator('.theme-handoff')
-        await reopened.waitForFunction(() =>
-          document
-            .querySelector('.handoff-import-result')
-            ?.textContent.includes('Configuration restored')
-        )
-        await restored.getByText('Reusable configuration JSON', { exact: true }).click()
-        assert.equal(
-          await restored
-            .getByRole('textbox', { name: 'Configuration output', exact: true })
-            .inputValue(),
-          modernText
-        )
-        await reopened
-          .locator('.theme-workshop')
-          .getByRole('button', { name: 'Typography', exact: true })
-          .click()
-        const system = reopened.locator('.typesetting-editor')
-        assert.equal(
-          await system
-            .getByRole('spinbutton', { name: 'Prose size (px)', exact: true })
-            .inputValue(),
-          '22'
-        )
-        assert.equal(
-          await system.getByRole('spinbutton', { name: 'Prose leading', exact: true }).inputValue(),
-          '1.75'
-        )
+      await restored.getByText('Reusable configuration JSON', { exact: true }).click()
+      assert.equal(
+        await restored
+          .getByRole('textbox', { name: 'Configuration output', exact: true })
+          .inputValue(),
+        modernText
+      )
+      await reopened
+        .locator('.theme-workshop')
+        .getByRole('button', { name: 'Typography', exact: true })
+        .click()
+      const system = reopened.locator('.typesetting-editor')
+      assert.equal(
+        await system.getByRole('spinbutton', { name: 'Prose size (px)', exact: true }).inputValue(),
+        '22'
+      )
+      assert.equal(
+        await system.getByRole('spinbutton', { name: 'Prose leading', exact: true }).inputValue(),
+        '1.75'
+      )
+      await system
+        .getByRole('combobox', { name: 'Text style', exact: true })
+        .selectOption('prose-title')
+      assert.equal(
         await system
-          .getByRole('combobox', { name: 'Text style', exact: true })
-          .selectOption('prose-title')
-        assert.equal(
-          await system
-            .getByRole('spinbutton', { name: 'Narrow size (px)', exact: true })
-            .inputValue(),
-          '40'
-        )
-        assert.equal(
-          await system
-            .getByRole('spinbutton', { name: 'Wide size (px)', exact: true })
-            .inputValue(),
-          '72'
-        )
-        const setup = restored.locator('.handoff-setup')
-        await setup.locator(':scope > summary').click()
-        assert.match(await setup.innerText(), /Missing brand[\s\S]*wght[\s\S]*File not included/)
-        assert.equal(
-          await reopened.evaluate(
-            () =>
-              [...document.fonts].filter(
-                face => face.family.replaceAll('"', '') === 'Missing brand'
-              ).length
-          ),
-          0
-        )
-      } finally {
-        await reopened.close()
-      }
+          .getByRole('spinbutton', { name: 'Narrow size (px)', exact: true })
+          .inputValue(),
+        '40'
+      )
+      assert.equal(
+        await system.getByRole('spinbutton', { name: 'Wide size (px)', exact: true }).inputValue(),
+        '72'
+      )
+      const setup = restored.locator('.handoff-setup')
+      await setup.locator(':scope > summary').click()
+      assert.match(await setup.innerText(), /Missing brand[\s\S]*wght[\s\S]*File not included/)
+      assert.equal(
+        await reopened.evaluate(
+          () =>
+            [...document.fonts].filter(face => face.family.replaceAll('"', '') === 'Missing brand')
+              .length
+        ),
+        0
+      )
+    } finally {
+      await reopened.close()
     }
     assert.deepEqual(errors, [], 'no handoff runtime/hydration errors')
     const blocked = await context.newPage()

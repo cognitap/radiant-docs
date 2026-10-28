@@ -18,15 +18,10 @@
 .proof-context,
 .proof-explanation,
 .proof-copy-editor > p,
-.proof-feedback,
-.proof-availability {
+.proof-feedback {
   font-size: 0.8125rem;
   color: var(--docs-muted);
   line-height: 1.6;
-}
-.proof-availability {
-  padding: 1rem;
-  border: 1px solid var(--docs-border);
 }
 .typography-proofs .workshop-options label:has(input[type='checkbox']) {
   display: flex;

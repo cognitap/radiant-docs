@@ -1,12 +1,18 @@
 'use client'
 
 import { useEffect, useMemo, useState, useSyncExternalStore } from 'react'
-import { Button } from '@cognitap/radiant'
+import {
+  Button,
+  type TypographyAssignment,
+  type TypographyInput,
+  type TypographyPreset,
+  type TypographyRole,
+  type TypographyStyle
+} from '@cognitap/radiant'
 import { curatedFonts, type TrialFont } from './workshop-fonts'
 import { WorkshopFontLoader } from './font-runtime'
 import { FontNumber } from './FontEditor'
 import {
-  typesettingAvailable,
   assignments,
   assignmentName,
   styleName,
@@ -16,10 +22,7 @@ import {
   resetRhythm,
   resetTextStyle,
   applyTypesetting,
-  assignedTrial,
-  type TypesettingInput,
-  type TextStyle,
-  type Assignment
+  assignedTrial
 } from './workshop-typography'
 import './typography-editor.css'
 
@@ -54,7 +57,7 @@ export function TypographyEditor({
   const result = useMemo(() => documentTypesetting(document), [document])
   const [notice, setNotice] = useState('')
   const [custom, setCustom] = useState('Georgia, serif')
-  const [customAssignment, setCustomAssignment] = useState<Assignment>('body')
+  const [customAssignment, setCustomAssignment] = useState<TypographyAssignment>('body')
   const [fontState, setFontState] = useState({ key: '', message: '' })
   const [retry, setRetry] = useState(0)
   const [fluidModes, setFluidModes] = useState<Record<string, boolean>>({})
@@ -89,13 +92,6 @@ export function TypographyEditor({
       cancelled = true
     }
   }, [active, loader, fontKey, fonts, local, retry])
-  if (!typesettingAvailable)
-    return (
-      <p className="typesetting-availability">
-        The full typesetting editor needs a package with typography roles. The installed release
-        retains its existing font trials; use a matching candidate for the new editor.
-      </p>
-    )
   if (!result)
     return (
       <div
@@ -120,7 +116,9 @@ export function TypographyEditor({
       </div>
     )
   const { input, prose, ui } = result
-  const role = Object.hasOwn(result.styles, selectedRole) ? selectedRole : 'prose-body'
+  const role = (
+    Object.hasOwn(result.styles, selectedRole) ? selectedRole : 'prose-body'
+  ) as TypographyRole
   const style = result.styles[role]
   const fluid = fluidModes[role] ?? style.narrow !== style.wide
   const candidates = [...curatedFonts, ...(local?.styles.includes('normal') ? [local] : [])]
@@ -137,7 +135,7 @@ export function TypographyEditor({
       warnings.push(
         `${styleName(warning.role)} requests ${warning.requestedWeight}; supported weights are ${warning.supportedWeights.join('–')}.`
       )
-  function change(next: TypesettingInput, reset = false) {
+  function change(next: TypographyInput, reset = false) {
     try {
       onChange(applyTypesetting(document, next, local, reset))
       if (reset) setFluidModes({})
@@ -154,7 +152,7 @@ export function TypographyEditor({
       )
     }
   }
-  function changeStyle(key: keyof TextStyle, value: number | Assignment) {
+  function changeStyle(key: keyof TypographyStyle, value: number | TypographyAssignment) {
     change({
       ...input,
       styles: { ...input.styles, [role]: { ...input.styles?.[role], [key]: value } }
@@ -176,7 +174,7 @@ export function TypographyEditor({
           Starting point
           <select
             value={input.preset}
-            onChange={event => change({ preset: event.target.value }, true)}
+            onChange={event => change({ preset: event.target.value as TypographyPreset }, true)}
           >
             {startingPoints.map(item => (
               <option
@@ -239,7 +237,7 @@ export function TypographyEditor({
               Manual assignment
               <select
                 value={customAssignment}
-                onChange={event => setCustomAssignment(event.target.value as Assignment)}
+                onChange={event => setCustomAssignment(event.target.value as TypographyAssignment)}
               >
                 {assignments.map(assignment => (
                   <option
@@ -393,7 +391,7 @@ export function TypographyEditor({
             value={role}
             onChange={event => onSelectRole(event.target.value)}
           >
-            {Object.keys(result.styles).map(name => (
+            {(Object.keys(result.styles) as TypographyRole[]).map(name => (
               <option
                 key={name}
                 value={name}
@@ -411,7 +409,9 @@ export function TypographyEditor({
             Style assignment
             <select
               value={style.assignment}
-              onChange={event => changeStyle('assignment', event.target.value as Assignment)}
+              onChange={event =>
+                changeStyle('assignment', event.target.value as TypographyAssignment)
+              }
             >
               {assignments.map(item => (
                 <option

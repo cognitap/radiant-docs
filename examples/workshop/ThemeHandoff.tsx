@@ -51,7 +51,6 @@ export function ThemeHandoff({
   const [busy, setBusy] = useState('')
   const operation = useRef({ ticket: 0 })
   const prepared = useMemo(() => {
-    if (!handoffAPI) return null
     try {
       const config = handoffAPI.configuration(themeDocument, recipes)
       let css = '',
@@ -97,11 +96,10 @@ export function ThemeHandoff({
       }
     }
   }, [themeDocument, recipes])
-  const sections =
-    prepared?.config && handoffAPI
-      ? jsonText(handoffAPI.sections(prepared.config.document, selected))
-      : ''
-  const configText = prepared?.config ? jsonText(prepared.config) : ''
+  const sections = prepared.config
+    ? jsonText(handoffAPI.sections(prepared.config.document, selected))
+    : ''
+  const configText = prepared.config ? jsonText(prepared.config) : ''
   useEffect(() => {
     let active = true
     const pending = operation.current
@@ -109,10 +107,6 @@ export function ThemeHandoff({
       const ticket = ++operation.current.ticket
       if (!window.location.hash.startsWith('#workshop=')) return
       try {
-        if (!handoffAPI)
-          throw new Error(
-            'This shared configuration needs a Radiant package with document APIs. Open it in the labeled candidate preview.'
-          )
         const text = await decodeShare(window.location.hash.slice('#workshop='.length))
         const data = handoffAPI.read(text)
         if (data.kind !== 'radiant-workshop')
@@ -140,7 +134,6 @@ export function ThemeHandoff({
   function importText(text: string) {
     operation.current.ticket++
     try {
-      if (!handoffAPI) throw new Error('The installed package does not support document import.')
       onImport(handoffAPI.read(text), applyMode)
       setFeedback('')
     } catch (error) {
@@ -212,8 +205,8 @@ export function ThemeHandoff({
       setBusy('')
     }
   }
-  const unavailable = !ready || !prepared?.config
-  const fonts = prepared?.config ? fontRequirements(prepared.config.document) : []
+  const unavailable = !ready || !prepared.config
+  const fonts = prepared.config ? fontRequirements(prepared.config.document) : []
   return (
     <section
       className="theme-handoff"
@@ -225,13 +218,7 @@ export function ThemeHandoff({
         Files and links include theme values and available editor recipes. Specimen interactions
         stay local.
       </p>
-      {!handoffAPI && (
-        <p className="workshop-notice">
-          Theme handoff needs a package with the public document APIs. Use the labeled candidate
-          preview; the published pin remains available for specimen inspection.
-        </p>
-      )}
-      {prepared?.error && <p>{prepared.error}</p>}
+      {prepared.error && <p>{prepared.error}</p>}
       <output className="handoff-feedback">{feedback}</output>
       <output
         id={resultId}
@@ -245,13 +232,13 @@ export function ThemeHandoff({
           <Button
             aria-disabled={!!busy}
             pending={busy === 'Typed theme'}
-            onClick={() => void copy(prepared?.typed ?? '', 'Typed theme')}
+            onClick={() => void copy(prepared.typed ?? '', 'Typed theme')}
           >
             Copy typed theme
           </Button>
           <Button
             variant="outline"
-            onClick={() => download(prepared?.typed ?? '', 'radiant-theme.ts', 'text/typescript')}
+            onClick={() => download(prepared.typed ?? '', 'radiant-theme.ts', 'text/typescript')}
           >
             Download typed theme
           </Button>
@@ -287,7 +274,7 @@ export function ThemeHandoff({
               readOnly
               rows={14}
               wrap="off"
-              value={prepared?.typed ?? ''}
+              value={prepared.typed ?? ''}
             />
           </label>
         </details>
@@ -377,20 +364,20 @@ export function ThemeHandoff({
             provides no sampled spring CSS export. Use the typed theme and runtime setup below for
             spring motion.
           </p>
-          {prepared?.cssError ? (
+          {prepared.cssError ? (
             <p>{prepared.cssError}</p>
           ) : (
             <>
               <Button
                 variant="outline"
                 aria-disabled={!!busy}
-                onClick={() => void copy(prepared?.css ?? '', 'CSS')}
+                onClick={() => void copy(prepared.css ?? '', 'CSS')}
               >
                 Copy CSS
               </Button>
               <Button
                 variant="outline"
-                onClick={() => download(prepared?.css ?? '', 'radiant-theme.css', 'text/css')}
+                onClick={() => download(prepared.css ?? '', 'radiant-theme.css', 'text/css')}
               >
                 Download CSS
               </Button>
@@ -400,7 +387,7 @@ export function ThemeHandoff({
                   readOnly
                   rows={12}
                   wrap="off"
-                  value={prepared?.css ?? ''}
+                  value={prepared.css ?? ''}
                 />
               </label>
             </>
@@ -419,14 +406,14 @@ export function ThemeHandoff({
             <Button
               variant="outline"
               aria-disabled={!!busy}
-              onClick={() => void copy(prepared?.motionTyped ?? '', 'Motion typed theme')}
+              onClick={() => void copy(prepared.motionTyped ?? '', 'Motion typed theme')}
             >
               Copy motion TypeScript
             </Button>
             <Button
               variant="outline"
               onClick={() =>
-                download(prepared?.motionTyped ?? '', 'radiant-motion.ts', 'text/typescript')
+                download(prepared.motionTyped ?? '', 'radiant-motion.ts', 'text/typescript')
               }
             >
               Download motion TypeScript
@@ -438,7 +425,7 @@ export function ThemeHandoff({
               readOnly
               rows={12}
               wrap="off"
-              value={prepared?.motionTyped ?? ''}
+              value={prepared.motionTyped ?? ''}
             />
           </label>
         </details>
@@ -455,18 +442,14 @@ export function ThemeHandoff({
             <Button
               variant="outline"
               aria-disabled={!!busy}
-              onClick={() => void copy(prepared?.typographyTyped ?? '', 'Typography typed theme')}
+              onClick={() => void copy(prepared.typographyTyped ?? '', 'Typography typed theme')}
             >
               Copy typography TypeScript
             </Button>
             <Button
               variant="outline"
               onClick={() =>
-                download(
-                  prepared?.typographyTyped ?? '',
-                  'radiant-typography.ts',
-                  'text/typescript'
-                )
+                download(prepared.typographyTyped ?? '', 'radiant-typography.ts', 'text/typescript')
               }
             >
               Download typography TypeScript
@@ -474,16 +457,16 @@ export function ThemeHandoff({
             <Button
               variant="outline"
               aria-disabled={!!busy}
-              disabled={!!prepared?.typographyCSSError}
-              onClick={() => void copy(prepared?.typographyCSS ?? '', 'Typography CSS')}
+              disabled={!!prepared.typographyCSSError}
+              onClick={() => void copy(prepared.typographyCSS ?? '', 'Typography CSS')}
             >
               Copy typography CSS
             </Button>
             <Button
               variant="outline"
-              disabled={!!prepared?.typographyCSSError}
+              disabled={!!prepared.typographyCSSError}
               onClick={() =>
-                download(prepared?.typographyCSS ?? '', 'radiant-typography.css', 'text/css')
+                download(prepared.typographyCSS ?? '', 'radiant-typography.css', 'text/css')
               }
             >
               Download typography CSS
@@ -495,17 +478,17 @@ export function ThemeHandoff({
               readOnly
               rows={12}
               wrap="off"
-              value={prepared?.typographyTyped ?? ''}
+              value={prepared.typographyTyped ?? ''}
             />
           </label>
-          {prepared?.typographyCSSError && <p>{prepared.typographyCSSError}</p>}
+          {prepared.typographyCSSError && <p>{prepared.typographyCSSError}</p>}
           <label>
             Typography CSS output
             <textarea
               readOnly
               rows={12}
               wrap="off"
-              value={prepared?.typographyCSS ?? ''}
+              value={prepared.typographyCSS ?? ''}
             />
           </label>
         </details>
@@ -523,7 +506,7 @@ export function ThemeHandoff({
             variant="outline"
             disabled={unavailable}
             aria-disabled={!!busy}
-            onClick={() => void copy(prepared?.runtime.install ?? '', 'Install command')}
+            onClick={() => void copy(prepared.runtime.install ?? '', 'Install command')}
           >
             Copy install command
           </Button>
@@ -531,7 +514,7 @@ export function ThemeHandoff({
             variant="outline"
             disabled={unavailable}
             aria-disabled={!!busy}
-            onClick={() => void copy(prepared?.runtime.source ?? '', 'Runtime setup')}
+            onClick={() => void copy(prepared.runtime.source ?? '', 'Runtime setup')}
           >
             Copy runtime setup
           </Button>
@@ -539,7 +522,7 @@ export function ThemeHandoff({
             variant="outline"
             disabled={unavailable}
             onClick={() =>
-              download(prepared?.runtime.source ?? '', 'RadiantMotion.tsx', 'text/typescript')
+              download(prepared.runtime.source ?? '', 'RadiantMotion.tsx', 'text/typescript')
             }
           >
             Download runtime setup
@@ -550,7 +533,7 @@ export function ThemeHandoff({
           <input
             type="text"
             readOnly
-            value={prepared?.runtime.install ?? ''}
+            value={prepared.runtime.install ?? ''}
           />
         </label>
         <label>
@@ -559,7 +542,7 @@ export function ThemeHandoff({
             readOnly
             rows={14}
             wrap="off"
-            value={prepared?.runtime.source ?? ''}
+            value={prepared.runtime.source ?? ''}
           />
         </label>
         <p>
@@ -611,14 +594,14 @@ export function ThemeHandoff({
             variant="outline"
             disabled={unavailable}
             aria-disabled={!!busy}
-            onClick={() => void copy(prepared?.setup ?? '', 'Font setup CSS')}
+            onClick={() => void copy(prepared.setup ?? '', 'Font setup CSS')}
           >
             Copy font setup
           </Button>
           <Button
             variant="outline"
             disabled={unavailable}
-            onClick={() => download(prepared?.setup ?? '', 'radiant-fonts.css', 'text/css')}
+            onClick={() => download(prepared.setup ?? '', 'radiant-fonts.css', 'text/css')}
           >
             Download font setup
           </Button>
@@ -629,7 +612,7 @@ export function ThemeHandoff({
             readOnly
             rows={12}
             wrap="off"
-            value={prepared?.setup ?? ''}
+            value={prepared.setup ?? ''}
           />
         </label>
       </details>

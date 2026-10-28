@@ -3,21 +3,20 @@ import { execFileSync } from 'node:child_process'
 import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { createRequire } from 'node:module'
-import * as Radiant from '@cognitap/radiant'
+import { themeDocumentFromDefinition, updateThemeDocument } from '@cognitap/radiant'
 import { handoffAPI } from '../examples/workshop/workshop-handoff.ts'
 import { handoffFixture } from './handoff-fixture.mjs'
 
 // Compile the actual exported TypeScript and render both handoff routes against
 // the installed artifact. No library source or Storybook aliases participate.
 export async function verifyHandoffConsumer(browser) {
-  if (!handoffAPI) return
   await mkdir(new URL('../output/', import.meta.url), { recursive: true })
   const directory = await mkdtemp(new URL('../output/handoff-consumer-', import.meta.url))
   try {
     const { document, recipes } = handoffFixture()
     const full = handoffAPI.read(JSON.stringify(handoffAPI.configuration(document, recipes)))
     const base = handoffAPI.configuration(
-      Radiant.themeDocumentFromDefinition({
+      themeDocumentFromDefinition({
         id: 'partial-target',
         name: 'Partial target',
         tokens: {
@@ -46,24 +45,22 @@ export async function verifyHandoffConsumer(browser) {
       assert.deepEqual(item.document.sections.typography, base.document.sections.typography)
       assert.deepEqual(item.document.sections.components, base.document.sections.components)
     }
-    if (typeof Reflect.get(Radiant, 'generateTypography') === 'function')
-      cases.push({
-        name: 'typesetting',
-        document: Radiant.updateThemeDocument(cases[0].document, {
-          typography: {
-            typesetting: {
-              fonts: { ui: { family: '"Local Display", serif', profile: 'manual' } },
-              ui: { size: 18, lineHeight: 1.7 },
-              styles: { 'ui-label': { weight: 650 } }
-            },
-            // Recipe-owned UI must win over these retained legacy values.
-            values: { bodySize: '1.5rem', bodyWeight: 300 }
-          }
-        })
-      })
-    const typeSource =
-      cases.find(item => item.name === 'typesetting')?.document ?? cases[0].document
-    await writeFile(`${directory}/typography.ts`, handoffAPI.typedTheme(typeSource, ['typography']))
+    const typesetting = updateThemeDocument(cases[0].document, {
+      typography: {
+        typesetting: {
+          fonts: { ui: { family: '"Local Display", serif', profile: 'manual' } },
+          ui: { size: 18, lineHeight: 1.7 },
+          styles: { 'ui-label': { weight: 650 } }
+        },
+        // Recipe-owned UI must win over these retained legacy values.
+        values: { bodySize: '1.5rem', bodyWeight: 300 }
+      }
+    })
+    cases.push({ name: 'typesetting', document: typesetting })
+    await writeFile(
+      `${directory}/typography.ts`,
+      handoffAPI.typedTheme(typesetting, ['typography'])
+    )
     for (const item of cases)
       await writeFile(`${directory}/${item.name}.ts`, handoffAPI.typedTheme(item.document))
     await writeFile(
@@ -180,7 +177,7 @@ export const markup = renderToStaticMarkup(<>{[${cases.map(item => `{name: '${it
         )
         .join('\n') +
       '\n' +
-      handoffAPI.cssOutput(typeSource, ['typography'])
+      handoffAPI.cssOutput(typesetting, ['typography'])
     const parity = new Map()
     const page = await browser.newPage({ reducedMotion: 'reduce' })
     try {
@@ -191,7 +188,7 @@ export const markup = renderToStaticMarkup(<>{[${cases.map(item => `{name: '${it
           await page.waitForFunction(() =>
             document.getAnimations().every(a => a.playState !== 'running')
           )
-          for (const item of [...cases, { name: 'typography', document: typeSource }])
+          for (const item of [...cases, { name: 'typography', document: typesetting }])
             for (const mode of ['light', 'dark', 'system']) {
               const measure = async kind =>
                 page.locator(`[data-proof="${item.name}-${kind}-${mode}"]`).evaluate(node => {

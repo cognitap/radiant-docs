@@ -1,16 +1,12 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import * as Radiant from '@cognitap/radiant'
+import { defineThemeDocument, updateThemeDocument } from '@cognitap/radiant'
 import { fontRequirements, fontSetup } from '../examples/workshop/font-requirements.ts'
-import {
-  fontAxesAvailable,
-  curatedFonts,
-  applyTrialFont
-} from '../examples/workshop/workshop-fonts.ts'
+import { curatedFonts, applyTrialFont } from '../examples/workshop/workshop-fonts.ts'
 import { handoffAPI } from '../examples/workshop/workshop-handoff.ts'
 
 const base = () =>
-  Radiant.defineThemeDocument({
+  defineThemeDocument({
     kind: 'radiant-theme',
     version: 1,
     id: 'font-handoff',
@@ -29,7 +25,7 @@ test('curated installation requirements name actual files, licenses, ranges and 
   assert.equal(requirements[0].files.length, 2)
   assert.ok(requirements[0].axes.some(axis => axis.tag === 'opsz'))
   assert.match(requirements[0].license, /Inter-LICENSE/)
-  const duplicated = Radiant.updateThemeDocument(document, {
+  const duplicated = updateThemeDocument(document, {
     typography: {
       fonts: [
         ...document.sections.typography.fonts,
@@ -70,7 +66,7 @@ test('typography-only outputs preserve the native recipe/metadata and never pain
 })
 
 test('custom files remain missing requirements, with safe setup comments and no invented axes', () => {
-  const document = Radiant.updateThemeDocument(base(), {
+  const document = updateThemeDocument(base(), {
     typography: {
       fonts: [
         {
@@ -92,33 +88,29 @@ test('custom files remain missing requirements, with safe setup comments and no 
   assert.doesNotMatch(css, /<\/style>|@font-face|blob:|data:/)
 })
 
-test(
-  'local available axes survive native full/selective configuration handoff',
-  { skip: !fontAxesAvailable },
-  () => {
-    const axes = [
-      { tag: 'wght', min: 100, default: 400, max: 900 },
-      { tag: 'opsz', min: 8, default: 20, max: 72 }
-    ]
-    const document = Radiant.updateThemeDocument(base(), {
-      typography: {
-        fonts: [
-          {
-            id: 'local',
-            family: 'Brand font',
-            source: 'local',
-            weights: [450],
-            styles: ['normal'],
-            axes
-          }
-        ]
-      }
-    })
-    const config = handoffAPI.read(JSON.stringify(handoffAPI.configuration(document, {})))
-    assert.deepEqual(fontRequirements(config.document)[0].axes, axes)
-    const selected = handoffAPI.sections(document, ['typography'])
-    const restored = handoffAPI.apply(handoffAPI.configuration(base(), {}), selected, 'replace')
-    assert.deepEqual(restored.document.sections.typography.fonts[0].axes, axes)
-    assert.match(fontSetup(restored.document), /opsz 8…72/)
-  }
-)
+test('local available axes survive native full/selective configuration handoff', () => {
+  const axes = [
+    { tag: 'wght', min: 100, default: 400, max: 900 },
+    { tag: 'opsz', min: 8, default: 20, max: 72 }
+  ]
+  const document = updateThemeDocument(base(), {
+    typography: {
+      fonts: [
+        {
+          id: 'local',
+          family: 'Brand font',
+          source: 'local',
+          weights: [450],
+          styles: ['normal'],
+          axes
+        }
+      ]
+    }
+  })
+  const config = handoffAPI.read(JSON.stringify(handoffAPI.configuration(document, {})))
+  assert.deepEqual(fontRequirements(config.document)[0].axes, axes)
+  const selected = handoffAPI.sections(document, ['typography'])
+  const restored = handoffAPI.apply(handoffAPI.configuration(base(), {}), selected, 'replace')
+  assert.deepEqual(restored.document.sections.typography.fonts[0].axes, axes)
+  assert.match(fontSetup(restored.document), /opsz 8…72/)
+})

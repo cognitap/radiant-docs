@@ -10,8 +10,7 @@
 }
 .typesetting-editor p,
 .typesetting-editor output,
-.typesetting-editor li,
-.typesetting-availability {
+.typesetting-editor li {
   font-size: 0.8125rem;
   line-height: 1.6;
 }

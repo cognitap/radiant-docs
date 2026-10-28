@@ -80,7 +80,7 @@ export function FontEditor({
   onChange: (document: object) => void
   onSession?: (loader: WorkshopFontLoader | null) => void
   onLocalReady?: (font: TrialFont | null) => void
-  onAssignFont?: (document: object, font: TrialFont, context: FontContext) => object
+  onAssignFont: (document: object, font: TrialFont, context: FontContext) => object
 }) {
   const [selected, setSelected] = useState('inter')
   const [custom, setCustom] = useState<TrialFont | null>(null)
@@ -445,11 +445,9 @@ export function FontEditor({
         onClick={() => {
           try {
             const next = applyTrialFont(document, font, weight)
-            onChange(onAssignFont ? onAssignFont(next, font, context) : next)
+            onChange(onAssignFont(next, font, context))
             setNotice(
-              onAssignFont
-                ? `${font.family} assigned to ${context}. Role weights are set in the text style inspector; sample rhythm/axes stay local.`
-                : `${font.family} and weight ${weight} applied. Sample rhythm/axes stay local; other theme settings are retained.`
+              `${font.family} assigned to ${context}. Role weights are set in the text style inspector; sample rhythm/axes stay local.`
             )
           } catch (error) {
             setNotice(error instanceof Error ? error.message : 'Unable to apply this font.')

@@ -1,6 +1,5 @@
 import { setTypographyFamily } from './typography-controls.mjs'
 import assert from 'node:assert/strict'
-import { workshopAvailable } from './radiant-package.mjs'
 
 export async function verifyColorEditor(browser, baseURL) {
   const page = await browser.newPage({
@@ -20,14 +19,6 @@ export async function verifyColorEditor(browser, baseURL) {
     await page.waitForFunction(
       () => !document.querySelector('.theme-workshop .demo-controls button').disabled
     )
-    if (!workshopAvailable) {
-      assert.equal(await brand.isDisabled(), true)
-      assert.equal(await frame.locator('.color-swatch').count(), 0)
-      console.log(
-        'Color editor: published pin exposes its unavailable state without a substitute engine.'
-      )
-      return
-    }
     assert.equal(await brand.isEnabled(), true)
     const canvas = frame.locator('.workshop-canvas')
     const variable = name =>

@@ -1,11 +1,12 @@
-import * as Radiant from '@cognitap/radiant'
+import {
+  generateColorWall,
+  recommendColorPalette,
+  themeDocumentFromDefinition,
+  updateThemeAppearance,
+  updateThemeDocument
+} from '@cognitap/radiant'
 import { geometryPreset } from '../examples/workshop/workshop-geometry.ts'
 export function handoffFixture() {
-  const create = Reflect.get(Radiant, 'themeDocumentFromDefinition')
-  const update = Reflect.get(Radiant, 'updateThemeDocument')
-  const generate = Reflect.get(Radiant, 'generateColorWall')
-  const recommend = Reflect.get(Radiant, 'recommendColorPalette')
-  const appearance = Reflect.get(Radiant, 'updateThemeAppearance')
   const color = {
     input: {
       brand: '#166534',
@@ -21,7 +22,7 @@ export function handoffFixture() {
   }
   const geometry = geometryPreset('spacious')
   geometry.modes.dark = { ...geometry.modes.dark, density: 0.9, elevation: 0 }
-  let document = create({
+  let document = themeDocumentFromDefinition({
     id: 'handoff-proof',
     name: 'Handoff proof',
     motion: {
@@ -48,11 +49,14 @@ export function handoffFixture() {
     },
     modes: { dark: { components: { card: { shadow: 'none' } } } }
   })
-  document = appearance(document, {
-    palette: recommend(generate(color.input), { working: color.working, modes: color.modes }),
+  document = updateThemeAppearance(document, {
+    palette: recommendColorPalette(generateColorWall(color.input), {
+      working: color.working,
+      modes: color.modes
+    }),
     geometry
   })
-  document = update(document, {
+  document = updateThemeDocument(document, {
     typography: {
       fonts: [
         {

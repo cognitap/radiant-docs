@@ -4,7 +4,6 @@ import { readFileSync } from 'node:fs'
 import { createHash } from 'node:crypto'
 import {
   curatedFonts,
-  fontAxesAvailable,
   fontRecommendation,
   inspectLocalFont,
   localFont,
@@ -119,7 +118,7 @@ test('theme and share handoff carry requirements only, preserving unrelated sett
       source: 'local',
       weights: [650],
       styles: ['normal'],
-      ...(fontAxesAvailable ? { axes: localFont(bytes, 'Brand font', 'normal', 400).axes } : {})
+      axes: localFont(bytes, 'Brand font', 'normal', 400).axes
     }
   ])
   const text = jsonText(handoffAPI.configuration(next, {}))
