@@ -1,84 +1,116 @@
 ---
 title: Collapsible
-description: A native details disclosure for optional content that stays in the document.
+description: Optional details, native keyboard behavior and natural-height motion without scaling content.
 ---
 
 import { CompositionDemo } from '../../components/CompositionDemo'
+import { CollapsibleSettingsDemo, CollapsibleHeightDemo } from '../../components/CollapsibleDemo'
+
+<CollapsibleSettingsDemo />
+
+## Reveal optional details
+
+```tsx
+<Collapsible defaultOpen>
+  <CollapsibleTrigger>Advanced options</CollapsibleTrigger>
+  <CollapsibleContent>Keep the useful details close.</CollapsibleContent>
+</Collapsible>
+```
+
+Collapsible is native `details`, Trigger its direct-child `summary`, and
+Content a `div`. Enter, Space and pointer activation toggle the summary. Keep
+a descriptive trigger and visible focus; do not put buttons or links inside it.
+The marker is decorative.
+
+Content stays mounted. Closing hides it from keyboard navigation without
+clearing values or disabling form fields. Closed fields still contribute to
+FormData. Native form reset restores uncontrolled inputs, without changing
+disclosure state.
 
 <CompositionDemo kind="collapsible" />
 
-## Show optional content
+## Own state once
 
-Collapsible renders native `details`. CollapsibleTrigger is its direct-child
-`summary`, and CollapsibleContent is the content `div`. Activate the summary
-with a pointer, Enter or Space. The marker is decorative; descriptive trigger
-text gives the disclosure its name.
+```tsx
+const [open, setOpen] = useState(false)
 
-The content stays mounted, so reopening preserves an input's value. Closed
-content is hidden and skipped by keyboard navigation. Collapsing does not clear
-values or submit a form.
+<Collapsible open={open} onOpenChange={setOpen}>
+  <CollapsibleTrigger>Reading notes</CollapsibleTrigger>
+  <CollapsibleContent>Saved for later.</CollapsibleContent>
+</Collapsible>
+```
 
-Give several Collapsibles the same native `name` to make an exclusive group:
-opening one closes the others. A nested disclosure does not toggle its parent.
-
-## Controlled and uncontrolled
-
-With `defaultOpen`, Collapsible owns its state and `onOpenChange` reports
-changes. The next example passes `open` with `onOpenChange`, so an outside
-button and the summary update the same application-owned state.
+Choose controlled `open` or initial `defaultOpen`; never combine them or change
+ownership during a mount. Write state through `onOpenChange`. `onToggle`
+observes native events, including synchronization; it is not a second state
+writer. An owner may decline a change. No-op requests do not notify.
 
 <CompositionDemo
   kind="collapsible"
   controlled
 />
 
-Choose one owner per mount; do not pass both `open` and `defaultOpen`, or change
-ownership in place. Native `onToggle` observes the details event; use `onOpenChange` to accept a
-controlled state change. Do not write the same state through two callbacks.
+A shared native `name` creates an exclusive group. Nested disclosures do not
+toggle parents. Use [Accordion](/docs/accordion/) for a shared selection owner
+and disabled items. Collapsible has no native disabled prop or Button render API.
 
-## Anatomy and customization
+## Add motion and dynamic content
 
-| Component          | Native style/ref target | `data-slot` identity  |
-| ------------------ | ----------------------- | --------------------- |
-| Collapsible        | `details`               | `collapsible`         |
-| CollapsibleTrigger | `summary`               | `collapsible-trigger` |
-| CollapsibleContent | `div`                   | `collapsible-content` |
+```tsx
+import { MotionProvider } from '@cognitap/radiant/motion/react'
 
-Keep the summary directly inside details. Do not wrap it in a button or move it
-into another wrapper; native activation and disclosure semantics belong to it.
-Never put a button or link inside the trigger.
-The root, trigger and content expose `data-state="open" | "closed"`; the root
-also has native `open`. CollapsibleContent receives its generated content ID.
+;<MotionProvider>
+  <Collapsible motion="inherit">
+    <CollapsibleTrigger>Details</CollapsibleTrigger>
+    <CollapsibleContent>{details}</CollapsibleContent>
+  </Collapsible>
+</MotionProvider>
+```
 
-Set `--rad-collapsible-padding` in the root's inline style for local padding.
-Each named part accepts `className`, typed theme `style` and its own native
-ref. Preserve the hidden-content behavior, focus indicator and reduced-motion
-alternative when customizing. `useCollapsible()` returns the nearest state or
-`null` outside a Collapsible.
+The provider springs natural height. Content keeps its size; rapid reversals
+retarget the current spring. Local `motion="off"`, theme off and live reduced
+motion settle height and marker feedback. Native open/closed semantics stay
+immediate. Before hydration, native details owns visibility.
+
+Keep one Content wrapper in normal flow. Resize observation follows its
+children, wrapping text, images and replacements. Avoid absolute positioning,
+transforms and percentage heights that depend on the animated container.
+The height enhancement needs `::details-content`; unsupported browsers retain
+native disclosure behavior. Without JavaScript, native details still works;
+application controls require hydration. See [motion setup](/docs/foundations/motion/).
+
+<CollapsibleHeightDemo />
+
+## Parts and customization
+
+| Component   | Native style/ref target | Identity              |
+| ----------- | ----------------------- | --------------------- |
+| Collapsible | `details`               | `collapsible`         |
+| Trigger     | `summary`               | `collapsible-trigger` |
+| Content     | `div`                   | `collapsible-content` |
+
+Parts accept native props, className, typed theme style and real DOM refs.
+Identities are additive `data-slot` tokens; states use `data-state="open|closed"`.
+Content keeps its generated ID. Set `--rad-collapsible-padding` on the root for
+local spacing. Preserve native composition and hidden-content behavior.
+`useCollapsible()` returns the nearest state and `setOpen`, or null outside one.
+When a content action collapses itself, return focus to the summary.
 
 ## Public props
 
 Each named part's prop type and `CollapsibleState` are exported.
 
-| Collapsible prop            | Purpose / default                                         |
-| --------------------------- | --------------------------------------------------------- |
-| `open` / `defaultOpen`      | Controlled state or initial local state; initially closed |
-| `onOpenChange`              | Receives the next boolean change request                  |
-| `onToggle`                  | Native details event observation                          |
-| `className`, `style`, `ref` | Customization and ref on the native details               |
-| `data-slot`                 | Additional identity tokens; retains the base token        |
-| Other native props          | Remaining details attributes/events and children          |
+| Collapsible prop            | Purpose / default                                            |
+| --------------------------- | ------------------------------------------------------------ |
+| `open` / `defaultOpen`      | Controlled state or initial local state; initially closed    |
+| `onOpenChange`              | Receives the next boolean change request                     |
+| `onToggle`                  | Native details event observation                             |
+| `className`, `style`, `ref` | Customization and ref on the native details                  |
+| `data-slot`                 | Additional identity tokens; retains the base token           |
+| `motion`                    | `inherit` (default) or `off`; height and marker presentation |
+| Other native props          | Remaining details attributes/events and children             |
 
 Trigger and Content accept native summary/div props, styles, refs and additive
 identities. There is no Button `render` API or native `disabled` prop on this
 family. Use [Accordion](/docs/accordion/) when related disclosures need a
 selection owner and disabled items. Use [Dialog](/docs/dialog/) for a modal task.
-
-## Use the examples
-
-Keep the `compositions/` paths when copying. These examples need React and
-Radiant only. Basic native details work without JavaScript; controlled state
-requires it.
-
-Your application decides whether to retain, clear or persist
-the content; disclosure state alone does not own those decisions.

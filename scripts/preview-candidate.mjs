@@ -18,6 +18,7 @@ await mkdir(scratch, { recursive: true })
 const staging = await mkdtemp(path.join(scratch, 'candidate-'))
 const excluded = new Set([
   '.git',
+  '.claude',
   '.next',
   '.source',
   '.wrangler',
