@@ -157,6 +157,8 @@ export interface CardOption {
   name: string
   sample: ReactNode
   style?: CSSProperties
+  /** Shown and selectable only by the value matching it, never by choosing it. */
+  disabled?: boolean
 }
 /** Radio cards whose sample shows what each option does. One tab stop; arrows move. */
 export function OptionCards({
@@ -191,6 +193,7 @@ export function OptionCards({
             name={id}
             value={option.value}
             checked={option.value === value}
+            disabled={option.disabled}
             aria-label={option.name}
             onChange={() => onChange(option.value)}
           />

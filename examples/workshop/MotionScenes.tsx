@@ -25,6 +25,7 @@ import {
   useSpringLayout
 } from '@cognitap/radiant/motion/react'
 import { MotionInspector, type MotionReader } from './MotionInspector'
+import { publishMovement } from './motion-trace'
 import { PreviewFrame } from './PreviewFrame'
 import { motionPreview } from './workshop-motion'
 import type { Frame, MotionScene, MotionSceneSessions } from './workshop-preview'
@@ -582,6 +583,7 @@ export function MotionFrame({
         <MotionInspector
           key={key}
           sourceRef={sourceRef}
+          onMovement={frame.slot === 'primary' ? publishMovement : undefined}
         />
       }
     >

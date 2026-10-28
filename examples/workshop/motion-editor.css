@@ -17,68 +17,208 @@
 .motion-editor *::after {
   box-sizing: border-box;
 }
-.motion-toolbar,
-.motion-physics-summary,
 .motion-inline-actions {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 0.65rem;
 }
-.motion-toolbar {
+.motion-section {
+  display: grid;
+  gap: 0.5rem;
+  min-width: 0;
+}
+.motion-section h4 {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--docs-muted);
+}
+.motion-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.75rem;
+}
+.motion-start {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 1rem 1.5rem;
   align-items: start;
 }
-.motion-editor label {
-  display: grid;
-  gap: 0.35rem;
-  min-width: 0;
-  max-width: 100%;
-  font-size: 0.8125rem;
-}
-.motion-editor select {
-  width: 100%;
-  min-width: 0;
-  max-width: 100%;
-  border: 1px solid var(--docs-border);
-  border-radius: 0.4rem;
-  padding: 0.5rem;
+.motion-link {
+  padding: 0;
+  border: 0;
+  background: none;
   font: inherit;
-  color: var(--docs-foreground);
-  background: var(--docs-surface);
+  font-size: 0.75rem;
+  color: var(--docs-accent);
+  text-decoration: underline;
+  cursor: pointer;
 }
-.motion-editor input[type='range'] {
-  width: 100%;
+.motion-link:disabled {
+  color: var(--docs-muted);
+  text-decoration: none;
+  cursor: default;
+}
+.motion-link:focus-visible {
+  outline: 2px solid var(--docs-accent);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+.chip-dot {
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: 50%;
+  background: currentColor;
+}
+/* Preset samples: a dot on the real spring, or the still curve under reduced motion */
+.motion-editor .option-cards {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  max-width: 22rem;
+}
+.motion-editor .option-card:has(input:disabled) {
+  cursor: default;
+}
+.motion-editor .option-card:has(input:disabled:not(:checked)) {
+  opacity: 0.55;
+}
+.spring-sample {
+  position: relative;
+  display: block;
+  width: 60px;
+  height: 16px;
+  border-radius: 999px;
+  background: var(--docs-border);
+}
+.spring-sample-dot {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--docs-accent);
+}
+.spring-sample-still {
+  width: 60px;
+  height: 28px;
+  overflow: visible;
+}
+.spring-sample-still path {
+  fill: none;
+  stroke: var(--docs-accent);
+  stroke-width: 1.5;
+  vector-effect: non-scaling-stroke;
+}
+.spring-sample-still path:first-child {
+  stroke: var(--docs-border);
+  stroke-dasharray: 2 2;
+}
+/* The step response: the curve, two handles on it and the words it comes to */
+.motion-curve {
+  position: relative;
   min-width: 0;
-  max-width: 100%;
-  accent-color: var(--docs-accent);
 }
-.motion-editor select:focus-visible,
-.motion-editor input:focus-visible {
+.motion-curve svg {
+  display: block;
+  width: 100%;
+  height: 11rem;
+  border: 1px solid var(--docs-border);
+  border-radius: 0.5rem;
+  background: var(--docs-background);
+  overflow: visible;
+  touch-action: none;
+}
+.motion-curve path {
+  fill: none;
+  vector-effect: non-scaling-stroke;
+}
+.motion-curve-grid {
+  stroke: var(--docs-border);
+  stroke-width: 1;
+}
+.motion-curve-destination {
+  stroke: var(--docs-muted);
+  stroke-width: 1;
+  stroke-dasharray: 5 4;
+}
+.motion-curve-line {
+  stroke: var(--docs-accent);
+  stroke-width: 2;
+}
+.motion-curve-trace {
+  stroke: var(--docs-foreground);
+  stroke-width: 1.5;
+  stroke-dasharray: 2 3;
+  opacity: 0.7;
+}
+.motion-curve-tick {
+  fill: var(--docs-muted);
+  font-size: 11px;
+}
+.motion-curve-handle {
+  position: absolute;
+  z-index: 1;
+  width: 0.9rem;
+  height: 0.9rem;
+  translate: -50% -50%;
+  background: var(--docs-background, #fff);
+  border: 2px solid var(--docs-accent);
+  border-radius: 50%;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.35);
+  cursor: grab;
+  touch-action: none;
+}
+.motion-curve-handle:active,
+.motion-curve[data-dragging] .motion-curve-handle:focus {
+  background: var(--docs-accent);
+  cursor: grabbing;
+}
+.motion-curve-handle:focus-visible {
   outline: 2px solid var(--docs-accent);
   outline-offset: 3px;
 }
+.motion-curve-readout {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.25rem 1rem;
+  margin: 0.4rem 0 0;
+  font-size: 0.8125rem;
+}
+.motion-curve-readout output {
+  font-weight: 600;
+}
+.motion-curve-key {
+  color: var(--docs-muted);
+  font-size: 0.75rem;
+}
+/* Changed wrappers are inline-size containers with no intrinsic width, so the row gives each dial its track. */
 .motion-dials {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
-  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+  align-items: start;
+  gap: 0.5rem 1rem;
 }
 .motion-dial {
+  display: grid;
+  justify-items: start;
+  gap: 0.2rem;
   min-width: 0;
-  border: 1px solid var(--docs-border);
-  border-radius: 0.6rem;
-  padding: 1rem;
 }
-.motion-dial input[type='number'] {
-  max-width: 100%;
+.motion-dial > .control-change {
+  width: 100%;
 }
-.motion-range {
-  margin-top: 0.75rem;
+.motion-editor .chip {
+  display: inline-flex;
+  white-space: nowrap;
 }
-.motion-physics-summary {
-  justify-content: space-between;
-  padding-block: 0.5rem;
+.motion-dial[data-overridden] .scrub-field {
+  border-color: var(--docs-accent);
 }
-.motion-guidance,
 .motion-fine-print {
   margin: 0;
   color: var(--docs-muted);
@@ -258,10 +398,7 @@
   .motion-inspector {
     padding: 0.75rem;
   }
-  .motion-toolbar > label {
-    flex: 1 1 100%;
-  }
-  .motion-dials {
+  .motion-start {
     grid-template-columns: minmax(0, 1fr);
   }
   .motion-readouts {
@@ -281,9 +418,13 @@
   .motion-graph-target {
     stroke: CanvasText;
   }
-  .motion-track,
-  .motion-dial {
+  .motion-track {
     border-color: CanvasText;
+  }
+  .motion-curve-line,
+  .spring-sample-dot {
+    stroke: Highlight;
+    background: Highlight;
   }
   .motion-follow-marker {
     background: Highlight;

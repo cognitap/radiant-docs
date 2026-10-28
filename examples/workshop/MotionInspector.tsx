@@ -4,6 +4,7 @@
 
 import { useEffect, useRef, useState, type RefObject } from 'react'
 import { Button } from '@cognitap/radiant'
+import type { Movement } from './motion-trace'
 
 export interface MotionReading {
   position: number
@@ -15,7 +16,14 @@ export interface MotionReading {
 }
 export type MotionReader = () => MotionReading | null
 /** Inspection samples real presentation. It never calculates a spring trajectory. */
-export function MotionInspector({ sourceRef }: { sourceRef: RefObject<MotionReader | null> }) {
+export function MotionInspector({
+  sourceRef,
+  onMovement
+}: {
+  sourceRef: RefObject<MotionReader | null>
+  /** Each movement from rest to rest, once it ends. */
+  onMovement?: (movement: Movement) => void
+}) {
   const [paused, setPaused] = useState(false)
   const actual = useRef<SVGPathElement>(null)
   const destination = useRef<SVGPathElement>(null)
@@ -31,6 +39,8 @@ export function MotionInspector({ sourceRef }: { sourceRef: RefObject<MotionRead
     let previous: { time: number; value: number } | undefined
     let signature = ''
     let samples: { time: number; position: number; target?: number }[] = []
+    let movement: { start: number; origin: number; points: { t: number; x: number }[] } | null =
+      null
     function draw(now: number) {
       if (document.hidden) return
       const reading = sourceRef.current?.()
@@ -40,12 +50,48 @@ export function MotionInspector({ sourceRef }: { sourceRef: RefObject<MotionRead
           signature = nextSignature
           samples = []
           previous = undefined
+          movement = null
         }
         const speed =
           reading.velocity ??
           (previous
             ? ((reading.position - previous.value) * 1000) / Math.max(1, now - previous.time)
             : 0)
+        const moving = reading.moving ?? Math.abs(speed) > 0.01
+        if (moving && !movement) {
+          const origin = previous?.value ?? reading.position
+          movement = { start: previous?.time ?? now, origin, points: [{ t: 0, x: origin }] }
+        }
+        if (movement) {
+          movement.points.push({ t: (now - movement.start) / 1000, x: reading.position })
+          if (!moving) {
+            if (movement.points.length > 3) {
+              const { origin } = movement
+              // Rest can be reported before the first rendered change; the trace starts at that change.
+              const first = Math.max(0, movement.points.findIndex(point => point.x !== origin) - 1)
+              const offset = movement.points[first]!.t
+              const points = movement.points
+                .slice(first)
+                .map(point => ({ t: point.t - offset, x: point.x }))
+              const span =
+                Math.abs(reading.position - origin) > 1e-6
+                  ? reading.position - origin
+                  : points.reduce(
+                      (far, point) =>
+                        Math.abs(point.x - origin) > Math.abs(far) ? point.x - origin : far,
+                      1e-6
+                    )
+              onMovement?.({
+                label: reading.label,
+                points: points.slice(-600).map(point => ({
+                  t: point.t,
+                  x: (point.x - origin) / span
+                }))
+              })
+            }
+            movement = null
+          }
+        }
         previous = { time: now, value: reading.position }
         samples.push({ time: now, position: reading.position, target: reading.target })
         samples = samples.filter(sample => now - sample.time <= 2000).slice(-180)
@@ -76,9 +122,7 @@ export function MotionInspector({ sourceRef }: { sourceRef: RefObject<MotionRead
               : `${reading.target.toFixed(2)}${reading.unit}`
         if (velocity.current)
           velocity.current.value = `${speed.toFixed(2)}${reading.unit || ' scale'}/s`
-        if (status.current)
-          status.current.textContent =
-            (reading.moving ?? Math.abs(speed) > 0.01) ? 'Moving' : 'At rest'
+        if (status.current) status.current.textContent = moving ? 'Moving' : 'At rest'
         if (label.current) label.current.textContent = reading.label
         if (scale.current)
           scale.current.textContent = `${min.toFixed(2)}–${max.toFixed(2)}${reading.unit}`
@@ -96,7 +140,7 @@ export function MotionInspector({ sourceRef }: { sourceRef: RefObject<MotionRead
       cancelAnimationFrame(frame)
       document.removeEventListener('visibilitychange', resume)
     }
-  }, [paused, sourceRef])
+  }, [paused, sourceRef, onMovement])
   return (
     <section
       className="motion-inspector"
