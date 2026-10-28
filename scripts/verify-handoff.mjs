@@ -4,7 +4,7 @@ import { pickRadio } from './typography-controls.mjs'
 import { readFile } from 'node:fs/promises'
 import { handoffFixture } from './handoff-fixture.mjs'
 import { handoffAPI, jsonText } from '../examples/workshop/workshop-handoff.ts'
-import { openWorkshop } from './workshop-entry.mjs'
+import { openWorkshop, waitForEditors } from './workshop-entry.mjs'
 
 export async function verifyHandoff(browser, baseURL) {
   const context = await browser.newContext({
@@ -364,11 +364,7 @@ export async function verifyHandoff(browser, baseURL) {
     try {
       await reopened.goto(modernLink)
       const restored = reopened.locator('.theme-handoff')
-      await reopened.waitForFunction(() =>
-        document
-          .querySelector('.handoff-import-result')
-          ?.textContent.includes('Configuration restored')
-      )
+      await waitForEditors(reopened)
       await restored.getByText('Reusable configuration JSON', { exact: true }).click()
       assert.equal(
         await restored

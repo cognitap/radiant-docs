@@ -248,15 +248,15 @@ export function StartScreen({
               }}
             />
           </label>
+          <output
+            id={`${id}-message`}
+            className="start-message"
+            data-start-error={message ? '' : undefined}
+          >
+            {message}
+          </output>
         </form>
       </div>
-      <output
-        id={`${id}-message`}
-        className="start-message"
-        data-start-error={message ? '' : undefined}
-      >
-        {message}
-      </output>
     </section>
   )
 }
