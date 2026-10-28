@@ -15,12 +15,10 @@ export async function verifyColorEditor(browser, baseURL) {
     await page.goto(`${baseURL}/workshop/`)
     const frame = page.getByRole('region', { name: 'Shared theme workshop', exact: true })
     const brand = frame.getByRole('textbox', { name: 'Brand color', exact: true })
-    await frame.getByRole('button', { name: 'Reset specimen', exact: true }).waitFor()
-    await page.waitForFunction(
-      () => !document.querySelector('.theme-workshop .demo-controls button').disabled
-    )
+    await frame.getByRole('button', { name: 'Reset scene', exact: true }).waitFor()
+    await page.waitForFunction(() => !document.querySelector('.preview-toolbar button').disabled)
     assert.equal(await brand.isEnabled(), true)
-    const canvas = frame.locator('.workshop-canvas')
+    const canvas = frame.locator('.preview-page').first()
     const variable = name =>
       canvas.evaluate((node, key) => getComputedStyle(node).getPropertyValue(key).trim(), name)
     const role = frame.getByRole('combobox', { name: 'Semantic role', exact: true })

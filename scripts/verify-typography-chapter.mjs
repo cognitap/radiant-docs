@@ -20,7 +20,7 @@ export async function verifyTypographyChapter(browser, baseURL) {
     const workshop = page.locator('.theme-workshop')
     await workshop.getByRole('button', { name: 'Typography', exact: true }).click()
     const editor = workshop.locator('.typesetting-editor')
-    const proofs = workshop.locator('.typography-proofs')
+    const preview = page.getByRole('region', { name: 'Theme preview', exact: true })
     const number = name => editor.getByRole('spinbutton', { name, exact: true })
     const definitions = [
       {
@@ -105,15 +105,15 @@ export async function verifyTypographyChapter(browser, baseURL) {
           .getByRole('combobox', { name: 'Preview mode', exact: true })
           .selectOption(mode)
         for (const proof of ['article', 'form', 'data', 'landing']) {
-          await proofs
-            .getByRole('combobox', { name: 'Proof composition', exact: true })
-            .selectOption(proof)
+          await preview
+            .getByRole('combobox', { name: 'Scene', exact: true })
+            .selectOption(`page:${proof}`)
           for (const width of [800, 640, 390, 320]) {
-            await proofs
-              .getByRole('combobox', { name: 'Proof layout', exact: true })
+            await preview
+              .getByRole('combobox', { name: 'Preview width', exact: true })
               .selectOption(String(width))
-            const frame = proofs.locator('.proof-frame').first()
-            const root = frame.locator('.proof-page')
+            const frame = preview.locator('.preview-frame').first()
+            const root = frame.locator('.preview-page')
             const observed = await root.evaluate(node => ({
               width: parseFloat(getComputedStyle(node).width),
               client: node.clientWidth,

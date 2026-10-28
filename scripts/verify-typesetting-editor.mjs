@@ -18,8 +18,9 @@ export async function verifyTypesettingEditor(browser, baseURL) {
     await workshop.getByRole('button', { name: 'Typography', exact: true }).click()
     const editor = workshop.locator('.typesetting-editor')
     await editor.waitFor()
-    const proofs = workshop.locator('.typography-proofs')
-    const proof = proofs.locator('.proof-page').first()
+    const preview = page.getByRole('region', { name: 'Theme preview', exact: true })
+    const proof = preview.locator('.preview-page').first()
+    const scene = preview.getByRole('combobox', { name: 'Scene', exact: true })
     const number = name => editor.getByRole('spinbutton', { name, exact: true })
     const select = name => editor.getByRole('combobox', { name, exact: true })
     const body = () => proof.locator('[data-rad-prose] > p:not([data-rad-text])').first()
@@ -57,11 +58,13 @@ export async function verifyTypesettingEditor(browser, baseURL) {
     await number('Style leading').fill('1.2')
     await number('Style tracking (em)').fill('-0.01')
     await number('Style measure (ch)').fill('18')
-    await proofs.getByRole('combobox', { name: 'Proof layout' }).selectOption('compare')
-    const sizes = await proofs
+    await preview.getByRole('combobox', { name: 'Preview width', exact: true }).selectOption('800')
+    await preview.getByRole('combobox', { name: 'Compare', exact: true }).selectOption('390')
+    const sizes = await preview
       .locator('[data-rad-text="prose-title"]')
       .evaluateAll(nodes => nodes.map(node => parseFloat(getComputedStyle(node).fontSize)))
     assert.ok(sizes[0] > sizes[1], `local container interpolation: ${sizes}`)
+    await preview.getByRole('combobox', { name: 'Compare', exact: true }).selectOption('none')
     await number('Prose size (px)').fill('24')
     assert.equal(
       await number('Narrow size (px)').inputValue(),
@@ -91,7 +94,7 @@ export async function verifyTypesettingEditor(browser, baseURL) {
     assert.equal(await number('Prose size (px)').getAttribute('aria-invalid'), 'true')
     await number('Prose size (px)').press('Tab')
     assert.equal(await number('Prose size (px)').inputValue(), '21')
-    await proofs.getByRole('checkbox', { name: /Inspect text styles/ }).check()
+    await preview.getByRole('checkbox', { name: /Inspect text styles/ }).check()
     await proof.locator('[data-rad-text="prose-title"]').click()
     assert.equal(await select('Text style').inputValue(), 'prose-title')
     await body().click()
@@ -101,7 +104,7 @@ export async function verifyTypesettingEditor(browser, baseURL) {
       'solid',
       'automatic semantic prose is highlighted too'
     )
-    await proofs.getByRole('combobox', { name: 'Proof composition' }).selectOption('landing')
+    await scene.selectOption('page:landing')
     await proof
       .getByRole('button', { name: 'Join the list', exact: true })
       .click({ position: { x: 3, y: 3 } })
@@ -110,8 +113,8 @@ export async function verifyTypesettingEditor(browser, baseURL) {
       1,
       'inspection pauses actions even when clicking button padding'
     )
-    await proofs.getByRole('checkbox', { name: /Inspect text styles/ }).uncheck()
-    await proofs.getByRole('combobox', { name: 'Proof composition' }).selectOption('form')
+    await preview.getByRole('checkbox', { name: /Inspect text styles/ }).uncheck()
+    await scene.selectOption('page:form')
     await proof
       .getByRole('textbox', { name: 'Name shown to collaborators' })
       .fill('Typesetting Ada')
@@ -258,7 +261,7 @@ export async function verifyTypesettingEditor(browser, baseURL) {
     assert.equal(await select('Starting point').inputValue(), 'inter')
     assert.deepEqual(errors, [], 'no hydration/runtime/console errors')
     console.log(
-      'Typesetting editor passed: 16 production styles, four independent assignments, profile/manual rhythm, fixed/fluid overrides, scoped resets, actual local font and weight warnings, proof picking/state, keyboard drafts, shared faces, 320px/390px reflow and reload.'
+      'Typesetting editor passed: 16 production styles, four independent assignments, profile/manual rhythm, fixed/fluid overrides, scoped resets, actual local font and weight warnings, preview picking/state, keyboard drafts, shared faces, 320px/390px reflow and reload.'
     )
   } catch (error) {
     await page

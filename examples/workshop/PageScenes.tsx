@@ -4,53 +4,36 @@
 
 import { useId, type ReactNode } from 'react'
 import { Button, Card, Field, Input, Link, Checkbox } from '@cognitap/radiant'
-import { proofCopy, readCopy, type CopyEdits, type Proof } from './proof-content'
+import { sceneCopy, readCopy, type CopyEdits, type PageScene } from './page-copy'
+import type { PageSessions } from './workshop-preview'
 
-export interface ProofInteraction {
-  name: string
-  email: string
-  updates: boolean
-  saved: boolean
-  attempted: boolean
-  query: string
-  joined: boolean
-}
-export function initialProofInteraction(): ProofInteraction {
-  return {
-    name: 'Ada Lovelace',
-    email: 'ada@example.com',
-    updates: true,
-    saved: false,
-    attempted: false,
-    query: '',
-    joined: false
-  }
-}
+export type PagePatch = <K extends PageScene>(page: K, patch: Partial<PageSessions[K]>) => void
+const validEmail = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
 
-/** One content/state owner feeds every frame; components own only DOM identities. */
-export function ProofPage({
-  proof,
-  edits,
-  interaction,
-  onInteraction
+/** One copy/session owner feeds every frame; components own only DOM identities. */
+export function Page({
+  page,
+  copy,
+  sessions,
+  onPage
 }: {
-  proof: Proof
-  edits: CopyEdits
-  interaction: ProofInteraction
-  onInteraction: (patch: Partial<ProofInteraction>) => void
+  page: PageScene
+  copy: CopyEdits
+  sessions: PageSessions
+  onPage: PagePatch
 }) {
   const id = useId()
-  const text = <P extends Proof>(page: P, key: keyof (typeof proofCopy)[P]) =>
-    readCopy(edits, page, key)
+  const text = <P extends PageScene>(scene: P, key: keyof (typeof sceneCopy)[P]) =>
+    readCopy(copy, scene, key)
   const role = (name: string, children: ReactNode) => <span data-rad-text={name}>{children}</span>
-  if (proof === 'article')
+  if (page === 'article')
     return (
       <article
         data-rad-prose=""
-        className="proof-prose"
+        className="scene-prose"
       >
         <header
-          className="proof-stack"
+          className="scene-stack"
           data-rad-not-prose=""
         >
           <p data-rad-text="ui-eyebrow">{text('article', 'kicker')}</p>
@@ -58,13 +41,13 @@ export function ProofPage({
           <p data-rad-text="prose-lead">{text('article', 'lead')}</p>
           <p
             data-rad-text="ui-caption"
-            className="proof-muted"
+            className="scene-muted"
           >
             {text('article', 'note')}
           </p>
         </header>
         <p>
-          {edits.article?.body === undefined ? (
+          {copy.article?.body === undefined ? (
             <>
               Start with the words people need to <em>read</em>. A useful interface makes the next
               step clear, while a longer story needs space to unfold. Both deserve the same care.
@@ -84,7 +67,7 @@ export function ProofPage({
         </ul>
         <section
           data-rad-not-prose=""
-          className="proof-scroll"
+          className="scene-scroll"
           tabIndex={0}
           aria-label="Article code sample"
         >
@@ -98,44 +81,41 @@ export function ProofPage({
         <p
           id={`${id}-note`}
           data-rad-text="prose-small"
-          className="proof-muted"
+          className="scene-muted"
         >
-          An independently authored specimen. Inline <code>code</code> follows the surrounding
+          An independently authored page. Inline <code>code</code> follows the surrounding
           paragraph.
         </p>
       </article>
     )
-  if (proof === 'form') {
-    const nameError =
-      interaction.attempted && !interaction.name.trim() ? 'Enter your name.' : undefined
+  if (page === 'form') {
+    const form = sessions.form
+    const nameError = form.attempted && !form.name.trim() ? 'Enter your name.' : undefined
     const emailError =
-      interaction.attempted && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(interaction.email)
-        ? 'Enter a valid email address.'
-        : undefined
+      form.attempted && !validEmail(form.email) ? 'Enter a valid email address.' : undefined
     return (
       <div
-        className="proof-product"
+        className="scene-product"
         data-rad-text="ui-body"
       >
-        <header className="proof-stack">
+        <header className="scene-stack">
           <p data-rad-text="ui-eyebrow">{text('form', 'kicker')}</p>
           <h2 data-rad-text="ui-title">{text('form', 'title')}</h2>
           <p>{text('form', 'introduction')}</p>
         </header>
-        <div className="proof-form-layout">
+        <div className="scene-form-layout">
           <form
-            className="proof-stack"
-            aria-label="Typography preferences"
+            className="scene-stack"
+            aria-label="Workspace preferences"
             noValidate
             onSubmit={event => {
               event.preventDefault()
-              const valid =
-                !!interaction.name.trim() && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(interaction.email)
-              onInteraction({ attempted: true, saved: valid })
+              const valid = !!form.name.trim() && validEmail(form.email)
+              onPage('form', { attempted: true, saved: valid })
               if (!valid)
                 event.currentTarget
                   .querySelector<HTMLInputElement>(
-                    !interaction.name.trim() ? '[name="proof-name"]' : '[name="proof-email"]'
+                    !form.name.trim() ? '[name="scene-name"]' : '[name="scene-email"]'
                   )
                   ?.focus()
             }}
@@ -147,10 +127,10 @@ export function ProofPage({
               required
             >
               <Input
-                name="proof-name"
+                name="scene-name"
                 autoComplete="off"
-                value={interaction.name}
-                onChange={event => onInteraction({ name: event.target.value, saved: false })}
+                value={form.name}
+                onChange={event => onPage('form', { name: event.target.value, saved: false })}
               />
             </Field>
             <Field
@@ -160,31 +140,29 @@ export function ProofPage({
               required
             >
               <Input
-                name="proof-email"
+                name="scene-email"
                 type="email"
                 autoComplete="off"
-                value={interaction.email}
-                onChange={event => onInteraction({ email: event.target.value, saved: false })}
+                value={form.email}
+                onChange={event => onPage('form', { email: event.target.value, saved: false })}
               />
             </Field>
             <Checkbox
               label={role('ui-label', text('form', 'updates'))}
-              checked={interaction.updates}
-              onChange={event => onInteraction({ updates: event.target.checked, saved: false })}
+              checked={form.updates}
+              onChange={event => onPage('form', { updates: event.target.checked, saved: false })}
             />
             <div>
               <Button type="submit">{role('ui-label', text('form', 'save'))}</Button>
             </div>
             <output data-rad-text="ui-supporting">
-              {interaction.saved
-                ? `Saved locally for ${interaction.name}.`
-                : text('form', 'secondary')}
+              {form.saved ? `Saved locally for ${form.name}.` : text('form', 'secondary')}
             </output>
             <Link href={`#${id}-privacy`}>{role('ui-supporting', text('form', 'link'))}</Link>
           </form>
           <Card
             id={`${id}-privacy`}
-            className="proof-aside"
+            className="scene-aside"
           >
             <h3 data-rad-text="prose-subheading">{text('form', 'asideTitle')}</h3>
             <p data-rad-text="prose-body">{text('form', 'aside')}</p>
@@ -193,7 +171,8 @@ export function ProofPage({
       </div>
     )
   }
-  if (proof === 'data') {
+  if (page === 'data') {
+    const { query } = sessions.data
     const rows = [
       [text('data', 'projectOne'), 'Design', 'In review', '$4,800'],
       [text('data', 'projectTwo'), 'Engineering', 'Active', '$12,400'],
@@ -201,28 +180,26 @@ export function ProofPage({
       [text('data', 'projectFour'), 'Design', 'Active', '$7,200']
     ]
       .map((cells, id) => ({ id, cells }))
-      .filter(({ cells }) =>
-        cells.join(' ').toLowerCase().includes(interaction.query.toLowerCase())
-      )
+      .filter(({ cells }) => cells.join(' ').toLowerCase().includes(query.toLowerCase()))
     return (
       <div
-        className="proof-stack"
+        className="scene-stack"
         data-rad-text="ui-body"
       >
         <p data-rad-text="ui-eyebrow">{text('data', 'kicker')}</p>
         <h2 data-rad-text="ui-title">{text('data', 'title')}</h2>
         <p>{text('data', 'introduction')}</p>
-        <div className="proof-metrics">
+        <div className="scene-metrics">
           {(['revenue', 'projects'] as const).map(metric => (
             <Card
               key={metric}
-              className="proof-stack"
+              className="scene-stack"
             >
               <p data-rad-text="ui-label">{text('data', `${metric}Label`)}</p>
               <p data-rad-text="ui-metric">{text('data', metric)}</p>
               <p
                 data-rad-text="ui-caption"
-                className="proof-muted"
+                className="scene-muted"
               >
                 {text('data', `${metric}Note`)}
               </p>
@@ -231,8 +208,8 @@ export function ProofPage({
         </div>
         <Field label={role('ui-label', text('data', 'filter'))}>
           <Input
-            value={interaction.query}
-            onChange={event => onInteraction({ query: event.target.value })}
+            value={query}
+            onChange={event => onPage('data', { query: event.target.value })}
           />
         </Field>
         <h3
@@ -242,7 +219,7 @@ export function ProofPage({
           {text('data', 'heading')}
         </h3>
         <section
-          className="proof-scroll"
+          className="scene-scroll"
           tabIndex={0}
           aria-labelledby={`${id}-table`}
         >
@@ -277,7 +254,7 @@ export function ProofPage({
         <output data-rad-text="ui-caption">{rows.length} projects shown.</output>
         <p
           data-rad-text="ui-supporting"
-          className="proof-muted"
+          className="scene-muted"
         >
           {text('data', 'note')}
         </p>
@@ -285,24 +262,24 @@ export function ProofPage({
     )
   }
   return (
-    <div className="proof-stack proof-landing">
-      <nav aria-label="Landing proof navigation">
+    <div className="scene-stack scene-landing">
+      <nav aria-label="Landing page navigation">
         <strong data-rad-text="ui-label">{text('landing', 'brand')}</strong>
         <Link href={`#${id}-features`}>{role('ui-label', text('landing', 'nav'))}</Link>
       </nav>
-      <header className="proof-stack">
+      <header className="scene-stack">
         <p data-rad-text="ui-eyebrow">{text('landing', 'kicker')}</p>
         <h2 data-rad-text="display">{text('landing', 'title')}</h2>
         <p data-rad-text="prose-lead">{text('landing', 'lead')}</p>
-        <div className="proof-actions">
-          <Button onClick={() => onInteraction({ joined: true })}>
+        <div className="scene-actions">
+          <Button onClick={() => onPage('landing', { joined: true })}>
             {role('ui-label', text('landing', 'action'))}
           </Button>
           <Link href={`#${id}-features`}>{role('ui-label', text('landing', 'link'))}</Link>
         </div>
         <output data-rad-text="ui-supporting">
-          {interaction.joined
-            ? 'You are on this specimen’s local list.'
+          {sessions.landing.joined
+            ? 'You are on this page’s local list.'
             : 'Try an action. No signup is sent.'}
         </output>
       </header>
@@ -313,11 +290,11 @@ export function ProofPage({
         <h3 data-rad-text="prose-heading">{text('landing', 'heading')}</h3>
         <p>{text('landing', 'body')}</p>
       </section>
-      <div className="proof-metrics">
+      <div className="scene-metrics">
         {(['One', 'Two'] as const).map(key => (
           <Card
             key={key}
-            className="proof-stack"
+            className="scene-stack"
           >
             <h3 data-rad-text="ui-title">{text('landing', `feature${key}`)}</h3>
             <p data-rad-text="ui-body">{text('landing', `feature${key}Body`)}</p>
@@ -326,7 +303,7 @@ export function ProofPage({
       </div>
       <footer
         data-rad-text="ui-caption"
-        className="proof-muted"
+        className="scene-muted"
       >
         {text('landing', 'note')}
       </footer>

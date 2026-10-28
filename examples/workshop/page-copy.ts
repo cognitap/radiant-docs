@@ -1,5 +1,5 @@
 /** Website-owned copy. Overrides are plain text; untouched passages retain their inline markup. */
-export const proofCopy = {
+export const sceneCopy = {
   article: {
     kicker: 'Field notes / 04',
     title: 'Make room for the useful things, and the people who use them.',
@@ -75,25 +75,25 @@ export const proofCopy = {
   }
 } as const
 
-export type Proof = keyof typeof proofCopy
-export type CopyEdits = Partial<Record<Proof, Record<string, string>>>
-export const proofNames: Record<Proof, string> = {
+export type PageScene = keyof typeof sceneCopy
+export type CopyEdits = Partial<Record<PageScene, Record<string, string>>>
+export const pageNames: Record<PageScene, string> = {
   article: 'Article',
   form: 'Form',
   data: 'Data',
   landing: 'Landing'
 }
-export const proofContexts: Record<Proof, string> = {
+export const pageContexts: Record<PageScene, string> = {
   article: 'Prose · Body and Headings, with UI captions and Code',
   form: 'UI · labels, controls and supporting text, with a prose aside',
   data: 'UI · dense data, metrics and supporting text',
   landing: 'Prose and UI · display, paragraphs, navigation and actions'
 }
 
-export function readCopy<P extends Proof>(
+export function readCopy<P extends PageScene>(
   edits: CopyEdits,
-  proof: P,
-  key: keyof (typeof proofCopy)[P]
+  page: P,
+  key: keyof (typeof sceneCopy)[P]
 ): string {
-  return edits[proof]?.[String(key)] ?? String(proofCopy[proof][key])
+  return edits[page]?.[String(key)] ?? String(sceneCopy[page][key])
 }

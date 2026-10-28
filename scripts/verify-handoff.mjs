@@ -20,12 +20,10 @@ export async function verifyHandoff(browser, baseURL) {
     const frame = page.getByRole('region', { name: 'Shared theme workshop', exact: true })
     const handoff = frame.getByRole('region', { name: 'Theme handoff', exact: true })
     const field = label => handoff.getByRole('textbox', { name: label, exact: true })
-    const canvas = frame.locator('.workshop-canvas')
+    const canvas = frame.locator('.preview-page').first()
     const variable = key =>
       canvas.evaluate((node, key) => getComputedStyle(node).getPropertyValue(key).trim(), key)
-    await page.waitForFunction(
-      () => !document.querySelector('.theme-workshop .demo-controls button').disabled
-    )
+    await page.waitForFunction(() => !document.querySelector('.preview-toolbar button').disabled)
     await handoff.getByText('Reusable configuration JSON', { exact: true }).click()
     const baseline = await field('Configuration output').inputValue()
     assert.equal(JSON.parse(baseline).kind, 'radiant-workshop')
@@ -77,8 +75,8 @@ export async function verifyHandoff(browser, baseURL) {
     assert.equal(file.suggestedFilename(), 'radiant-workshop.json')
     assert.equal(await readFile(await file.path(), 'utf8'), baseline)
     await file.delete()
-    await frame.getByRole('combobox', { name: 'Specimen', exact: true }).selectOption('form')
-    await canvas.getByRole('textbox', { name: 'Display name' }).fill('Private Ada')
+    await frame.getByRole('combobox', { name: 'Scene', exact: true }).selectOption('page:form')
+    await canvas.getByRole('textbox', { name: 'Name shown to collaborators' }).fill('Private Ada')
     const config = handoffAPI.configuration(
       ...(() => {
         const { document, recipes } = handoffFixture()
@@ -97,7 +95,7 @@ export async function verifyHandoff(browser, baseURL) {
     )
     assert.equal(await field('Configuration output').inputValue(), text)
     assert.equal(
-      await canvas.getByRole('textbox', { name: 'Display name' }).inputValue(),
+      await canvas.getByRole('textbox', { name: 'Name shown to collaborators' }).inputValue(),
       'Private Ada'
     )
     assert.equal(await variable('--rad-button-radius'), '27px')

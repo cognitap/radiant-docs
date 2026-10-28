@@ -8,15 +8,20 @@ export function WorkshopDemo() {
       files={[
         'workshop/ThemeWorkshop.tsx',
         'workshop/workshop-theme.ts',
+        'workshop/workshop-preview.ts',
+        'workshop/Preview.tsx',
+        'workshop/PreviewFrame.tsx',
+        'workshop/preview-tools.tsx',
+        'workshop/PageScenes.tsx',
+        'workshop/page-copy.ts',
+        'workshop/ComponentScene.tsx',
+        'workshop/TypographyTools.tsx',
+        'workshop/preview.css',
         'workshop/MotionEditor.tsx',
-        'workshop/MotionProofs.tsx',
+        'workshop/MotionScenes.tsx',
         'workshop/MotionInspector.tsx',
         'workshop/workshop-motion.ts',
         'workshop/motion-editor.css',
-        'workshop/TypographyProofs.tsx',
-        'workshop/ProofPages.tsx',
-        'workshop/proof-content.ts',
-        'workshop/typography-proofs.css',
         'workshop/TypographyEditor.tsx',
         'workshop/workshop-typography.ts',
         'workshop/typography-editor.css',
@@ -35,12 +40,8 @@ export function WorkshopDemo() {
         'workshop/workshop-handoff.ts',
         'workshop/workshop-share.ts',
         'workshop/theme-handoff.css',
-        'workshop/Specimens.tsx',
         'workshop/workshop.css',
-        'profile/NativeProfileForm.tsx',
-        'profile/profile.ts',
-        'profile/useHydrated.ts',
-        'profile/profile-form.css'
+        'profile/useHydrated.ts'
       ]}
     >
       <ThemeWorkshop />

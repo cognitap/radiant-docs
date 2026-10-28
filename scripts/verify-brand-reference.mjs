@@ -32,13 +32,11 @@ export async function verifyBrandReference(browser, baseURL) {
   try {
     await page.goto(`${baseURL}/workshop/`)
     const frame = page.getByRole('region', { name: 'Shared theme workshop', exact: true })
-    await page.waitForFunction(
-      () => !document.querySelector('.theme-workshop .demo-controls button').disabled
-    )
+    await page.waitForFunction(() => !document.querySelector('.preview-toolbar button').disabled)
     const brand = frame.getByRole('textbox', { name: 'Brand color', exact: true })
     const mode = frame.getByRole('combobox', { name: 'Preview mode', exact: true })
-    const specimen = frame.getByRole('combobox', { name: 'Specimen', exact: true })
-    const canvas = frame.locator('.workshop-canvas')
+    const scene = frame.getByRole('combobox', { name: 'Scene', exact: true })
+    const canvas = frame.locator('.preview-page').first()
     const wallPreset = frame.getByRole('combobox', { name: 'Wall preset', exact: true })
     const rampPreset = frame.getByRole('combobox', { name: 'Brand ramp preset', exact: true })
     for (const wall of ['classic', 'balanced', 'expressive'])
@@ -118,17 +116,23 @@ export async function verifyBrandReference(browser, baseURL) {
           Object.keys(expected)
         )
         assert.deepEqual(actual, expected, `${value}/${selectedMode}: actual semantic variables`)
-        for (const choice of ['article', 'form', 'dashboard', 'landing', 'components']) {
-          await specimen.selectOption(choice)
+        for (const choice of [
+          'page:article',
+          'page:form',
+          'page:data',
+          'page:landing',
+          'components'
+        ]) {
+          await scene.selectOption(choice)
           assert.equal(await canvas.isVisible(), true)
-          if (choice === 'form') {
+          if (choice === 'page:form') {
             await canvas.screenshot({ path: `output/docs/brand-${slug}-${selectedMode}.png` })
           }
         }
         await frame
           .getByRole('combobox', { name: 'Component state', exact: true })
           .selectOption('invalid')
-        assert.ok(await canvas.locator('section:not([hidden]) input[aria-invalid="true"]').count())
+        assert.ok(await canvas.locator('input[aria-invalid="true"]').count())
         await frame
           .getByRole('combobox', { name: 'Component state', exact: true })
           .selectOption('rest')

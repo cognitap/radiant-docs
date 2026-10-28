@@ -25,16 +25,20 @@ export async function verifyMotionEditor(browser, baseURL) {
   try {
     await page.goto(`${baseURL}/workshop/`)
     const workshop = page.locator('.theme-workshop')
-    await page.waitForFunction(
-      () => !document.querySelector('.theme-workshop .demo-controls button')?.disabled
-    )
+    await page.waitForFunction(() => !document.querySelector('.preview-toolbar button')?.disabled)
     await workshop.getByRole('button', { name: 'Motion', exact: true }).click()
     const editor = workshop.locator('.motion-editor'),
-      bench = workshop.locator('.motion-proofs')
+      preview = page.getByRole('region', { name: 'Theme preview', exact: true })
+    const scene = preview.getByRole('combobox', { name: 'Scene', exact: true })
+    const compare = preview.getByRole('combobox', { name: 'Compare', exact: true })
+    const frameOf = name => preview.getByRole('figure', { name, exact: true })
+    const replay = () => preview.getByRole('button', { name: /^Replay( both)?$/ }).click()
+    const resetScene = () =>
+      preview.getByRole('button', { name: 'Reset scene', exact: true }).click()
     const number = name => editor.getByRole('spinbutton', { name, exact: true })
     const scope = editor.getByRole('combobox', { name: 'Profile scope', exact: true })
     const preset = editor.getByRole('combobox', { name: 'Starting point', exact: true })
-    const primary = () => bench.locator('.motion-frame').first()
+    const primary = () => preview.locator('.preview-frame').first()
     const press = () => primary().getByRole('button', { name: 'Press me', exact: true })
     await number('Stiffness').fill('450')
     await scope.selectOption('press')
@@ -70,7 +74,7 @@ export async function verifyMotionEditor(browser, baseURL) {
     )
     await page.keyboard.up('Space')
     assert.equal(await primary().locator('.motion-action-count').innerText(), 'Activated 1 time')
-    await primary().getByRole('button', { name: 'Replay', exact: true }).click()
+    await replay()
     await page.waitForFunction(
       node => parseFloat(getComputedStyle(node).scale) < 0.999,
       await press().elementHandle()
@@ -81,20 +85,20 @@ export async function verifyMotionEditor(browser, baseURL) {
       'replay does not activate the native action'
     )
     await primary().getByRole('combobox', { name: 'Inspect action' }).selectOption('disclosure')
-    await primary().getByRole('button', { name: 'Replay', exact: true }).click()
+    await replay()
     const disclosure = primary().locator('details[data-slot~="collapsible"]')
     await page.waitForFunction(node => node.open, await disclosure.elementHandle())
-    await primary().getByRole('button', { name: 'Replay', exact: true }).click()
+    await replay()
     await page.waitForFunction(node => !node.open, await disclosure.elementHandle())
     await primary().getByRole('button', { name: 'Try a modal' }).click()
     const dialog = primary().getByRole('dialog')
     await dialog.waitFor()
     await page.keyboard.press('Escape')
     assert.equal(await dialog.count(), 0, 'modal semantics close immediately')
-    await bench.getByRole('combobox', { name: 'Comparison', exact: true }).selectOption('character')
-    assert.equal(await bench.locator('.motion-frame').count(), 2)
-    const restrained = bench.getByRole('region', { name: 'Restrained motion example', exact: true })
-    const expressive = bench.getByRole('region', { name: 'Expressive motion example', exact: true })
+    await compare.selectOption('character')
+    assert.equal(await preview.locator('.preview-frame').count(), 2)
+    const restrained = frameOf('Restrained')
+    const expressive = frameOf('Expressive')
     const oldCount = await expressive.locator('.motion-action-count').innerText()
     await restrained.getByRole('button', { name: 'Press me', exact: true }).click()
     assert.equal(
@@ -102,13 +106,13 @@ export async function verifyMotionEditor(browser, baseURL) {
       oldCount,
       'comparison state is independent'
     )
-    await bench.getByRole('combobox', { name: 'Comparison', exact: true }).selectOption('off')
-    await bench.getByRole('button', { name: 'Drag & snap', exact: true }).click()
+    await compare.selectOption('off')
+    await scene.selectOption('motion:drag')
     const handle = primary().getByRole('button', { name: 'Drag', exact: true })
-    const offFrame = bench.getByRole('region', { name: 'Motion off motion example', exact: true })
+    const offFrame = frameOf('Motion off')
     const offHandle = offFrame.getByRole('button', { name: 'Drag', exact: true })
     await page.waitForFunction(() =>
-      [...document.querySelectorAll('.motion-frame')].every(frame => {
+      [...document.querySelectorAll('.preview-frame')].every(frame => {
         const track = frame.querySelector('.motion-drag-track')
         const handle = frame.querySelector('.motion-drag-handle')
         const slider = frame.querySelector('input[type="range"]')
@@ -145,13 +149,13 @@ export async function verifyMotionEditor(browser, baseURL) {
     await waitPosition(page, handle, max)
     await page.waitForFunction(
       expected =>
-        Number(document.querySelector('.motion-frame input[type="range"]').value) === expected,
+        Number(document.querySelector('.preview-frame input[type="range"]').value) === expected,
       max
     )
-    await bench.getByRole('button', { name: 'Moving target', exact: true }).click()
-    await bench.getByRole('button', { name: 'Drag & snap', exact: true }).click()
+    await scene.selectOption('motion:follow')
+    await scene.selectOption('motion:drag')
     await waitPosition(page, handle, max)
-    await primary().getByRole('button', { name: 'Reset example', exact: true }).click()
+    await resetScene()
     await waitPosition(page, handle, 0)
     const box = await handle.boundingBox()
     const cdp = await context.newCDPSession(page)
@@ -171,11 +175,11 @@ export async function verifyMotionEditor(browser, baseURL) {
       await handle.elementHandle()
     )
     await cdp.detach()
-    await bench.getByRole('combobox', { name: 'Comparison', exact: true }).selectOption('current')
-    await bench.getByRole('button', { name: 'Moving target', exact: true }).click()
+    await compare.selectOption('none')
+    await scene.selectOption('motion:follow')
     await primary().getByRole('button', { name: 'Start moving target', exact: true }).click()
     await page.waitForFunction(() => {
-      const root = document.querySelector('.motion-proofs .motion-frame')
+      const root = document.querySelector('.preview-frame')
       const a = root.querySelector('.motion-target-marker'),
         b = root.querySelector('.motion-follow-marker')
       return (
@@ -199,12 +203,12 @@ export async function verifyMotionEditor(browser, baseURL) {
       manualTarget,
       'theme reset retains example state'
     )
-    await primary().getByRole('button', { name: 'Reset example', exact: true }).click()
+    await resetScene()
     assert.equal(
       await primary().getByRole('slider', { name: 'Manual destination', exact: true }).inputValue(),
       '80'
     )
-    await bench.getByRole('button', { name: 'Resize & reorder', exact: true }).click()
+    await scene.selectOption('motion:layout')
     const card = primary().locator('[data-rad-layout-part]').first()
     const initialWidth = await card.evaluate(node => node.getBoundingClientRect().width)
     await primary().getByRole('button', { name: 'Resize cards', exact: true }).click()
@@ -223,30 +227,29 @@ export async function verifyMotionEditor(browser, baseURL) {
     await primary().getByRole('button', { name: 'Resume inspection', exact: true }).click()
     await page.emulateMedia({ reducedMotion: 'reduce' })
     await primary().getByText('Spatial motion off', { exact: false }).waitFor()
-    await bench.getByRole('button', { name: 'Press & disclose', exact: true }).click()
+    await scene.selectOption('motion:actions')
     await press().focus()
     await page.keyboard.down('Space')
     assert.equal(await press().evaluate(node => getComputedStyle(node).scale), '1')
     await page.keyboard.up('Space')
     await page.emulateMedia({ reducedMotion: 'no-preference' })
     await primary().getByText('Spring motion active', { exact: false }).waitFor()
-    await bench.getByRole('combobox', { name: 'Comparison', exact: true }).selectOption('reduced')
+    await compare.selectOption('reduced')
     assert.equal(
-      await bench
-        .getByRole('region', { name: 'Reduced motion preview motion example', exact: true })
+      await frameOf('Reduced motion preview')
         .getByText('Spatial motion off', { exact: false })
         .isVisible(),
       true
     )
-    await bench.getByRole('combobox', { name: 'Comparison', exact: true }).selectOption('current')
+    await compare.selectOption('none')
     await editor.getByRole('combobox', { name: 'Theme motion', exact: true }).selectOption('off')
     await primary().getByText('Spatial motion off', { exact: false }).waitFor()
     await editor.getByRole('combobox', { name: 'Theme motion', exact: true }).selectOption('system')
     for (const width of [390, 320]) {
       await page.setViewportSize({ width, height: 900 })
-      for (const name of ['Press & disclose', 'Drag & snap', 'Moving target', 'Resize & reorder']) {
-        await bench.getByRole('button', { name, exact: true }).click()
-        await primary().getByRole('button', { name: 'Replay', exact: true }).click()
+      for (const name of ['motion:actions', 'motion:drag', 'motion:follow', 'motion:layout']) {
+        await scene.selectOption(name)
+        await replay()
         assert.ok(
           await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1),
           `${name}: no ${width}px page overflow`
@@ -254,16 +257,14 @@ export async function verifyMotionEditor(browser, baseURL) {
       }
     }
     await page.setViewportSize({ width: 1600, height: 1100 })
-    await bench.getByRole('combobox', { name: 'Comparison', exact: true }).selectOption('character')
+    await compare.selectOption('character')
     await mkdir(new URL('../output/docs/', import.meta.url), { recursive: true })
-    await bench.screenshot({ path: 'output/docs/motion-editor-light.png' })
+    await preview.screenshot({ path: 'output/docs/motion-editor-light.png' })
     await page.getByRole('combobox', { name: 'Appearance', exact: true }).selectOption('dark')
-    await bench
-      .getByRole('combobox', { name: 'Motion preview mode', exact: true })
-      .selectOption('dark')
-    await bench.screenshot({ path: 'output/docs/motion-editor-dark.png' })
+    await preview.getByRole('combobox', { name: 'Preview mode', exact: true }).selectOption('dark')
+    await preview.screenshot({ path: 'output/docs/motion-editor-dark.png' })
     await page.setViewportSize({ width: 320, height: 900 })
-    await bench.screenshot({ path: 'output/docs/motion-editor-phone.png' })
+    await preview.screenshot({ path: 'output/docs/motion-editor-phone.png' })
     assert.deepEqual(errors, [], 'no hydration, runtime or asset errors')
     await writeFile(
       'output/docs/motion-editor-results.json',

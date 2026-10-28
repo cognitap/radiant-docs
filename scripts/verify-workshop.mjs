@@ -2,16 +2,64 @@ import { setTypographyFamily } from './typography-controls.mjs'
 import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 
+const workshopFiles = [
+  'workshop/ThemeWorkshop.tsx',
+  'workshop/workshop-theme.ts',
+  'workshop/workshop-preview.ts',
+  'workshop/Preview.tsx',
+  'workshop/PreviewFrame.tsx',
+  'workshop/preview-tools.tsx',
+  'workshop/PageScenes.tsx',
+  'workshop/page-copy.ts',
+  'workshop/ComponentScene.tsx',
+  'workshop/TypographyTools.tsx',
+  'workshop/preview.css',
+  'workshop/MotionEditor.tsx',
+  'workshop/MotionScenes.tsx',
+  'workshop/MotionInspector.tsx',
+  'workshop/workshop-motion.ts',
+  'workshop/motion-editor.css',
+  'workshop/TypographyEditor.tsx',
+  'workshop/workshop-typography.ts',
+  'workshop/typography-editor.css',
+  'workshop/FontEditor.tsx',
+  'workshop/workshop-fonts.ts',
+  'workshop/font-requirements.ts',
+  'workshop/font-runtime.ts',
+  'workshop/font-editor.css',
+  'workshop/workshop-color.ts',
+  'workshop/ColorEditor.tsx',
+  'workshop/color-editor.css',
+  'workshop/GeometryEditor.tsx',
+  'workshop/workshop-geometry.ts',
+  'workshop/geometry-editor.css',
+  'workshop/ThemeHandoff.tsx',
+  'workshop/workshop-handoff.ts',
+  'workshop/workshop-share.ts',
+  'workshop/theme-handoff.css',
+  'workshop/workshop.css',
+  'profile/useHydrated.ts'
+]
+const articleTitle = 'Make room for the useful things, and the people who use them.'
+
+/** The one preview must stay in view while any editor control changes. */
+async function assertPreviewInView(page, label) {
+  const previews = page.getByRole('region', { name: 'Theme preview', exact: true })
+  assert.equal(await previews.count(), 1, `${label}: exactly one preview region`)
+  const visible = await previews.evaluate(node => {
+    const rect = node.getBoundingClientRect()
+    return rect.bottom > 0 && rect.top < innerHeight && rect.right > 0 && rect.left < innerWidth
+  })
+  assert.equal(visible, true, `${label}: preview intersects the viewport without scrolling`)
+}
+
 export async function verifyWorkshop(browser, baseURL) {
   const staticPage = await browser.newPage({ javaScriptEnabled: false })
   assert.equal((await staticPage.goto(`${baseURL}/workshop/`)).status(), 200)
-  assert.equal(
-    await staticPage.getByRole('heading', { name: 'Make room for the useful things.' }).isVisible(),
-    true
-  )
+  assert.equal(await staticPage.getByRole('heading', { name: articleTitle }).isVisible(), true)
   const staticFrame = staticPage.getByRole('region', { name: 'Shared theme workshop', exact: true })
   await staticFrame.locator('.demo-sources > summary').press('Enter')
-  assert.equal(await staticFrame.locator('.demo-sources pre').count(), 35)
+  assert.equal(await staticFrame.locator('.demo-sources pre').count(), workshopFiles.length)
   await staticPage.close()
 
   const widePage = await browser.newPage({ viewport: { width: 1440, height: 900 } })
@@ -23,6 +71,44 @@ export async function verifyWorkshop(browser, baseURL) {
   const docsColumnWidth = 52 * 16
   const frameWidth = (await wideFrame.boundingBox()).width
   assert.ok(frameWidth > docsColumnWidth + 200, `workshop frame is ${frameWidth}px wide`)
+  await widePage.waitForFunction(() => !document.querySelector('.preview-toolbar button').disabled)
+  const wideEditor = async name => {
+    await wideFrame.getByRole('button', { name, exact: true }).click()
+    await assertPreviewInView(widePage, name)
+  }
+  await wideFrame.getByRole('textbox', { name: 'Brand color', exact: true }).fill('#166534')
+  await assertPreviewInView(widePage, 'brand color')
+  const editorBox = await wideFrame.locator('.workshop-editor').boundingBox()
+  const previewBox = await widePage
+    .getByRole('region', { name: 'Theme preview', exact: true })
+    .boundingBox()
+  assert.ok(
+    editorBox.x + editorBox.width <= previewBox.x + 1,
+    'controls sit beside the preview at 1440px'
+  )
+  await wideEditor('Typography')
+  await setTypographyFamily(wideFrame)
+  await assertPreviewInView(widePage, 'typography control')
+  await wideEditor('Spacing & surfaces')
+  await wideFrame.getByRole('spinbutton', { name: 'Surface radius (px)', exact: true }).fill('24')
+  await assertPreviewInView(widePage, 'geometry control')
+  await wideEditor('Motion')
+  await wideFrame
+    .locator('.motion-editor')
+    .getByRole('spinbutton', { name: 'Stiffness', exact: true })
+    .fill('450')
+  await assertPreviewInView(widePage, 'motion control')
+  assert.equal(
+    await wideFrame.getByRole('combobox', { name: 'Scene', exact: true }).inputValue(),
+    'motion:actions',
+    'the Motion editor switches a page scene to a motion scene'
+  )
+  await wideEditor('Color')
+  assert.equal(
+    await wideFrame.getByRole('combobox', { name: 'Scene', exact: true }).inputValue(),
+    'page:article',
+    'leaving Motion returns to the last page scene'
+  )
   await widePage.goto(`${baseURL}/docs/workshop/`)
   assert.equal((await widePage.locator('main a[href="/workshop/"]').count()) > 0, true)
   assert.equal(await widePage.getByRole('region', { name: 'Shared theme workshop' }).count(), 0)
@@ -41,12 +127,10 @@ export async function verifyWorkshop(browser, baseURL) {
   try {
     await page.goto(`${baseURL}/workshop/`)
     const frame = page.getByRole('region', { name: 'Shared theme workshop', exact: true })
-    const canvas = frame.locator('.workshop-canvas')
-    await frame.getByRole('button', { name: 'Reset specimen', exact: true }).waitFor()
-    await page.waitForFunction(
-      () => !document.querySelector('.theme-workshop .demo-controls button').disabled
-    )
-    const specimen = frame.getByRole('combobox', { name: 'Specimen', exact: true })
+    const canvas = frame.locator('.preview-page').first()
+    await frame.getByRole('button', { name: 'Reset scene', exact: true }).waitFor()
+    await page.waitForFunction(() => !document.querySelector('.preview-toolbar button').disabled)
+    const scene = frame.getByRole('combobox', { name: 'Scene', exact: true })
     const mode = frame.getByRole('combobox', { name: 'Preview mode', exact: true })
     const width = frame.getByRole('combobox', { name: 'Preview width', exact: true })
     const variable = name =>
@@ -58,11 +142,14 @@ export async function verifyWorkshop(browser, baseURL) {
       assert.equal(await button.getAttribute('aria-pressed'), 'true')
     }
     const baseline = await variable('--rad-color-accent')
-    await specimen.selectOption('form')
-    const form = canvas.getByRole('form', { name: 'Edit profile' })
-    await form.getByRole('textbox', { name: 'Display name' }).fill('Workshop Ada')
-    await form.getByRole('textbox', { name: 'Email address' }).fill('ada@example.com')
-    await form.getByRole('button', { name: 'Save profile' }).click()
+    await scene.selectOption('page:form')
+    const form = canvas.getByRole('form', { name: 'Workspace preferences' })
+    const name = () => form.getByRole('textbox', { name: 'Name shown to collaborators' })
+    await name().fill('Workshop Ada')
+    await form
+      .getByRole('textbox', { name: 'Email for important account updates' })
+      .fill('ada@example.com')
+    await form.getByRole('button', { name: 'Save preferences' }).click()
     await canvas
       .getByRole('status')
       .filter({ hasText: 'Saved locally for Workshop Ada.' })
@@ -79,11 +166,12 @@ export async function verifyWorkshop(browser, baseURL) {
       .locator('.motion-editor')
       .getByRole('spinbutton', { name: 'Stiffness', exact: true })
       .fill('450')
-    assert.equal(
-      await form.getByRole('textbox', { name: 'Display name' }).inputValue(),
-      'Workshop Ada'
-    )
+    assert.equal(await scene.inputValue(), 'motion:actions')
+    await selectEditor('Spacing & surfaces')
+    assert.equal(await scene.inputValue(), 'page:form', 'the form scene survives a motion visit')
+    assert.equal(await name().inputValue(), 'Workshop Ada')
     assert.equal(await variable('--rad-surface-radius'), '24px')
+    await selectEditor('Motion')
     assert.equal(
       await frame
         .locator('.motion-editor')
@@ -96,18 +184,17 @@ export async function verifyWorkshop(browser, baseURL) {
     assert.equal(await variable('--rad-color-accent'), baseline)
     assert.equal(await variable('--rad-surface-radius'), '24px')
     assert.equal(await variable(typographyFamily), 'Georgia, serif')
-    assert.equal(
-      await form.getByRole('textbox', { name: 'Display name' }).inputValue(),
-      'Workshop Ada'
-    )
+    assert.equal(await name().inputValue(), 'Workshop Ada')
     await frame.getByRole('textbox', { name: 'Brand color', exact: true }).fill('#166534')
-    await specimen.selectOption('dashboard')
-    await canvas.getByRole('textbox', { name: 'Filter projects' }).fill('Design')
+    await scene.selectOption('page:data')
+    const filter = () =>
+      canvas.getByRole('textbox', { name: 'Filter projects by name, team or status' })
+    await filter().fill('Design')
     assert.equal(await canvas.locator('tbody tr').count(), 2)
-    await specimen.selectOption('landing')
+    await scene.selectOption('page:landing')
     await canvas.getByRole('button', { name: 'Join the list' }).click()
     await canvas.getByRole('status').filter({ hasText: 'local list' }).waitFor()
-    await specimen.selectOption('components')
+    await scene.selectOption('components')
     const action = canvas.getByRole('button', { name: 'Try the action' })
     await action.click()
     const count = canvas.getByRole('status').filter({ hasText: 'Action activated' })
@@ -141,40 +228,32 @@ export async function verifyWorkshop(browser, baseURL) {
       assert.equal(await canvas.getAttribute('data-rad-mode'), next)
     }
     assert.equal(await page.locator('.site-theme').getAttribute('data-docs-mode'), siteMode)
-    await frame.getByRole('button', { name: 'Reset specimen', exact: true }).click()
+    await frame.getByRole('button', { name: 'Reset scene', exact: true }).click()
     assert.equal(await count.innerText(), 'Action activated 0 times.')
-    await specimen.selectOption('form')
-    assert.equal(
-      await form.getByRole('textbox', { name: 'Display name' }).inputValue(),
-      'Workshop Ada'
-    )
-    await specimen.selectOption('dashboard')
-    assert.equal(
-      await canvas.getByRole('textbox', { name: 'Filter projects' }).inputValue(),
-      'Design'
-    )
+    await scene.selectOption('page:form')
+    assert.equal(await name().inputValue(), 'Workshop Ada')
+    await scene.selectOption('page:data')
+    assert.equal(await filter().inputValue(), 'Design')
 
     for (const viewport of [390, 320]) {
       await page.setViewportSize({ width: viewport, height: 844 })
-      for (const name of ['article', 'form', 'dashboard', 'landing', 'components']) {
-        await specimen.selectOption(name)
-        await width.selectOption('phone')
+      for (const id of ['page:article', 'page:form', 'page:data', 'page:landing', 'components']) {
+        await scene.selectOption(id)
+        await width.selectOption('390')
         for (const next of ['light', 'dark']) {
           await mode.selectOption(next)
           assert.equal(
             await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth),
             true,
-            `${viewport}-${name}-${next}: page overflow`
+            `${viewport}-${id}-${next}: page overflow`
           )
         }
       }
-      await specimen.selectOption('dashboard')
-      const table = canvas.getByRole('region', { name: 'Team activity' })
+      await scene.selectOption('page:data')
+      const table = canvas.getByRole('region', { name: 'Team activity and monthly commitments' })
       await table.focus()
       await page.keyboard.press('ArrowRight')
-      await page.waitForFunction(
-        () => document.querySelector('.workshop-table-scroll').scrollLeft > 0
-      )
+      await page.waitForFunction(() => document.querySelector('.scene-scroll').scrollLeft > 0)
       assert.ok(
         await table.evaluate(node => node.scrollLeft > 0),
         'table scrolls from the keyboard'
@@ -182,73 +261,35 @@ export async function verifyWorkshop(browser, baseURL) {
       await page.screenshot({ path: `output/docs/workshop-${viewport}.png`, fullPage: true })
     }
     await page.setViewportSize({ width: 1280, height: 1000 })
-    await width.selectOption('full')
+    await width.selectOption('fill')
     await mode.selectOption('light')
-    await specimen.selectOption('article')
+    await scene.selectOption('page:article')
     await page.screenshot({ path: 'output/docs/workshop-desktop.png', fullPage: true })
     const disclosure = frame.locator('.demo-sources > summary')
     await disclosure.focus()
     await disclosure.press('Enter')
-    for (const file of [
-      'workshop/ThemeWorkshop.tsx',
-      'workshop/workshop-theme.ts',
-      'workshop/MotionEditor.tsx',
-      'workshop/MotionProofs.tsx',
-      'workshop/MotionInspector.tsx',
-      'workshop/workshop-motion.ts',
-      'workshop/motion-editor.css',
-      'workshop/TypographyProofs.tsx',
-      'workshop/ProofPages.tsx',
-      'workshop/proof-content.ts',
-      'workshop/typography-proofs.css',
-      'workshop/TypographyEditor.tsx',
-      'workshop/workshop-typography.ts',
-      'workshop/typography-editor.css',
-      'workshop/FontEditor.tsx',
-      'workshop/workshop-fonts.ts',
-      'workshop/font-runtime.ts',
-      'workshop/font-editor.css',
-      'workshop/workshop-color.ts',
-      'workshop/ColorEditor.tsx',
-      'workshop/color-editor.css',
-      'workshop/GeometryEditor.tsx',
-      'workshop/workshop-geometry.ts',
-      'workshop/geometry-editor.css',
-      'workshop/ThemeHandoff.tsx',
-      'workshop/workshop-handoff.ts',
-      'workshop/workshop-share.ts',
-      'workshop/theme-handoff.css',
-      'workshop/Specimens.tsx',
-      'workshop/workshop.css',
-      'profile/NativeProfileForm.tsx',
-      'profile/profile.ts',
-      'profile/useHydrated.ts',
-      'profile/profile-form.css'
-    ]) {
+    for (const file of workshopFiles) {
       const actual = await readFile(new URL(`../examples/${file}`, import.meta.url), 'utf8')
       assert.equal(await frame.getByLabel(`Source: ${file}`, { exact: true }).textContent(), actual)
     }
-    await frame.getByRole('button', { name: 'Copy workshop/Specimens.tsx', exact: true }).click()
+    await frame.getByRole('button', { name: 'Copy workshop/PageScenes.tsx', exact: true }).click()
     assert.equal(
       await page.evaluate(() => navigator.clipboard.readText()),
-      await readFile(new URL('../examples/workshop/Specimens.tsx', import.meta.url), 'utf8')
+      await readFile(new URL('../examples/workshop/PageScenes.tsx', import.meta.url), 'utf8')
     )
     const reset = frame.getByRole('button', { name: 'Reset preview', exact: true })
     await reset.focus()
     await reset.press('Enter')
     assert.equal(await reset.evaluate(node => node === document.activeElement), true)
     assert.equal(await frame.locator('.demo-sources').getAttribute('open'), '')
-    assert.equal(await specimen.inputValue(), 'article')
-    await specimen.selectOption('form')
-    assert.notEqual(
-      await form.getByRole('textbox', { name: 'Display name' }).inputValue(),
-      'Workshop Ada'
-    )
+    assert.equal(await scene.inputValue(), 'page:article')
+    await scene.selectOption('page:form')
+    assert.notEqual(await name().inputValue(), 'Workshop Ada')
     await page.reload()
-    await page.getByRole('heading', { name: 'Make room for the useful things.' }).waitFor()
+    await page.getByRole('heading', { name: articleTitle }).waitFor()
     assert.deepEqual(errors, [], 'no workshop hydration/runtime/asset errors')
     console.log(
-      'Workshop passed: installed document editing and section resets, five isolated specimens, mode/viewport/state inspection, keyboard modal/table/reset, actual copied source, static/direct loads and 320px/390px layouts.'
+      'Workshop passed: installed document editing and section resets, one always-visible preview beside the controls, five isolated scenes, editor-driven scene switching, mode/width/state inspection, keyboard modal/table/reset, actual copied source, static/direct loads and 320px/390px layouts.'
     )
   } catch (error) {
     await page

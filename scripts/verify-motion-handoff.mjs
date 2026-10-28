@@ -15,9 +15,7 @@ export async function verifyMotionHandoff(browser, baseURL) {
     await page.goto(`${baseURL}/workshop/`)
     const workshop = page.locator('.theme-workshop')
     const handoff = workshop.locator('.theme-handoff')
-    await page.waitForFunction(
-      () => !document.querySelector('.theme-workshop .demo-controls button').disabled
-    )
+    await page.waitForFunction(() => !document.querySelector('.preview-toolbar button').disabled)
     await workshop.getByRole('button', { name: 'Motion', exact: true }).click()
     const editor = workshop.locator('.motion-editor')
     await editor.getByRole('spinbutton', { name: 'Stiffness', exact: true }).fill('450')
