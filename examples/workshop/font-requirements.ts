@@ -43,6 +43,43 @@ export function fontRequirements(document: object): FontRequirement[] {
   })
 }
 
+export const fontPlacement =
+  'Download the WOFF2 files and licenses. Place the WOFF2 files in ./fonts beside the setup CSS, or adapt the URLs for your app.'
+
+export interface FontFamilySummary {
+  family: string
+  source: FontRequirement['source']
+  weights: number[]
+  styles: string[]
+  files: FontRequirement['files']
+  license?: string
+  /** Set when the family has no catalog files to download. */
+  note?: string
+}
+
+/** One entry per family for the setup step: descriptors of the same family merge. */
+export function fontFamilies(requirements: readonly FontRequirement[]): FontFamilySummary[] {
+  const families = new Map<string, FontFamilySummary>()
+  for (const font of requirements) {
+    const key = `${font.source}/${font.family}`
+    const entry = families.get(key) ?? {
+      family: font.family,
+      source: font.source,
+      weights: [],
+      styles: [],
+      files: [],
+      license: font.license,
+      note: font.files.length ? undefined : font.instruction
+    }
+    entry.weights = [...new Set([...entry.weights, ...font.weights])].sort((a, b) => a - b)
+    entry.styles = [...new Set([...entry.styles, ...font.styles])]
+    for (const file of font.files)
+      if (!entry.files.some(known => known.url === file.url)) entry.files.push(file)
+    families.set(key, entry)
+  }
+  return [...families.values()]
+}
+
 export function fontSetup(document: object): string {
   const requirements = fontRequirements(document)
   const seen = new Set<string>()

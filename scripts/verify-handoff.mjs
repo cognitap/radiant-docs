@@ -208,9 +208,16 @@ export async function verifyHandoff(browser, baseURL) {
       0,
       'no preset card is picked for imported geometry'
     )
+    const families = await handoff.locator('.handoff-fonts li strong').allInnerTexts()
+    assert.equal(new Set(families).size, families.length, 'each font family is listed once')
+    assert.doesNotMatch(
+      await handoff.locator('.handoff-fonts').innerText(),
+      /Available axes|Trial-only/,
+      'the font step omits axes and trial notes'
+    )
     assert.ok(
       (await handoff.locator('.handoff-fonts').innerText()).includes(
-        'Local Display · local · weights 400, 700'
+        'Local Display · local · 400, 700'
       )
     )
 
@@ -538,7 +545,7 @@ export async function verifyHandoff(browser, baseURL) {
       )
       assert.match(
         await restored.locator('.handoff-fonts').innerText(),
-        /Missing brand[\s\S]*wght[\s\S]*File not included/
+        /Missing brand[\s\S]*File not included/
       )
       assert.equal(
         await reopened.evaluate(

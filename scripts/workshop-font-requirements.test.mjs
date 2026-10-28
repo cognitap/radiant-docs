@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { defineThemeDocument, updateThemeDocument } from '@cognitap/radiant'
-import { fontRequirements, fontSetup } from '../examples/workshop/font-requirements.ts'
+import { fontFamilies, fontRequirements, fontSetup } from '../examples/workshop/font-requirements.ts'
 import { curatedFonts, applyTrialFont } from '../examples/workshop/workshop-fonts.ts'
 import { handoffAPI } from '../examples/workshop/workshop-handoff.ts'
 
@@ -39,6 +39,29 @@ test('curated installation requirements name actual files, licenses, ranges and 
   assert.match(css, /font-display: swap/)
   assert.match(fontSetup(applyTrialFont(base(), curatedFonts[2], 500)), /font-stretch: 85% 100%/)
   assert.doesNotMatch(css, /blob:|data:|base64|https?:/)
+})
+
+test('the setup step lists each family once with merged weights, styles and files', () => {
+  let document = applyTrialFont(base(), curatedFonts[0], 400)
+  const inter = document.sections.typography.fonts[0]
+  document = updateThemeDocument(document, {
+    typography: {
+      fonts: [
+        { ...inter, weights: [400, 600], styles: ['normal'] },
+        { ...inter, id: 'heading', weights: [500, 600], styles: ['italic'] },
+        { id: 'brand', family: 'Brand', source: 'local', weights: [700], styles: ['normal'] }
+      ]
+    }
+  })
+  const families = fontFamilies(fontRequirements(document))
+  assert.deepEqual(
+    families.map(font => font.family),
+    ['Inter', 'Brand']
+  )
+  assert.deepEqual(families[0].weights, [400, 500, 600])
+  assert.deepEqual(families[0].styles, ['normal', 'italic'])
+  assert.equal(families[0].files.length, new Set(families[0].files.map(file => file.url)).size)
+  assert.match(families[1].note, /File not included/)
 })
 
 test('typography-only outputs preserve the native recipe/metadata and never paint other sections', () => {

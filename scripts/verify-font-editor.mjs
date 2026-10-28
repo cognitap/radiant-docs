@@ -179,6 +179,8 @@ export async function verifyFontEditor(browser, baseURL) {
       await frame.locator('.handoff-fonts').innerText(),
       /Brand font.*File not included/s
     )
+    const listed = await frame.locator('.handoff-fonts li strong').allInnerTexts()
+    assert.equal(new Set(listed).size, listed.length, 'each font family is listed once')
     await openFormat(frame.page(), 'Configuration file')
     const exported = JSON.parse(
       await frame.getByRole('textbox', { name: 'Configuration output', exact: true }).inputValue()

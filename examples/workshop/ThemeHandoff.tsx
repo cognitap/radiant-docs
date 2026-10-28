@@ -23,6 +23,7 @@ import {
   type SectionName
 } from './workshop-handoff'
 import { setupGuide, setups, type Setup, type SetupGuide, type SetupStep } from './workshop-setup'
+import { fontFamilies, fontPlacement } from './font-requirements'
 import { downloadText } from './workshop-download'
 import './theme-handoff.css'
 
@@ -217,6 +218,7 @@ export function ThemeHandoff({
   }
   const unavailable = !ready || !prepared.config
   const guide = prepared.guide
+  const families = fontFamilies(guide.fonts)
   const other = prepared.other
   const outputField = (item: SetupGuide) => `${item.output.label} output`
   /** Copy and download for one text, named after it. */
@@ -361,43 +363,42 @@ export function ThemeHandoff({
               >
                 <p>{step.text}</p>
                 {step.fonts && (
-                  <ul>
-                    {guide.fonts.map(font => (
-                      <li key={font.id}>
-                        <strong>{font.family}</strong> · {font.source} · weights{' '}
-                        {font.weights.join(', ') || 'unspecified'} · styles{' '}
-                        {font.styles.join(', ') || 'unspecified'}
-                        <p>
-                          Available axes:{' '}
-                          {font.axes
-                            .map(
-                              axis => `${axis.tag} ${axis.min}–${axis.max}, default ${axis.default}`
-                            )
-                            .join('; ') || 'not verified'}
-                          . Trial-only adjustments are not applied to the theme.
-                        </p>
-                        <p>{font.instruction}</p>
-                        {font.files.map(file => (
-                          <span key={file.style}>
-                            <a
-                              href={file.url}
-                              download
-                            >
-                              {file.style} WOFF2
-                            </a>{' '}
-                          </span>
-                        ))}
-                        {font.license && (
-                          <a
-                            href={font.license}
-                            download
-                          >
-                            Font license
-                          </a>
-                        )}
-                      </li>
-                    ))}
-                  </ul>
+                  <>
+                    {families.some(font => font.files.length > 0) && <p>{fontPlacement}</p>}
+                    <ul>
+                      {families.map(font => (
+                        <li key={`${font.source}/${font.family}`}>
+                          <strong>{font.family}</strong>
+                          {font.source !== 'catalog' && ` · ${font.source}`} ·{' '}
+                          {font.weights.join(', ') || 'unspecified'} ·{' '}
+                          {font.styles.join(', ') || 'unspecified'}
+                          {font.note && <> · {font.note}</>}
+                          {font.files.map(file => (
+                            <span key={file.url}>
+                              {' · '}
+                              <a
+                                href={file.url}
+                                download
+                              >
+                                {file.style} WOFF2
+                              </a>
+                            </span>
+                          ))}
+                          {font.license && (
+                            <>
+                              {' · '}
+                              <a
+                                href={font.license}
+                                download
+                              >
+                                Font license
+                              </a>
+                            </>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  </>
                 )}
                 {stepBody(step)}
               </li>

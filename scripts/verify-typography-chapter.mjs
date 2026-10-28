@@ -157,6 +157,8 @@ export async function verifyTypographyChapter(browser, baseURL) {
       await handoff.locator('.handoff-fonts').innerText(),
       /Chapter brand[\s\S]*File not included/
     )
+    const listed = await handoff.locator('.handoff-fonts li strong').allInnerTexts()
+    assert.equal(new Set(listed).size, listed.length, 'each font family is listed once')
     await workshop
       .locator('.font-editor')
       .getByRole('button', { name: 'Remove local font', exact: true })
