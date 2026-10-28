@@ -1,28 +1,21 @@
 import type { Theme, TypographyResult } from '@cognitap/radiant'
-import { documentAPI, initialDocument, readThemeDocument, type Editor } from './workshop-theme.ts'
+import { documentAPI, readThemeDocument, type Editor } from './workshop-theme.ts'
 import {
   colorAPI,
   colorFields,
-  defaultColorRecipe,
   type ColorFields,
   type ColorRecipe,
   type ColorSession
 } from './workshop-color.ts'
+import { geometryFields, type GeometryFields, type GeometryRecipe } from './workshop-geometry.ts'
 import {
-  geometryAPI,
-  geometryFields,
-  geometryPreset,
-  type GeometryFields,
-  type GeometryRecipe
-} from './workshop-geometry.ts'
-import {
-  applyTypesetting,
   documentTypesetting,
+  typographyFields,
   type TypographyFields
 } from './workshop-typography.ts'
-import { typographyFields } from './workshop-typography.ts'
 import { motionFields, type MotionFields } from './workshop-motion.ts'
 import { compareFields, type EditorChanges } from './workshop-fields.ts'
+import { handoffAPI, type Configuration } from './workshop-handoff.ts'
 
 /** Everything needed to restore the theme and its editor recipes; never preview or session state. */
 export interface ThemeSnapshot {
@@ -44,11 +37,19 @@ export interface ThemeChanges {
   motion: EditorChanges<MotionFields>
 }
 
-export function initialSnapshot(): ThemeSnapshot {
-  const geometry = geometryPreset()
-  const color = colorAPI.create(defaultColorRecipe())
-  const document = geometryAPI.apply(applyTypesetting(initialDocument(), {}), geometry)
-  return { document: colorAPI.apply(document, color), color: color.recipe, geometry }
+/** The handoff configuration is the snapshot's portable form; both directions validate. */
+export function snapshotConfiguration(snapshot: ThemeSnapshot): Configuration {
+  return handoffAPI.configuration(snapshot.document, {
+    color: snapshot.color ?? undefined,
+    geometry: snapshot.geometry ?? undefined
+  })
+}
+export function snapshotFromConfiguration(configuration: Configuration): ThemeSnapshot {
+  return {
+    document: configuration.document,
+    color: configuration.recipes.color ?? null,
+    geometry: configuration.recipes.geometry ?? null
+  }
 }
 export function viewTheme(snapshot: ThemeSnapshot): ThemeView {
   return {

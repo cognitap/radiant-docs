@@ -46,6 +46,13 @@ export async function encodeShare(text: string): Promise<string> {
     throw new Error('Configuration is too large for a share link. Download the JSON file instead.')
   return payload
 }
+/** The payload of a pasted share link, a bare payload, or null for anything else. */
+export function sharePayload(text: string): string | null {
+  const trimmed = text.trim()
+  const marker = trimmed.indexOf('#workshop=')
+  if (marker !== -1) return trimmed.slice(marker + '#workshop='.length)
+  return trimmed.startsWith('1.') ? trimmed : null
+}
 export async function decodeShare(payload: string): Promise<string> {
   if (payload.length > maxShareLength)
     throw new Error('Share link is too large. Import a configuration file instead.')

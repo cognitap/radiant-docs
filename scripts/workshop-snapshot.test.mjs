@@ -1,16 +1,13 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import {
-  initialSnapshot,
-  resetEditor,
-  themeChanges,
-  viewTheme
-} from '../examples/workshop/workshop-snapshot.ts'
+import { resetEditor, themeChanges, viewTheme } from '../examples/workshop/workshop-snapshot.ts'
+import { defaultRecipe, startingSnapshot } from '../examples/workshop/workshop-start.ts'
 import { colorAPI } from '../examples/workshop/workshop-color.ts'
 import { geometryAPI, changeGeometry } from '../examples/workshop/workshop-geometry.ts'
 import { changeMotion } from '../examples/workshop/workshop-motion.ts'
 import { changedFields } from '../examples/workshop/workshop-fields.ts'
 
+const initialSnapshot = () => startingSnapshot(defaultRecipe)
 const edit = (snapshot, patch) => ({ ...snapshot, ...patch })
 const withColor = (snapshot, recipe) => {
   const session = colorAPI.create(recipe)
