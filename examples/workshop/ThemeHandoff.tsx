@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useId, useMemo, useRef, useState } from 'react'
+import { useDeferredValue, useEffect, useId, useMemo, useRef, useState } from 'react'
 import { Button } from '@cognitap/radiant'
 import { useHydrated } from '../profile/useHydrated'
 import {
@@ -48,9 +48,13 @@ export function ThemeHandoff({
   const [feedback, setFeedback] = useState('')
   const [busy, setBusy] = useState('')
   const operation = useRef({ ticket: 0 })
+  /* Preparing the exports re-parses the whole document (about 25 ms), so it follows a drag
+     at low priority instead of running inside every input event. */
+  const deferredDocument = useDeferredValue(themeDocument)
+  const deferredRecipes = useDeferredValue(recipes)
   const prepared = useMemo(() => {
     try {
-      const config = handoffAPI.configuration(themeDocument, recipes)
+      const config = handoffAPI.configuration(deferredDocument, deferredRecipes)
       let css = '',
         cssError = '',
         typographyCSS = '',
@@ -93,7 +97,7 @@ export function ThemeHandoff({
         error: errorMessage(error)
       }
     }
-  }, [themeDocument, recipes])
+  }, [deferredDocument, deferredRecipes])
   const sections = prepared.config
     ? jsonText(handoffAPI.sections(prepared.config.document, selected))
     : ''
@@ -202,6 +206,7 @@ export function ThemeHandoff({
   return (
     <section
       className="theme-handoff"
+      data-settling={deferredDocument !== themeDocument || undefined}
       aria-label="Theme handoff"
     >
       <h3>Use your theme</h3>
