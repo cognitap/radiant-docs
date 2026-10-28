@@ -4,7 +4,15 @@ import { pickRadio } from './typography-controls.mjs'
 import { readFile } from 'node:fs/promises'
 import { handoffFixture } from './handoff-fixture.mjs'
 import { handoffAPI, jsonText } from '../examples/workshop/workshop-handoff.ts'
-import { openWorkshop, waitForEditors } from './workshop-entry.mjs'
+import { setupGuide, setups } from '../examples/workshop/workshop-setup.ts'
+import {
+  chooseSetup,
+  copyShareLink,
+  enterWorkshop,
+  openFormat,
+  openWorkshop,
+  waitForEditors
+} from './workshop-entry.mjs'
 
 export async function verifyHandoff(browser, baseURL) {
   const context = await browser.newContext({
@@ -22,64 +30,135 @@ export async function verifyHandoff(browser, baseURL) {
     const frame = page.getByRole('region', { name: 'Shared theme workshop', exact: true })
     const handoff = frame.getByRole('region', { name: 'Theme handoff', exact: true })
     const field = label => handoff.getByRole('textbox', { name: label, exact: true })
+    const button = name => handoff.getByRole('button', { name, exact: true })
     /** The outputs follow theme changes at low priority; read them once they have caught up. */
     const settled = () =>
       page.waitForFunction(() => !document.querySelector('.theme-handoff[data-settling]'))
+    const feedback = message =>
+      page.waitForFunction(
+        message => document.querySelector('.handoff-feedback').textContent === message,
+        message
+      )
+    const clipboard = () => page.evaluate(() => navigator.clipboard.readText())
     const canvas = frame.locator('.preview-page').first()
     const variable = key =>
       canvas.evaluate((node, key) => getComputedStyle(node).getPropertyValue(key).trim(), key)
+    async function copied(name, text, message) {
+      const action = button(name)
+      await action.focus()
+      await action.press('Enter')
+      await feedback(message)
+      assert.equal(await clipboard(), text)
+      assert.equal(await action.evaluate(node => node === document.activeElement), true)
+    }
+    async function downloaded(name, filename, text) {
+      const pending = page.waitForEvent('download')
+      await button(name).click()
+      const file = await pending
+      assert.equal(file.suggestedFilename(), filename)
+      assert.equal(await readFile(await file.path(), 'utf8'), text)
+      await file.delete()
+    }
     await page.waitForFunction(() => !document.querySelector('.preview-toolbar button').disabled)
-    await handoff.getByText('Reusable configuration JSON', { exact: true }).click()
+    const useTheme = frame.getByRole('button', { name: 'Use this theme', exact: true })
+    await useTheme.click()
+    assert.equal(
+      await page.evaluate(() => document.activeElement?.textContent),
+      'Use your theme',
+      'Use this theme hands focus to the export heading'
+    )
+    assert.ok(
+      await handoff.evaluate(node => node.getBoundingClientRect().top < innerHeight),
+      'the export area is in view'
+    )
+    await chooseSetup(page, 'React')
+    await openFormat(page, 'Configuration file')
     const baseline = await field('Configuration output').inputValue()
     assert.equal(JSON.parse(baseline).kind, 'radiant-workshop')
     const typed = await field('Typed theme output').inputValue()
-    const copy = handoff.getByRole('button', { name: 'Copy typed theme', exact: true })
-    await copy.focus()
-    await copy.press('Enter')
-    await page.waitForFunction(
-      () => document.querySelector('.handoff-feedback').textContent === 'Typed theme copied.'
+    await copied('Copy typed theme', typed, 'Typed theme copied.')
+    await downloaded('Download typed theme', 'radiant-theme.ts', typed)
+
+    const document = handoffAPI.read(baseline).document
+    for (const setup of setups) {
+      await chooseSetup(page, setup.label)
+      const guide = setupGuide(setup.id, document)
+      assert.equal(await field(`${guide.output.label} output`).inputValue(), guide.output.text)
+      assert.deepEqual(
+        await handoff.locator('.handoff-steps > li > p').allInnerTexts(),
+        guide.steps.map(step => step.text),
+        `${setup.id}: the numbered steps`
+      )
+      for (const step of guide.steps)
+        if (step.code !== undefined)
+          assert.equal(
+            await field(step.label).inputValue(),
+            step.code,
+            `${setup.id}: ${step.label}`
+          )
+      assert.equal(
+        await handoff
+          .locator('.handoff-format > summary')
+          .allInnerTexts()
+          .then(names => names.at(-2)),
+        setup.id === 'react' ? 'Scoped CSS' : 'Typed theme',
+        `${setup.id}: the other route sits under Other formats`
+      )
+    }
+    const css = await field('Theme CSS output').inputValue()
+    assert.equal(css, handoffAPI.cssOutput(document))
+    await copied('Copy theme CSS', css, 'Theme CSS copied.')
+    await downloaded('Download theme CSS', 'radiant-theme.css', css)
+    await copied(
+      'Copy install command',
+      handoffAPI.installCommand(false),
+      'Install command copied.'
     )
-    assert.equal(await page.evaluate(() => navigator.clipboard.readText()), typed)
-    assert.equal(await copy.evaluate(node => node === document.activeElement), true)
-    await handoff.getByText('Typography only · typed and CSS', { exact: true }).click()
-    for (const [button, output, feedback] of [
+    assert.ok(
+      (await handoff.locator('.handoff-steps').innerText()).includes(
+        'Spring profiles need the React runtime'
+      ),
+      'CSS and Tailwind say that springs need the runtime'
+    )
+    await page.reload()
+    await enterWorkshop(page)
+    assert.equal(
+      await page.getByRole('radio', { name: 'Tailwind', exact: true }).isChecked(),
+      true,
+      'the last choice is remembered after a reload'
+    )
+    await chooseSetup(page, 'React')
+
+    const expand = handoff.locator('.handoff-output .handoff-expand').first()
+    assert.equal(await expand.getAttribute('aria-expanded'), 'false')
+    const collapsedRows = await field('Typed theme output').getAttribute('rows')
+    await expand.click()
+    assert.ok(
+      Number(await field('Typed theme output').getAttribute('rows')) > Number(collapsedRows),
+      'Expand shows the whole output'
+    )
+    await expand.click()
+    assert.equal(await field('Typed theme output').getAttribute('rows'), collapsedRows)
+
+    await openFormat(page, 'Typography only')
+    for (const [name, output, message] of [
       [
         'Copy typography TypeScript',
         'Typography TypeScript output',
-        'Typography typed theme copied.'
+        'Typography TypeScript copied.'
       ],
       ['Copy typography CSS', 'Typography CSS output', 'Typography CSS copied.']
-    ]) {
-      const text = await field(output).inputValue()
-      const action = handoff.getByRole('button', { name: button, exact: true })
-      await action.focus()
-      await action.press('Enter')
-      await page.waitForFunction(
-        message => document.querySelector('.handoff-feedback').textContent === message,
-        feedback
-      )
-      assert.equal(await page.evaluate(() => navigator.clipboard.readText()), text)
-      assert.equal(await action.evaluate(node => node === document.activeElement), true)
-    }
+    ])
+      await copied(name, await field(output).inputValue(), message)
     assert.doesNotMatch(
       await field('Typography CSS output').inputValue(),
       /--rad-(?:color|control|surface|motion|button)-/
     )
-    await handoff.getByText('Required setup and fonts', { exact: true }).click()
-    const setup = await field('Font setup CSS output').inputValue()
-    await handoff.getByRole('button', { name: 'Copy font setup', exact: true }).click()
-    await page.waitForFunction(
-      () => document.querySelector('.handoff-feedback').textContent === 'Font setup CSS copied.'
-    )
-    assert.equal(await page.evaluate(() => navigator.clipboard.readText()), setup)
+    const setup = await field('Font setup CSS').inputValue()
+    await copied('Copy font setup CSS', setup, 'Font setup CSS copied.')
     assert.doesNotMatch(setup, /blob:|data:|base64/)
-    await handoff.getByText('Required setup and fonts', { exact: true }).click()
-    const download = page.waitForEvent('download')
-    await handoff.getByRole('button', { name: 'Download configuration', exact: true }).click()
-    const file = await download
-    assert.equal(file.suggestedFilename(), 'radiant-workshop.json')
-    assert.equal(await readFile(await file.path(), 'utf8'), baseline)
-    await file.delete()
+    await openFormat(page, 'Configuration file')
+    await downloaded('Download configuration', 'radiant-workshop.json', baseline)
     await frame.getByRole('combobox', { name: 'Scene', exact: true }).selectOption('page:form')
     await canvas.getByRole('textbox', { name: 'Name shown to collaborators' }).fill('Private Ada')
     const config = handoffAPI.configuration(
@@ -89,8 +168,9 @@ export async function verifyHandoff(browser, baseURL) {
       })()
     )
     const text = jsonText(config)
+    await openFormat(page, 'Import')
     const input = field('Configuration JSON')
-    const apply = handoff.getByRole('button', { name: 'Import JSON', exact: true })
+    const apply = button('Import JSON')
     await input.fill(text)
     await apply.click()
     await settled()
@@ -128,23 +208,42 @@ export async function verifyHandoff(browser, baseURL) {
       0,
       'no preset card is picked for imported geometry'
     )
-    await handoff.getByText('Required setup and fonts', { exact: true }).click()
     assert.ok(
-      (await handoff.locator('.handoff-setup').innerText()).includes(
+      (await handoff.locator('.handoff-fonts').innerText()).includes(
         'Local Display · local · weights 400, 700'
       )
     )
-    await handoff.getByRole('button', { name: 'Copy share link', exact: true }).click()
-    await page.waitForFunction(() =>
-      document.querySelector('.handoff-feedback').textContent.startsWith('Share link copied.')
+
+    const share = frame.getByRole('button', { name: 'Share', exact: true })
+    const popover = page.getByRole('dialog', { name: 'Share link', exact: true })
+    await share.focus()
+    await page.keyboard.press('Enter')
+    await popover.getByText('Link copied', { exact: true }).waitFor()
+    assert.equal(
+      await popover
+        .getByRole('textbox', { name: 'Share link', exact: true })
+        .evaluate(node => node === document.activeElement),
+      true,
+      'the popover opens with the link focused'
     )
-    const link = await field('Share link').inputValue()
+    const link = await popover
+      .getByRole('textbox', { name: 'Share link', exact: true })
+      .inputValue()
     assert.ok(link.startsWith(`${baseURL}/workshop/#workshop=1.`))
-    assert.equal(await page.evaluate(() => navigator.clipboard.readText()), link)
+    assert.equal(await clipboard(), link)
+    await page.keyboard.press('Escape')
+    await popover.waitFor({ state: 'hidden' })
+    assert.equal(
+      await share.evaluate(node => node === document.activeElement),
+      true,
+      'Escape closes the popover and returns focus to Share'
+    )
+    assert.equal(await handoff.getByRole('textbox', { name: 'Share link' }).count(), 0)
     const shared = await context.newPage()
     try {
       await shared.goto(link)
-      await shared.getByText('Reusable configuration JSON', { exact: true }).click()
+      await waitForEditors(shared)
+      await openFormat(shared, 'Configuration file')
       const exported = shared.getByRole('textbox', { name: 'Configuration output', exact: true })
       await shared.waitForFunction(() =>
         document.querySelector('.theme-handoff textarea[readonly]')?.value.includes('handoff-proof')
@@ -153,7 +252,8 @@ export async function verifyHandoff(browser, baseURL) {
       assert.equal(await checked(shared, 'Wall preset'), 'expressive')
       assert.equal(await checked(shared, 'Brand ramp preset'), 'classic')
       await shared.reload()
-      await shared.getByText('Reusable configuration JSON', { exact: true }).click()
+      await waitForEditors(shared)
+      await openFormat(shared, 'Configuration file')
       await shared.waitForFunction(() =>
         document.querySelector('.theme-handoff textarea[readonly]')?.value.includes('handoff-proof')
       )
@@ -256,7 +356,7 @@ export async function verifyHandoff(browser, baseURL) {
       '#7C3AED'
     )
     assert.equal(await variable('--rad-button-radius'), '27px')
-    await handoff.getByText('Selective section JSON', { exact: true }).click()
+    await openFormat(page, 'Selective sections')
     const selected = JSON.parse(await field('Section output').inputValue())
     assert.deepEqual(Object.keys(selected.sections).sort(), [
       'color',
@@ -269,23 +369,53 @@ export async function verifyHandoff(browser, baseURL) {
       JSON.parse(await field('Section output').inputValue()).sections.components,
       config.document.sections.components
     )
-    await handoff.getByRole('button', { name: 'Copy sections', exact: true }).click()
-    await page.waitForFunction(
-      () => document.querySelector('.handoff-feedback').textContent === 'Sections copied.'
+    await copied('Copy sections', await field('Section output').inputValue(), 'Sections copied.')
+    await openFormat(page, 'Scoped CSS')
+    await copied(
+      'Copy theme CSS',
+      await field('Theme CSS output').inputValue(),
+      'Theme CSS copied.'
     )
-    assert.equal(
-      await page.evaluate(() => navigator.clipboard.readText()),
-      await field('Section output').inputValue()
+
+    const bulky = jsonText(
+      handoffAPI.configuration(
+        updateThemeDocument(config.document, {
+          typography: {
+            fonts: Array.from({ length: 1200 }, (_, i) => ({
+              id: `f${i}`,
+              family: `Family ${((i * 2654435761) >>> 0).toString(36)}${((i * 40503) >>> 0).toString(36)}`,
+              source: 'system'
+            }))
+          }
+        }),
+        config.recipes
+      )
     )
-    await handoff.getByText('Scoped CSS · full theme', { exact: true }).click()
-    await handoff.getByRole('button', { name: 'Copy CSS', exact: true }).click()
-    await page.waitForFunction(
-      () => document.querySelector('.handoff-feedback').textContent === 'CSS copied.'
+    await handoff.getByLabel('Import configuration file', { exact: true }).setInputFiles({
+      name: 'bulky.json',
+      mimeType: 'application/json',
+      buffer: Buffer.from(bulky)
+    })
+    await page.waitForFunction(() =>
+      document
+        .querySelector('.handoff-import-result')
+        ?.textContent.includes('Configuration restored')
     )
-    assert.equal(
-      await page.evaluate(() => navigator.clipboard.readText()),
-      await field('CSS output').inputValue()
-    )
+    await settled()
+    assert.equal(await field('Configuration output').inputValue(), bulky)
+    await share.click()
+    await popover.getByText(/too large for a share link/).waitFor()
+    const pendingFile = page.waitForEvent('download')
+    await popover.getByRole('button', { name: 'Download configuration', exact: true }).click()
+    const file = await pendingFile
+    assert.equal(file.suggestedFilename(), 'radiant-workshop.json')
+    assert.equal(await readFile(await file.path(), 'utf8'), bulky)
+    await file.delete()
+    await popover.waitFor({ state: 'hidden' })
+    await input.fill(text)
+    await apply.click()
+    await settled()
+
     for (const width of [390, 320]) {
       await page.setViewportSize({ width, height: 844 })
       assert.equal(
@@ -309,6 +439,21 @@ export async function verifyHandoff(browser, baseURL) {
         await field('Typed theme output').evaluate(node => node === document.activeElement),
         true
       )
+      const cards = await handoff
+        .locator('.handoff-setup')
+        .evaluateAll(nodes => nodes.map(node => Math.round(node.getBoundingClientRect().left)))
+      assert.equal(new Set(cards).size, 1, `${width}: the three choices stack`)
+      await share.click()
+      await popover.getByText('Link copied', { exact: true }).waitFor()
+      assert.ok(
+        await popover.evaluate(node => {
+          const rect = node.getBoundingClientRect()
+          return rect.left >= 0 && rect.right <= innerWidth
+        }),
+        `${width}: the share popover stays within the viewport`
+      )
+      await page.keyboard.press('Escape')
+      await popover.waitFor({ state: 'hidden' })
       await page.screenshot({ path: `output/docs/handoff-${width}.png`, fullPage: true })
     }
     await page.setViewportSize({ width: 1600, height: 1000 })
@@ -353,19 +498,14 @@ export async function verifyHandoff(browser, baseURL) {
     )
     const modernText = await field('Configuration output').inputValue()
     assert.deepEqual(JSON.parse(modernText), modern)
-    const previousLink = await field('Share link').inputValue()
-    await handoff.getByRole('button', { name: 'Copy share link', exact: true }).click()
-    await page.waitForFunction(previous => {
-      const link = document.querySelector('.theme-handoff input[readonly]').value
-      return link !== previous && link.includes('#workshop=1.')
-    }, previousLink)
-    const modernLink = await field('Share link').inputValue()
+    const modernLink = await copyShareLink(page)
+    assert.notEqual(modernLink, link)
     const reopened = await context.newPage()
     try {
       await reopened.goto(modernLink)
       const restored = reopened.locator('.theme-handoff')
       await waitForEditors(reopened)
-      await restored.getByText('Reusable configuration JSON', { exact: true }).click()
+      await openFormat(reopened, 'Configuration file')
       assert.equal(
         await restored
           .getByRole('textbox', { name: 'Configuration output', exact: true })
@@ -396,9 +536,10 @@ export async function verifyHandoff(browser, baseURL) {
         await system.getByRole('spinbutton', { name: 'Wide size (px)', exact: true }).inputValue(),
         '72'
       )
-      const setup = restored.locator('.handoff-setup')
-      await setup.locator(':scope > summary').click()
-      assert.match(await setup.innerText(), /Missing brand[\s\S]*wght[\s\S]*File not included/)
+      assert.match(
+        await restored.locator('.handoff-fonts').innerText(),
+        /Missing brand[\s\S]*wght[\s\S]*File not included/
+      )
       assert.equal(
         await reopened.evaluate(
           () =>
@@ -423,6 +564,7 @@ export async function verifyHandoff(browser, baseURL) {
         })
       )
       await openWorkshop(blocked, baseURL)
+      await chooseSetup(blocked, 'React')
       await blocked.getByRole('button', { name: 'Copy typed theme', exact: true }).click()
       await blocked.waitForFunction(() =>
         document.querySelector('.handoff-feedback').textContent.startsWith('Copy failed.')
@@ -434,9 +576,18 @@ export async function verifyHandoff(browser, baseURL) {
             .inputValue()
         ).includes('satisfies ThemeDocument')
       )
-      await blocked.getByRole('button', { name: 'Copy share link', exact: true }).click()
-      await blocked.waitForFunction(() =>
-        document.querySelector('.theme-handoff input[readonly]').value.includes('#workshop=1.')
+      await blocked.getByRole('button', { name: 'Share', exact: true }).click()
+      const blockedPopover = blocked.getByRole('dialog', { name: 'Share link', exact: true })
+      await blockedPopover
+        .getByText('Copy failed. Select the link below.', { exact: true })
+        .waitFor()
+      assert.ok(
+        (
+          await blockedPopover
+            .getByRole('textbox', { name: 'Share link', exact: true })
+            .inputValue()
+        ).includes('#workshop=1.'),
+        'a blocked clipboard still shows the link to select'
       )
       const invalid = await context.newPage()
       await invalid.goto(`${baseURL}/workshop/#workshop=2.invalid`)
@@ -454,7 +605,7 @@ export async function verifyHandoff(browser, baseURL) {
       await blocked.close()
     }
     console.log(
-      'Handoff UI passed: exact typed/configuration/section/CSS copies, download/file import, full and partial policies, share/reload/undo, fonts, preserved exceptions and private form state, failures, imported recipe-free sections, keyboard and mobile layouts.'
+      'Handoff UI passed: React/CSS/Tailwind each show their exact output, steps and snippets with copy and download, the choice survives a reload, Other formats keep configuration/section/motion/typography/CSS copies and merge/replace imports, Share copies a link that reopens the theme from the keyboard, too-large themes offer the file, fonts, failures and 320/390 layouts.'
     )
   } catch (error) {
     await page

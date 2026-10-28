@@ -3,7 +3,7 @@ import { readFile, mkdir } from 'node:fs/promises'
 import { handoffAPI, jsonText } from '../examples/workshop/workshop-handoff.ts'
 import { encodeShare } from '../examples/workshop/workshop-share.ts'
 import { pickRadio } from './typography-controls.mjs'
-import { openWorkshop } from './workshop-entry.mjs'
+import { chooseSetup, copyShareLink, openFormat, openWorkshop } from './workshop-entry.mjs'
 
 export async function verifyMotionHandoff(browser, baseURL) {
   const context = await browser.newContext({
@@ -24,7 +24,8 @@ export async function verifyMotionHandoff(browser, baseURL) {
     await pickRadio(editor, 'Physics for', 'layout')
     await editor.getByRole('spinbutton', { name: 'Damping', exact: true }).fill('25')
     await pickRadio(editor, 'Theme motion', 'off')
-    await handoff.getByText('Reusable configuration JSON', { exact: true }).click()
+    await chooseSetup(page, 'React')
+    await openFormat(page, 'Configuration file')
     const configField = handoff.getByRole('textbox', { name: 'Configuration output', exact: true })
     /** The outputs follow theme changes at low priority; read them once they have caught up. */
     const settled = () =>
@@ -32,7 +33,7 @@ export async function verifyMotionHandoff(browser, baseURL) {
     await settled()
     const config = JSON.parse(await configField.inputValue())
     assert.equal(config.document.sections.motion.profile.mode, 'off')
-    await handoff.getByText('Motion only · typed configuration', { exact: true }).click()
+    await openFormat(page, 'Motion only')
     const typed = handoff.getByRole('textbox', { name: 'Motion TypeScript output', exact: true })
     assert.equal(await typed.inputValue(), handoffAPI.typedTheme(config.document, ['motion']))
     async function copied(button, text, feedback) {
@@ -46,7 +47,7 @@ export async function verifyMotionHandoff(browser, baseURL) {
       assert.equal(await page.evaluate(() => navigator.clipboard.readText()), text)
       assert.equal(await action.evaluate(node => node === document.activeElement), true)
     }
-    await copied('Copy motion TypeScript', await typed.inputValue(), 'Motion typed theme copied.')
+    await copied('Copy motion TypeScript', await typed.inputValue(), 'Motion TypeScript copied.')
     async function downloaded(button, name, text) {
       const pending = page.waitForEvent('download')
       await handoff.getByRole('button', { name: button, exact: true }).click()
@@ -55,22 +56,19 @@ export async function verifyMotionHandoff(browser, baseURL) {
       assert.equal(await readFile(await file.path(), 'utf8'), text)
     }
     await downloaded('Download motion TypeScript', 'radiant-motion.ts', await typed.inputValue())
-    await handoff.getByText('Required setup and fonts', { exact: true }).click()
     const setup = handoffAPI.runtimeSetup()
     assert.equal(
       await handoff.getByRole('textbox', { name: 'Install command', exact: true }).inputValue(),
       setup.install
     )
-    assert.equal(
-      await handoff
-        .getByRole('textbox', { name: 'Runtime setup TypeScript output', exact: true })
-        .inputValue(),
-      setup.source
+    assert.doesNotMatch(
+      await handoff.getByRole('textbox', { name: 'Theme scope', exact: true }).inputValue(),
+      /MotionProvider/,
+      'a theme with motion off needs ThemeScope alone'
     )
+    assert.equal(await handoff.getByRole('textbox', { name: 'Runtime setup' }).count(), 0)
     await copied('Copy install command', setup.install, 'Install command copied.')
-    await copied('Copy runtime setup', setup.source, 'Runtime setup copied.')
-    await downloaded('Download runtime setup', 'RadiantMotion.tsx', setup.source)
-    await handoff.getByText('Selective section JSON', { exact: true }).click()
+    await openFormat(page, 'Selective sections')
     for (const box of await handoff.locator('.handoff-sections input').all()) await box.uncheck()
     await handoff.getByRole('checkbox', { name: 'motion', exact: true }).check()
     const section = await handoff
@@ -79,6 +77,7 @@ export async function verifyMotionHandoff(browser, baseURL) {
     assert.equal(section, jsonText(handoffAPI.sections(config.document, ['motion'])))
     await copied('Copy sections', section, 'Sections copied.')
     await workshop.getByRole('button', { name: 'Reset motion', exact: true }).click()
+    await openFormat(page, 'Import')
     const input = handoff.getByRole('textbox', { name: 'Configuration JSON', exact: true })
     await input.fill(section)
     await handoff.getByRole('combobox', { name: 'Section apply mode' }).selectOption('replace')
@@ -92,12 +91,7 @@ export async function verifyMotionHandoff(browser, baseURL) {
       jsonText(config),
       'selective motion restore preserves unrelated authoring'
     )
-    await handoff.getByRole('button', { name: 'Copy share link', exact: true }).click()
-    const linkField = handoff.getByRole('textbox', { name: 'Share link', exact: true })
-    await page.waitForFunction(() =>
-      document.querySelector('.theme-handoff input[readonly]').value.includes('#workshop=')
-    )
-    const link = await linkField.inputValue()
+    const link = await copyShareLink(page)
     const shared = await context.newPage()
     await shared.goto(link)
     await shared
@@ -107,7 +101,7 @@ export async function verifyMotionHandoff(browser, baseURL) {
     await shared.waitForFunction(
       () => document.querySelector('.motion-editor').dataset.motionMode === 'off'
     )
-    await shared.getByText('Reusable configuration JSON', { exact: true }).click()
+    await openFormat(shared, 'Configuration file')
     assert.equal(
       await shared.getByRole('textbox', { name: 'Configuration output', exact: true }).inputValue(),
       jsonText(config)
@@ -136,11 +130,17 @@ export async function verifyMotionHandoff(browser, baseURL) {
       'system',
       'OS preference never becomes authored off'
     )
+    assert.equal(
+      await handoff.getByRole('textbox', { name: 'Runtime setup', exact: true }).inputValue(),
+      setup.source,
+      'spring motion brings the MotionProvider setup back'
+    )
+    await copied('Copy runtime setup', setup.source, 'Runtime setup copied.')
     await shared.close()
     await mkdir('output/docs', { recursive: true })
     const motionDetails = handoff
-      .getByText('Motion only · typed configuration', { exact: true })
-      .locator('..')
+      .locator('.handoff-format')
+      .filter({ has: page.getByText('Motion only', { exact: true }) })
     await motionDetails.screenshot({ path: 'output/docs/motion-handoff-section.png' })
     await handoff.screenshot({ path: 'output/docs/motion-handoff-desktop.png' })
     for (const width of [390, 320]) {
