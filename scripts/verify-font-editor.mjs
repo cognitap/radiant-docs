@@ -39,7 +39,7 @@ export async function verifyFontEditor(browser, baseURL) {
     const select = panel.getByRole('combobox', { name: 'Trial typeface', exact: true })
     const sample = panel.getByTestId('font-sample')
     // Typesetting assigns the selected trial context (Code here), independently of UI.
-    const appliedText = frame.locator('.typography-proofs [data-rad-text="code"]').first()
+    const appliedText = frame.locator('.preview-page [data-rad-text="code"]').first()
     const loaded = async family => {
       await page.waitForFunction(
         family =>

@@ -15,7 +15,7 @@ export async function verifyGeometryEditor(browser, baseURL) {
     await page.goto(`${baseURL}/workshop/`)
     const frame = page.getByRole('region', { name: 'Shared theme workshop', exact: true })
     const shell = frame.locator('.theme-workshop')
-    const canvas = frame.locator('.workshop-canvas')
+    const canvas = frame.locator('.preview-page').first()
     const editor = frame.locator('.geometry-editor')
     const chooseEditor = async name => {
       const button = frame.getByRole('button', { name, exact: true })
@@ -30,10 +30,8 @@ export async function verifyGeometryEditor(browser, baseURL) {
     const preset = editor.getByRole('combobox', { name: 'Starting preset', exact: true })
     const scope = editor.getByRole('combobox', { name: 'Geometry scope', exact: true })
     const mode = frame.getByRole('combobox', { name: 'Preview mode', exact: true })
-    const specimen = frame.getByRole('combobox', { name: 'Specimen', exact: true })
-    await page.waitForFunction(
-      () => !document.querySelector('.theme-workshop .demo-controls button').disabled
-    )
+    const scene = frame.getByRole('combobox', { name: 'Scene', exact: true })
+    await page.waitForFunction(() => !document.querySelector('.preview-toolbar button').disabled)
     await chooseEditor('Spacing & surfaces')
     assert.equal(await editor.getByRole('spinbutton').count(), 7)
     assert.equal(await shell.getAttribute('data-workshop-geometry'), 'enabled')
@@ -54,8 +52,8 @@ export async function verifyGeometryEditor(browser, baseURL) {
       includeHidden: true
     })
     await stiffness.fill('450')
-    await specimen.selectOption('form')
-    await canvas.getByRole('textbox', { name: 'Display name' }).fill('Geometry Ada')
+    await scene.selectOption('page:form')
+    await canvas.getByRole('textbox', { name: 'Name shown to collaborators' }).fill('Geometry Ada')
     await chooseEditor('Spacing & surfaces')
     const radius = number('Surface radius (px)')
     await radius.fill('99')
@@ -88,7 +86,7 @@ export async function verifyGeometryEditor(browser, baseURL) {
       '3rem',
       'preset replay does not compound'
     )
-    await specimen.selectOption('components')
+    await scene.selectOption('components')
     const medium = canvas.getByRole('button', { name: 'medium action', exact: true })
     const rootSize = await page.evaluate(() =>
       parseFloat(getComputedStyle(document.documentElement).fontSize)
@@ -241,8 +239,14 @@ export async function verifyGeometryEditor(browser, baseURL) {
       await page.setViewportSize({ width, height: 844 })
       for (const next of ['light', 'dark']) {
         await mode.selectOption(next)
-        for (const name of ['article', 'form', 'dashboard', 'landing', 'components']) {
-          await specimen.selectOption(name)
+        for (const name of [
+          'page:article',
+          'page:form',
+          'page:data',
+          'page:landing',
+          'components'
+        ]) {
+          await scene.selectOption(name)
           assert.equal(
             await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth),
             true,
@@ -276,9 +280,9 @@ export async function verifyGeometryEditor(browser, baseURL) {
     assert.equal(await mode.inputValue(), 'dark')
     await mode.selectOption('light')
     assert.equal(await variable('--rad-surface-canvas'), '#FFEECC')
-    await specimen.selectOption('form')
+    await scene.selectOption('page:form')
     assert.equal(
-      await canvas.getByRole('textbox', { name: 'Display name' }).inputValue(),
+      await canvas.getByRole('textbox', { name: 'Name shown to collaborators' }).inputValue(),
       'Geometry Ada'
     )
     await editor.screenshot({ path: 'output/docs/geometry-editor-desktop.png' })
