@@ -19,6 +19,7 @@ import {
   type Role
 } from './workshop-color'
 import { Changed } from './ControlChange'
+import type { ControlTarget } from './workshop-inspect'
 import type { Change } from './workshop-history'
 import type { Changes } from './workshop-fields'
 import './color-editor.css'
@@ -145,16 +146,31 @@ export function ColorEditor({
   session,
   changes,
   disabled,
+  target,
   onChange
 }: {
   session: ColorSession | null
   changes: Changes<ColorFields> | null
   disabled: boolean
+  target?: ControlTarget
   onChange: (recipe: ColorRecipe, change: Change) => void
 }) {
   const presetsId = useId()
   const [mode, setMode] = useState<Mode>('light')
   const [role, setRole] = useState<Role>('accent')
+  const [seen, setSeen] = useState(target)
+  if (target !== seen) {
+    setSeen(target)
+    const [, targetMode, targetRole] = target?.field.split('.') ?? []
+    if (
+      (targetMode === 'light' || targetMode === 'dark') &&
+      targetRole &&
+      Object.hasOwn(roleNames, targetRole)
+    ) {
+      setMode(targetMode)
+      setRole(targetRole as Role)
+    }
+  }
   const [family, setFamily] = useState('brand')
   const [stop, setStop] = useState(500)
   if (!session)

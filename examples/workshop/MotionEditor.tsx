@@ -19,11 +19,14 @@ import {
 import { Changed } from './ControlChange'
 import type { Change } from './workshop-history'
 import type { Changes } from './workshop-fields'
+import type { ControlTarget } from './workshop-inspect'
 import './motion-editor.css'
 
 const inherited = (value: number | undefined) =>
   value === undefined ? 'common physics' : String(value)
 const presetName = (id: string) => motionPresets.find(preset => preset.id === id)?.name ?? id
+const targetScope = (target: ControlTarget | undefined) =>
+  motionScopes.find(scope => target?.field.startsWith(`${scope.id}.`))?.id
 function PhysicsDial({
   dial,
   value,
@@ -107,13 +110,21 @@ function PhysicsDial({
 export function MotionEditor({
   document,
   changes,
+  target,
   onChange
 }: {
   document: object
   changes: Changes<MotionFields> | null
+  target?: ControlTarget
   onChange: (document: object, change: Change) => void
 }) {
   const [scope, setScope] = useState<MotionScope>('shared')
+  const [seen, setSeen] = useState(target)
+  if (target !== seen) {
+    setSeen(target)
+    const next = targetScope(target)
+    if (next) setScope(next)
+  }
   const input = authoredMotion(document)
   const resolved = defineMotionProfile(input)
   const parameters = scope === 'shared' ? resolved.spring : resolved.interactions[scope]

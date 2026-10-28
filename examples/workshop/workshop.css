@@ -174,6 +174,22 @@
   gap: 0.3rem;
   min-width: 0;
 }
+.control-change[data-jumped] {
+  outline: 2px solid var(--docs-accent);
+  outline-offset: 6px;
+  border-radius: 0.25rem;
+  animation: control-jump 1.5s ease-out forwards;
+}
+@keyframes control-jump {
+  to {
+    outline-color: transparent;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .control-change[data-jumped] {
+    animation: none;
+  }
+}
 .control-change-marker {
   display: flex;
   flex-wrap: wrap;
