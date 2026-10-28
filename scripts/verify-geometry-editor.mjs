@@ -12,7 +12,7 @@ export async function verifyGeometryEditor(browser, baseURL) {
     if (message.type() === 'error') errors.push(message.text())
   })
   try {
-    await page.goto(`${baseURL}/docs/workshop/`)
+    await page.goto(`${baseURL}/workshop/`)
     const frame = page.getByRole('region', { name: 'Shared theme workshop', exact: true })
     const shell = frame.locator('.theme-workshop')
     const canvas = frame.locator('.workshop-canvas')
@@ -296,7 +296,7 @@ export async function verifyGeometryEditor(browser, baseURL) {
     assert.deepEqual(errors, [], 'no geometry editor hydration/runtime errors')
     const staticPage = await browser.newPage({ javaScriptEnabled: false })
     try {
-      await staticPage.goto(`${baseURL}/docs/workshop/`)
+      await staticPage.goto(`${baseURL}/workshop/`)
       assert.equal(await staticPage.locator('.geometry-editor input[type=number]').count(), 7)
       assert.equal(
         await staticPage.locator('.geometry-editor input[type=number]').first().isDisabled(),

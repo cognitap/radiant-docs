@@ -12,7 +12,7 @@ export async function verifyMotionHandoff(browser, baseURL) {
   const errors = []
   page.on('pageerror', error => errors.push(error.message))
   try {
-    await page.goto(`${baseURL}/docs/workshop/`)
+    await page.goto(`${baseURL}/workshop/`)
     const workshop = page.locator('.theme-workshop')
     const handoff = workshop.locator('.theme-handoff')
     await page.waitForFunction(
@@ -113,7 +113,7 @@ export async function verifyMotionHandoff(browser, baseURL) {
     await handoff.getByRole('button', { name: 'Import JSON', exact: true }).click()
     await handoff.locator('.handoff-import-error').waitFor()
     assert.equal(await configField.inputValue(), jsonText(config))
-    const badLink = `${baseURL}/docs/workshop/#workshop=${await encodeShare(jsonText(invalid))}`
+    const badLink = `${baseURL}/workshop/#workshop=${await encodeShare(jsonText(invalid))}`
     await shared.goto(badLink)
     await shared.locator('.handoff-import-error').waitFor()
     const summary = shared.getByText('Reusable configuration JSON', { exact: true })

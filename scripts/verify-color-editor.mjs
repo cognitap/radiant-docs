@@ -12,7 +12,7 @@ export async function verifyColorEditor(browser, baseURL) {
     if (message.type() === 'error') errors.push(message.text())
   })
   try {
-    await page.goto(`${baseURL}/docs/workshop/`)
+    await page.goto(`${baseURL}/workshop/`)
     const frame = page.getByRole('region', { name: 'Shared theme workshop', exact: true })
     const brand = frame.getByRole('textbox', { name: 'Brand color', exact: true })
     await frame.getByRole('button', { name: 'Reset specimen', exact: true }).waitFor()
@@ -203,7 +203,7 @@ export async function verifyColorEditor(browser, baseURL) {
     assert.deepEqual(errors, [], 'no color editor hydration/runtime errors')
     const staticPage = await browser.newPage({ javaScriptEnabled: false })
     try {
-      await staticPage.goto(`${baseURL}/docs/workshop/`)
+      await staticPage.goto(`${baseURL}/workshop/`)
       assert.equal(await staticPage.locator('.color-swatch').count(), 198)
       assert.equal(
         await staticPage.getByRole('textbox', { name: 'Brand color', exact: true }).isDisabled(),

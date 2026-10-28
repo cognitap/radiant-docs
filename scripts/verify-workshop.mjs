@@ -4,7 +4,7 @@ import { readFile } from 'node:fs/promises'
 
 export async function verifyWorkshop(browser, baseURL) {
   const staticPage = await browser.newPage({ javaScriptEnabled: false })
-  assert.equal((await staticPage.goto(`${baseURL}/docs/workshop/`)).status(), 200)
+  assert.equal((await staticPage.goto(`${baseURL}/workshop/`)).status(), 200)
   assert.equal(
     await staticPage.getByRole('heading', { name: 'Make room for the useful things.' }).isVisible(),
     true
@@ -13,6 +13,20 @@ export async function verifyWorkshop(browser, baseURL) {
   await staticFrame.locator('.demo-sources > summary').press('Enter')
   assert.equal(await staticFrame.locator('.demo-sources pre').count(), 35)
   await staticPage.close()
+
+  const widePage = await browser.newPage({ viewport: { width: 1440, height: 900 } })
+  await widePage.goto(`${baseURL}/workshop/`)
+  const wideFrame = widePage.getByRole('region', { name: 'Shared theme workshop', exact: true })
+  await wideFrame.waitFor()
+  assert.equal(await widePage.locator('.docs-sidebar, .outline-desktop').count(), 0)
+  assert.equal(await widePage.title(), 'Theme workshop · Radiant')
+  const docsColumnWidth = 52 * 16
+  const frameWidth = (await wideFrame.boundingBox()).width
+  assert.ok(frameWidth > docsColumnWidth + 200, `workshop frame is ${frameWidth}px wide`)
+  await widePage.goto(`${baseURL}/docs/workshop/`)
+  assert.equal((await widePage.locator('main a[href="/workshop/"]').count()) > 0, true)
+  assert.equal(await widePage.getByRole('region', { name: 'Shared theme workshop' }).count(), 0)
+  await widePage.close()
 
   const context = await browser.newContext({
     permissions: ['clipboard-read', 'clipboard-write'],
@@ -25,7 +39,7 @@ export async function verifyWorkshop(browser, baseURL) {
     if (message.type() === 'error') errors.push(message.text())
   })
   try {
-    await page.goto(`${baseURL}/docs/workshop/`)
+    await page.goto(`${baseURL}/workshop/`)
     const frame = page.getByRole('region', { name: 'Shared theme workshop', exact: true })
     const canvas = frame.locator('.workshop-canvas')
     await frame.getByRole('button', { name: 'Reset specimen', exact: true }).waitFor()

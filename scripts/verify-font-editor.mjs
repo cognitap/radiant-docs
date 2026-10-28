@@ -19,7 +19,7 @@ export async function verifyFontEditor(browser, baseURL) {
       }))
     )
   try {
-    await page.goto(baseURL + '/docs/workshop/')
+    await page.goto(baseURL + '/workshop/')
     const frame = page.getByRole('region', { name: 'Shared theme workshop', exact: true })
     const panel = frame.locator('.font-editor')
     assert.equal(

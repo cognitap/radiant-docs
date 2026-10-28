@@ -16,7 +16,7 @@ export async function verifyHandoff(browser, baseURL) {
     if (message.type() === 'error') errors.push(message.text())
   })
   try {
-    await page.goto(`${baseURL}/docs/workshop/`)
+    await page.goto(`${baseURL}/workshop/`)
     const frame = page.getByRole('region', { name: 'Shared theme workshop', exact: true })
     const handoff = frame.getByRole('region', { name: 'Theme handoff', exact: true })
     const field = label => handoff.getByRole('textbox', { name: label, exact: true })
@@ -136,7 +136,7 @@ export async function verifyHandoff(browser, baseURL) {
       document.querySelector('.handoff-feedback').textContent.startsWith('Share link copied.')
     )
     const link = await field('Share link').inputValue()
-    assert.ok(link.startsWith(`${baseURL}/docs/workshop/#workshop=1.`))
+    assert.ok(link.startsWith(`${baseURL}/workshop/#workshop=1.`))
     assert.equal(await page.evaluate(() => navigator.clipboard.readText()), link)
     const shared = await context.newPage()
     try {
@@ -421,7 +421,7 @@ export async function verifyHandoff(browser, baseURL) {
           }
         })
       )
-      await blocked.goto(`${baseURL}/docs/workshop/`)
+      await blocked.goto(`${baseURL}/workshop/`)
       await blocked.getByRole('button', { name: 'Copy typed theme', exact: true }).click()
       await blocked.waitForFunction(() =>
         document.querySelector('.handoff-feedback').textContent.startsWith('Copy failed.')
@@ -437,7 +437,7 @@ export async function verifyHandoff(browser, baseURL) {
       await blocked.waitForFunction(() =>
         document.querySelector('.theme-handoff input[readonly]').value.includes('#workshop=1.')
       )
-      await blocked.goto(`${baseURL}/docs/workshop/#workshop=2.invalid`)
+      await blocked.goto(`${baseURL}/workshop/#workshop=2.invalid`)
       await blocked.waitForFunction(() =>
         document.querySelector('.handoff-import-error')?.textContent.includes('unsupported')
       )

@@ -37,6 +37,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                 className="site-tools"
               >
                 <NextLink href="/docs/getting-started/">Documentation</NextLink>
+                <NextLink href="/workshop/">Workshop</NextLink>
                 <Search />
                 <AppearanceControl />
               </nav>

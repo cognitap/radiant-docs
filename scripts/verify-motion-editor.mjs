@@ -23,7 +23,7 @@ export async function verifyMotionEditor(browser, baseURL) {
     if (message.type() === 'error') errors.push(message.text())
   })
   try {
-    await page.goto(`${baseURL}/docs/workshop/`)
+    await page.goto(`${baseURL}/workshop/`)
     const workshop = page.locator('.theme-workshop')
     await page.waitForFunction(
       () => !document.querySelector('.theme-workshop .demo-controls button')?.disabled

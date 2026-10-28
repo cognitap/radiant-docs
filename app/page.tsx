@@ -36,7 +36,7 @@ export default function HomePage() {
       </nav>
       <p>
         <a
-          href="/docs/workshop/"
+          href="/workshop/"
           className="explore-link"
         >
           Open the theme workshop <span aria-hidden="true">↗</span>

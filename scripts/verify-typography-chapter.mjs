@@ -16,7 +16,7 @@ export async function verifyTypographyChapter(browser, baseURL) {
     models = [],
     captures = []
   try {
-    await page.goto(`${baseURL}/docs/workshop/`)
+    await page.goto(`${baseURL}/workshop/`)
     const workshop = page.locator('.theme-workshop')
     await workshop.getByRole('button', { name: 'Typography', exact: true }).click()
     const editor = workshop.locator('.typesetting-editor')
