@@ -1,91 +1,128 @@
 ---
 title: Accordion
-description: Coordinate related native disclosures with single or multiple open sections.
+description: Related native disclosures with one selection owner and natural-height motion.
 ---
 
 import { CompositionDemo } from '../../components/CompositionDemo'
+import { AccordionGuideDemo, AccordionSelectionDemo } from '../../components/AccordionDemo'
+
+<AccordionGuideDemo />
+
+## Group related answers
+
+```tsx
+<Accordion defaultValue="start">
+  <AccordionItem value="start">
+    <AccordionTrigger>Where should I begin?</AccordionTrigger>
+    <AccordionContent>Start with one clear next step.</AccordionContent>
+  </AccordionItem>
+  <AccordionItem value="next">
+    <AccordionTrigger>What comes next?</AccordionTrigger>
+    <AccordionContent>Make a little room to explore.</AccordionContent>
+  </AccordionItem>
+</Accordion>
+```
+
+Accordion owns selection. Items reuse [Collapsible](/docs/collapsible/): native
+`details`, a direct-child `summary`, and a normal-flow Content wrapper. Give
+each item a stable, distinct string value and React key; an empty string is valid.
+Single selection opens at most one item; activating it again closes all.
+
+Tab reaches enabled summaries and open content. Enter and Space toggle the
+focused summary; arrow keys have no special behavior. Trigger places a heading
+inside summary, defaulting to h3. Choose its `level` for your page outline, or
+`null` to supply your own heading. Keep links and buttons in Content.
 
 <CompositionDemo kind="accordion" />
 
-## Choose a selection model
+## Own selection once
 
-Accordion coordinates [Collapsible](/docs/collapsible/) items. Each remains
-native `details` with a direct-child `summary`. The root owns selection; each
-item has a distinct `value`.
+```tsx
+const [value, setValue] = useState<string[]>(['start'])
 
-Single selection opens at most one item; opening another closes the first, and
-activating the open summary again leaves all items closed. Multiple selection
-lets several stay open. Accordion's type and ownership stay fixed during a mount.
-A nested disclosure inside an item does not change the Accordion's selection.
+<Accordion type="multiple" value={value} onValueChange={setValue}>
+  {items}
+</Accordion>
+```
 
-## Keyboard, disabled state and content
+Multiple selection uses `string[]`; single uses `string | null`. Clear with
+`[]` or `null`. Choose controlled `value` or initial `defaultValue`, never both.
+Remount with a new key to change type or ownership. Control the root, not each
+item's open state. `onValueChange` requests updates; an owner may decline.
+No-op requests and prop synchronization do not notify. Item `onToggle` remains
+a native observation.
 
-Tab reaches enabled summaries and links in open content. Enter and Space toggle
-the focused summary. There is no arrow-key navigation. Closed content stays
-mounted and is hidden from keyboard navigation.
+Root and item disabled states add up. Disabled summaries guard activation and
+leave the Tab sequence; application changes to controlled selection still work.
+Closing keeps fields mounted, retains their values and includes them in
+FormData. Native reset restores uncontrolled fields without resetting selection.
+Nested disclosures keep their own state.
 
-A disabled item's summary has `aria-disabled`, is removed from the tab sequence
-and guards pointer/Enter/Space activation. Disabled state blocks user changes, not
-your application's control of selection.
+## Add motion
 
-Native details expand without JavaScript. Coordinated selection, disabled
-guards and controlled state require it. The stylesheet provides closed-content
-and focus behavior.
+```tsx
+import { MotionProvider } from '@cognitap/radiant/motion/react'
 
-## Controlled or local selection
+;<MotionProvider>
+  <Accordion defaultValue="start">
+    <AccordionItem
+      value="start"
+      motion="inherit"
+    >
+      <AccordionTrigger>Details</AccordionTrigger>
+      <AccordionContent>{details}</AccordionContent>
+    </AccordionItem>
+  </Accordion>
+</MotionProvider>
+```
 
-In single mode the value is a string or `null`; in multiple mode it is a string
-array. Use `null` or `[]` to clear a controlled selection, not `undefined`,
-which changes ownership. Summaries request updates through `onValueChange`.
-Give the Accordion a new `key` to change its `type` or ownership. Do not
-control each item's `open` yourself.
+The shared disclosure engine springs natural height without scaling content.
+Rapid switches retarget moving items; dynamic content is measured as it grows.
+Item `motion="off"`, theme off and live reduced motion settle presentation;
+selection stays immediate. See [Collapsible](/docs/collapsible/#add-motion-and-dynamic-content)
+for measurement and browser fallback, and [motion setup](/docs/foundations/motion/).
+Native disclosures work before hydration; coordinated selection and disabled
+guards need JavaScript.
 
-## Named parts and targets
+<AccordionSelectionDemo />
 
-| Component        | Native style/ref target | `data-slot` tokens                      |
-| ---------------- | ----------------------- | --------------------------------------- |
-| Accordion        | `div`                   | `accordion`                             |
-| AccordionItem    | `details`               | `collapsible accordion-item`            |
-| AccordionTrigger | `summary`               | `collapsible-trigger accordion-trigger` |
-| AccordionContent | `div`                   | `collapsible-content accordion-content` |
+## Parts and customization
 
-Match identities as tokens, such as `[data-slot~="accordion-item"]`. The root exposes `data-type` and optional
-`data-disabled`. Items expose `data-value`, optional `data-disabled` and
-`data-state`; trigger/content also expose `data-state`.
+| Component        | Native style/ref target | Identity tokens                       |
+| ---------------- | ----------------------- | ------------------------------------- |
+| Accordion        | div                     | accordion                             |
+| AccordionItem    | details                 | collapsible accordion-item            |
+| AccordionTrigger | summary                 | collapsible-trigger accordion-trigger |
+| AccordionContent | div                     | collapsible-content accordion-content |
 
-AccordionTrigger places a heading **inside** the direct-child summary.
-Its native attributes, styles and ref target the summary. Never put a button
-or link inside AccordionTrigger.
+Parts accept native props, className, typed theme style and DOM refs. Match
+additive identities with `[data-slot~="accordion-item"]`. Items expose
+`data-value`, `data-state` and optional `data-disabled`; root exposes `data-type`.
 
-`components.accordion.gap` spaces the items. Items inherit
-`components.collapsible` values, so a Collapsible token such as padding on the
-Accordion root reaches every item. `useAccordion()` returns the nearest
-owner state, or `null` outside an Accordion.
+Set `--rad-accordion-gap` on the root for spacing; Collapsible tokens style its
+items. Preserve focus and hidden-content behavior. `useAccordion()` returns
+nearest owner state and `setItemOpen(value, open)`, or null outside one.
+When an action closes its own answer, return focus to its summary.
 
 ## Public props
 
-Each component's prop type, `AccordionValue`, `AccordionHeadingLevel` and
-`AccordionState` are exported.
+All part prop types, AccordionValue, AccordionState and AccordionHeadingLevel
+are exported.
 
-| Accordion prop           | Purpose / default                                                |
-| ------------------------ | ---------------------------------------------------------------- |
-| `type`                   | `single` (default) or `multiple`; fixed per mount                |
-| `value` / `defaultValue` | Controlled or initial local selection; defaults to `null` / `[]` |
-| `onValueChange`          | Receives the matching string-or-null / string-array selection    |
-| `disabled`               | Disable user interaction for all items; defaults to `false`      |
-| Native div props         | Root attributes, events, children, styling and ref               |
+| Root prop            | Purpose / default                                    |
+| -------------------- | ---------------------------------------------------- |
+| type                 | single (default) or multiple; fixed per mount        |
+| value / defaultValue | Controlled or initial selection; initially null / [] |
+| onValueChange        | Matching string-or-null / string-array request       |
+| disabled             | Guard user selection; false                          |
+| Native div props     | Attributes, events, children, className, style, ref  |
 
-| Part prop                      | Purpose                                                                      |
-| ------------------------------ | ---------------------------------------------------------------------------- |
-| Item `value`                   | Required distinct string identifying this item                               |
-| Item `disabled`                | Disable this item; root disabled state also applies                          |
-| Item native props              | Details props/styles/ref, excluding owned open/defaultOpen/onOpenChange/name |
-| Trigger `level`                | Inner heading level `1`–`6`, default `3`; `null` omits the heading           |
-| Trigger / Content native props | Summary/div props, styles and refs                                           |
-| `data-slot`                    | Additive identities on root and named parts                                  |
-
-## Use the example
-
-Keep the `compositions/` paths when copying. It needs only React and Radiant.
-For an independent disclosure, use [Collapsible](/docs/collapsible/); for
-passive grouping of content and actions, use [Card](/docs/card/).
+| Part prop                      | Purpose                                                       |
+| ------------------------------ | ------------------------------------------------------------- |
+| Item value                     | Required stable, distinct string                              |
+| Item disabled                  | Add to root disabled state                                    |
+| Item motion                    | inherit (default) or off                                      |
+| Item native props              | Details props except owned open/defaultOpen/onOpenChange/name |
+| Trigger level                  | Inner heading 1–6, default 3; null omits heading              |
+| Trigger / Content native props | Summary/div attributes, styles, refs                          |
+| data-slot                      | Additional identities on all hosts                            |
