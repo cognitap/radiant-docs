@@ -1,7 +1,12 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { defaultTheme } from '@cognitap/radiant'
-import { documentAPI, initialDocument, resetEditor } from '../examples/workshop/workshop-theme.ts'
+import { documentAPI, initialDocument } from '../examples/workshop/workshop-theme.ts'
+import { resetEditor } from '../examples/workshop/workshop-snapshot.ts'
+
+const snapshot = document => ({ document, color: null, geometry: null })
+const reset = (document, editor) =>
+  resetEditor(snapshot(document), snapshot(initialDocument()), editor).document
 
 test('the workshop compiles its initial document through the released library API', () => {
   assert.equal(documentAPI.compile(initialDocument()).id, 'workshop')
@@ -23,7 +28,7 @@ test('geometry reset preserves independent canvas colors, other sections and com
     modes: { dark: { tokens: { surface: { canvas: '#112233' } } } }
   })
   const before = JSON.stringify(original)
-  const next = resetEditor(original, 'geometry')
+  const next = reset(original, 'geometry')
   const theme = documentAPI.compile(next)
   assert.equal(theme.modes.light['--rad-surface-canvas'], '#FFEECC')
   assert.equal(theme.modes.dark['--rad-surface-canvas'], '#112233')
@@ -65,7 +70,7 @@ test('each editor resets only its owned decisions through the public document AP
     ['typography', '--rad-typography-family'],
     ['motion', '--rad-motion-release-duration']
   ]) {
-    const theme = documentAPI.compile(resetEditor(original, editor))
+    const theme = documentAPI.compile(reset(original, editor))
     for (const mode of ['light', 'dark']) {
       assert.equal(theme.modes[mode][owned], defaultTheme.modes[mode][owned])
       assert.equal(theme.modes[mode]['--rad-surface-radius'], '2rem')

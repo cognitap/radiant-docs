@@ -5,9 +5,14 @@ export function WorkshopDemo() {
   return (
     <Demo
       title="Shared theme workshop"
+      reset={false}
       files={[
         'workshop/ThemeWorkshop.tsx',
         'workshop/workshop-theme.ts',
+        'workshop/workshop-snapshot.ts',
+        'workshop/workshop-history.ts',
+        'workshop/workshop-fields.ts',
+        'workshop/ControlChange.tsx',
         'workshop/workshop-preview.ts',
         'workshop/Preview.tsx',
         'workshop/PreviewFrame.tsx',

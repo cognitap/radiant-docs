@@ -1,25 +1,21 @@
 'use client'
 
-import { createContext, Fragment, useContext, useId, useState, type ReactNode } from 'react'
+import { Fragment, useId, useState, type ReactNode } from 'react'
 import { Button } from '@cognitap/radiant'
 import { useHydrated } from '@/examples/profile/useHydrated'
 
-// Examples with external state (such as a share fragment) can distinguish an
-// initial load from the frame's explicit complete reset.
-const DemoRevision = createContext(0)
-export function useDemoRevision() {
-  return useContext(DemoRevision)
-}
-
 type DemoSource = { name: string; code: string; highlighted: ReactNode }
 
+/** An example with its own history opts out of the frame's remount reset. */
 export function DemoFrame({
   title,
   sources,
+  reset = true,
   children
 }: {
   title: string
   sources: readonly DemoSource[]
+  reset?: boolean
   children: ReactNode
 }) {
   const titleId = useId()
@@ -33,19 +29,21 @@ export function DemoFrame({
     >
       <div className="demo-heading">
         <h2 id={titleId}>{title}</h2>
-        <Button
-          disabled={!ready}
-          onClick={() => setRevision(value => value + 1)}
-        >
-          Reset preview
-        </Button>
+        {reset && (
+          <Button
+            disabled={!ready}
+            onClick={() => setRevision(value => value + 1)}
+          >
+            Reset preview
+          </Button>
+        )}
       </div>
-      <DemoRevision value={revision}>
-        <Fragment key={revision}>{children}</Fragment>
-      </DemoRevision>
-      <output className="demo-feedback">
-        <span key={revision}>{revision > 0 ? 'Preview reset.' : ''}</span>
-      </output>
+      <Fragment key={revision}>{children}</Fragment>
+      {reset && (
+        <output className="demo-feedback">
+          <span key={revision}>{revision > 0 ? 'Preview reset.' : ''}</span>
+        </output>
+      )}
       <details className="demo-sources">
         <summary>View source</summary>
         {sources.map(source => (

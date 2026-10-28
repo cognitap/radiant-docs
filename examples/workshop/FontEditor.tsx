@@ -25,6 +25,7 @@ export function FontNumber({
   min,
   max,
   step = 1,
+  describedBy,
   onValid
 }: {
   label: string
@@ -32,6 +33,7 @@ export function FontNumber({
   min: number
   max: number
   step?: number
+  describedBy?: string
   onValid: (value: number) => void
 }) {
   const [draft, setDraft] = useState(String(value))
@@ -52,6 +54,7 @@ export function FontNumber({
         step={step}
         value={draft}
         aria-invalid={!valid || undefined}
+        aria-describedby={describedBy}
         onChange={event => {
           const text = event.target.value
           setDraft(text)
@@ -460,7 +463,7 @@ export function FontEditor({
         <summary>Try a local font file</summary>
         <p>
           Files stay in memory for this workshop session. Choose WOFF2, WOFF, TTF or OTF, up to 10
-          MiB. Collections are unsupported. Reloading or resetting the preview discards local files;
+          MiB. Collections are unsupported. Reloading or resetting typography discards local files;
           recipients must provide their own copies.
         </p>
         <div className="font-controls">

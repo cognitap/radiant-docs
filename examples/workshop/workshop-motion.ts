@@ -86,6 +86,19 @@ export function changeMotion(
         }
   )
 }
+export function clearMotionOverride(
+  document: object,
+  scope: MotionInteraction,
+  key: keyof SpringParameters
+): object {
+  const profile = authoredMotion(document)
+  const interaction = { ...profile.interactions?.[scope] }
+  delete interaction[key]
+  const interactions = { ...profile.interactions }
+  if (Object.keys(interaction).length) interactions[scope] = interaction
+  else delete interactions[scope]
+  return applyMotion(document, { ...profile, interactions })
+}
 export function inheritMotion(document: object, scope: MotionScope): object {
   const profile = authoredMotion(document)
   if (scope === 'shared') {
@@ -115,6 +128,27 @@ export function matchingMotionPreset(document: object): string {
       motionDials.every(({ key }) => preset.spring[key] === current[key])
     )?.id ?? 'custom'
   )
+}
+/** Common physics shows resolved values; interaction fields are the overrides themselves. */
+export type MotionFields = {
+  preset: string
+  mode: 'system' | 'off'
+} & { [K in `shared.${keyof SpringParameters}`]: number } & {
+  [K in `${MotionInteraction}.${keyof SpringParameters}`]: number | undefined
+}
+export function motionFields(document: object): MotionFields {
+  const input = authoredMotion(document)
+  const resolved = defineMotionProfile(input)
+  const fields: Record<string, string | number | undefined> = {
+    preset: matchingMotionPreset(document),
+    mode: resolved.mode
+  }
+  for (const { key } of motionDials) {
+    fields[`shared.${key}`] = resolved.spring[key]
+    for (const { id } of motionScopes)
+      if (id !== 'shared') fields[`${id}.${key}`] = input.interactions?.[id]?.[key]
+  }
+  return fields as MotionFields
 }
 export type MotionTreatment = 'current' | 'restrained' | 'expressive' | 'off' | 'reduced'
 /** Comparison is preview-only. Reduced preview resolves to the runtime's spatial-off policy. */

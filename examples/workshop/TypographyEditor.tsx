@@ -1,11 +1,12 @@
 'use client'
 
-import { useEffect, useMemo, useState, useSyncExternalStore } from 'react'
+import { useEffect, useState, useSyncExternalStore } from 'react'
 import {
   Button,
   type TypographyAssignment,
   type TypographyInput,
   type TypographyPreset,
+  type TypographyResult,
   type TypographyRole,
   type TypographyStyle
 } from '@cognitap/radiant'
@@ -15,16 +16,28 @@ import { FontNumber } from './FontEditor'
 import {
   assignments,
   assignmentName,
+  assignFamily,
+  fontFieldName,
   styleName,
   startingPoints,
-  documentTypesetting,
   chooseAssignment,
   resetRhythm,
   resetTextStyle,
+  setRhythm,
+  setStyle,
   applyTypesetting,
-  assignedTrial
+  assignedTrial,
+  type TypographyFields
 } from './workshop-typography'
+import { Changed } from './ControlChange'
+import type { Change } from './workshop-history'
+import type { Changes } from './workshop-fields'
 import './typography-editor.css'
+
+const generated = (value: number | string | undefined) =>
+  value === undefined ? 'the generated value' : String(value)
+const presetName = (id: string | undefined) =>
+  startingPoints.find(item => item.id === id)?.name ?? String(id)
 
 const rhythmNames: Record<string, string> = {
   size: 'size',
@@ -39,6 +52,8 @@ const noSubscription = () => () => {}
 export function TypographyEditor({
   active,
   document,
+  result,
+  changes,
   loader,
   local,
   selectedRole,
@@ -47,14 +62,15 @@ export function TypographyEditor({
 }: {
   active: boolean
   document: object
+  result: TypographyResult | null
+  changes: Changes<TypographyFields> | null
   loader: WorkshopFontLoader | null
   local: TrialFont | null
   selectedRole: string
   onSelectRole: (role: string) => void
-  onChange: (document: object) => void
+  onChange: (document: object, change: Change) => void
 }) {
   useSyncExternalStore(loader?.subscribe ?? noSubscription, loader?.snapshot ?? zero, zero)
-  const result = useMemo(() => documentTypesetting(document), [document])
   const [notice, setNotice] = useState('')
   const [custom, setCustom] = useState('Georgia, serif')
   const [customAssignment, setCustomAssignment] = useState<TypographyAssignment>('body')
@@ -108,7 +124,11 @@ export function TypographyEditor({
           <Button
             key={item.id}
             variant="outline"
-            onClick={() => onChange(applyTypesetting(document, { preset: item.id }, local, true))}
+            onClick={() =>
+              onChange(applyTypesetting(document, { preset: item.id }, local, true), {
+                label: 'typography starting point'
+              })
+            }
           >
             Start with {item.name}
           </Button>
@@ -135,9 +155,9 @@ export function TypographyEditor({
       warnings.push(
         `${styleName(warning.role)} requests ${warning.requestedWeight}; supported weights are ${warning.supportedWeights.join('–')}.`
       )
-  function change(next: TypographyInput, reset = false) {
+  function change(next: TypographyInput, source: Change, reset = false) {
     try {
-      onChange(applyTypesetting(document, next, local, reset))
+      onChange(applyTypesetting(document, next, local, reset), source)
       if (reset) setFluidModes({})
       setNotice(
         reset
@@ -152,12 +172,24 @@ export function TypographyEditor({
       )
     }
   }
-  function changeStyle(key: keyof TypographyStyle, value: number | TypographyAssignment) {
-    change({
-      ...input,
-      styles: { ...input.styles, [role]: { ...input.styles?.[role], [key]: value } }
+  function changeStyle<K extends keyof TypographyStyle>(
+    key: K,
+    value: TypographyStyle[K] | undefined
+  ) {
+    change(setStyle(input, role, key, value), {
+      label: `${styleName(role)} ${key}`.toLowerCase(),
+      coalesce: `style.${role}.${key}`
     })
   }
+  const styleField = <K extends keyof TypographyStyle>(key: K) =>
+    `style.${role}.${key}` as `style.${TypographyRole}.${K}`
+  const styleSize = (value: number | undefined) =>
+    change(setStyle(setStyle(input, role, 'narrow', value), role, 'wide', value), {
+      label: `${styleName(role)} size`.toLowerCase(),
+      coalesce: `style.${role}.size`
+    })
+  const startingPoint = (preset: TypographyPreset | undefined) =>
+    change({ preset }, { label: 'typography starting point' }, true)
   return (
     <div
       className="typesetting-editor"
@@ -170,25 +202,36 @@ export function TypographyEditor({
         rem.
       </p>
       <div className="typesetting-controls">
-        <label>
-          Starting point
-          <select
-            value={input.preset}
-            onChange={event => change({ preset: event.target.value as TypographyPreset }, true)}
-          >
-            {startingPoints.map(item => (
-              <option
-                key={item.id}
-                value={item.id}
+        <Changed
+          changes={changes}
+          field="preset"
+          label="Starting point"
+          format={presetName}
+          set={startingPoint}
+        >
+          {describedBy => (
+            <label>
+              Starting point
+              <select
+                value={input.preset}
+                aria-describedby={describedBy}
+                onChange={event => startingPoint(event.target.value as TypographyPreset)}
               >
-                {item.name}
-              </option>
-            ))}
-          </select>
-        </label>
+                {startingPoints.map(item => (
+                  <option
+                    key={item.id}
+                    value={item.id}
+                  >
+                    {item.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
+        </Changed>
         <Button
           variant="outline"
-          onClick={() => change({ preset: input.preset }, true)}
+          onClick={() => startingPoint(input.preset)}
         >
           Restore starting point
         </Button>
@@ -203,30 +246,52 @@ export function TypographyEditor({
           {assignments.map(assignment => {
             const value = input.fonts![assignment]!
             const known = assignedTrial(value, local)
+            const label = `${assignmentName(assignment)} assignment`
             return (
-              <label key={assignment}>
-                {assignmentName(assignment)} assignment
-                <select
-                  value={known?.id ?? 'manual'}
-                  onChange={event => {
-                    const font = candidates.find(item => item.id === event.target.value)
-                    if (font) change(chooseAssignment(input, assignment, font))
-                  }}
-                >
-                  {!known && (
-                    <option value="manual">{value.family} · manual / file may be missing</option>
-                  )}
-                  {candidates.map(font => (
-                    <option
-                      key={font.id}
-                      value={font.id}
+              <Changed
+                key={assignment}
+                changes={changes}
+                field={`font.${assignment}`}
+                label={label}
+                format={fontFieldName}
+                set={family =>
+                  change(assignFamily(input, assignment, family, local), {
+                    label: label.toLowerCase()
+                  })
+                }
+              >
+                {describedBy => (
+                  <label>
+                    {label}
+                    <select
+                      value={known?.id ?? 'manual'}
+                      aria-describedby={describedBy}
+                      onChange={event => {
+                        const font = candidates.find(item => item.id === event.target.value)
+                        if (font)
+                          change(chooseAssignment(input, assignment, font), {
+                            label: label.toLowerCase()
+                          })
+                      }}
                     >
-                      {font.family}
-                      {font.source === 'local' ? ' · local, manual' : ''}
-                    </option>
-                  ))}
-                </select>
-              </label>
+                      {!known && (
+                        <option value="manual">
+                          {value.family} · manual / file may be missing
+                        </option>
+                      )}
+                      {candidates.map(font => (
+                        <option
+                          key={font.id}
+                          value={font.id}
+                        >
+                          {font.family}
+                          {font.source === 'local' ? ' · local, manual' : ''}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                )}
+              </Changed>
             )
           })}
         </div>
@@ -259,13 +324,16 @@ export function TypographyEditor({
             <Button
               variant="outline"
               onClick={() =>
-                change({
-                  ...input,
-                  fonts: {
-                    ...input.fonts,
-                    [customAssignment]: { family: custom, profile: 'manual' }
-                  }
-                })
+                change(
+                  {
+                    ...input,
+                    fonts: {
+                      ...input.fonts,
+                      [customAssignment]: { family: custom, profile: 'manual' }
+                    }
+                  },
+                  { label: `${assignmentName(customAssignment).toLowerCase()} assignment` }
+                )
               }
             >
               Use manual family
@@ -323,20 +391,41 @@ export function TypographyEditor({
               ['headingScale', 'Heading scale', 1.1, 1.5, 0.001]
             ] as const
           ).map(([key, label, min, max, step]) => (
-            <FontNumber
+            <Changed
               key={key}
+              changes={changes}
+              field={`prose.${key}`}
               label={label}
-              value={prose[key]}
-              min={min}
-              max={max}
-              step={step}
-              onValid={value => change({ ...input, prose: { ...input.prose, [key]: value } })}
-            />
+              format={generated}
+              set={value =>
+                change(setRhythm(input, 'prose', key, value), {
+                  label: label.toLowerCase(),
+                  coalesce: `prose.${key}`
+                })
+              }
+            >
+              {describedBy => (
+                <FontNumber
+                  label={label}
+                  value={prose[key]}
+                  min={min}
+                  max={max}
+                  step={step}
+                  describedBy={describedBy}
+                  onValid={value =>
+                    change(setRhythm(input, 'prose', key, value), {
+                      label: label.toLowerCase(),
+                      coalesce: `prose.${key}`
+                    })
+                  }
+                />
+              )}
+            </Changed>
           ))}
         </div>
         <Button
           variant="outline"
-          onClick={() => change(resetRhythm(input, 'prose'))}
+          onClick={() => change(resetRhythm(input, 'prose'), { label: 'prose rhythm' })}
         >
           Reset prose rhythm
         </Button>
@@ -360,20 +449,41 @@ export function TypographyEditor({
               ['lineHeight', 'UI leading', 1, 3, 0.05]
             ] as const
           ).map(([key, label, min, max, step]) => (
-            <FontNumber
+            <Changed
               key={key}
+              changes={changes}
+              field={`ui.${key}`}
               label={label}
-              value={ui[key]}
-              min={min}
-              max={max}
-              step={step}
-              onValid={value => change({ ...input, ui: { ...input.ui, [key]: value } })}
-            />
+              format={generated}
+              set={value =>
+                change(setRhythm(input, 'ui', key, value), {
+                  label: label.toLowerCase(),
+                  coalesce: `ui.${key}`
+                })
+              }
+            >
+              {describedBy => (
+                <FontNumber
+                  label={label}
+                  value={ui[key]}
+                  min={min}
+                  max={max}
+                  step={step}
+                  describedBy={describedBy}
+                  onValid={value =>
+                    change(setRhythm(input, 'ui', key, value), {
+                      label: label.toLowerCase(),
+                      coalesce: `ui.${key}`
+                    })
+                  }
+                />
+              )}
+            </Changed>
           ))}
         </div>
         <Button
           variant="outline"
-          onClick={() => change(resetRhythm(input, 'ui'))}
+          onClick={() => change(resetRhythm(input, 'ui'), { label: 'UI rhythm' })}
         >
           Reset UI rhythm
         </Button>
@@ -405,81 +515,110 @@ export function TypographyEditor({
           </select>
         </label>
         <div className="typesetting-controls">
-          <label>
-            Style assignment
-            <select
-              value={style.assignment}
-              onChange={event =>
-                changeStyle('assignment', event.target.value as TypographyAssignment)
-              }
-            >
-              {assignments.map(item => (
-                <option
-                  key={item}
-                  value={item}
+          <Changed
+            changes={changes}
+            field={styleField('assignment')}
+            label="Style assignment"
+            format={generated}
+            set={value => changeStyle('assignment', value)}
+          >
+            {describedBy => (
+              <label>
+                Style assignment
+                <select
+                  value={style.assignment}
+                  aria-describedby={describedBy}
+                  onChange={event =>
+                    changeStyle('assignment', event.target.value as TypographyAssignment)
+                  }
                 >
-                  {assignmentName(item)}
-                </option>
-              ))}
-            </select>
-          </label>
+                  {assignments.map(item => (
+                    <option
+                      key={item}
+                      value={item}
+                    >
+                      {assignmentName(item)}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            )}
+          </Changed>
           <label className="typesetting-fluid">
             <input
               type="checkbox"
               checked={fluid}
               onChange={event => {
                 setFluidModes(previous => ({ ...previous, [role]: event.target.checked }))
-                if (!event.target.checked)
-                  change({
-                    ...input,
-                    styles: {
-                      ...input.styles,
-                      [role]: { ...input.styles?.[role], narrow: style.narrow, wide: style.narrow }
-                    }
-                  })
+                if (!event.target.checked) styleSize(style.narrow)
               }}
             />
             Responsive endpoints
           </label>
           {fluid ? (
             <>
-              <FontNumber
+              <Changed
                 key={`${role}:narrow`}
+                changes={changes}
+                field={styleField('narrow')}
                 label="Narrow size (px)"
-                value={style.narrow}
-                min={8}
-                max={Math.min(256, style.wide)}
-                step={0.5}
-                onValid={value => changeStyle('narrow', value)}
-              />
-              <FontNumber
+                format={generated}
+                set={value => changeStyle('narrow', value)}
+              >
+                {describedBy => (
+                  <FontNumber
+                    label="Narrow size (px)"
+                    value={style.narrow}
+                    min={8}
+                    max={Math.min(256, style.wide)}
+                    step={0.5}
+                    describedBy={describedBy}
+                    onValid={value => changeStyle('narrow', value)}
+                  />
+                )}
+              </Changed>
+              <Changed
                 key={`${role}:wide`}
+                changes={changes}
+                field={styleField('wide')}
                 label="Wide size (px)"
-                value={style.wide}
-                min={style.narrow}
-                max={512}
-                step={0.5}
-                onValid={value => changeStyle('wide', value)}
-              />
+                format={generated}
+                set={value => changeStyle('wide', value)}
+              >
+                {describedBy => (
+                  <FontNumber
+                    label="Wide size (px)"
+                    value={style.wide}
+                    min={style.narrow}
+                    max={512}
+                    step={0.5}
+                    describedBy={describedBy}
+                    onValid={value => changeStyle('wide', value)}
+                  />
+                )}
+              </Changed>
             </>
           ) : (
-            <FontNumber
+            <Changed
               key={`${role}:fixed`}
+              changes={changes}
+              field={styleField('narrow')}
               label="Style size (px)"
-              value={style.narrow}
-              min={8}
-              max={256}
-              step={0.5}
-              onValid={value =>
-                change({
-                  ...input,
-                  styles: {
-                    ...input.styles,
-                    [role]: { ...input.styles?.[role], narrow: value, wide: value }
-                  }
-                })
-              }
-            />
+              format={generated}
+              set={styleSize}
+            >
+              {describedBy => (
+                <FontNumber
+                  label="Style size (px)"
+                  value={style.narrow}
+                  min={8}
+                  max={256}
+                  step={0.5}
+                  describedBy={describedBy}
+                  onValid={styleSize}
+                />
+              )}
+            </Changed>
           )}
           {(
             [
@@ -489,15 +628,26 @@ export function TypographyEditor({
               ['measure', 'Style measure (ch)', 0, 120, 1]
             ] as const
           ).map(([key, label, min, max, step]) => (
-            <FontNumber
+            <Changed
               key={`${role}:${key}`}
+              changes={changes}
+              field={styleField(key)}
               label={label}
-              value={style[key]}
-              min={min}
-              max={max}
-              step={step}
-              onValid={value => changeStyle(key, value)}
-            />
+              format={generated}
+              set={value => changeStyle(key, value)}
+            >
+              {describedBy => (
+                <FontNumber
+                  label={label}
+                  value={style[key]}
+                  min={min}
+                  max={max}
+                  step={step}
+                  describedBy={describedBy}
+                  onValid={value => changeStyle(key, value)}
+                />
+              )}
+            </Changed>
           ))}
         </div>
         <Button
@@ -508,7 +658,7 @@ export function TypographyEditor({
               delete next[role]
               return next
             })
-            change(resetTextStyle(input, role))
+            change(resetTextStyle(input, role), { label: `${styleName(role)} style`.toLowerCase() })
           }}
         >
           Reset selected style

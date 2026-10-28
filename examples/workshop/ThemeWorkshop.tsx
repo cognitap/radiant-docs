@@ -1,22 +1,39 @@
 'use client'
 
-import { useCallback, useId, useMemo, useReducer, useRef, useState } from 'react'
+import {
+  Fragment,
+  useCallback,
+  useEffect,
+  useId,
+  useMemo,
+  useReducer,
+  useRef,
+  useState,
+  type Reducer
+} from 'react'
 import { Button, generateTypography } from '@cognitap/radiant'
 import { useHydrated } from '../profile/useHydrated'
+import { documentAPI, editors, type Editor, type SectionPatch } from './workshop-theme'
 import {
-  documentAPI,
-  editors,
-  initialDocument,
+  initialSnapshot,
   resetEditor,
-  type Editor,
-  type SectionPatch
-} from './workshop-theme'
+  themeChanges,
+  viewTheme,
+  type ThemeSnapshot
+} from './workshop-snapshot'
+import {
+  createHistory,
+  historyReducer,
+  type Change,
+  type History,
+  type HistoryAction
+} from './workshop-history'
 import { initialPreview, previewReducer } from './workshop-preview'
 import { Preview } from './Preview'
 import { ThemeHandoff, type ImportResult } from './ThemeHandoff'
 import { handoffAPI, errorMessage, type ImportData } from './workshop-handoff'
 import { GeometryEditor } from './GeometryEditor'
-import { geometryAPI, geometryPreset, type GeometryRecipe } from './workshop-geometry'
+import { geometryAPI, type GeometryRecipe } from './workshop-geometry'
 import { ColorEditor } from './ColorEditor'
 import { FontEditor } from './FontEditor'
 import { TypographyEditor } from './TypographyEditor'
@@ -24,7 +41,7 @@ import { WorkshopFontLoader } from './font-runtime'
 import type { TrialFont } from './workshop-fonts'
 import { applyTypesetting, chooseAssignment, documentTypesetting } from './workshop-typography'
 import { MotionEditor } from './MotionEditor'
-import { colorAPI, defaultColorRecipe, type ColorRecipe, type ColorSession } from './workshop-color'
+import { colorAPI, type ColorRecipe } from './workshop-color'
 import './workshop.css'
 
 function Choice({
@@ -59,39 +76,36 @@ function Choice({
   )
 }
 
-interface WorkshopState {
-  document: object
-  color: ColorSession | null
-  geometry: GeometryRecipe | null
-  importResult: ImportResult | null
-  colorImportRevision: number
-  geometryImportRevision: number
-}
-
 const descriptions: Record<Editor, string> = {
   color: 'Build a complete color system and inspect its roles in the preview.',
   typography: 'Assign families, text styles and rhythm, then read them in composed pages.',
   geometry: 'Shape shared spacing, control sizes and surfaces across the same scenes.',
   motion: 'Tune a physical response, then feel it in real interactions.'
 }
+const themeHistory: Reducer<History<ThemeSnapshot>, HistoryAction<ThemeSnapshot>> = historyReducer
 
-/** The document and the preview have separate owners; theme edits never remount scenes. */
+/** Native text editing keeps its own undo; the workshop shortcut yields to it. */
+function editsText(target: EventTarget | null) {
+  if (!(target instanceof HTMLElement)) return false
+  if (target.isContentEditable || target instanceof HTMLTextAreaElement) return true
+  return (
+    target instanceof HTMLInputElement &&
+    !['range', 'checkbox', 'radio', 'color', 'file', 'button', 'submit'].includes(target.type)
+  )
+}
+
+/** The theme, the preview and the session have separate owners; theme edits never remount scenes. */
 export function ThemeWorkshop() {
-  const [workshop, setWorkshop] = useState<WorkshopState>(() => {
-    const geometry = geometryPreset()
-    const document = geometryAPI.apply(applyTypesetting(initialDocument(), {}), geometry)
-    const color = colorAPI.create(defaultColorRecipe())
-    return {
-      document: colorAPI.apply(document, color),
-      color,
-      geometry,
-      importResult: null,
-      colorImportRevision: 0,
-      geometryImportRevision: 0
-    }
-  })
-  const { document, color, geometry } = workshop
+  const [baseline] = useState(initialSnapshot)
+  const [history, dispatchHistory] = useReducer(themeHistory, baseline, createHistory)
+  const present = history.present.state
+  const presentRef = useRef(present)
+  useEffect(() => {
+    presentRef.current = present
+  }, [present])
+  const { document, geometry } = present
   const [preview, dispatch] = useReducer(previewReducer, undefined, initialPreview)
+  const [importResult, setImportResult] = useState<ImportResult | null>(null)
   const [colorRevision, setColorRevision] = useState(0)
   const [geometryRevision, setGeometryRevision] = useState(0)
   const [fontRevision, setFontRevision] = useState(0)
@@ -102,17 +116,56 @@ export function ThemeWorkshop() {
   const [feedback, setFeedback] = useState('')
   const ready = useHydrated()
   const panelId = useId()
+  const countId = useId()
   const workshopHost = useRef<HTMLDivElement>(null)
-  const theme = useMemo(() => documentAPI.compile(document), [document])
+  const view = useMemo(() => viewTheme(present), [present])
+  const baselineView = useMemo(() => viewTheme(baseline), [baseline])
+  const changes = useMemo(() => themeChanges(view, baselineView), [view, baselineView])
+  const { theme, color } = view
   const recipes = useMemo(
     () => ({ color: color?.recipe, geometry: geometry ?? undefined }),
     [color, geometry]
   )
-  const importConfiguration = useCallback((data: ImportData, applyMode: 'merge' | 'replace') => {
-    setWorkshop(previous => {
+  const commit = useCallback(
+    (change: Change, state: ThemeSnapshot | ((state: ThemeSnapshot) => ThemeSnapshot)) =>
+      dispatchHistory({ type: 'commit', state, change, at: Date.now() }),
+    []
+  )
+  const canUndo = history.past.length > 0
+  const canRedo = history.future.length > 0
+  const undo = useCallback(() => {
+    if (!history.past.length) return
+    dispatchHistory({ type: 'undo' })
+    setFeedback(`Undid ${history.present.label}.`)
+  }, [history])
+  const redo = useCallback(() => {
+    const next = history.future[0]
+    if (!next) return
+    dispatchHistory({ type: 'redo' })
+    setFeedback(`Redid ${next.label}.`)
+  }, [history])
+  useEffect(() => {
+    const shortcut = (event: KeyboardEvent) => {
+      if (!(event.metaKey || event.ctrlKey) || event.altKey || editsText(event.target)) return
+      const key = event.key.toLowerCase()
+      if (key === 'z') {
+        event.preventDefault()
+        if (event.shiftKey) redo()
+        else undo()
+      } else if (key === 'y' && event.ctrlKey && !event.shiftKey) {
+        event.preventDefault()
+        redo()
+      }
+    }
+    window.addEventListener('keydown', shortcut)
+    return () => window.removeEventListener('keydown', shortcut)
+  }, [undo, redo])
+  const importConfiguration = useCallback(
+    (data: ImportData, applyMode: 'merge' | 'replace') => {
+      const previous = presentRef.current
       try {
         const current = handoffAPI.configuration(previous.document, {
-          color: previous.color?.recipe,
+          color: previous.color ?? undefined,
           geometry: previous.geometry ?? undefined
         })
         const next = handoffAPI.apply(current, data, applyMode)
@@ -120,41 +173,35 @@ export function ThemeWorkshop() {
           data.kind === 'radiant-workshop'
             ? ['color', 'surface', 'control', 'spacing']
             : Object.keys(data.sections)
-        return {
-          ...previous,
-          document: next.document,
-          color: next.recipes.color ? colorAPI.create(next.recipes.color) : null,
-          geometry: next.recipes.geometry ?? null,
-          colorImportRevision:
-            previous.colorImportRevision +
-            Number(affected.some(name => ['color', 'surface'].includes(name))),
-          geometryImportRevision:
-            previous.geometryImportRevision +
-            Number(affected.some(name => ['control', 'spacing', 'surface'].includes(name))),
-          importResult: {
-            ok: true,
-            message:
-              data.kind === 'radiant-workshop'
-                ? 'Configuration restored. Preview controls and scene interactions retained.'
-                : `Sections ${applyMode === 'merge' ? 'merged' : 'replaced'}. Unrelated sections and scene interactions retained.`
+        commit(
+          { label: data.kind === 'radiant-workshop' ? 'configuration import' : 'section import' },
+          {
+            document: next.document,
+            color: next.recipes.color ?? null,
+            geometry: next.recipes.geometry ?? null
           }
-        }
+        )
+        if (affected.some(name => ['color', 'surface'].includes(name)))
+          setColorRevision(value => value + 1)
+        if (affected.some(name => ['control', 'spacing', 'surface'].includes(name)))
+          setGeometryRevision(value => value + 1)
+        setImportResult({
+          ok: true,
+          message:
+            data.kind === 'radiant-workshop'
+              ? 'Configuration restored. Preview controls and scene interactions retained.'
+              : `Sections ${applyMode === 'merge' ? 'merged' : 'replaced'}. Unrelated sections and scene interactions retained.`
+        })
       } catch (error) {
-        return {
-          ...previous,
-          importResult: {
-            ok: false,
-            message: `Import: ${errorMessage(error)} Current theme retained.`
-          }
-        }
+        setImportResult({
+          ok: false,
+          message: `Import: ${errorMessage(error)} Current theme retained.`
+        })
       }
-    })
-  }, [])
-  const importError = useCallback(
-    (message: string) =>
-      setWorkshop(previous => ({ ...previous, importResult: { ok: false, message } })),
-    []
+    },
+    [commit]
   )
+  const importError = useCallback((message: string) => setImportResult({ ok: false, message }), [])
   const values = theme.modes.light
   const current = editors.find(item => item.id === editor)!
   const token = (name: `--rad-${string}`) => String(values[name])
@@ -162,29 +209,41 @@ export function ThemeWorkshop() {
     setEditor(next)
     dispatch({ type: 'editor', editor: next })
   }
-  function edit(patch: SectionPatch) {
-    setWorkshop(previous => ({
+  function edit(label: string, patch: SectionPatch) {
+    commit({ label }, previous => ({
       ...previous,
       document: documentAPI.update(previous.document, patch)
     }))
     setFeedback(`${current.label} updated. Preview state retained.`)
   }
-  function updateColor(recipe: ColorRecipe) {
-    const next: ColorSession = colorAPI.create(recipe)
-    setWorkshop(previous => ({
+  function updateColor(recipe: ColorRecipe, change: Change) {
+    const session = colorAPI.create(recipe)
+    commit(change, previous => ({
       ...previous,
-      document: colorAPI.apply(previous.document, next),
-      color: next
+      document: colorAPI.apply(previous.document, session),
+      color: session.recipe
     }))
     setFeedback('Color updated. Other sections and preview state retained.')
   }
-  function updateGeometry(recipe: GeometryRecipe) {
-    setWorkshop(previous => ({
+  function updateGeometry(recipe: GeometryRecipe, change: Change) {
+    commit(change, previous => ({
       ...previous,
       document: geometryAPI.apply(previous.document, recipe),
       geometry: recipe
     }))
     setFeedback('Spacing & surfaces updated. Other sections and preview state retained.')
+  }
+  function updateDocument(next: object, change: Change) {
+    commit(change, previous => ({ ...previous, document: next }))
+  }
+  function resetCurrent() {
+    commit({ label: `${current.label.toLowerCase()} reset` }, previous =>
+      resetEditor(previous, baseline, editor)
+    )
+    if (editor === 'color') setColorRevision(value => value + 1)
+    if (editor === 'geometry') setGeometryRevision(value => value + 1)
+    if (editor === 'typography') setFontRevision(value => value + 1)
+    setFeedback(`${current.label} reset. Other sections and preview state retained.`)
   }
   function selectRole(role: string) {
     setSelectedRole(role)
@@ -202,18 +261,55 @@ export function ThemeWorkshop() {
           className="workshop-editor-nav"
           aria-label="Theme editors"
         >
-          {editors.map(item => (
+          {editors.map(item => {
+            const count = changes[item.id].count
+            return (
+              <Fragment key={item.id}>
+                <Button
+                  disabled={!ready}
+                  variant={editor === item.id ? 'solid' : 'outline'}
+                  aria-pressed={editor === item.id}
+                  aria-controls={panelId}
+                  aria-describedby={count ? `${countId}-${item.id}` : undefined}
+                  onClick={() => chooseEditor(item.id)}
+                >
+                  {item.label}
+                  {count > 0 && (
+                    <span
+                      className="workshop-nav-count"
+                      aria-hidden="true"
+                    >
+                      {count}
+                    </span>
+                  )}
+                </Button>
+                {count > 0 && (
+                  <span
+                    id={`${countId}-${item.id}`}
+                    className="workshop-sr-only"
+                  >
+                    {count} changed
+                  </span>
+                )}
+              </Fragment>
+            )
+          })}
+          <div className="workshop-history">
             <Button
-              key={item.id}
-              disabled={!ready}
-              variant={editor === item.id ? 'solid' : 'outline'}
-              aria-pressed={editor === item.id}
-              aria-controls={panelId}
-              onClick={() => chooseEditor(item.id)}
+              variant="outline"
+              disabled={!ready || !canUndo}
+              onClick={undo}
             >
-              {item.label}
+              Undo
             </Button>
-          ))}
+            <Button
+              variant="outline"
+              disabled={!ready || !canRedo}
+              onClick={redo}
+            >
+              Redo
+            </Button>
+          </div>
         </nav>
         <div className="workshop-editing">
           <section
@@ -226,25 +322,7 @@ export function ThemeWorkshop() {
               <Button
                 variant="outline"
                 disabled={!ready}
-                onClick={() => {
-                  if (editor === 'color') {
-                    updateColor(defaultColorRecipe())
-                    setColorRevision(n => n + 1)
-                  } else if (editor === 'geometry') {
-                    updateGeometry(geometryPreset())
-                    setGeometryRevision(n => n + 1)
-                  } else {
-                    if (editor === 'typography') setFontRevision(value => value + 1)
-                    setWorkshop(previous => ({
-                      ...previous,
-                      document:
-                        editor === 'typography'
-                          ? applyTypesetting(resetEditor(previous.document, editor), {})
-                          : resetEditor(previous.document, editor)
-                    }))
-                  }
-                  setFeedback(`${current.label} reset. Other sections and preview state retained.`)
-                }}
+                onClick={resetCurrent}
               >
                 Reset {current.label.toLowerCase()}
               </Button>
@@ -260,13 +338,14 @@ export function ThemeWorkshop() {
                 className="workshop-color-panel"
               >
                 <ColorEditor
-                  key={`${colorRevision}:${workshop.colorImportRevision}`}
+                  key={colorRevision}
                   session={color}
+                  changes={changes.color.changes}
                   disabled={!ready}
                   onChange={updateColor}
                 />
               </div>
-              {editor === 'typography' && !documentTypesetting(document) && (
+              {editor === 'typography' && !view.typography && (
                 <>
                   <Choice
                     label="Body family"
@@ -276,7 +355,7 @@ export function ThemeWorkshop() {
                       ['Georgia, serif', 'Georgia serif'],
                       ['ui-monospace, monospace', 'System mono']
                     ]}
-                    onChange={family => edit({ typography: { values: { family } } })}
+                    onChange={family => edit('body family', { typography: { values: { family } } })}
                   />
                   <Choice
                     label="Body size"
@@ -286,7 +365,9 @@ export function ThemeWorkshop() {
                       ['1rem', '16px base'],
                       ['1.125rem', '18px base']
                     ]}
-                    onChange={bodySize => edit({ typography: { values: { bodySize } } })}
+                    onChange={bodySize =>
+                      edit('body size', { typography: { values: { bodySize } } })
+                    }
                   />
                 </>
               )}
@@ -313,7 +394,7 @@ export function ThemeWorkshop() {
                     }
                     active={editor === 'typography'}
                     document={document}
-                    onChange={next => setWorkshop(previous => ({ ...previous, document: next }))}
+                    onChange={next => updateDocument(next, { label: 'font assignment' })}
                   />
                 </details>
               </div>
@@ -322,8 +403,9 @@ export function ThemeWorkshop() {
                 className="workshop-geometry-panel"
               >
                 <GeometryEditor
-                  key={`${geometryRevision}:${workshop.geometryImportRevision}`}
+                  key={geometryRevision}
                   recipe={geometry}
+                  changes={changes.geometry.changes}
                   theme={theme}
                   disabled={!ready}
                   onChange={updateGeometry}
@@ -335,7 +417,8 @@ export function ThemeWorkshop() {
               >
                 <MotionEditor
                   document={document}
-                  onChange={next => setWorkshop(previous => ({ ...previous, document: next }))}
+                  changes={changes.motion.changes}
+                  onChange={updateDocument}
                 />
               </div>
             </fieldset>
@@ -346,18 +429,18 @@ export function ThemeWorkshop() {
               <TypographyEditor
                 active={editor === 'typography'}
                 document={document}
+                result={view.typography}
+                changes={changes.typography.changes}
                 loader={fontLoader}
                 local={localFont}
                 selectedRole={selectedRole}
                 onSelectRole={setSelectedRole}
-                onChange={next => setWorkshop(previous => ({ ...previous, document: next }))}
+                onChange={updateDocument}
               />
             </div>
           </section>
           <output className="workshop-feedback">{feedback}</output>
-          {workshop.importResult && (
-            <p className="workshop-notice">{workshop.importResult.message}</p>
-          )}
+          {importResult && <p className="workshop-notice">{importResult.message}</p>}
         </div>
         <Preview
           editor={editor}
@@ -373,7 +456,7 @@ export function ThemeWorkshop() {
       <ThemeHandoff
         document={document}
         recipes={recipes}
-        result={workshop.importResult}
+        result={importResult}
         onImport={importConfiguration}
         onError={importError}
       />

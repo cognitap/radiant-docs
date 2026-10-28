@@ -29,9 +29,10 @@
   display: flex;
   flex-wrap: wrap;
   gap: 0.75rem;
-  align-items: end;
+  align-items: start;
 }
-.typesetting-controls > label {
+.typesetting-controls > label,
+.typesetting-controls > .control-change {
   flex: 1 1 9rem;
 }
 .typesetting-editor input,

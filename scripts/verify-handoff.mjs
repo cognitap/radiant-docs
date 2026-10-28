@@ -159,10 +159,12 @@ export async function verifyHandoff(browser, baseURL) {
         document.querySelector('.theme-handoff textarea[readonly]')?.value.includes('handoff-proof')
       )
       assert.equal(await exported.inputValue(), text)
-      await shared.getByRole('button', { name: 'Reset preview', exact: true }).click()
-      await shared.waitForFunction(() => window.location.hash === '')
-      await shared.getByText('Reusable configuration JSON', { exact: true }).click()
-      assert.equal(JSON.parse(await exported.inputValue()).document.id, 'workshop')
+      await shared.getByRole('button', { name: 'Undo', exact: true }).click()
+      assert.equal(
+        JSON.parse(await exported.inputValue()).document.id,
+        'workshop',
+        'a share link import is one undoable step'
+      )
     } finally {
       await shared.close()
     }
@@ -447,7 +449,7 @@ export async function verifyHandoff(browser, baseURL) {
       await blocked.close()
     }
     console.log(
-      'Handoff UI passed: exact typed/configuration/section/CSS copies, download/file import, full and partial policies, share/reload/reset, fonts, preserved exceptions and private form state, failures, imported recipe-free sections, keyboard and mobile layouts.'
+      'Handoff UI passed: exact typed/configuration/section/CSS copies, download/file import, full and partial policies, share/reload/undo, fonts, preserved exceptions and private form state, failures, imported recipe-free sections, keyboard and mobile layouts.'
     )
   } catch (error) {
     await page
