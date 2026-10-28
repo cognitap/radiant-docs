@@ -131,69 +131,13 @@ export function geometryFields(recipe: GeometryRecipe): GeometryFields {
   return fields as GeometryFields
 }
 export const geometryDials = [
-  {
-    key: 'spacing',
-    label: 'Spacing multiplier',
-    min: 0.5,
-    max: 2,
-    step: 0.05,
-    unit: '×',
-    help: 'All five shared gaps plus panel padding and gap; rem units remain responsive.'
-  },
-  {
-    key: 'density',
-    label: 'Control density',
-    min: 0.75,
-    max: 1.5,
-    step: 0.05,
-    unit: '×',
-    help: 'Small, medium and large heights, horizontal padding and indicators. Font sizes stay unchanged.'
-  },
-  {
-    key: 'controlRadius',
-    label: 'Control radius',
-    min: 0,
-    max: 32,
-    step: 1,
-    unit: 'px',
-    help: 'Shared action and input shape. Checkbox caps its radius; Radio remains circular.'
-  },
-  {
-    key: 'surfaceRadius',
-    label: 'Surface radius',
-    min: 0,
-    max: 48,
-    step: 1,
-    unit: 'px',
-    help: 'Cards, dialogs, disclosures and accordion items.'
-  },
-  {
-    key: 'controlBorderWidth',
-    label: 'Control border width',
-    min: 0,
-    max: 4,
-    step: 0.25,
-    unit: 'px',
-    help: 'Shared control boundary. Inspect focus, disabled and invalid controls after changing it.'
-  },
-  {
-    key: 'surfaceBorderWidth',
-    label: 'Surface border width',
-    min: 0,
-    max: 4,
-    step: 0.25,
-    unit: 'px',
-    help: 'Shared panel boundary; independent of control borders.'
-  },
-  {
-    key: 'backdropOpacity',
-    label: 'Modal backdrop opacity',
-    min: 0,
-    max: 0.9,
-    step: 0.05,
-    unit: '',
-    help: 'Black modal backdrop, from transparent to 90%. Open the component overlay to inspect it.'
-  }
+  { key: 'spacing', label: 'Breathing room', min: 0.5, max: 2, step: 0.05, unit: '×' },
+  { key: 'density', label: 'Density', min: 0.75, max: 1.5, step: 0.05, unit: '×' },
+  { key: 'controlRadius', label: 'Control roundness', min: 0, max: 32, step: 1, unit: 'px' },
+  { key: 'surfaceRadius', label: 'Surface roundness', min: 0, max: 48, step: 1, unit: 'px' },
+  { key: 'controlBorderWidth', label: 'Control borders', min: 0, max: 4, step: 0.25, unit: 'px' },
+  { key: 'surfaceBorderWidth', label: 'Surface borders', min: 0, max: 4, step: 0.25, unit: 'px' },
+  { key: 'backdropOpacity', label: 'Backdrop dim', min: 0, max: 0.9, step: 0.05, unit: '' }
 ] as const
 // Actual resolved values from the public Theme ABI, including independent fonts.
 export const geometryMetrics: readonly (readonly [string, `--rad-${string}`])[] = [
