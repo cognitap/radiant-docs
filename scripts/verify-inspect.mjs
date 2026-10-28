@@ -109,6 +109,9 @@ export async function verifyInspect(browser, baseURL) {
 
     await scene.selectOption('page:article')
     await proof.locator('[data-rad-text="prose-title"]').click()
+    assert.equal(await item(/Foreground/).count(), 1, 'the title lists the color that paints it')
+    assert.equal(await item(/Prose \/ Title/).count(), 1, 'and its text style')
+    assert.doesNotMatch(await inspector.innerText(), /--rad-|No workshop control/)
     await workshop.getByRole('button', { name: 'Typography', exact: true }).click()
     const style = workshop.getByRole('combobox', { name: 'Text style', exact: true })
     assert.equal(await style.inputValue(), 'prose-title', 'clicking text selects its style')

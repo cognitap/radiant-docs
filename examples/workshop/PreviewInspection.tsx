@@ -5,6 +5,7 @@
 import { useEffect, useId, useRef, useState, type CSSProperties, type ReactNode } from 'react'
 import {
   displayValue,
+  inheritedColorToken,
   inspectStyling,
   matchedTokens,
   textRole,
@@ -25,7 +26,11 @@ export interface Selection {
 function* styleRules(rules: CSSRuleList): Generator<StyleRule> {
   for (const rule of rules) {
     if (rule instanceof CSSStyleRule)
-      yield { selector: rule.selectorText, cssText: rule.style.cssText }
+      yield {
+        selector: rule.selectorText,
+        cssText: rule.style.cssText,
+        color: rule.style.getPropertyValue('color') || undefined
+      }
     if ('cssRules' in rule && rule.cssRules instanceof CSSRuleList) yield* styleRules(rule.cssRules)
   }
 }
@@ -62,6 +67,12 @@ export function readSelection(start: Element): Selection | null {
     element = element.parentElement
     tokens = matchedTokens(rules, safeMatches(element))
   }
+  function* ancestors(from: Element) {
+    for (let node: Element | null = from; node; node = node === page ? null : node.parentElement)
+      yield safeMatches(node)
+  }
+  const color = inheritedColorToken(rules, ancestors(element))
+  if (color && !tokens.includes(color)) tokens = [...tokens, color]
   const within = <T extends Element>(candidate: T | null) =>
     candidate && element.contains(candidate) ? candidate : null
   const explicit = within(start.closest<HTMLElement>('[data-rad-text]'))
@@ -235,15 +246,17 @@ export function Inspector({
       </div>
     )
   const { groups, unmapped } = inspectStyling(selection.styling, context)
+  const empty = groups.length === 0
   return (
     <section
       className="preview-inspector"
       aria-label="Inspected element"
+      data-unmapped={unmapped.join(' ') || undefined}
     >
       <p className="preview-inspector-target">
         Inspecting <strong>{selection.name}</strong>
-        {groups.length === 0 ? '. No theme values style it directly.' : ''}
       </p>
+      {empty && <p className="preview-note">Nothing on this element comes from the theme.</p>}
       {groups.map(group => (
         <div
           key={group.editor}
@@ -267,11 +280,6 @@ export function Inspector({
           </ul>
         </div>
       ))}
-      {unmapped.length > 0 && (
-        <p className="preview-note">
-          No workshop control: <code>{unmapped.join(' ')}</code>
-        </p>
-      )}
     </section>
   )
 }

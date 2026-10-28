@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import {
   displayValue,
+  inheritedColorToken,
   inspectStyling,
   matchedTokens,
   normalizeSelector,
@@ -89,7 +90,7 @@ test('a solid button maps to action color, control radius, density, its label st
       ['Color', ['role.light.accent']],
       ['Typography', ['style.ui-label.assignment']],
       ['Spacing & surfaces', ['shared.controlRadius', 'shared.density']],
-      ['Motion', ['mode', 'shared.stiffness']]
+      ['Motion', ['shared.stiffness']]
     ]
   )
   const [accent] = groups[0].items
@@ -99,14 +100,14 @@ test('a solid button maps to action color, control radius, density, its label st
   assert.equal(accent.note, 'Automatic')
   assert.match(groups[0].hint, /follow Brand color/)
   assert.equal(groups[2].hint, undefined)
-  const press = groups[3].items[1]
+  const press = groups[3].items[0]
   assert.equal(press.label, 'Button press physics')
   assert.equal(press.value, 'stiffness 320 · damping 30 · mass 1')
   assert.equal(press.note, 'Inherits common physics')
   assert.deepEqual(
     unmapped,
-    ['--rad-focus-width'],
-    'initial and unset component hooks are not listed'
+    ['--rad-motion-color-duration', '--rad-focus-width'],
+    'durations have no control; initial and unset component hooks are not listed'
   )
 })
 
@@ -151,4 +152,53 @@ test('displayValue shows px for lengths and the first family name', () => {
   assert.equal(displayValue('length', '2.5rem 1px'), '40px 1px')
   assert.equal(displayValue('family', '"Inter", system-ui, sans-serif'), 'Inter')
   assert.equal(displayValue('color', 'oklch(0.5 0 0)'), 'oklch(0.5 0 0)')
+})
+
+test('inheritedColorToken follows the nearest ancestor whose rules set color', () => {
+  const rules = [
+    {
+      selector: '.page',
+      cssText: 'color:var(--rad-color-foreground)',
+      color: 'var(--rad-color-foreground)'
+    },
+    {
+      selector: '.muted',
+      cssText: 'color:var(--rad-color-muted)',
+      color: 'var(--rad-color-muted)'
+    },
+    { selector: 'h2', cssText: 'margin:0' },
+    { selector: '.plain', cssText: 'color:red', color: 'red' }
+  ]
+  const is =
+    (...names) =>
+    selector =>
+      names.includes(selector)
+  assert.equal(
+    inheritedColorToken(rules, [is('h2'), is('article'), is('.page')]),
+    '--rad-color-foreground'
+  )
+  assert.equal(
+    inheritedColorToken(rules, [is('h2'), is('.muted'), is('.page')]),
+    '--rad-color-muted'
+  )
+  assert.equal(
+    inheritedColorToken(rules, [is('h2', '.plain'), is('.page')]),
+    undefined,
+    'a non-theme color on the way stops the climb'
+  )
+  assert.equal(inheritedColorToken(rules, [is('h2')]), undefined)
+})
+
+test('an inherited foreground token joins the text style as a color item', () => {
+  const { groups } = inspectStyling(
+    { tokens: ['--rad-color-foreground'], slot: undefined, textRole: 'prose-title' },
+    context({ values: { '--rad-color-foreground': '#111111' } })
+  )
+  assert.deepEqual(
+    groups.map(group => [group.label, group.items.map(item => item.label)]),
+    [
+      ['Color', ['Foreground']],
+      ['Typography', ['Prose / Title']]
+    ]
+  )
 })

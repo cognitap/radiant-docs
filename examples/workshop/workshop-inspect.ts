@@ -10,7 +10,7 @@ import { motionDials, motionScopes } from './workshop-motion.ts'
 import { styleName } from './workshop-typography.ts'
 
 export type TokenName = `--rad-${string}`
-export type ValueKind = 'color' | 'length' | 'family' | 'duration' | 'shadow' | 'physics' | 'text'
+export type ValueKind = 'color' | 'length' | 'family' | 'shadow' | 'physics' | 'text'
 /** The control that edits one theme decision: an editor and a field path from that editor's Fields. */
 export interface ControlTarget {
   editor: Editor
@@ -171,15 +171,6 @@ define([
 ], fixed('typography', 'prose.paragraphSpacing', 'Prose paragraph spacing', 'length'))
 define(['--rad-typography-body-size'], fixed('typography', 'ui.size', 'UI size', 'length'))
 
-define([
-  '--rad-motion-press-duration',
-  '--rad-motion-press-ease',
-  '--rad-motion-release-duration',
-  '--rad-motion-release-ease',
-  '--rad-motion-color-duration',
-  '--rad-motion-disclosure-duration'
-], fixed('motion', 'mode', 'Theme motion', 'duration'))
-
 /** Radiant slots whose interaction runs on a spring from the motion profile. */
 export const slotInteractions: Readonly<Record<string, MotionInteraction>> = {
   button: 'press',
@@ -223,6 +214,8 @@ export function normalizeSelector(selector: string): string {
 export interface StyleRule {
   selector: string
   cssText: string
+  /** The rule's `color` declaration, when it sets one. */
+  color?: string
 }
 export function matchedTokens(
   rules: Iterable<StyleRule>,
@@ -235,6 +228,25 @@ export function matchedTokens(
     for (const token of tokensIn(rule.cssText)) tokens.add(token)
   }
   return [...tokens]
+}
+
+/**
+ * The theme token behind the color that paints an element's text. `ancestors` run from the
+ * element outward; the first one with a matched rule setting `color` decides, as inheritance does.
+ */
+export function inheritedColorToken(
+  rules: readonly StyleRule[],
+  ancestors: Iterable<(selector: string) => boolean>
+): TokenName | undefined {
+  for (const matches of ancestors) {
+    let color: string | undefined
+    for (const rule of rules) {
+      const selector = normalizeSelector(rule.selector)
+      if (rule.color && selector.trim() && matches(selector)) color = rule.color
+    }
+    if (color !== undefined) return tokensIn(color)[0]
+  }
+  return undefined
 }
 
 const hints = { color: 'Automatic roles follow Brand color; the role control pins an exact value.' }
