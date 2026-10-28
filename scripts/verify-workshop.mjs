@@ -16,6 +16,12 @@ assert.ok(
 )
 const articleTitle = 'Make room for the useful things, and the people who use them.'
 
+/** A control that needs a paragraph should be fixed instead; specimen text is exempt. */
+const proseLimit = 120
+/** One row of small controls is 2rem plus padding and border; Typography adds a second row of
+    tools. Before the compact toolbar these were 196px to 298px at 1440×900. */
+const toolbarBudget = { color: 64, typography: 100, geometry: 64, motion: 64 }
+
 /** The one preview must stay in view while any editor control changes. */
 async function assertPreviewInView(page, label) {
   const previews = page.getByRole('region', { name: 'Theme preview', exact: true })
@@ -50,6 +56,45 @@ export async function verifyWorkshop(browser, baseURL) {
     await wideFrame.getByRole('button', { name, exact: true }).click()
     await assertPreviewInView(widePage, name)
   }
+  for (const [editor, name] of [
+    ['color', 'Color'],
+    ['typography', 'Typography'],
+    ['geometry', 'Spacing & surfaces'],
+    ['motion', 'Motion']
+  ]) {
+    await wideFrame.getByRole('button', { name, exact: true }).click()
+    const { prose, toolbar } = await widePage.evaluate(() => ({
+      prose: [...document.querySelectorAll('.workshop-editor p')]
+        .filter(node => node.checkVisibility() && !node.closest('.font-sample'))
+        .map(node => node.textContent.trim()),
+      toolbar: document.querySelector('.preview-toolbar').getBoundingClientRect().height
+    }))
+    assert.deepEqual(
+      prose.filter(text => text.length > proseLimit),
+      [],
+      `${name}: no explanatory paragraph over ${proseLimit} characters`
+    )
+    assert.ok(
+      toolbar <= toolbarBudget[editor],
+      `${name}: preview toolbar is ${toolbar}px, over its ${toolbarBudget[editor]}px budget`
+    )
+  }
+  const sample = () =>
+    widePage
+      .locator('.spring-sample-dot')
+      .first()
+      .evaluate(node => node.style.cssText)
+  const moving = await sample()
+  await widePage.waitForFunction(
+    before => document.querySelector('.spring-sample-dot').style.cssText !== before,
+    moving,
+    { timeout: 4000 }
+  )
+  await wideFrame.getByRole('button', { name: 'Color', exact: true }).click()
+  await widePage.waitForTimeout(1000)
+  const resting = await sample()
+  await widePage.waitForTimeout(1600)
+  assert.equal(await sample(), resting, 'starting-point samples pause while Motion is hidden')
   await wideFrame.getByRole('textbox', { name: 'Brand color', exact: true }).fill('#166534')
   await assertPreviewInView(widePage, 'brand color')
   const editorBox = await wideFrame.locator('.workshop-editor').boundingBox()
