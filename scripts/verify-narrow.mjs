@@ -62,10 +62,9 @@ export async function verifyNarrow(browser, baseURL) {
       await assertEditable(brand, 'brand color after the edit')
 
       await editor('Spacing & surfaces').click()
-      const spacing = workshop.getByRole('slider', {
-        name: 'Spacing multiplier slider',
-        exact: true
-      })
+      const spacing = workshop
+        .locator('.geometry-editor')
+        .getByRole('slider', { name: 'Breathing room', exact: true })
       const gap = await variable('--rad-spacing-group-gap')
       await spacing.focus()
       await assertEditable(spacing, 'spacing slider')
@@ -133,8 +132,8 @@ export async function verifyNarrow(browser, baseURL) {
       await inspect.click()
       await canvas.getByRole('button', { name: 'Try the action', exact: true }).click()
       const inspector = preview.getByRole('region', { name: 'Inspected element', exact: true })
-      await inspector.getByRole('button', { name: /Control radius/ }).click()
-      const radius = workshop.getByRole('spinbutton', { name: 'Control radius (px)', exact: true })
+      await inspector.getByRole('button', { name: /Control roundness/ }).click()
+      const radius = workshop.getByRole('spinbutton', { name: 'Control roundness', exact: true })
       await page.waitForFunction(
         () => document.activeElement?.getAttribute('type') === 'number',
         null,

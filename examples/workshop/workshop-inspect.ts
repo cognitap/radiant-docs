@@ -121,7 +121,7 @@ define(['--rad-control-border-style', '--rad-surface-border-style'], fixed(
 define(['--rad-surface-shadow', '--rad-surface-overlay-shadow'], fixed(
   'geometry',
   'shared.elevation',
-  'Surface elevation',
+  'Depth',
   'shadow'
 ))
 define(['--rad-surface-backdrop'], fixed(

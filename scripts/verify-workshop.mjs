@@ -95,7 +95,7 @@ export async function verifyWorkshop(browser, baseURL) {
   await setTypographyFamily(wideFrame)
   await assertPreviewInView(widePage, 'typography control')
   await wideEditor('Spacing & surfaces')
-  await wideFrame.getByRole('spinbutton', { name: 'Surface radius (px)', exact: true }).fill('24')
+  await wideFrame.getByRole('spinbutton', { name: 'Surface roundness', exact: true }).fill('24')
   await assertPreviewInView(widePage, 'geometry control')
   await wideEditor('Motion')
   await wideFrame
@@ -165,7 +165,7 @@ export async function verifyWorkshop(browser, baseURL) {
     await selectEditor('Typography')
     const typographyFamily = await setTypographyFamily(frame, 18)
     await selectEditor('Spacing & surfaces')
-    await frame.getByRole('spinbutton', { name: 'Surface radius (px)', exact: true }).fill('24')
+    await frame.getByRole('spinbutton', { name: 'Surface roundness', exact: true }).fill('24')
     await selectEditor('Motion')
     await frame
       .locator('.motion-editor')

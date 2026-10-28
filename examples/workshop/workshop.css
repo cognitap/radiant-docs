@@ -197,13 +197,38 @@
     animation: none;
   }
 }
+/* One line, so a marker under a compact field never stacks and breaks its row. In a cell too
+   narrow for the words, only the dot and Reset show; the span keeps the full text for
+   aria-describedby. */
+.control-change {
+  container-type: inline-size;
+}
+@container (width < 13rem) {
+  .control-change-marker > span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
 .control-change-marker {
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
   gap: 0.4rem;
+  min-width: 0;
   font-size: 0.75rem;
   color: var(--docs-muted);
+}
+.control-change-marker > span {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 .control-change-marker::before {
   content: '';
@@ -214,6 +239,7 @@
   background: var(--docs-accent);
 }
 .control-change-marker button {
+  flex: none;
   margin: 0;
   padding: 0.1rem 0.5rem;
   font: inherit;

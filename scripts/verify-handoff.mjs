@@ -121,8 +121,11 @@ export async function verifyHandoff(browser, baseURL) {
     assert.equal(await checked(frame, 'Brand ramp preset'), 'classic')
     await frame.getByRole('button', { name: 'Spacing & surfaces', exact: true }).click()
     assert.equal(
-      await frame.getByRole('combobox', { name: 'Starting preset', exact: true }).inputValue(),
-      'custom'
+      await frame
+        .locator('[role="radiogroup"][aria-label="Starting preset"] input:checked')
+        .count(),
+      0,
+      'no preset card is picked for imported geometry'
     )
     await handoff.getByText('Required setup and fonts', { exact: true }).click()
     assert.ok(

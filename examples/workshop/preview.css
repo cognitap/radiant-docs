@@ -584,3 +584,59 @@
     border-color: Highlight;
   }
 }
+
+/* Geometry handles: drag a control's corner and height and a surface's corner on the preview. */
+.geometry-handles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.geometry-handle {
+  position: absolute;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+.geometry-handle .geometry-grip {
+  box-sizing: border-box;
+  pointer-events: auto;
+}
+.geometry-handle[data-handle='controlRadius'] .geometry-grip,
+.geometry-handle[data-handle='surfaceRadius'] .geometry-grip {
+  cursor: nesw-resize;
+}
+.geometry-handle[data-handle='density'] .geometry-grip {
+  width: 1.75rem;
+  height: 0.6rem;
+  border-radius: 0.2rem;
+  cursor: ns-resize;
+}
+.geometry-handle-readout {
+  position: absolute;
+  left: 0.75rem;
+  top: -1.9rem;
+  display: none;
+  padding: 0.15rem 0.45rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  line-height: 1.4;
+  white-space: nowrap;
+  color: var(--docs-background, #fff);
+  background: var(--docs-foreground, #111);
+  border-radius: 0.3rem;
+  pointer-events: none;
+}
+.geometry-handle:hover .geometry-handle-readout,
+.geometry-handle:focus-within .geometry-handle-readout,
+.geometry-handles[data-dragging='controlRadius']
+  [data-handle='controlRadius']
+  .geometry-handle-readout,
+.geometry-handles[data-dragging='surfaceRadius']
+  [data-handle='surfaceRadius']
+  .geometry-handle-readout,
+.geometry-handles[data-dragging='density'] [data-handle='density'] .geometry-handle-readout {
+  display: block;
+}
+.geometry-handles[data-dragging] .geometry-grip {
+  background: var(--docs-accent);
+}
