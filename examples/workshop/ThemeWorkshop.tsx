@@ -130,7 +130,7 @@ function WorkshopShell({
   useEffect(() => {
     const nav = editorNav.current
     if (!nav) return
-    const root = document.documentElement
+    const root = globalThis.document.documentElement
     const observer = new ResizeObserver(() =>
       root.style.setProperty('--workshop-nav', `${nav.offsetHeight}px`)
     )
