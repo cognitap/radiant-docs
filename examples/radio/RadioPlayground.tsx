@@ -2,13 +2,8 @@
 
 import { useMemo, useState } from 'react'
 import dynamic from 'next/dynamic'
-import {
-  ThemeScope,
-  radiant,
-  type ControlSize,
-  type Theme,
-  type ThemeMode
-} from '@cognitap/radiant'
+import { ThemeScope, type ControlSize, type Theme, type ThemeMode } from '@cognitap/radiant'
+import { radiant } from '@cognitap/radiant/examples'
 import { PreviewThemeControls, SelectControl } from '@/components/demo/ActionControls'
 import { DemoControls, DemoPreview } from '@/components/demo/DemoFrame'
 

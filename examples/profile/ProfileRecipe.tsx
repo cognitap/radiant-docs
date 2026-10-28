@@ -14,10 +14,10 @@ import {
   DialogTitle,
   DialogTrigger,
   ThemeScope,
-  radiant,
   type Theme,
   type ThemeMode
 } from '@cognitap/radiant'
+import { radiant } from '@cognitap/radiant/examples'
 import { NativeProfileForm } from './NativeProfileForm'
 import { TanStackProfileForm } from './TanStackProfileForm'
 import type { Profile } from './profile'

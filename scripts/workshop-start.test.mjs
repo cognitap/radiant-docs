@@ -3,11 +3,12 @@ import test from 'node:test'
 import {
   brandSnapshot,
   defaultRecipe,
-  defaultTheme,
+  exampleSnapshot,
   readSharedTheme,
   startingSnapshot,
   startingThemes
 } from '../examples/workshop/workshop-start.ts'
+import { themes } from '@cognitap/radiant/examples'
 import {
   snapshotConfiguration,
   snapshotFromConfiguration,
@@ -16,63 +17,59 @@ import {
 } from '../examples/workshop/workshop-snapshot.ts'
 import { handoffAPI, jsonText } from '../examples/workshop/workshop-handoff.ts'
 import { sharePayload } from '../examples/workshop/workshop-share.ts'
-import { initialDocument, readThemeDocument } from '../examples/workshop/workshop-theme.ts'
+import { readThemeDocument } from '../examples/workshop/workshop-theme.ts'
 import { colorAPI, colorFields, defaultColorRecipe } from '../examples/workshop/workshop-color.ts'
-import {
-  geometryAPI,
-  geometryPreset,
-  geometryFields
-} from '../examples/workshop/workshop-geometry.ts'
-import { applyTypesetting } from '../examples/workshop/workshop-typography.ts'
-import { motionFields } from '../examples/workshop/workshop-motion.ts'
+import { geometryFields } from '../examples/workshop/workshop-geometry.ts'
 
-test('the registry has distinct ids, names and recipes', () => {
-  const ids = startingThemes.map(theme => theme.id)
-  assert.equal(new Set(ids).size, ids.length)
-  assert.equal(new Set(startingThemes.map(theme => theme.name)).size, ids.length)
-  assert.equal(new Set(startingThemes.map(theme => JSON.stringify(theme.recipe))).size, ids.length)
-  assert.ok(ids.length >= 4 && ids.length <= 6, `${ids.length} themes`)
-  for (const theme of startingThemes)
+test("the gallery is Radiant's example themes, each with a few words of character", () => {
+  assert.deepEqual(
+    startingThemes.map(theme => theme.id),
+    themes.map(theme => theme.id)
+  )
+  for (const theme of startingThemes) {
+    assert.notEqual(theme.character, theme.name, `${theme.id}: has its own character`)
     assert.ok(theme.character.split(' ').length <= 5, `${theme.id}: a few words`)
+  }
 })
 
-test('the default theme is the workshop as it opened before the start screen', () => {
-  const geometry = geometryPreset()
-  const color = colorAPI.create(defaultColorRecipe())
-  const document = geometryAPI.apply(applyTypesetting(initialDocument(), {}), geometry)
-  const before = { document: colorAPI.apply(document, color), color: color.recipe, geometry }
-  assert.deepEqual(startingSnapshot(defaultTheme.recipe), before)
-  assert.deepEqual(startingSnapshot(defaultRecipe), before)
-})
-
-test('every theme builds deterministically, validates and resolves to its recipe', () => {
-  for (const { id, recipe } of startingThemes) {
-    const snapshot = startingSnapshot(recipe)
-    assert.deepEqual(startingSnapshot(recipe), snapshot, `${id}: deterministic`)
+test('every example opens as the exact theme the package publishes', () => {
+  startingThemes.forEach((theme, index) => {
+    const snapshot = exampleSnapshot(theme)
     assert.equal(readThemeDocument(snapshot.document).kind, 'radiant-theme')
     const view = viewTheme(snapshot)
-    const color = colorFields(view.color)
-    assert.equal(color.brand, recipe.brand, `${id}: brand`)
-    assert.equal(color.wallPreset, recipe.wall, `${id}: wall`)
-    assert.equal(color.rampPreset, recipe.ramp, `${id}: ramp`)
-    assert.equal(view.typography.input.preset, recipe.typography, `${id}: typography`)
-    assert.equal(geometryFields(snapshot.geometry).preset, recipe.geometry, `${id}: geometry`)
-    assert.equal(motionFields(snapshot.document).preset, recipe.motion, `${id}: motion`)
-    assert.equal(view.theme.modes.light['--rad-color-accent'], recipe.brand, `${id}: accent`)
-    const changes = themeChanges(view, viewTheme(startingSnapshot(recipe)))
+    assert.deepEqual(view.theme, themes[index], `${theme.id}: compiled theme`)
+    const changes = themeChanges(view, viewTheme(exampleSnapshot(theme)))
     for (const editor of ['color', 'typography', 'geometry', 'motion'])
-      assert.equal(changes[editor].count, 0, `${id}: ${editor} unchanged against itself`)
+      assert.equal(changes[editor].count, 0, `${theme.id}: ${editor} unchanged against itself`)
+  })
+})
+
+test('every example round-trips through the handoff configuration', () => {
+  for (const theme of startingThemes) {
+    const snapshot = exampleSnapshot(theme)
+    const text = jsonText(snapshotConfiguration(snapshot))
+    assert.deepEqual(snapshotFromConfiguration(handoffAPI.read(text)), snapshot, theme.id)
+    assert.deepEqual(readSharedTheme(text), snapshot, `${theme.id}: shared theme`)
   }
 })
 
-test('every theme round-trips through the handoff configuration', () => {
-  for (const { id, recipe } of startingThemes) {
-    const snapshot = startingSnapshot(recipe)
-    const text = jsonText(snapshotConfiguration(snapshot))
-    const restored = snapshotFromConfiguration(handoffAPI.read(text))
-    assert.deepEqual(restored, snapshot, `${id}: configuration round trip`)
-    assert.deepEqual(readSharedTheme(text), snapshot, `${id}: shared theme`)
-  }
+test('an example adopts a color recipe from its own accent', () => {
+  const jelly = startingThemes.find(theme => theme.id === 'jelly')
+  const before = viewTheme(exampleSnapshot(jelly))
+  const accent = before.theme.modes.light['--rad-color-accent']
+  const color = colorAPI.create({ input: { ...defaultColorRecipe().input, brand: accent } })
+  const after = viewTheme({
+    ...exampleSnapshot(jelly),
+    document: colorAPI.apply(exampleSnapshot(jelly).document, color),
+    color: color.recipe
+  })
+  assert.equal(colorFields(after.color).brand, accent)
+  assert.equal(after.theme.modes.light['--rad-color-accent'], accent)
+  assert.equal(
+    after.theme.modes.light['--rad-button-shadow'],
+    before.theme.modes.light['--rad-button-shadow'],
+    'component exceptions survive a palette change'
+  )
 })
 
 test('a brand color keeps the default recipe around it', () => {

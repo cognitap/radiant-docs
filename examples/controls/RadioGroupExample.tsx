@@ -1,7 +1,8 @@
 'use client'
 
 import { useId, useRef, useState } from 'react'
-import { Button, Radio, RadioGroup, ThemeScope, radiant } from '@cognitap/radiant'
+import { Button, Radio, RadioGroup, ThemeScope } from '@cognitap/radiant'
+import { radiant } from '@cognitap/radiant/examples'
 import type { ControlExampleProps } from './control-types'
 import { useHydrated } from '../profile/useHydrated'
 import '@cognitap/radiant/styles.css'

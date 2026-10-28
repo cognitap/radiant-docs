@@ -493,6 +493,7 @@ function WorkshopShell({
                 <ColorEditor
                   key={colorRevision}
                   session={color}
+                  accent={String(theme.modes.light['--rad-color-accent'])}
                   changes={changes.color.changes}
                   disabled={!ready}
                   target={jump?.editor === 'color' ? jump : undefined}

@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
-import { themes, sharp, jelly, defaultTheme } from '@cognitap/radiant'
+import { defaultTheme } from '@cognitap/radiant'
+import { themes, sharp, jelly } from '@cognitap/radiant/examples'
 
 const pages = [
   'getting-started',

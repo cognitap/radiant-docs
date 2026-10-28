@@ -3,7 +3,7 @@
 /* oxlint-disable jsx-a11y/no-noninteractive-tabindex -- The named resolved-values table needs keyboard scrolling. */
 
 import { useState, type CSSProperties, type ReactNode } from 'react'
-import type { Theme } from '@cognitap/radiant'
+import { Button, type Theme } from '@cognitap/radiant'
 import {
   changeGeometry,
   clearGeometryOverride,
@@ -176,9 +176,19 @@ export function GeometryEditor({
   return (
     <div className="geometry-editor">
       {!recipe && (
-        <p className="geometry-lead">
-          Imported spacing and surface values are kept exactly. Reset to start from Balanced.
-        </p>
+        <>
+          <p className="geometry-lead">
+            These spacing and surface values are set by hand and kept exactly. Start from a preset
+            to edit them.
+          </p>
+          <Button
+            variant="soft"
+            disabled={disabled}
+            onClick={() => onChange(geometryPreset(), { label: 'starting preset' })}
+          >
+            Start from Balanced
+          </Button>
+        </>
       )}
       <fieldset
         hidden={!recipe}

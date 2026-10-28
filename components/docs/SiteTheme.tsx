@@ -1,7 +1,8 @@
 'use client'
 
 import { createContext, useContext, useState, type ReactNode } from 'react'
-import { ThemeScope, radiant, type ThemeMode } from '@cognitap/radiant'
+import { ThemeScope, type ThemeMode } from '@cognitap/radiant'
+import { radiant } from '@cognitap/radiant/examples'
 
 const AppearanceContext = createContext<{
   mode: ThemeMode

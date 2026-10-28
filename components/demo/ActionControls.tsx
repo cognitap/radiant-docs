@@ -1,6 +1,7 @@
 'use client'
 
-import { themes, type Theme, type ThemeMode } from '@cognitap/radiant'
+import { type Theme, type ThemeMode } from '@cognitap/radiant'
+import { themes } from '@cognitap/radiant/examples'
 
 /** Native selects keep the docs controls independent of unreleased components. */
 export function SelectControl<Value extends string>({

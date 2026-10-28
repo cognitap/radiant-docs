@@ -1,7 +1,8 @@
 'use client'
 
 import { useRef, useState } from 'react'
-import { Button, ThemeScope, radiant, type Theme, type ThemeMode } from '@cognitap/radiant'
+import { Button, ThemeScope, type Theme, type ThemeMode } from '@cognitap/radiant'
+import { radiant } from '@cognitap/radiant/examples'
 import '@cognitap/radiant/styles.css'
 import './button-example.css'
 import { useHydrated } from '../profile/useHydrated'

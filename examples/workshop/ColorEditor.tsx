@@ -6,6 +6,7 @@ import { useId, useMemo, useState } from 'react'
 import { Button } from '@cognitap/radiant'
 import {
   chooseWorkingFamily,
+  defaultColorRecipe,
   overrideRole,
   roleNames,
   roleValue,
@@ -75,12 +76,15 @@ function Fix({
 
 export function ColorEditor({
   session,
+  accent,
   changes,
   disabled,
   target,
   onChange
 }: {
   session: ColorSession | null
+  /** The current light accent, offered as the brand when hand-authored colors adopt a recipe. */
+  accent: string
   changes: Changes<ColorFields> | null
   disabled: boolean
   target?: ControlTarget
@@ -118,8 +122,19 @@ export function ColorEditor({
     return (
       <div className="color-editor">
         <p className="color-lead">
-          Imported colors are kept exactly. Reset to start from the default brand.
+          These colors are set by hand and kept exactly. Generate a palette to edit them.
         </p>
+        <Button
+          variant="soft"
+          disabled={disabled}
+          onClick={() => {
+            const { input } = defaultColorRecipe()
+            const brand = /^#[\da-f]{6}$/i.test(accent) ? accent : input.brand
+            onChange({ input: { ...input, brand } }, { label: 'generated palette' })
+          }}
+        >
+          Generate from the accent
+        </Button>
       </div>
     )
   const { recipe, wall, palette } = session

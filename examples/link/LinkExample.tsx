@@ -1,13 +1,7 @@
 'use client'
 
-import {
-  Link,
-  ThemeScope,
-  radiant,
-  type LinkProps,
-  type Theme,
-  type ThemeMode
-} from '@cognitap/radiant'
+import { Link, ThemeScope, type LinkProps, type Theme, type ThemeMode } from '@cognitap/radiant'
+import { radiant } from '@cognitap/radiant/examples'
 import '@cognitap/radiant/styles.css'
 import './link-example.css'
 

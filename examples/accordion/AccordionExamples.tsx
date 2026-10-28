@@ -18,11 +18,11 @@ import {
   Input,
   Link,
   ThemeScope,
-  radiant,
   useAccordion,
   type Theme,
   type ThemeMode
 } from '@cognitap/radiant'
+import { radiant } from '@cognitap/radiant/examples'
 import { MotionProvider, useReducedMotion } from '@cognitap/radiant/motion/react'
 
 const subscribe = () => () => {}

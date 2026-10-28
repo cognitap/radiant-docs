@@ -8,9 +8,9 @@ import {
   CollapsibleTrigger,
   Field,
   Input,
-  ThemeScope,
-  radiant
+  ThemeScope
 } from '@cognitap/radiant'
+import { radiant } from '@cognitap/radiant/examples'
 import type { CompositionOptions } from './composition-types'
 import { useHydrated } from '../profile/useHydrated'
 import '@cognitap/radiant/styles.css'

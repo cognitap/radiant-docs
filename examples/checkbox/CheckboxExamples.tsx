@@ -11,13 +11,13 @@ import {
   Checkbox,
   Field,
   ThemeScope,
-  radiant,
   useField,
   type CheckboxProps,
   type ControlSize,
   type Theme,
   type ThemeMode
 } from '@cognitap/radiant'
+import { radiant } from '@cognitap/radiant/examples'
 import { MotionProvider, useReducedMotion, useSpring } from '@cognitap/radiant/motion/react'
 
 import '@cognitap/radiant/styles.css'

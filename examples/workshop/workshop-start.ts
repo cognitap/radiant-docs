@@ -1,4 +1,9 @@
-import type { TypographyPreset } from '@cognitap/radiant'
+import { themeDefinitions } from '@cognitap/radiant/examples'
+import {
+  themeDocumentFromDefinition,
+  type ThemeDefinition,
+  type TypographyPreset
+} from '@cognitap/radiant'
 import { initialDocument } from './workshop-theme.ts'
 import { colorAPI, type ColorPreset } from './workshop-color.ts'
 import { geometryAPI, geometryPreset } from './workshop-geometry.ts'
@@ -8,8 +13,8 @@ import { handoffAPI } from './workshop-handoff.ts'
 import { snapshotFromConfiguration, type ThemeSnapshot } from './workshop-snapshot.ts'
 
 export type MotionPresetId = (typeof motionPresets)[number]['id']
-/** One decision per editor; every value is a preset the editors already offer, so the theme
-    round-trips through export and import unchanged. */
+/** One decision per editor for the brand-color start; every value is a preset the editors
+    already offer, so the theme round-trips through export and import unchanged. */
 export interface StartingRecipe {
   brand: string
   wall: ColorPreset
@@ -21,9 +26,9 @@ export interface StartingRecipe {
 export interface StartingTheme {
   id: string
   name: string
-  /** A few words of character, read after the name: "Start from Editorial: warm serif, roomy". */
+  /** A few words of character, read after the name: "Start from Jelly: squishy, playful". */
   character: string
-  recipe: StartingRecipe
+  definition: ThemeDefinition
 }
 
 export const defaultRecipe: StartingRecipe = {
@@ -34,81 +39,28 @@ export const defaultRecipe: StartingRecipe = {
   geometry: 'balanced',
   motion: 'restrained'
 }
-export const startingThemes: readonly StartingTheme[] = [
-  {
-    id: 'radiant',
-    name: 'Radiant',
-    character: 'calm violet, balanced',
-    recipe: defaultRecipe
-  },
-  {
-    id: 'editorial',
-    name: 'Editorial',
-    character: 'warm serif, roomy',
-    recipe: {
-      brand: '#9A3412',
-      wall: 'classic',
-      ramp: 'classic',
-      typography: 'source-serif',
-      geometry: 'spacious',
-      motion: 'restrained'
-    }
-  },
-  {
-    id: 'ledger',
-    name: 'Ledger',
-    character: 'dense, built for data',
-    recipe: {
-      brand: '#0F5F8F',
-      wall: 'balanced',
-      ramp: 'classic',
-      typography: 'plex',
-      geometry: 'compact',
-      motion: 'restrained'
-    }
-  },
-  {
-    id: 'marquee',
-    name: 'Marquee',
-    character: 'bold color, lively motion',
-    recipe: {
-      brand: '#DB2777',
-      wall: 'expressive',
-      ramp: 'expressive',
-      typography: 'inter',
-      geometry: 'spacious',
-      motion: 'expressive'
-    }
-  },
-  {
-    id: 'blueprint',
-    name: 'Blueprint',
-    character: 'square, flat, technical',
-    recipe: {
-      brand: '#1D4ED8',
-      wall: 'classic',
-      ramp: 'balanced',
-      typography: 'plex',
-      geometry: 'square',
-      motion: 'restrained'
-    }
-  },
-  {
-    id: 'linen',
-    name: 'Linen',
-    character: 'quiet neutrals, soft edges',
-    recipe: {
-      brand: '#3F6F63',
-      wall: 'balanced',
-      ramp: 'classic',
-      typography: 'source-serif',
-      geometry: 'balanced',
-      motion: 'restrained'
-    }
-  }
-]
-export const defaultTheme = startingThemes[0]
+const characters: Record<string, string> = {
+  radiant: 'calm green, balanced',
+  default: 'the neutral baseline',
+  'soft-squircle': 'rounded, friendly',
+  expressive: 'bold type, lively',
+  glass: 'translucent, airy',
+  'sharp-3d': 'square, hard shadows',
+  jelly: 'squishy, playful',
+  ticket: 'condensed, uppercase'
+}
+/** Radiant's example themes, so the workshop and the docs pages start from the same values. */
+export const startingThemes: readonly StartingTheme[] = themeDefinitions.map(definition => ({
+  id: definition.id,
+  name: definition.name,
+  character: characters[definition.id] ?? definition.name,
+  definition
+}))
 
+/** A hand-authored theme keeps its values exactly; Color and Spacing offer to adopt a recipe. */
+export function exampleSnapshot(theme: StartingTheme): ThemeSnapshot {
+  return { document: themeDocumentFromDefinition(theme.definition), color: null, geometry: null }
+}
 /** Build a snapshot from a recipe. Motion is authored only when the preset differs from what the
     document already resolves to, so the library default stays unauthored and exports stay lean. */
 export function startingSnapshot(recipe: StartingRecipe): ThemeSnapshot {

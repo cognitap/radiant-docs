@@ -352,7 +352,9 @@ export async function verifyHandoff(browser, baseURL) {
     )
     assert.equal(await variable('--rad-button-radius'), '27px')
     await frame.getByRole('button', { name: 'Spacing & surfaces', exact: true }).click()
-    assert.ok((await frame.locator('.geometry-editor').innerText()).includes('Imported spacing'))
+    assert.ok(
+      (await frame.locator('.geometry-editor').innerText()).includes('set by hand and kept exactly')
+    )
     await frame.getByRole('button', { name: 'Reset spacing & surfaces', exact: true }).click()
     assert.equal(await variable('--rad-surface-radius'), '12px')
     assert.equal(await variable('--rad-button-radius'), '27px')

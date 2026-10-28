@@ -2,7 +2,8 @@
 
 import { useState } from 'react'
 import dynamic from 'next/dynamic'
-import { themes, radiant, type ThemeMode } from '@cognitap/radiant'
+import { type ThemeMode } from '@cognitap/radiant'
+import { themes, radiant } from '@cognitap/radiant/examples'
 import { DemoControls, DemoPreview } from '@/components/demo/DemoFrame'
 import type { FormOwner, FormPlacement } from './ProfileRecipe'
 
