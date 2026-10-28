@@ -81,8 +81,9 @@ Rapid switches retarget moving items; dynamic content is measured as it grows.
 Item `motion="off"`, theme off and live reduced motion settle presentation;
 selection stays immediate. See [Collapsible](/docs/collapsible/#add-motion-and-dynamic-content)
 for measurement and browser fallback, and [motion setup](/docs/foundations/motion/).
-Native disclosures work before hydration; coordinated selection and disabled
-guards need JavaScript.
+Native disclosures work before hydration. At hydration, items return to the root
+selection, including a local root's initial default. Earlier native toggles do
+not request selection changes. Coordination and disabled guards need JavaScript.
 
 <AccordionSelectionDemo />
 

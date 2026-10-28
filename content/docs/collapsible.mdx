@@ -45,6 +45,10 @@ ownership during a mount. Write state through `onOpenChange`. `onToggle`
 observes native events, including synchronization; it is not a second state
 writer. An owner may decline a change. No-op requests do not notify.
 
+At hydration, uncontrolled state adopts the native open state and calls
+`onOpenChange` if it changed. Controlled `open` restores its value silently.
+`onToggle` is not replayed for an earlier event.
+
 <CompositionDemo
   kind="collapsible"
   controlled
@@ -110,7 +114,5 @@ Each named part's prop type and `CollapsibleState` are exported.
 | `motion`                    | `inherit` (default) or `off`; height and marker presentation |
 | Other native props          | Remaining details attributes/events and children             |
 
-Trigger and Content accept native summary/div props, styles, refs and additive
-identities. There is no Button `render` API or native `disabled` prop on this
-family. Use [Accordion](/docs/accordion/) when related disclosures need a
-selection owner and disabled items. Use [Dialog](/docs/dialog/) for a modal task.
+Use [Accordion](/docs/accordion/) for shared selection and disabled items, or
+[Dialog](/docs/dialog/) for a modal task.
