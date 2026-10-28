@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict'
 import { writeFile } from 'node:fs/promises'
 import { colorAPI } from '../examples/workshop/workshop-color.ts'
+import { openWorkshop } from './workshop-entry.mjs'
 
 // Agreed opaque sRGB reference set, including the workshop's initial seed.
 const brands = [
@@ -30,7 +31,7 @@ export async function verifyBrandReference(browser, baseURL) {
   })
   const cases = []
   try {
-    await page.goto(`${baseURL}/workshop/`)
+    await openWorkshop(page, baseURL)
     const frame = page.getByRole('region', { name: 'Shared theme workshop', exact: true })
     await page.waitForFunction(() => !document.querySelector('.preview-toolbar button').disabled)
     const brand = frame.getByRole('textbox', { name: 'Brand color', exact: true })

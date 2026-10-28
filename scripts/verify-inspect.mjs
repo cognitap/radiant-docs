@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict'
 import { pickedRadio, radioGroup } from './typography-controls.mjs'
+import { openWorkshop } from './workshop-entry.mjs'
 
 /** Inspect mode: pick an element by pointer or keyboard, read what styles it, jump to the control. */
 export async function verifyInspect(browser, baseURL) {
@@ -13,7 +14,7 @@ export async function verifyInspect(browser, baseURL) {
     if (message.type() === 'error') errors.push(message.text())
   })
   try {
-    await page.goto(`${baseURL}/workshop/`)
+    await openWorkshop(page, baseURL)
     const workshop = page.locator('.theme-workshop')
     const preview = page.getByRole('region', { name: 'Theme preview', exact: true })
     await page.waitForFunction(() => !document.querySelector('.preview-toolbar button').disabled)

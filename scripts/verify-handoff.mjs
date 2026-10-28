@@ -4,6 +4,7 @@ import { pickRadio } from './typography-controls.mjs'
 import { readFile } from 'node:fs/promises'
 import { handoffFixture } from './handoff-fixture.mjs'
 import { handoffAPI, jsonText } from '../examples/workshop/workshop-handoff.ts'
+import { openWorkshop, waitForEditors } from './workshop-entry.mjs'
 
 export async function verifyHandoff(browser, baseURL) {
   const context = await browser.newContext({
@@ -17,7 +18,7 @@ export async function verifyHandoff(browser, baseURL) {
     if (message.type() === 'error') errors.push(message.text())
   })
   try {
-    await page.goto(`${baseURL}/workshop/`)
+    await openWorkshop(page, baseURL)
     const frame = page.getByRole('region', { name: 'Shared theme workshop', exact: true })
     const handoff = frame.getByRole('region', { name: 'Theme handoff', exact: true })
     const field = label => handoff.getByRole('textbox', { name: label, exact: true })
@@ -157,12 +158,13 @@ export async function verifyHandoff(browser, baseURL) {
         document.querySelector('.theme-handoff textarea[readonly]')?.value.includes('handoff-proof')
       )
       assert.equal(await exported.inputValue(), text)
-      await shared.getByRole('button', { name: 'Undo', exact: true }).click()
       assert.equal(
-        JSON.parse(await exported.inputValue()).document.id,
-        'workshop',
-        'a share link import is one undoable step'
+        await shared.getByRole('button', { name: 'Undo', exact: true }).isDisabled(),
+        true,
+        'a shared theme opens as the baseline, with nothing to undo'
       )
+      assert.equal(await shared.locator('.start-card').count(), 0, 'a share link skips the start')
+      assert.equal(await shared.locator('.workshop-nav-count').count(), 0, 'no changed markers')
     } finally {
       await shared.close()
     }
@@ -362,11 +364,7 @@ export async function verifyHandoff(browser, baseURL) {
     try {
       await reopened.goto(modernLink)
       const restored = reopened.locator('.theme-handoff')
-      await reopened.waitForFunction(() =>
-        document
-          .querySelector('.handoff-import-result')
-          ?.textContent.includes('Configuration restored')
-      )
+      await waitForEditors(reopened)
       await restored.getByText('Reusable configuration JSON', { exact: true }).click()
       assert.equal(
         await restored
@@ -424,7 +422,7 @@ export async function verifyHandoff(browser, baseURL) {
           }
         })
       )
-      await blocked.goto(`${baseURL}/workshop/`)
+      await openWorkshop(blocked, baseURL)
       await blocked.getByRole('button', { name: 'Copy typed theme', exact: true }).click()
       await blocked.waitForFunction(() =>
         document.querySelector('.handoff-feedback').textContent.startsWith('Copy failed.')
@@ -440,14 +438,18 @@ export async function verifyHandoff(browser, baseURL) {
       await blocked.waitForFunction(() =>
         document.querySelector('.theme-handoff input[readonly]').value.includes('#workshop=1.')
       )
-      await blocked.goto(`${baseURL}/workshop/#workshop=2.invalid`)
-      await blocked.waitForFunction(() =>
-        document.querySelector('.handoff-import-error')?.textContent.includes('unsupported')
+      const invalid = await context.newPage()
+      await invalid.goto(`${baseURL}/workshop/#workshop=2.invalid`)
+      await invalid.waitForFunction(() =>
+        document
+          .querySelector('.start-message[data-start-error]')
+          ?.textContent.includes('unsupported')
       )
-      assert.equal(
-        await blocked.getByRole('textbox', { name: 'Brand color', exact: true }).inputValue(),
-        '#7C3AED'
+      assert.ok(
+        (await invalid.locator('.start-card').count()) > 0,
+        'an invalid link lands on the start screen'
       )
+      await invalid.close()
     } finally {
       await blocked.close()
     }

@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict'
 import { readFile, mkdir } from 'node:fs/promises'
 import { pickRadio, pickedRadio, radioGroup } from './typography-controls.mjs'
+import { openWorkshop, enterWorkshop } from './workshop-entry.mjs'
 
 export async function verifyFontEditor(browser, baseURL) {
   await mkdir(new URL('../output/docs/', import.meta.url), { recursive: true })
@@ -20,7 +21,7 @@ export async function verifyFontEditor(browser, baseURL) {
       }))
     )
   try {
-    await page.goto(baseURL + '/workshop/')
+    await openWorkshop(page, baseURL)
     const frame = page.getByRole('region', { name: 'Shared theme workshop', exact: true })
     const panel = frame.locator('.font-editor')
     assert.equal(
@@ -338,6 +339,7 @@ export async function verifyFontEditor(browser, baseURL) {
     await panel.getByRole('button', { name: 'Retry font', exact: true }).click()
     await loaded('Inter')
     await page.reload()
+    await enterWorkshop(page)
     await openTypography()
     await loaded('Inter')
     assert.equal(

@@ -17,7 +17,7 @@ export default function WorkshopPage() {
       <header className="workshop-intro">
         <h1>Theme workshop</h1>
         <p className="lede">
-          Edit one Radiant theme, then take it into your app.{' '}
+          Pick a starting point, edit one Radiant theme, then take it into your app.{' '}
           <NextLink href="/docs/workshop/">Read the guide</NextLink>
         </p>
       </header>

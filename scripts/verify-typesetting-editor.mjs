@@ -2,6 +2,7 @@ import { closePreviewOptions, openPreviewOptions } from './preview-options.mjs'
 import { pickRadio, pickedRadio, radioGroup } from './typography-controls.mjs'
 import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
+import { openWorkshop, enterWorkshop } from './workshop-entry.mjs'
 
 export async function verifyTypesettingEditor(browser, baseURL) {
   const context = await browser.newContext({
@@ -15,7 +16,7 @@ export async function verifyTypesettingEditor(browser, baseURL) {
     if (message.type() === 'error') errors.push(message.text())
   })
   try {
-    await page.goto(`${baseURL}/workshop/`)
+    await openWorkshop(page, baseURL)
     const workshop = page.locator('.theme-workshop')
     await workshop.getByRole('button', { name: 'Typography', exact: true }).click()
     const editor = workshop.locator('.typesetting-editor')
@@ -425,6 +426,7 @@ export async function verifyTypesettingEditor(browser, baseURL) {
       'Typesetting Ada'
     )
     await page.reload()
+    await enterWorkshop(page)
     await workshop.getByRole('button', { name: 'Typography', exact: true }).click()
     assert.equal(await picked('Starting point'), 'inter')
     assert.deepEqual(errors, [], 'no hydration/runtime/console errors')

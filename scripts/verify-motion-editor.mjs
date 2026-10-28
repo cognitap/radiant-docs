@@ -2,6 +2,7 @@ import { openPreviewOptions } from './preview-options.mjs'
 import { pickRadio, pickedRadio, radioGroup } from './typography-controls.mjs'
 import assert from 'node:assert/strict'
 import { mkdir, writeFile } from 'node:fs/promises'
+import { openWorkshop } from './workshop-entry.mjs'
 
 const position = handle =>
   handle.evaluate(node => parseFloat(getComputedStyle(node).translate) || 0)
@@ -25,7 +26,7 @@ export async function verifyMotionEditor(browser, baseURL) {
     if (message.type() === 'error') errors.push(message.text())
   })
   try {
-    await page.goto(`${baseURL}/workshop/`)
+    await openWorkshop(page, baseURL)
     const workshop = page.locator('.theme-workshop')
     await page.waitForFunction(() => !document.querySelector('.preview-toolbar button')?.disabled)
     await workshop.getByRole('button', { name: 'Motion', exact: true }).click()

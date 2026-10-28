@@ -3,6 +3,7 @@ import { readFile, mkdir } from 'node:fs/promises'
 import { handoffAPI, jsonText } from '../examples/workshop/workshop-handoff.ts'
 import { encodeShare } from '../examples/workshop/workshop-share.ts'
 import { pickRadio } from './typography-controls.mjs'
+import { openWorkshop } from './workshop-entry.mjs'
 
 export async function verifyMotionHandoff(browser, baseURL) {
   const context = await browser.newContext({
@@ -13,7 +14,7 @@ export async function verifyMotionHandoff(browser, baseURL) {
   const errors = []
   page.on('pageerror', error => errors.push(error.message))
   try {
-    await page.goto(`${baseURL}/workshop/`)
+    await openWorkshop(page, baseURL)
     const workshop = page.locator('.theme-workshop')
     const handoff = workshop.locator('.theme-handoff')
     await page.waitForFunction(() => !document.querySelector('.preview-toolbar button').disabled)
@@ -119,14 +120,15 @@ export async function verifyMotionHandoff(browser, baseURL) {
     await settled()
     assert.equal(await configField.inputValue(), jsonText(config))
     const badLink = `${baseURL}/workshop/#workshop=${await encodeShare(jsonText(invalid))}`
-    await shared.goto(badLink)
-    await shared.locator('.handoff-import-error').waitFor()
-    const summary = shared.getByText('Reusable configuration JSON', { exact: true })
-    if (!(await summary.evaluate(node => node.parentElement.open))) await summary.click()
-    assert.notEqual(
-      await shared.getByRole('textbox', { name: 'Configuration output', exact: true }).inputValue(),
-      jsonText(invalid)
+    const bad = await context.newPage()
+    await bad.goto(badLink)
+    await bad.locator('.start-message[data-start-error]').waitFor()
+    assert.equal(
+      await bad.locator('.theme-handoff').count(),
+      0,
+      'an invalid link never opens editors'
     )
+    await bad.close()
     await pickRadio(editor, 'Theme motion', 'system')
     await settled()
     assert.equal(

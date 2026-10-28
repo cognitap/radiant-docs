@@ -1,6 +1,6 @@
 'use client'
 
-import { useDeferredValue, useEffect, useId, useMemo, useRef, useState } from 'react'
+import { useDeferredValue, useId, useMemo, useRef, useState } from 'react'
 import { Button } from '@cognitap/radiant'
 import { useHydrated } from '../profile/useHydrated'
 import {
@@ -13,7 +13,7 @@ import {
   type Recipes,
   type SectionName
 } from './workshop-handoff'
-import { decodeShare, encodeShare } from './workshop-share'
+import { encodeShare } from './workshop-share'
 import { fontRequirements, fontSetup } from './font-requirements'
 import './theme-handoff.css'
 
@@ -102,31 +102,6 @@ export function ThemeHandoff({
     ? jsonText(handoffAPI.sections(prepared.config.document, selected))
     : ''
   const configText = prepared.config ? jsonText(prepared.config) : ''
-  useEffect(() => {
-    let active = true
-    const pending = operation.current
-    const restore = async () => {
-      const ticket = ++operation.current.ticket
-      if (!window.location.hash.startsWith('#workshop=')) return
-      try {
-        const text = await decodeShare(window.location.hash.slice('#workshop='.length))
-        const data = handoffAPI.read(text)
-        if (data.kind !== 'radiant-workshop')
-          throw new Error('A share link must contain a full workshop configuration.')
-        if (active && ticket === operation.current.ticket) onImport(data, 'replace')
-      } catch (error) {
-        if (active && ticket === operation.current.ticket)
-          onError(`Share link: ${errorMessage(error)} Current theme retained.`)
-      }
-    }
-    void restore()
-    window.addEventListener('hashchange', restore)
-    return () => {
-      active = false
-      pending.ticket++
-      window.removeEventListener('hashchange', restore)
-    }
-  }, [onImport, onError])
   function importText(text: string) {
     operation.current.ticket++
     try {
