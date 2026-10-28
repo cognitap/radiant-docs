@@ -1,6 +1,47 @@
 .theme-workshop {
   min-width: 0;
 }
+.workshop-columns {
+  display: grid;
+  grid-template-areas:
+    'nav'
+    'preview'
+    'editor';
+  min-width: 0;
+}
+.workshop-editor-nav {
+  grid-area: nav;
+}
+.workshop-editing {
+  grid-area: editor;
+  min-width: 0;
+}
+.workshop-preview {
+  grid-area: preview;
+}
+/* Two columns once each gets about 500px: the color wall and a 390px frame at
+   full size both need that. */
+@media (min-width: 1100px) {
+  .workshop-columns {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+    grid-template-rows: auto 1fr;
+    grid-template-areas:
+      'nav preview'
+      'editor preview';
+    align-items: start;
+  }
+  .workshop-preview {
+    position: sticky;
+    top: 1rem;
+    max-height: calc(100dvh - 2rem);
+    border-top: 0;
+    border-left: 1px solid var(--docs-border);
+  }
+  .workshop-preview .preview-body {
+    overflow: auto;
+    scrollbar-width: thin;
+  }
+}
 .workshop-editor-nav,
 .workshop-editor-heading,
 .workshop-options {
