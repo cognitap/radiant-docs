@@ -93,6 +93,12 @@ export function FaceCards({
   )
 }
 
+export interface ChipOption {
+  value: string
+  label: string
+  /** A dot on the chip, with this text describing it to assistive technology. */
+  marked?: string
+}
 /** Small radio chips for a short enumeration. */
 export function Chips({
   label,
@@ -102,7 +108,7 @@ export function Chips({
   onChange
 }: {
   label: string
-  options: readonly { value: string; label: string }[]
+  options: readonly ChipOption[]
   value: string
   describedBy?: string
   onChange: (value: string) => void
@@ -119,15 +125,31 @@ export function Chips({
         <label
           key={option.value}
           className="chip"
+          data-marked={option.marked ? '' : undefined}
         >
           <input
             type="radio"
             name={id}
             value={option.value}
             checked={option.value === value}
+            aria-describedby={option.marked ? `${id}-${option.value}` : undefined}
             onChange={() => onChange(option.value)}
           />
           {option.label}
+          {option.marked && (
+            <span
+              className="chip-dot"
+              aria-hidden="true"
+            />
+          )}
+          {option.marked && (
+            <span
+              id={`${id}-${option.value}`}
+              hidden
+            >
+              {option.marked}
+            </span>
+          )}
         </label>
       ))}
     </div>

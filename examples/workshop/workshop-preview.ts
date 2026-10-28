@@ -1,4 +1,4 @@
-import type { ThemeMode } from '@cognitap/radiant'
+import type { MotionInteraction, ThemeMode } from '@cognitap/radiant'
 import type { Editor } from './workshop-theme'
 import type { MotionTreatment } from './workshop-motion'
 import { pageNames, type CopyEdits, type PageScene } from './page-copy'
@@ -102,6 +102,15 @@ export const motionSceneNames: Record<MotionScene, string> = {
   drag: 'Drag & snap',
   follow: 'Moving target',
   layout: 'Resize & reorder'
+}
+/** The scene that exercises an interaction's spring. */
+export const motionSceneFor: Record<MotionInteraction, MotionScene> = {
+  press: 'actions',
+  disclosure: 'actions',
+  dialog: 'actions',
+  drag: 'drag',
+  follow: 'follow',
+  layout: 'layout'
 }
 export const treatmentNames: Record<MotionTreatment, string> = {
   current: 'Your theme',
