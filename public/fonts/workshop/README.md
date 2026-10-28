@@ -1,6 +1,6 @@
 # Workshop font assets
 
-Unmodified upstream fonts, self-hosted for DEV-164. All four families use SIL
+Unmodified upstream fonts, self-hosted. All four families use SIL
 OFL 1.1. Keep their complete adjacent licenses with redistributed copies:
 `Inter-LICENSE.txt`, `Source-Serif-4-LICENSE.md`, `IBM-Plex-LICENSE.txt`.
 Inter is v4.1; Source Serif 4 is 4.005R; IBM Plex is pinned to
