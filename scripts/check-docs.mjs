@@ -1,6 +1,6 @@
 // Enforces the documentation rules in AGENTS.md using docs-policy.json.
 import { execFileSync } from 'node:child_process'
-import { existsSync, readFileSync } from 'node:fs'
+import { existsSync, readFileSync, statSync } from 'node:fs'
 
 const { budget, budgets, banned, legacy } = JSON.parse(readFileSync('docs-policy.json', 'utf8'))
 const glob = pattern =>
@@ -23,7 +23,7 @@ const errors = []
 const tracked = (...patterns) =>
   execFileSync('git', ['ls-files', '-co', '--exclude-standard', ...patterns], { encoding: 'utf8' })
     .split('\n')
-    .filter(file => file && existsSync(file))
+    .filter(file => file && existsSync(file) && statSync(file).isFile())
 const files = tracked('*.md', '*.mdx').filter(
   file => !file.startsWith('.github/') && !file.startsWith('public/')
 )

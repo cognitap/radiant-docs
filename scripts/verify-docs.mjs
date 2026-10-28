@@ -11,6 +11,7 @@ import { verifyActions } from './verify-actions.mjs'
 import { verifyControls } from './verify-controls.mjs'
 import { verifyField } from './verify-field.mjs'
 import { verifyInput } from './verify-input.mjs'
+import { verifyCheckbox } from './verify-checkbox.mjs'
 import { verifyCompositions } from './verify-compositions.mjs'
 import { verifyHandoff } from './verify-handoff.mjs'
 import { verifyHandoffConsumer } from './verify-handoff-consumer.mjs'
@@ -240,6 +241,7 @@ try {
   await verifyControls(browser, baseURL)
   await verifyField(browser, baseURL)
   await verifyInput(browser, baseURL)
+  await verifyCheckbox(browser, baseURL)
   await verifyCompositions(browser, baseURL)
   await verifyFoundations(browser, baseURL)
   await verifyWorkshop(browser, baseURL)
