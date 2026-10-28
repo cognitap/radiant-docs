@@ -1,34 +1,25 @@
 .workshop-motion-panel,
-.motion-editor,
-.motion-proofs,
-.motion-frame {
+.motion-editor {
   min-width: 0;
   width: 100%;
 }
 .workshop-motion-panel[hidden] {
   display: none !important;
 }
-.motion-editor,
-.motion-proofs {
-  box-sizing: border-box;
-}
-.motion-editor *,
-.motion-editor *::before,
-.motion-editor *::after,
-.motion-proofs *,
-.motion-proofs *::before,
-.motion-proofs *::after {
-  box-sizing: border-box;
-}
 .motion-editor {
+  box-sizing: border-box;
   display: grid;
   gap: 1rem;
   font-size: 0.875rem;
 }
+.motion-editor *,
+.motion-editor *::before,
+.motion-editor *::after {
+  box-sizing: border-box;
+}
 .motion-toolbar,
 .motion-physics-summary,
-.motion-inline-actions,
-.motion-proof-nav {
+.motion-inline-actions {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -37,16 +28,14 @@
 .motion-toolbar {
   align-items: start;
 }
-.motion-editor label,
-.motion-proofs label {
+.motion-editor label {
   display: grid;
   gap: 0.35rem;
   min-width: 0;
   max-width: 100%;
   font-size: 0.8125rem;
 }
-.motion-editor select,
-.motion-proofs select {
+.motion-editor select {
   width: 100%;
   min-width: 0;
   max-width: 100%;
@@ -57,17 +46,14 @@
   color: var(--docs-foreground);
   background: var(--docs-surface);
 }
-.motion-editor input[type='range'],
-.motion-proofs input[type='range'] {
+.motion-editor input[type='range'] {
   width: 100%;
   min-width: 0;
   max-width: 100%;
   accent-color: var(--docs-accent);
 }
 .motion-editor select:focus-visible,
-.motion-proofs select:focus-visible,
-.motion-editor input:focus-visible,
-.motion-proofs input:focus-visible {
+.motion-editor input:focus-visible {
   outline: 2px solid var(--docs-accent);
   outline-offset: 3px;
 }
@@ -93,90 +79,16 @@
   padding-block: 0.5rem;
 }
 .motion-guidance,
-.motion-fine-print,
-.motion-preference {
+.motion-fine-print {
   margin: 0;
   color: var(--docs-muted);
   font-size: 0.8125rem;
   line-height: 1.6;
 }
-.motion-proofs {
-  padding: 1rem;
-  display: grid;
-  gap: 1rem;
-  border-top: 1px solid var(--docs-border);
-}
-.motion-proofs > header h3 {
-  margin: 0.25rem 0 0.5rem;
-  font-size: 1.4rem;
-  line-height: 1.2;
-  letter-spacing: -0.025em;
-}
-.motion-proofs > header p {
-  margin: 0;
-  max-width: 65ch;
-  font-size: 0.875rem;
-  line-height: 1.6;
-}
-.motion-proofs .motion-eyebrow {
-  font-size: 0.7rem;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--docs-accent);
-}
-.motion-proof-nav button {
-  max-width: 100%;
-  white-space: normal;
-}
-.motion-frames {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
-  gap: 1rem;
-  align-items: start;
-}
-.motion-frame {
-  overflow: hidden;
-  border: 1px solid var(--docs-border);
-  border-radius: 0.8rem;
-}
-.motion-frames[data-motion-width='phone'] {
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
-}
-.motion-frames[data-motion-width='phone'] .motion-frame {
-  max-width: 20rem;
-}
-.motion-frame-heading {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: start;
-  justify-content: space-between;
-  gap: 0.75rem;
-  padding: 1rem;
-  background: var(--docs-surface);
-  border-bottom: 1px solid var(--docs-border);
-}
-.motion-frame-heading h4 {
-  margin: 0 0 0.3rem;
-  font-size: 1rem;
-  line-height: 1.3;
-}
-.motion-frame-heading span {
-  display: block;
-  max-width: 28ch;
-  color: var(--docs-muted);
+.motion-status {
+  margin: 0 0 1rem;
   font-size: 0.75rem;
-  line-height: 1.5;
-}
-.motion-frame button {
-  max-width: 100%;
-  white-space: normal;
-}
-.motion-stage {
-  min-width: 0;
-  padding: 1rem;
-  background: var(--rad-surface-canvas);
-  color: var(--rad-color-foreground);
+  color: var(--rad-color-muted-foreground);
 }
 .motion-scene {
   display: grid;
@@ -277,8 +189,10 @@
   overflow-wrap: anywhere;
 }
 .motion-inspector {
+  margin-top: 0.75rem;
   padding: 1rem;
-  border-top: 1px solid var(--docs-border);
+  border: 1px solid var(--docs-border);
+  border-radius: 0.5rem;
   color: var(--docs-foreground);
   background: var(--docs-surface);
 }
@@ -341,14 +255,8 @@
   overflow-wrap: anywhere;
 }
 @media (max-width: 480px) {
-  .motion-proofs,
-  .motion-stage,
-  .motion-frame-heading,
   .motion-inspector {
     padding: 0.75rem;
-  }
-  .motion-toolbar {
-    align-items: stretch;
   }
   .motion-toolbar > label {
     flex: 1 1 100%;
@@ -374,7 +282,6 @@
     stroke: CanvasText;
   }
   .motion-track,
-  .motion-frame,
   .motion-dial {
     border-color: CanvasText;
   }
