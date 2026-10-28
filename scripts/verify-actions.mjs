@@ -177,6 +177,69 @@ export async function verifyActions(browser, baseURL) {
       'ghost'
     ])
     await verifyAppearance(page, linkFrame, linkFrame.locator('.link-example'))
+    const motionFrame = page.getByRole('region', { name: 'Link and Button motion', exact: true })
+    const motionLink = motionFrame.getByRole('link', {
+      name: 'Explore the foundations',
+      exact: true
+    })
+    const motionButton = motionFrame.getByRole('button', { name: 'Save for later', exact: true })
+    await motionLink.waitFor()
+    for (const property of ['min-height', 'font-size', 'border-radius']) {
+      assert.equal(
+        await motionLink.evaluate(
+          (node, key) => getComputedStyle(node).getPropertyValue(key),
+          property
+        ),
+        await motionButton.evaluate(
+          (node, key) => getComputedStyle(node).getPropertyValue(key),
+          property
+        )
+      )
+    }
+    await motionButton.click()
+    await motionFrame
+      .locator('.link-motion-example output')
+      .filter({ hasText: 'Added to your reading list.' })
+      .waitFor()
+    const holdLink = async () => {
+      await motionLink.hover()
+      await page.mouse.down()
+    }
+    const releaseOutside = async () => {
+      await page.mouse.move(0, 0)
+      await page.mouse.up()
+    }
+    await holdLink()
+    await page.waitForFunction(
+      () => Number(document.querySelector('.link-motion-actions a').style.scale) < 0.99
+    )
+    await releaseOutside()
+    await page.waitForFunction(
+      () => Number(document.querySelector('.link-motion-actions a').style.scale) === 1
+    )
+    await motionFrame
+      .getByRole('checkbox', { name: 'Turn off spatial motion', exact: true })
+      .check()
+    await holdLink()
+    assert.equal(await motionLink.evaluate(node => Number(getComputedStyle(node).scale) || 1), 1)
+    await releaseOutside()
+    await motionFrame
+      .getByRole('checkbox', { name: 'Turn off spatial motion', exact: true })
+      .uncheck()
+    await page.emulateMedia({ reducedMotion: 'reduce' })
+    await holdLink()
+    assert.equal(await motionLink.evaluate(node => Number(getComputedStyle(node).scale) || 1), 1)
+    await releaseOutside()
+    await page.emulateMedia({ reducedMotion: 'no-preference' })
+    await verifyPresentation(motionFrame, motionLink, ['solid', 'soft', 'outline', 'ghost'])
+    await verifyAppearance(page, motionFrame, motionFrame.locator('.link-motion-example'))
+    await verifySources(page, motionFrame, [
+      'link/MotionLinkExample.tsx',
+      'link/link-example.css',
+      'profile/useHydrated.ts'
+    ])
+    await motionFrame.getByRole('button', { name: 'Reset preview', exact: true }).click()
+    await motionFrame.screenshot({ path: 'output/docs/link-motion.png', animations: 'disabled' })
     const router = page.getByRole('region', { name: 'Router link and ref', exact: true })
     assert.equal(
       await router.locator('.link-example').getAttribute('data-rad-mode'),
@@ -253,15 +316,32 @@ export async function verifyActions(browser, baseURL) {
     await linkFrame.getByRole('combobox', { name: 'Mode', exact: true }).selectOption('dark')
     await linkFrame.getByRole('combobox', { name: 'Variant', exact: true }).selectOption('solid')
     await linkFrame.screenshot({ path: 'output/docs/link-jelly-dark.png', animations: 'disabled' })
+    await motionFrame.getByRole('combobox', { name: 'Theme', exact: true }).selectOption('glass')
+    await motionFrame.getByRole('combobox', { name: 'Mode', exact: true }).selectOption('dark')
     for (const width of [390, 320]) {
       await page.setViewportSize({ width, height: 844 })
       assert.equal(
         await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth),
         true
       )
+      assert.equal(
+        await motionFrame.locator('.link-motion-actions').evaluate(node => {
+          const bounds = node.getBoundingClientRect()
+          return Array.from(node.children).every(child => {
+            const action = child.getBoundingClientRect()
+            return action.left >= bounds.left - 1 && action.right <= bounds.right + 1
+          })
+        }),
+        true,
+        'long CTA labels remain inside the Card at narrow widths'
+      )
       await router.getByRole('button', { name: 'Focus router link', exact: true }).click()
       assert.equal(await routerLink.evaluate(node => node === document.activeElement), true)
     }
+    await motionFrame.screenshot({
+      path: 'output/docs/link-motion-mobile.png',
+      animations: 'disabled'
+    })
     await page.screenshot({
       path: 'output/docs/link-mobile.png',
       fullPage: true,
