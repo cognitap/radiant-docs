@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import { writeFile } from 'node:fs/promises'
 import { colorAPI } from '../examples/workshop/workshop-color.ts'
 
-// DEV-151's agreed opaque sRGB reference set, including the workshop's initial seed.
+// Agreed opaque sRGB reference set, including the workshop's initial seed.
 const brands = [
   '#7C3AED',
   '#FF0000',
@@ -157,7 +157,7 @@ export async function verifyBrandReference(browser, baseURL) {
             wallPreset: 'balanced',
             rampPreset: 'balanced'
           },
-          ownerDecision: 'DEV-160: Ready — keep Balanced defaults; nearby readable UI fills',
+          ownerDecision: 'Ready — keep Balanced defaults; nearby readable UI fills',
           review:
             'Production owner review accepted; automated proof remains scoped to the recorded fixtures and states.',
           cases
