@@ -10,13 +10,14 @@ import {
   type TypographyRole,
   type TypographyStyle
 } from '@cognitap/radiant'
-import { curatedFonts, fontFamily, type TrialFont } from './workshop-fonts'
+import { curatedFonts, type TrialFont } from './workshop-fonts'
 import { WorkshopFontLoader } from './font-runtime'
 import { FontNumber } from './FontEditor'
 import {
   assignments,
   assignmentName,
   assignFamily,
+  fontFieldName,
   styleName,
   startingPoints,
   chooseAssignment,
@@ -35,8 +36,6 @@ import './typography-editor.css'
 
 const generated = (value: number | string | undefined) =>
   value === undefined ? 'the generated value' : String(value)
-const familyName = (family: string) =>
-  curatedFonts.find(font => fontFamily(font) === family)?.family ?? family
 const presetName = (id: string | undefined) =>
   startingPoints.find(item => item.id === id)?.name ?? String(id)
 
@@ -254,7 +253,7 @@ export function TypographyEditor({
                 changes={changes}
                 field={`font.${assignment}`}
                 label={label}
-                format={familyName}
+                format={fontFieldName}
                 set={family =>
                   change(assignFamily(input, assignment, family, local), {
                     label: label.toLowerCase()

@@ -89,3 +89,17 @@ test('an editor reset returns to the baseline, not to library defaults', () => {
   assert.equal(changes.geometry.count, 0)
   assert.equal(changes.color.count, 1)
 })
+
+test('a font assignment compares by profile and resets to the curated font', async () => {
+  const { assignFamily, fontField } = await import('../examples/workshop/workshop-typography.ts')
+  const { curatedFonts } = await import('../examples/workshop/workshop-fonts.ts')
+  const baseline = viewTheme(initialSnapshot()).typography.input
+  assert.equal(fontField(baseline.fonts.body), 'inter')
+  const serif = curatedFonts.find(font => font.id === 'source-serif-4')
+  const changed = assignFamily(baseline, 'body', serif.id)
+  assert.equal(fontField(changed.fonts.body), 'source-serif-4')
+  const restored = assignFamily(changed, 'body', fontField(baseline.fonts.body))
+  assert.equal(restored.fonts.body.profile, 'inter')
+  assert.equal(fontField(restored.fonts.body), fontField(baseline.fonts.body))
+  assert.equal(assignFamily(baseline, 'ui', 'Georgia, serif').fonts.ui.profile, 'manual')
+})

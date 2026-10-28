@@ -80,18 +80,25 @@ export function chooseAssignment(
   }
 }
 type Mutable<T> = { -readonly [K in keyof T]: T[K] }
-/** A family that is not a curated or local trial becomes a manual assignment. */
+/** A curated font is its profile id; a manual assignment is its family stack. */
+export const fontField = (font: TypographyFont) =>
+  font.profile === 'manual' ? font.family : font.profile
+export const fontFieldName = (value: string) =>
+  curatedFonts.find(font => font.id === value)?.family ?? value
 export function assignFamily(
   input: TypographyInput,
   assignment: TypographyAssignment,
-  family: string,
+  value: string,
   local?: TrialFont | null
 ): TypographyInput {
-  const trial = [...curatedFonts, ...(local ? [local] : [])].find(
-    font => fontFamily(font) === family
-  )
+  const trial =
+    curatedFonts.find(font => font.id === value) ??
+    (local && fontFamily(local) === value ? local : undefined)
   if (trial) return chooseAssignment(input, assignment, trial)
-  return { ...input, fonts: { ...input.fonts, [assignment]: { family, profile: 'manual' } } }
+  return {
+    ...input,
+    fonts: { ...input.fonts, [assignment]: { family: value, profile: 'manual' } }
+  }
 }
 export function setRhythm(
   input: TypographyInput,
@@ -192,8 +199,10 @@ export type TypographyFields = { preset: TypographyPreset | undefined } & {
 export function typographyFields(result: TypographyResult): TypographyFields {
   const { input } = result
   const fields: Record<string, string | number | undefined> = { preset: input.preset }
-  for (const assignment of assignments)
-    fields[`font.${assignment}`] = input.fonts?.[assignment]?.family
+  for (const assignment of assignments) {
+    const font = input.fonts?.[assignment]
+    fields[`font.${assignment}`] = font && fontField(font)
+  }
   for (const key of proseKeys) fields[`prose.${key}`] = input.prose?.[key]
   for (const key of uiKeys) fields[`ui.${key}`] = input.ui?.[key]
   for (const role of Object.keys(result.styles) as TypographyRole[])
