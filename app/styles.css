@@ -834,3 +834,13 @@ main:focus {
     width: 100%;
   }
 }
+
+.demo-sources-status {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0 1.25rem 1rem;
+  color: var(--docs-muted);
+  font-size: 0.875rem;
+}

@@ -5,7 +5,12 @@ import { readFile } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
 import { exampleSources } from '../lib/demo-sources.mjs'
 import { startingThemes } from '../examples/workshop/workshop-start.ts'
-import { openWorkshop, enterWorkshop } from './workshop-entry.mjs'
+import {
+  openWorkshop,
+  enterWorkshop,
+  waitForStartScreen,
+  workshopFrame
+} from './workshop-entry.mjs'
 
 const workshopFiles = await exampleSources(
   fileURLToPath(new URL('../examples/', import.meta.url)),
@@ -47,8 +52,35 @@ export async function verifyWorkshop(browser, baseURL) {
   assert.equal(await staticPage.locator('.start-card').count(), startingThemes.length)
   const staticFrame = staticPage.getByRole('region', { name: 'Shared theme workshop', exact: true })
   await staticFrame.locator('.demo-sources > summary').press('Enter')
-  assert.equal(await staticFrame.locator('.demo-sources pre').count(), workshopFiles.length)
+  const listingLink = staticFrame.getByRole('link', { name: 'Open the listing as JSON' })
+  assert.equal(await listingLink.isVisible(), true, 'without JavaScript the listing is a link')
+  const listing = await (
+    await fetch(new URL(await listingLink.getAttribute('href'), baseURL))
+  ).json()
+  assert.deepEqual(
+    listing.map(source => source.name),
+    workshopFiles,
+    'the static listing covers every workshop file'
+  )
   await staticPage.close()
+
+  const retryPage = await browser.newPage()
+  await retryPage.route('**/demo-sources/workshop.json', route => route.abort(), { times: 1 })
+  await retryPage.goto(`${baseURL}/workshop/`)
+  await waitForStartScreen(retryPage)
+  const retryFrame = workshopFrame(retryPage)
+  const retryDisclosure = retryFrame.locator('.demo-sources > summary')
+  await retryDisclosure.press('Enter')
+  await retryFrame.getByRole('button', { name: 'Retry', exact: true }).press('Enter')
+  await retryFrame.locator('.demo-sources pre').first().waitFor()
+  assert.equal(
+    await retryDisclosure.evaluate(node => node === document.activeElement),
+    true,
+    'retry after a failed load returns focus to the disclosure'
+  )
+  await retryPage.close()
+  const pageBytes = (await (await fetch(`${baseURL}/workshop/`)).arrayBuffer()).byteLength
+  assert.ok(pageBytes < 1024 * 1024, `workshop page HTML is ${pageBytes} bytes, over 1MB`)
 
   const widePage = await browser.newPage({ viewport: { width: 1440, height: 900 } })
   await openWorkshop(widePage, baseURL)
@@ -295,6 +327,16 @@ export async function verifyWorkshop(browser, baseURL) {
     const disclosure = frame.locator('.demo-sources > summary')
     await disclosure.focus()
     await disclosure.press('Enter')
+    await frame.locator('.demo-sources pre').first().waitFor()
+    assert.equal(await frame.locator('.demo-sources pre').count(), workshopFiles.length)
+    await page.keyboard.press('Tab')
+    assert.equal(
+      await frame
+        .getByRole('button', { name: `Copy ${workshopFiles[0]}`, exact: true })
+        .evaluate(node => node === document.activeElement),
+      true,
+      'the loaded listing is next in tab order'
+    )
     for (const file of workshopFiles) {
       const actual = await readFile(new URL(`../examples/${file}`, import.meta.url), 'utf8')
       assert.equal(await frame.getByLabel(`Source: ${file}`, { exact: true }).textContent(), actual)
@@ -314,7 +356,7 @@ export async function verifyWorkshop(browser, baseURL) {
     await page.getByRole('heading', { name: articleTitle }).waitFor()
     assert.deepEqual(errors, [], 'no workshop hydration/runtime/asset errors')
     console.log(
-      'Workshop passed: installed document editing and section resets, one always-visible preview beside the controls, five isolated scenes, editor-driven scene switching, mode/width/state inspection, keyboard modal/table, actual copied source, static/direct loads and 320px/390px layouts.'
+      'Workshop passed: installed document editing and section resets, one always-visible preview beside the controls, five isolated scenes, editor-driven scene switching, mode/width/state inspection, keyboard modal/table, actual copied source loaded on open with retry, a page under 1MB, static/direct loads and 320px/390px layouts.'
     )
   } catch (error) {
     await page
