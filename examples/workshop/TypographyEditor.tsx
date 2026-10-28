@@ -491,9 +491,9 @@ export function TypographyEditor({
       <fieldset className="typesetting-inspector">
         <legend>Text style inspector</legend>
         <p>
-          Choose a style, or enable text inspection beside the proofs. Local headings interpolate
-          over 24–56rem of content width. Fixed styles keep equal endpoints; measure 0 lets layout
-          own the width.
+          Choose a style, or turn on Inspect above the preview and click text. Local headings
+          interpolate over 24–56rem of content width. Fixed styles keep equal endpoints; measure 0
+          lets layout own the width.
         </p>
         <label>
           Text style

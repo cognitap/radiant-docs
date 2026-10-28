@@ -174,8 +174,105 @@
 .preview-page :where(p, h2, h3, h4, blockquote, ul, section, header, footer, nav, div, form) {
   min-width: 0;
 }
-[data-text-inspecting] .preview-page {
+.preview-inspection {
+  position: relative;
+}
+[data-inspecting] .preview-page {
   cursor: crosshair;
+}
+.inspect-outline {
+  position: absolute;
+  pointer-events: none;
+  box-sizing: border-box;
+  outline: 2px solid var(--rad-color-focus);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+.inspect-outline[data-state='hover'] {
+  outline-style: dashed;
+}
+.preview-inspector {
+  display: grid;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  border: 1px solid var(--docs-border);
+  border-radius: 0.5rem;
+  background: var(--docs-surface);
+}
+.preview-inspector-target {
+  margin: 0;
+  font-size: 0.8125rem;
+  overflow-wrap: anywhere;
+}
+.preview-inspector-group {
+  display: grid;
+  gap: 0.25rem;
+}
+.preview-inspector-group h4 {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--docs-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.preview-inspector-group ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+}
+.preview-inspector-group button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.3rem 0.6rem;
+  font: inherit;
+  font-size: 0.8125rem;
+  color: var(--docs-foreground);
+  background: transparent;
+  border: 1px solid var(--docs-border);
+  border-radius: 999px;
+  cursor: pointer;
+}
+.preview-inspector-group button:hover {
+  border-color: var(--docs-accent);
+}
+.preview-inspector-group button:focus-visible {
+  outline: 2px solid var(--docs-accent);
+  outline-offset: 2px;
+}
+.preview-inspector-group button small {
+  color: var(--docs-muted);
+}
+.inspect-label {
+  font-weight: 600;
+}
+.inspect-value {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--docs-muted);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.inspect-value[data-kind='shadow'] {
+  max-width: 10rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.inspect-swatch {
+  flex: none;
+  width: 0.875rem;
+  height: 0.875rem;
+  border-radius: 50%;
+  border: 1px solid var(--docs-border);
+}
+.preview-inspector code {
+  font-size: 0.75rem;
+  overflow-wrap: anywhere;
 }
 .scene-prose {
   margin-inline: auto;
