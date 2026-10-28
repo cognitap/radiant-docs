@@ -5,6 +5,10 @@ import { readFile } from 'node:fs/promises'
 const workshopFiles = [
   'workshop/ThemeWorkshop.tsx',
   'workshop/workshop-theme.ts',
+  'workshop/workshop-snapshot.ts',
+  'workshop/workshop-history.ts',
+  'workshop/workshop-fields.ts',
+  'workshop/ControlChange.tsx',
   'workshop/workshop-preview.ts',
   'workshop/Preview.tsx',
   'workshop/PreviewFrame.tsx',
@@ -277,19 +281,16 @@ export async function verifyWorkshop(browser, baseURL) {
       await page.evaluate(() => navigator.clipboard.readText()),
       await readFile(new URL('../examples/workshop/PageScenes.tsx', import.meta.url), 'utf8')
     )
-    const reset = frame.getByRole('button', { name: 'Reset preview', exact: true })
-    await reset.focus()
-    await reset.press('Enter')
-    assert.equal(await reset.evaluate(node => node === document.activeElement), true)
-    assert.equal(await frame.locator('.demo-sources').getAttribute('open'), '')
-    assert.equal(await scene.inputValue(), 'page:article')
-    await scene.selectOption('page:form')
-    assert.notEqual(await name().inputValue(), 'Workshop Ada')
+    assert.equal(
+      await frame.getByRole('button', { name: 'Reset preview', exact: true }).count(),
+      0,
+      'the workshop has history instead of a frame reset'
+    )
     await page.reload()
     await page.getByRole('heading', { name: articleTitle }).waitFor()
     assert.deepEqual(errors, [], 'no workshop hydration/runtime/asset errors')
     console.log(
-      'Workshop passed: installed document editing and section resets, one always-visible preview beside the controls, five isolated scenes, editor-driven scene switching, mode/width/state inspection, keyboard modal/table/reset, actual copied source, static/direct loads and 320px/390px layouts.'
+      'Workshop passed: installed document editing and section resets, one always-visible preview beside the controls, five isolated scenes, editor-driven scene switching, mode/width/state inspection, keyboard modal/table, actual copied source, static/direct loads and 320px/390px layouts.'
     )
   } catch (error) {
     await page

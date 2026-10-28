@@ -23,6 +23,7 @@ import { verifyMotionHandoff } from './verify-motion-handoff.mjs'
 import { verifyMotionHandoffConsumer } from './verify-motion-handoff-consumer.mjs'
 import { verifyMotionChapter } from './verify-motion-chapter.mjs'
 import { verifyWorkshop } from './verify-workshop.mjs'
+import { verifyHistory } from './verify-history.mjs'
 import { verifyTypographyChapter } from './verify-typography-chapter.mjs'
 import { verifyTypesettingEditor } from './verify-typesetting-editor.mjs'
 import { verifyTypographyProofs } from './verify-typography-proofs.mjs'
@@ -243,6 +244,7 @@ try {
   await verifyCompositions(browser, baseURL)
   await verifyFoundations(browser, baseURL)
   await verifyWorkshop(browser, baseURL)
+  await verifyHistory(browser, baseURL)
   await verifyMotionEditor(browser, baseURL)
   await verifyFontEditor(browser, baseURL)
   await verifyTypographyProofs(browser, baseURL)

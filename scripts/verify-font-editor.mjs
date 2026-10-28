@@ -281,18 +281,11 @@ export async function verifyFontEditor(browser, baseURL) {
     }
     await page.setViewportSize({ width: 1280, height: 1000 })
     await panel.screenshot({ path: 'output/docs/fonts-desktop.png' })
-    await frame.getByRole('button', { name: 'Reset typography', exact: true }).click()
+    const resetTypography = () =>
+      frame.getByRole('button', { name: 'Reset typography', exact: true }).click()
+    await resetTypography()
     await page.waitForFunction(
       () => ![...document.fonts].some(face => face.family.includes('Brand font'))
-    )
-    await frame.getByRole('button', { name: 'Reset preview', exact: true }).click()
-    await page.waitForFunction(
-      () =>
-        ![...document.fonts].some(face =>
-          ['Inter', 'Source Serif 4', 'IBM Plex Sans', 'IBM Plex Mono', 'Brand font'].includes(
-            face.family.replaceAll('"', '')
-          )
-        )
     )
 
     // Reset while a face is in flight: the disposed session cannot register it later.
@@ -306,15 +299,16 @@ export async function verifyFontEditor(browser, baseURL) {
       started()
       await done
     })
-    await openTypography()
+    await resetTypography()
     await hit
-    await frame.getByRole('button', { name: 'Reset preview', exact: true }).click()
+    await resetTypography()
     unblock()
     await Promise.all(pending)
     await page.unroute('**/fonts/workshop/Inter*.woff2')
+    await loaded('Inter')
     assert.equal(
       (await faces()).filter(face => face.family === 'Inter').length,
-      0,
+      2,
       'late face cannot reappear after cleanup'
     )
 
@@ -325,7 +319,7 @@ export async function verifyFontEditor(browser, baseURL) {
       await paused
       await route.fulfill({ status: 404, body: 'missing' })
     })
-    await openTypography()
+    await resetTypography()
     await page.waitForFunction(
       () => document.querySelector('.font-editor').dataset.fontState === 'loading'
     )
