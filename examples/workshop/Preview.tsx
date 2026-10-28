@@ -28,6 +28,8 @@ import { MotionFrame } from './MotionScenes'
 import { PreviewFrame } from './PreviewFrame'
 import { Inspection, Inspector, type Selection } from './PreviewInspection'
 import { TextHandles, type HandleEdit } from './TextHandles'
+import { GeometryHandles, type GeometryEdit } from './GeometryHandles'
+import type { GeometryRecipe } from './workshop-geometry'
 import { previewTools } from './preview-tools'
 import './preview.css'
 
@@ -88,9 +90,11 @@ export function Preview({
   ready,
   role,
   typography,
+  geometry,
   onRole,
   onJump,
-  onTypography
+  onTypography,
+  onGeometry
 }: {
   editor: Editor
   theme: Theme
@@ -105,6 +109,9 @@ export function Preview({
   onRole: (role: string) => void
   onJump: (target: ControlTarget) => void
   onTypography: (edit: HandleEdit) => void
+  /** The geometry recipe while Spacing & surfaces is active; its handles sit on a control and a surface. */
+  geometry: GeometryRecipe | null
+  onGeometry: (edit: GeometryEdit) => void
 }) {
   const { view, session } = preview
   const [feedback, setFeedback] = useState('')
@@ -368,6 +375,15 @@ export function Preview({
               )
             )}
           </div>
+          {editor === 'geometry' && geometry && scene.kind !== 'motion' && (
+            <GeometryHandles
+              recipe={geometry}
+              mode={inspectMode}
+              scene={`${key}:${revision}`}
+              picked={selection?.element ?? null}
+              onEdit={onGeometry}
+            />
+          )}
           {editor === 'typography' && typography && scene.kind !== 'motion' && (
             <TextHandles
               role={role}

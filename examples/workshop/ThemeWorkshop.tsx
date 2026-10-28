@@ -506,9 +506,11 @@ export function ThemeWorkshop() {
           ready={ready}
           role={selectedRole}
           typography={view.typography}
+          geometry={geometry}
           onRole={selectRole}
           onJump={jumpTo}
           onTypography={editTypography}
+          onGeometry={edit => updateGeometry(edit.recipe, edit.change)}
         />
       </div>
       <ThemeHandoff
