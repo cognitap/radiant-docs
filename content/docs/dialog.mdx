@@ -1,45 +1,90 @@
 ---
 title: Dialog
-description: A native dialog for a focused task, with explicit actions and a shared theme.
+description: A focused native task, with explicit actions, shared themes and optional spring feedback.
 ---
 
 import { CompositionDemo } from '../../components/CompositionDemo'
 import { ProfileFormDemo } from '../../components/ProfileFormDemo'
+import { DialogProfileDemo, DialogTransitionDemo } from '../../components/DialogDemo'
+
+<DialogProfileDemo />
+
+## Start with an accessible task
+
+```tsx
+<Dialog>
+  <DialogTrigger>Edit profile</DialogTrigger>
+  <DialogContent>
+    <DialogTitle>Edit profile</DialogTitle>
+    <DialogDescription>Update the details your team sees.</DialogDescription>
+    <DialogClose>Done</DialogClose>
+  </DialogContent>
+</Dialog>
+```
+
+Dialog owns state without adding a DOM element. Content is a native `dialog`.
+It opens modally by default: the page becomes inert, focus moves inside, and
+closing returns focus to the opening control. `autoFocus` chooses initial focus.
+Without a Title, supply `aria-label` on Content. Keep an explicit close action.
+
+Escape and clicks outside the panel dismiss it. `closeOnEscape` and
+`closeOnBackdrop` configure those policies; Content's `onCancel` can cancel
+Escape. Nested modal dialogs stack; only the top layer handles Escape.
+
+## Own state and forms
+
+```tsx
+const [open, setOpen] = useState(false)
+
+<Dialog open={open} onOpenChange={setOpen}>
+  {/* Compose trigger, content, title, description and close here. */}
+</Dialog>
+```
+
+Choose controlled `open` or initial `defaultOpen`; never combine them or switch
+ownership. `onOpenChange` requests a change; an owner may refuse it. Prop syncs
+and no-op requests do not notify.
+
+There is no portal or body scroll lock. An ancestor form owns fields inside
+Content. A `form method="dialog"` closes natively and state follows. Ordinary
+form submission does not close automatically. Validation, pending work and
+persistence belong to your application.
+
+Trigger and Close compose [Button](/docs/button/), including pending, disabled
+and `render`. Forward resolved props, ref and children to one compatible button.
 
 <CompositionDemo kind="dialog" />
 
-## Open, review and dismiss
+Content keeps a 1rem viewport margin and scrolls long content. Set
+`--rad-dialog-width` in Content style for a local width.
 
-Dialog owns open state and the native dialog lifecycle. By default it opens modally: the rest of the page becomes inert
-and focus moves inside. Closing returns focus to the opening control. An element
-with `autoFocus` takes initial focus instead. Give every dialog a title,
-description and explicit close action. Without DialogTitle, pass `aria-label`
-on DialogContent.
+## Add motion
 
-Escape or a click outside the dialog's border box dismisses a modal dialog;
-keep an explicit close action even when you turn those off. A nonmodal dialog
-leaves the page usable. Changing `modal` while open switches between
-`showModal()` and `show()` without requesting a new open state.
+```tsx
+import { MotionProvider } from '@cognitap/radiant/motion/react'
 
-A `<form method="dialog">` inside the content closes the dialog, and React state
-follows. Nested modal dialogs stack; Escape closes the top one. A parent ignores
-close and cancel events that bubble up from a nested dialog.
+;<MotionProvider>
+  <Dialog>
+    <DialogTrigger>Open</DialogTrigger>
+    <DialogContent motion="inherit">
+      <DialogTitle>Ready when you are.</DialogTitle>
+      <DialogDescription>Native behavior stays immediate.</DialogDescription>
+      <DialogClose>Close</DialogClose>
+    </DialogContent>
+  </Dialog>
+</MotionProvider>
+```
 
-There is no portal. The panel stays where it renders, so an ancestor `form` owns
-fields inside it. Radiant does not lock body scrolling.
+The provider springs entry and composed Button presses. Content `motion="off"`
+disables its presentation; theme off and live reduced motion settle everything.
+Native close, modal semantics and focus never wait for an animation.
 
-## Button composition and state ownership
+A visual exit copy is inert, unnamed and hidden from assistive technology.
+Nested dialogs, media, embeds, canvas, custom elements and trees over 500
+descendants skip it. Copies expire within two seconds. Reopening removes the
+copy and retargets the spring. See [motion setup](/docs/foundations/motion/).
 
-DialogTrigger and DialogClose compose [Button](/docs/button/) and accept its
-props, including `render`. Do not nest another Button around the resolved result or substitute
-an anchor for an action.
-
-Do not pass both `open` and `defaultOpen`, or switch ownership during a mount.
-
-The open dialog keeps a 1rem viewport margin and a maximum height of
-`min(40rem, 100dvh - 2rem)`; its contents scroll. Set `--rad-dialog-width` in
-`DialogContent.style` for a local width. Use the `open:` variant for open-only
-classes. The dialog inherits its ThemeScope's theme.
+<DialogTransitionDemo />
 
 ## Named parts and targets
 
@@ -59,31 +104,26 @@ and do not overwrite their IDs. `useDialog()` returns the owner state, or
 
 ## Public props
 
-| Dialog prop            | Purpose / default                                                   |
-| ---------------------- | ------------------------------------------------------------------- |
-| `open` / `defaultOpen` | Controlled state or initial local state; initially closed           |
-| `onOpenChange`         | Receives a requested next boolean state                             |
-| `modal`                | Uses native `showModal()` when true (default), `show()` when false  |
-| `closeOnBackdrop`      | Modal backdrop dismissal; defaults to `true`                        |
-| `closeOnEscape`        | Modal Escape dismissal; defaults to `true`                          |
-| `children`             | Compose the named parts under this owner                            |
-| `DialogContent`        | Native dialog props, styles and ref, except owner-controlled `open` |
-| `onCancel`             | On DialogContent; `preventDefault` cancels native Escape dismissal  |
-| `onClose`              | On DialogContent; observes the native close event                   |
-| Title / Description    | Native host props, styles and refs                                  |
-| Trigger / Close        | `ButtonProps`, including `render`                                   |
+| Dialog prop            | Purpose / default                                                                 |
+| ---------------------- | --------------------------------------------------------------------------------- |
+| `open` / `defaultOpen` | Controlled state or initial local state; initially closed                         |
+| `onOpenChange`         | Receives a requested next boolean state                                           |
+| `modal`                | Native `showModal()` by default; `false` uses `show()` and leaves the page usable |
+| `closeOnBackdrop`      | Modal backdrop dismissal; defaults to `true`                                      |
+| `closeOnEscape`        | Modal Escape dismissal; defaults to `true`                                        |
+| `children`             | Compose the named parts under this owner                                          |
+| `DialogContent`        | Native dialog props, styles and ref, except owner-controlled `open`               |
+| `onCancel`             | On DialogContent; `preventDefault` cancels native Escape dismissal                |
+| `onClose`              | On DialogContent; observes the native close event                                 |
+| `motion` on Content    | `inherit` (default) or `off`; matches the shared transition convention            |
+| Title / Description    | Native host props, styles and refs                                                |
+| Trigger / Close        | `ButtonProps`, including `render`                                                 |
 
 Each part's prop type and `DialogRenderProps` are exported.
 
-## Put the existing form in a dialog
+## Complete form
 
-The [profile recipe](/docs/recipes/profile-form/), in Dialog placement.
+The [profile recipe](/docs/recipes/profile-form/) adds optional TanStack Form.
+Preserve the displayed source folders when copying examples.
 
 <ProfileFormDemo placement="dialog" />
-
-## Use the examples
-
-Preserve the `compositions/` and `profile/` paths when copying. The focused
-example needs only React and Radiant; the profile selector also imports optional
-TanStack Form ([recipe setup](/docs/recipes/profile-form/#use-the-recipe)).
-Your application owns validation, persistence and unsaved-work confirmation.

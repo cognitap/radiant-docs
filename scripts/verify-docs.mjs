@@ -13,6 +13,7 @@ import { verifyField } from './verify-field.mjs'
 import { verifyInput } from './verify-input.mjs'
 import { verifyCheckbox } from './verify-checkbox.mjs'
 import { verifyRadio } from './verify-radio.mjs'
+import { verifyDialog } from './verify-dialog.mjs'
 import { verifyCompositions } from './verify-compositions.mjs'
 import { verifyHandoff } from './verify-handoff.mjs'
 import { verifyHandoffConsumer } from './verify-handoff-consumer.mjs'
@@ -244,6 +245,7 @@ try {
   await verifyInput(browser, baseURL)
   await verifyCheckbox(browser, baseURL)
   await verifyRadio(browser, baseURL)
+  await verifyDialog(browser, baseURL)
   await verifyCompositions(browser, baseURL)
   await verifyFoundations(browser, baseURL)
   await verifyWorkshop(browser, baseURL)
