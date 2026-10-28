@@ -1,4 +1,5 @@
 import { setTypographyFamily } from './typography-controls.mjs'
+import { openPreviewOptions } from './preview-options.mjs'
 import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 
@@ -241,6 +242,7 @@ export async function verifyWorkshop(browser, baseURL) {
 
     for (const viewport of [390, 320]) {
       await page.setViewportSize({ width: viewport, height: 844 })
+      await openPreviewOptions(frame)
       for (const id of ['page:article', 'page:form', 'page:data', 'page:landing', 'components']) {
         await scene.selectOption(id)
         await width.selectOption('390')

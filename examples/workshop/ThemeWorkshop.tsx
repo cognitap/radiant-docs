@@ -259,6 +259,15 @@ export function ThemeWorkshop() {
     chooseEditor(target.editor)
     setJump({ ...target })
   }
+  /** On narrow screens the editor row scrolls sideways; keep the chosen editor in it. */
+  useEffect(() => {
+    const tab = workshopHost.current?.querySelector<HTMLElement>(
+      '.workshop-editor-tabs [aria-pressed="true"]'
+    )
+    const row = tab?.parentElement
+    if (!tab || !row || row.scrollWidth <= row.clientWidth) return
+    row.scrollLeft = tab.offsetLeft - row.offsetLeft - (row.clientWidth - tab.offsetWidth) / 2
+  }, [editor])
   useEffect(() => {
     if (!jump || !workshopHost.current) return
     const control = focusControl(workshopHost.current, jump.field)
@@ -280,53 +289,69 @@ export function ThemeWorkshop() {
           className="workshop-editor-nav"
           aria-label="Theme editors"
         >
-          {editors.map(item => {
-            const count = changes[item.id].count
-            return (
-              <Fragment key={item.id}>
-                <Button
-                  disabled={!ready}
-                  variant={editor === item.id ? 'solid' : 'outline'}
-                  aria-pressed={editor === item.id}
-                  aria-controls={panelId}
-                  aria-describedby={count ? `${countId}-${item.id}` : undefined}
-                  onClick={() => chooseEditor(item.id)}
-                >
-                  {item.label}
+          <div className="workshop-editor-tabs">
+            {editors.map(item => {
+              const count = changes[item.id].count
+              return (
+                <Fragment key={item.id}>
+                  <Button
+                    disabled={!ready}
+                    variant={editor === item.id ? 'solid' : 'outline'}
+                    aria-pressed={editor === item.id}
+                    aria-controls={panelId}
+                    aria-describedby={count ? `${countId}-${item.id}` : undefined}
+                    onClick={() => chooseEditor(item.id)}
+                  >
+                    {item.label}
+                    {count > 0 && (
+                      <span
+                        className="workshop-nav-count"
+                        aria-hidden="true"
+                      >
+                        {count}
+                      </span>
+                    )}
+                  </Button>
                   {count > 0 && (
                     <span
-                      className="workshop-nav-count"
-                      aria-hidden="true"
+                      id={`${countId}-${item.id}`}
+                      className="workshop-sr-only"
                     >
-                      {count}
+                      {count} changed
                     </span>
                   )}
-                </Button>
-                {count > 0 && (
-                  <span
-                    id={`${countId}-${item.id}`}
-                    className="workshop-sr-only"
-                  >
-                    {count} changed
-                  </span>
-                )}
-              </Fragment>
-            )
-          })}
+                </Fragment>
+              )
+            })}
+          </div>
           <div className="workshop-history">
             <Button
               variant="outline"
               disabled={!ready || !canUndo}
               onClick={undo}
             >
-              Undo
+              <svg
+                className="workshop-history-icon"
+                aria-hidden="true"
+                viewBox="0 0 24 24"
+              >
+                <path d="M9 14 4 9l5-5M4 9h10.5a5.5 5.5 0 0 1 0 11H11" />
+              </svg>
+              <span className="workshop-history-label">Undo</span>
             </Button>
             <Button
               variant="outline"
               disabled={!ready || !canRedo}
               onClick={redo}
             >
-              Redo
+              <svg
+                className="workshop-history-icon"
+                aria-hidden="true"
+                viewBox="0 0 24 24"
+              >
+                <path d="m15 14 5-5-5-5M20 9H9.5a5.5 5.5 0 0 0 0 11H13" />
+              </svg>
+              <span className="workshop-history-label">Redo</span>
             </Button>
           </div>
         </nav>

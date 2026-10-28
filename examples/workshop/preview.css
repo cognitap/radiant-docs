@@ -24,7 +24,20 @@
   align-items: end;
   gap: 0.75rem;
 }
-.preview-choices > label {
+.preview-options {
+  display: contents;
+}
+.preview-strip-control {
+  display: none;
+}
+.preview-inspect {
+  order: 1;
+}
+.preview-options > .preview-tools {
+  order: 2;
+  flex-basis: 100%;
+}
+.preview-options > label {
   display: grid;
   gap: 0.3rem;
   font-size: 0.8125rem;
@@ -391,5 +404,96 @@
   .scene-form-layout,
   .scene-metrics {
     grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Below the two-column breakpoint (workshop.css) the preview is a sticky strip: one row of
+   strip controls over the frames, with the remaining toolbar folded behind Preview options. */
+@media (width < 960px) {
+  .workshop-preview {
+    position: sticky;
+    top: 0;
+    z-index: 3;
+    box-sizing: border-box;
+    height: var(--workshop-strip);
+    border-bottom: 1px solid var(--docs-border);
+    background: var(--docs-surface);
+    transition: height 0.2s ease-out;
+  }
+  .workshop-preview[data-expanded] {
+    height: 100dvh;
+  }
+  .workshop-preview .preview-toolbar {
+    position: relative;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+  }
+  .preview-toolbar > legend,
+  .preview-toolbar > .preview-feedback {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .preview-choices {
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .preview-strip-control {
+    display: inline-flex;
+    flex: none;
+  }
+  .preview-inspect {
+    order: 0;
+    --rad-button-height: var(--rad-control-small-height, 2rem);
+    --rad-button-padding: var(--rad-control-small-padding-inline, 0.75rem);
+    --rad-button-font-size: var(--rad-control-small-font-size, 0.8125rem);
+  }
+  .preview-expand {
+    margin-inline-start: auto;
+  }
+  .preview-options {
+    display: none;
+  }
+  .preview-options[data-open] {
+    position: absolute;
+    top: 100%;
+    inset-inline: 0;
+    z-index: 1;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: end;
+    gap: 0.75rem;
+    max-height: 70svh;
+    overflow-y: auto;
+    padding: 1rem;
+    border-block: 1px solid var(--docs-border);
+    background: var(--docs-surface);
+    box-shadow: 0 0.75rem 1.5rem rgb(0 0 0 / 0.12);
+  }
+  .workshop-preview .preview-inspector {
+    max-height: 8rem;
+    overflow-y: auto;
+  }
+  .workshop-preview .preview-body {
+    overflow: auto;
+    overscroll-behavior: contain;
+    padding: 0.75rem 1rem;
+    scrollbar-width: thin;
+  }
+}
+/* On a phone the collapsed strip zooms out to show more of the scene; Expand shows real size.
+   Motion scenes stay unzoomed because layout springs measure in an unscaled space. */
+@media (width < 600px) {
+  .workshop-preview:not([data-expanded], [data-scene='motion']) .preview-frames {
+    zoom: 0.6;
+  }
+}
+@media (width < 960px) and (prefers-reduced-motion: reduce) {
+  .workshop-preview {
+    transition: none;
   }
 }

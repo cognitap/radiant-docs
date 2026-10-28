@@ -1,3 +1,4 @@
+import { openPreviewOptions } from './preview-options.mjs'
 import assert from 'node:assert/strict'
 import { mkdir, writeFile } from 'node:fs/promises'
 
@@ -247,6 +248,7 @@ export async function verifyMotionEditor(browser, baseURL) {
     await editor.getByRole('combobox', { name: 'Theme motion', exact: true }).selectOption('system')
     for (const width of [390, 320]) {
       await page.setViewportSize({ width, height: 900 })
+      await openPreviewOptions(preview)
       for (const name of ['motion:actions', 'motion:drag', 'motion:follow', 'motion:layout']) {
         await scene.selectOption(name)
         await replay()

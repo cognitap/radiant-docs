@@ -3,11 +3,15 @@
 }
 .workshop-columns {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   grid-template-areas:
-    'nav'
     'preview'
+    'nav'
     'editor';
   min-width: 0;
+}
+.workshop-editor-tabs {
+  display: contents;
 }
 .workshop-editor-nav {
   grid-area: nav;
@@ -19,9 +23,9 @@
 .workshop-preview {
   grid-area: preview;
 }
-/* Two columns once each gets about 500px: the color wall and a 390px frame at
-   full size both need that. */
-@media (min-width: 1100px) {
+/* Two columns once the preview column fits a 390px frame at full size and the color
+   wall keeps its dial pairs; landscape tablets and small laptop windows qualify. */
+@media (min-width: 960px) {
   .workshop-columns {
     grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
     grid-template-rows: auto 1fr;
@@ -145,6 +149,9 @@
   gap: 0.5rem;
   margin-inline-start: auto;
 }
+.workshop-history-icon {
+  display: none;
+}
 .workshop-nav-count {
   display: inline-block;
   min-width: 1.25em;
@@ -224,5 +231,57 @@
 @media (forced-colors: active) {
   .control-change-marker::before {
     background: Highlight;
+  }
+}
+/* One column: the preview is a sticky strip and the editor nav sticks under it, so every
+   edit happens with its effect in view. Scroll padding keeps focused controls below both. */
+@media (width < 960px) {
+  :root:has(.theme-workshop) {
+    --workshop-strip: clamp(12rem, 42svh, 30rem);
+    scroll-padding-block-start: calc(var(--workshop-strip) + 4rem);
+  }
+  /* Inspecting needs room for the inspected element and the inspector together. */
+  :root:has(.workshop-preview[data-inspecting]) {
+    --workshop-strip: clamp(16rem, 58svh, 36rem);
+  }
+  .workshop-editor-nav {
+    position: sticky;
+    top: var(--workshop-strip);
+    z-index: 2;
+    flex-wrap: nowrap;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: var(--docs-surface);
+    --rad-button-padding: 0.75rem;
+  }
+  .workshop-editor-tabs {
+    display: flex;
+    gap: 0.5rem;
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow-x: auto;
+    scrollbar-width: thin;
+    padding-block: 2px;
+  }
+  .workshop-history {
+    flex: none;
+  }
+  .workshop-history-icon {
+    display: block;
+    width: 1.125rem;
+    height: 1.125rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .workshop-history-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
   }
 }
