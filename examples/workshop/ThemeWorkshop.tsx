@@ -9,18 +9,31 @@ import {
   useReducer,
   useRef,
   useState,
+  useSyncExternalStore,
   type Reducer
 } from 'react'
-import { Button, generateTypography } from '@cognitap/radiant'
+import {
+  Button,
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+  generateTypography
+} from '@cognitap/radiant'
 import { useHydrated } from '../profile/useHydrated'
 import { documentAPI, editors, type Editor, type SectionPatch } from './workshop-theme'
 import {
-  initialSnapshot,
   resetEditor,
+  snapshotConfiguration,
+  snapshotFromConfiguration,
   themeChanges,
   viewTheme,
   type ThemeSnapshot
 } from './workshop-snapshot'
+import { readSharedTheme } from './workshop-start'
+import { decodeShare, sharePayload } from './workshop-share'
+import { StartScreen } from './StartScreen'
 import {
   createHistory,
   historyReducer,
@@ -91,10 +104,24 @@ function editsText(target: EventTarget | null) {
   )
 }
 
-/** The theme, the preview and the session have separate owners; theme edits never remount scenes. */
-export function ThemeWorkshop() {
-  const [baseline] = useState(initialSnapshot)
+/** The theme, the preview and the session have separate owners; theme edits never remount scenes.
+    The baseline is fixed for the shell's lifetime: changed markers count from it and history
+    opens with it as the present. */
+function WorkshopShell({
+  baseline,
+  focusOnEnter,
+  onStartOver
+}: {
+  baseline: ThemeSnapshot
+  focusOnEnter: boolean
+  onStartOver: () => void
+}) {
   const [history, dispatchHistory] = useReducer(themeHistory, baseline, createHistory)
+  const [confirming, setConfirming] = useState(false)
+  const editorHeading = useRef<HTMLHeadingElement>(null)
+  useEffect(() => {
+    if (focusOnEnter) editorHeading.current?.focus()
+  }, [focusOnEnter])
   const present = history.present.state
   const presentRef = useRef(present)
   useEffect(() => {
@@ -131,6 +158,13 @@ export function ThemeWorkshop() {
   )
   const canUndo = history.past.length > 0
   const canRedo = history.future.length > 0
+  /** Undoing back to the start leaves the baseline object itself as the present. */
+  const unsaved = canUndo || present !== baseline
+  const changeCount = editors.reduce((sum, item) => sum + changes[item.id].count, 0)
+  function startOver() {
+    if (unsaved) setConfirming(true)
+    else onStartOver()
+  }
   const undo = useCallback(() => {
     if (!history.past.length) return
     dispatchHistory({ type: 'undo' })
@@ -162,22 +196,14 @@ export function ThemeWorkshop() {
     (data: ImportData, applyMode: 'merge' | 'replace') => {
       const previous = presentRef.current
       try {
-        const current = handoffAPI.configuration(previous.document, {
-          color: previous.color ?? undefined,
-          geometry: previous.geometry ?? undefined
-        })
-        const next = handoffAPI.apply(current, data, applyMode)
+        const next = handoffAPI.apply(snapshotConfiguration(previous), data, applyMode)
         const affected =
           data.kind === 'radiant-workshop'
             ? ['color', 'surface', 'control', 'spacing']
             : Object.keys(data.sections)
         commit(
           { label: data.kind === 'radiant-workshop' ? 'configuration import' : 'section import' },
-          {
-            document: next.document,
-            color: next.recipes.color ?? null,
-            geometry: next.recipes.geometry ?? null
-          }
+          snapshotFromConfiguration(next)
         )
         if (affected.some(name => ['color', 'surface'].includes(name)))
           setColorRevision(value => value + 1)
@@ -356,6 +382,45 @@ export function ThemeWorkshop() {
               </svg>
               <span className="workshop-history-label">Redo</span>
             </Button>
+            <Button
+              variant="outline"
+              title="New theme"
+              disabled={!ready}
+              onClick={startOver}
+            >
+              <svg
+                className="workshop-history-icon"
+                aria-hidden="true"
+                viewBox="0 0 24 24"
+              >
+                <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8zM14 3v5h5M12 12v6M9 15h6" />
+              </svg>
+              <span className="workshop-history-label">New theme</span>
+            </Button>
+            <Dialog
+              open={confirming}
+              onOpenChange={setConfirming}
+            >
+              <DialogContent className="workshop-confirm">
+                <DialogTitle>Start a new theme?</DialogTitle>
+                <DialogDescription>
+                  {changeCount === 1 ? 'One change' : `${changeCount} changes`} and the undo history
+                  of this theme will be lost. Copy a share link or download the configuration first
+                  to keep them.
+                </DialogDescription>
+                <div className="workshop-confirm-actions">
+                  <DialogClose variant="outline">Keep editing</DialogClose>
+                  <Button
+                    onClick={() => {
+                      setConfirming(false)
+                      onStartOver()
+                    }}
+                  >
+                    Start new theme
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
           </div>
         </nav>
         <div className="workshop-editing">
@@ -365,7 +430,12 @@ export function ThemeWorkshop() {
             className="workshop-editor"
           >
             <div className="workshop-editor-heading">
-              <h3>{current.label}</h3>
+              <h3
+                ref={editorHeading}
+                tabIndex={-1}
+              >
+                {current.label}
+              </h3>
               <Button
                 variant="outline"
                 disabled={!ready}
@@ -516,5 +586,72 @@ export function ThemeWorkshop() {
         onError={importError}
       />
     </div>
+  )
+}
+
+type Stage =
+  | { kind: 'start'; notice: string | null; returned: boolean }
+  | { kind: 'workshop'; baseline: ThemeSnapshot; entry: number; chosen: boolean }
+
+const noSubscription = () => () => {}
+const linkInUrl = () => sharePayload(window.location.hash) !== null
+const noLinkOnServer = () => false
+
+/** The start screen is the server render. A share link in the URL fragment opens its theme as
+    the baseline instead; while it decodes, neither screen shows, so the workshop never appears
+    and then gives way to the start screen. */
+export function ThemeWorkshop() {
+  const [stage, setStage] = useState<Stage>({ kind: 'start', notice: null, returned: false })
+  const [linkPending, setLinkPending] = useState(true)
+  const hasLink = useSyncExternalStore(noSubscription, linkInUrl, noLinkOnServer)
+  const ready = useHydrated()
+  const entries = useRef(0)
+  const enter = useCallback((baseline: ThemeSnapshot, chosen: boolean) => {
+    entries.current += 1
+    setStage({ kind: 'workshop', baseline, entry: entries.current, chosen })
+  }, [])
+  useEffect(() => {
+    let active = true
+    const open = async () => {
+      const payload = sharePayload(window.location.hash)
+      if (payload === null) {
+        setLinkPending(false)
+        return
+      }
+      try {
+        const baseline = readSharedTheme(await decodeShare(payload))
+        if (active) enter(baseline, false)
+      } catch (error) {
+        if (active)
+          setStage({ kind: 'start', notice: `Share link: ${errorMessage(error)}`, returned: false })
+      } finally {
+        if (active) setLinkPending(false)
+      }
+    }
+    void open()
+    window.addEventListener('hashchange', open)
+    return () => {
+      active = false
+      window.removeEventListener('hashchange', open)
+    }
+  }, [enter])
+  if (stage.kind === 'workshop')
+    return (
+      <WorkshopShell
+        key={stage.entry}
+        baseline={stage.baseline}
+        focusOnEnter={stage.chosen}
+        onStartOver={() => setStage({ kind: 'start', notice: null, returned: true })}
+      />
+    )
+  if (hasLink && linkPending)
+    return <output className="workshop-opening">Opening the shared theme…</output>
+  return (
+    <StartScreen
+      ready={ready}
+      notice={stage.notice}
+      focusOnMount={stage.returned}
+      onStart={baseline => enter(baseline, true)}
+    />
   )
 }
