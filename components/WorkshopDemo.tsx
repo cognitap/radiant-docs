@@ -5,6 +5,7 @@ export function WorkshopDemo() {
   return (
     <Demo
       title="Shared theme workshop"
+      reset={false}
       files={[
         'workshop/ThemeWorkshop.tsx',
         'workshop/workshop-theme.ts',

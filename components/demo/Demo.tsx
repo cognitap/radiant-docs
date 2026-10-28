@@ -18,10 +18,12 @@ const languages: Record<string, string> = {
 export async function Demo({
   title,
   files,
+  reset,
   children
 }: {
   title: string
   files: readonly string[]
+  reset?: boolean
   children: ReactNode
 }) {
   const sources = await Promise.all(
@@ -55,6 +57,7 @@ export async function Demo({
     <DemoFrame
       title={title}
       sources={sources}
+      reset={reset}
     >
       {children}
     </DemoFrame>

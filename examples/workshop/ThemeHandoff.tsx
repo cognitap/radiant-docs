@@ -2,7 +2,6 @@
 
 import { useEffect, useId, useMemo, useRef, useState } from 'react'
 import { Button } from '@cognitap/radiant'
-import { useDemoRevision } from '@/components/demo/DemoFrame'
 import { useHydrated } from '../profile/useHydrated'
 import {
   errorMessage,
@@ -37,7 +36,6 @@ export function ThemeHandoff({
 }) {
   const resultId = useId()
   const ready = useHydrated()
-  const revision = useDemoRevision()
   const [selected, setSelected] = useState<SectionName[]>([
     'color',
     'surface',
@@ -117,20 +115,14 @@ export function ThemeHandoff({
           onError(`Share link: ${errorMessage(error)} Current theme retained.`)
       }
     }
-    if (revision > 0 && window.location.hash.startsWith('#workshop=')) {
-      window.history.replaceState(
-        window.history.state,
-        '',
-        `${window.location.pathname}${window.location.search}`
-      )
-    } else void restore()
+    void restore()
     window.addEventListener('hashchange', restore)
     return () => {
       active = false
       pending.ticket++
       window.removeEventListener('hashchange', restore)
     }
-  }, [revision, onImport, onError])
+  }, [onImport, onError])
   function importText(text: string) {
     operation.current.ticket++
     try {
@@ -622,8 +614,7 @@ export function ThemeHandoff({
           A full theme or workshop configuration replaces the current theme and identity. Selective
           files apply the mode below while retaining other sections and component exceptions.
           Preview mode and specimen interactions stay unchanged. Recipe-free imported Color/Geometry
-          values remain intact until you explicitly reset those editors. Reset preview restores the
-          default workspace and clears its share fragment.
+          values remain intact until you explicitly reset those editors. Undo reverses an import.
         </p>
         <label>
           Section apply mode
