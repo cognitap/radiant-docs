@@ -25,12 +25,14 @@ export async function verifyTypesettingEditor(browser, baseURL) {
     const body = () => proof.locator('[data-rad-prose] > p:not([data-rad-text])').first()
     const fontFaces = () =>
       page.evaluate(() => [...document.fonts].map(face => face.family.replaceAll('"', '')))
-    await page.waitForFunction(
-      () =>
-        [...document.fonts].filter(face =>
-          ['Inter', 'IBM Plex Mono'].includes(face.family.replaceAll('"', ''))
-        ).length === 4
-    )
+    const interAndMonoLoaded = () =>
+      page.waitForFunction(
+        () =>
+          [...document.fonts].filter(face =>
+            ['Inter', 'IBM Plex Mono'].includes(face.family.replaceAll('"', ''))
+          ).length >= 4
+      )
+    await interAndMonoLoaded()
     assert.equal(await select('Starting point').inputValue(), 'inter')
     assert.equal(await select('Text style').locator('option').count(), 16)
     assert.equal(await body().evaluate(node => getComputedStyle(node).fontSize), '20px')
@@ -203,9 +205,11 @@ export async function verifyTypesettingEditor(browser, baseURL) {
       await proof.getByRole('textbox', { name: 'Name shown to collaborators' }).inputValue(),
       'Typesetting Ada'
     )
+    await interAndMonoLoaded()
+    const faces = await fontFaces()
     assert.equal(
-      new Set(await fontFaces()).size,
-      (await fontFaces()).length / 2,
+      new Set(faces).size,
+      faces.length / 2,
       'normal/italic pairs are shared without duplicate registration'
     )
     await workshop.getByRole('textbox', { name: 'Configuration JSON', exact: true }).fill(

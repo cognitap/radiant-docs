@@ -1,6 +1,7 @@
 # Radiant documentation
 
-The public documentation site for [Radiant](https://github.com/cognitap/radiant).
+The documentation site for [Radiant](https://github.com/cognitap/radiant), live at
+<https://radiant-docs.pages.dev>.
 It is a static Next.js export built with Fumadocs, and its live examples use the
 published `@cognitap/radiant` package pinned in `package.json`.
 
