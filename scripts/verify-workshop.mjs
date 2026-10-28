@@ -4,6 +4,8 @@ import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
 import { exampleSources } from '../lib/demo-sources.mjs'
+import { startingThemes } from '../examples/workshop/workshop-start.ts'
+import { openWorkshop, enterWorkshop } from './workshop-entry.mjs'
 
 const workshopFiles = await exampleSources(
   fileURLToPath(new URL('../examples/', import.meta.url)),
@@ -36,14 +38,20 @@ async function assertPreviewInView(page, label) {
 export async function verifyWorkshop(browser, baseURL) {
   const staticPage = await browser.newPage({ javaScriptEnabled: false })
   assert.equal((await staticPage.goto(`${baseURL}/workshop/`)).status(), 200)
-  assert.equal(await staticPage.getByRole('heading', { name: articleTitle }).isVisible(), true)
+  assert.equal(
+    await staticPage
+      .getByRole('heading', { name: 'Make a Radiant theme for your app' })
+      .isVisible(),
+    true
+  )
+  assert.equal(await staticPage.locator('.start-card').count(), startingThemes.length)
   const staticFrame = staticPage.getByRole('region', { name: 'Shared theme workshop', exact: true })
   await staticFrame.locator('.demo-sources > summary').press('Enter')
   assert.equal(await staticFrame.locator('.demo-sources pre').count(), workshopFiles.length)
   await staticPage.close()
 
   const widePage = await browser.newPage({ viewport: { width: 1440, height: 900 } })
-  await widePage.goto(`${baseURL}/workshop/`)
+  await openWorkshop(widePage, baseURL)
   const wideFrame = widePage.getByRole('region', { name: 'Shared theme workshop', exact: true })
   await wideFrame.waitFor()
   assert.equal(await widePage.locator('.docs-sidebar, .outline-desktop').count(), 0)
@@ -51,7 +59,6 @@ export async function verifyWorkshop(browser, baseURL) {
   const docsColumnWidth = 52 * 16
   const frameWidth = (await wideFrame.boundingBox()).width
   assert.ok(frameWidth > docsColumnWidth + 200, `workshop frame is ${frameWidth}px wide`)
-  await widePage.waitForFunction(() => !document.querySelector('.preview-toolbar button').disabled)
   const wideEditor = async name => {
     await wideFrame.getByRole('button', { name, exact: true }).click()
     await assertPreviewInView(widePage, name)
@@ -144,7 +151,7 @@ export async function verifyWorkshop(browser, baseURL) {
     if (message.type() === 'error') errors.push(message.text())
   })
   try {
-    await page.goto(`${baseURL}/workshop/`)
+    await openWorkshop(page, baseURL)
     const frame = page.getByRole('region', { name: 'Shared theme workshop', exact: true })
     const canvas = frame.locator('.preview-page').first()
     await frame.getByRole('button', { name: 'Reset scene', exact: true }).waitFor()
@@ -303,6 +310,7 @@ export async function verifyWorkshop(browser, baseURL) {
       'the workshop has history instead of a frame reset'
     )
     await page.reload()
+    await enterWorkshop(page)
     await page.getByRole('heading', { name: articleTitle }).waitFor()
     assert.deepEqual(errors, [], 'no workshop hydration/runtime/asset errors')
     console.log(

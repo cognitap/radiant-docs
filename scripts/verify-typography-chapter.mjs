@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict'
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { pickRadio } from './typography-controls.mjs'
+import { openWorkshop } from './workshop-entry.mjs'
 
 // Recorded font/layout examples, not a synthetic readability or quality score.
 export async function verifyTypographyChapter(browser, baseURL) {
@@ -17,7 +18,7 @@ export async function verifyTypographyChapter(browser, baseURL) {
     models = [],
     captures = []
   try {
-    await page.goto(`${baseURL}/workshop/`)
+    await openWorkshop(page, baseURL)
     const workshop = page.locator('.theme-workshop')
     await workshop.getByRole('button', { name: 'Typography', exact: true }).click()
     const editor = workshop.locator('.typesetting-editor')

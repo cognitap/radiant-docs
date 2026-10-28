@@ -23,6 +23,7 @@ import { verifyMotionHandoff } from './verify-motion-handoff.mjs'
 import { verifyMotionHandoffConsumer } from './verify-motion-handoff-consumer.mjs'
 import { verifyMotionChapter } from './verify-motion-chapter.mjs'
 import { verifyWorkshop } from './verify-workshop.mjs'
+import { verifyStart } from './verify-start.mjs'
 import { verifyHistory } from './verify-history.mjs'
 import { verifyInspect } from './verify-inspect.mjs'
 import { verifyNarrow } from './verify-narrow.mjs'
@@ -246,6 +247,7 @@ try {
   await verifyCompositions(browser, baseURL)
   await verifyFoundations(browser, baseURL)
   await verifyWorkshop(browser, baseURL)
+  await verifyStart(browser, baseURL)
   await verifyHistory(browser, baseURL)
   await verifyInspect(browser, baseURL)
   await verifyNarrow(browser, baseURL)

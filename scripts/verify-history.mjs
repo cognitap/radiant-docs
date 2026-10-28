@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict'
 import { pickRadio } from './typography-controls.mjs'
+import { openWorkshop } from './workshop-entry.mjs'
 
 /** Undo/redo, changed markers with per-control reset, and editor counts over one theme history. */
 export async function verifyHistory(browser, baseURL) {
@@ -13,7 +14,7 @@ export async function verifyHistory(browser, baseURL) {
     if (message.type() === 'error') errors.push(message.text())
   })
   try {
-    await page.goto(`${baseURL}/workshop/`)
+    await openWorkshop(page, baseURL)
     const frame = page.getByRole('region', { name: 'Shared theme workshop', exact: true })
     await page.waitForFunction(() => !document.querySelector('.preview-toolbar button').disabled)
     const button = name => frame.getByRole('button', { name, exact: true })

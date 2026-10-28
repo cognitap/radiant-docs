@@ -2,6 +2,7 @@ import { setTypographyFamily } from './typography-controls.mjs'
 import { closePreviewOptions, openPreviewOptions } from './preview-options.mjs'
 import { pickRadio, pickedRadio, radioGroup } from './typography-controls.mjs'
 import assert from 'node:assert/strict'
+import { openWorkshop, enterWorkshop } from './workshop-entry.mjs'
 
 export async function verifyGeometryEditor(browser, baseURL) {
   const page = await browser.newPage({
@@ -14,7 +15,7 @@ export async function verifyGeometryEditor(browser, baseURL) {
     if (message.type() === 'error') errors.push(message.text())
   })
   try {
-    await page.goto(`${baseURL}/workshop/`)
+    await openWorkshop(page, baseURL)
     const frame = page.getByRole('region', { name: 'Shared theme workshop', exact: true })
     const shell = frame.locator('.theme-workshop')
     const canvas = frame.locator('.preview-page').first()
@@ -405,6 +406,7 @@ export async function verifyGeometryEditor(browser, baseURL) {
     )
     await editor.screenshot({ path: 'output/docs/geometry-editor-desktop.png' })
     await page.reload()
+    await enterWorkshop(page)
     await chooseEditor('Spacing & surfaces')
     assert.equal(await preset.value(), 'balanced')
     for (const width of [390, 320]) {
@@ -416,19 +418,8 @@ export async function verifyGeometryEditor(browser, baseURL) {
       )
     }
     assert.deepEqual(errors, [], 'no geometry editor hydration/runtime errors')
-    const staticPage = await browser.newPage({ javaScriptEnabled: false })
-    try {
-      await staticPage.goto(`${baseURL}/workshop/`)
-      assert.equal(await staticPage.locator('.geometry-editor input[type=number]').count(), 7)
-      assert.equal(
-        await staticPage.locator('.geometry-editor input[type=number]').first().isDisabled(),
-        true
-      )
-    } finally {
-      await staticPage.close()
-    }
     console.log(
-      'Geometry editor passed: preset cards by pointer and keyboard, precise scrub fields, keyboard on every visual, a corner drag the preview follows in one undo step, the preview corner handle, marked dark overrides with clear/reset, preserved sections and form state, three control sizes, focus/invalid/disabled/pending states, real light/dark overlays, compiled metrics and maximum-setting mobile layouts; static output/hydration and 320px/390px widths.'
+      'Geometry editor passed: preset cards by pointer and keyboard, precise scrub fields, keyboard on every visual, a corner drag the preview follows in one undo step, the preview corner handle, marked dark overrides with clear/reset, preserved sections and form state, three control sizes, focus/invalid/disabled/pending states, real light/dark overlays, compiled metrics and maximum-setting mobile layouts; hydration and 320px/390px widths.'
     )
   } catch (error) {
     await page

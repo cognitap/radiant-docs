@@ -1,5 +1,6 @@
 import { setTypographyFamily } from './typography-controls.mjs'
 import assert from 'node:assert/strict'
+import { openWorkshop, enterWorkshop } from './workshop-entry.mjs'
 
 export async function verifyColorEditor(browser, baseURL) {
   const page = await browser.newPage({
@@ -12,7 +13,7 @@ export async function verifyColorEditor(browser, baseURL) {
     if (message.type() === 'error') errors.push(message.text())
   })
   try {
-    await page.goto(`${baseURL}/workshop/`)
+    await openWorkshop(page, baseURL)
     const frame = page.getByRole('region', { name: 'Shared theme workshop', exact: true })
     const brand = frame.getByRole('textbox', { name: 'Brand color', exact: true })
     await frame.getByRole('button', { name: 'Reset scene', exact: true }).waitFor()
@@ -282,23 +283,12 @@ export async function verifyColorEditor(browser, baseURL) {
       await page.screenshot({ path: `output/docs/color-editor-${width}.png`, fullPage: true })
     }
     await page.reload()
+    await enterWorkshop(page)
     await brand.waitFor()
     assert.equal(await brand.inputValue(), '#7C3AED')
     assert.deepEqual(errors, [], 'no color editor hydration/runtime errors')
-    const staticPage = await browser.newPage({ javaScriptEnabled: false })
-    try {
-      await staticPage.goto(`${baseURL}/workshop/`)
-      assert.equal(await staticPage.locator('.color-swatch').count(), 198)
-      assert.equal(await staticPage.locator('.color-role-chip').count(), 36)
-      assert.equal(
-        await staticPage.getByRole('textbox', { name: 'Brand color', exact: true }).isDisabled(),
-        true
-      )
-    } finally {
-      await staticPage.close()
-    }
     console.log(
-      'Color editor passed: production 198-swatch wall, brand drag and keys, brand fidelity, all generator strips by keyboard with spoken values, preset cards, pinned roles, contrast warnings with a working fix, wall grid keys, resets, static rendering and 320px/390px layouts.'
+      'Color editor passed: production 198-swatch wall, brand drag and keys, brand fidelity, all generator strips by keyboard with spoken values, preset cards, pinned roles, contrast warnings with a working fix, wall grid keys, resets and 320px/390px layouts.'
     )
   } catch (error) {
     await page

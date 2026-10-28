@@ -1,6 +1,7 @@
 import { setTypographyFamily } from './typography-controls.mjs'
 import { openPreviewOptions } from './preview-options.mjs'
 import assert from 'node:assert/strict'
+import { openWorkshop, enterWorkshop } from './workshop-entry.mjs'
 
 export async function verifyTypographyProofs(browser, baseURL) {
   const context = await browser.newContext({
@@ -14,7 +15,7 @@ export async function verifyTypographyProofs(browser, baseURL) {
     if (message.type() === 'error') errors.push(message.text())
   })
   try {
-    await page.goto(`${baseURL}/workshop/`)
+    await openWorkshop(page, baseURL)
     const workshop = page.locator('.theme-workshop')
     await workshop.getByRole('button', { name: 'Typography', exact: true }).click()
     const preview = page.getByRole('region', { name: 'Theme preview', exact: true })
@@ -298,6 +299,7 @@ export async function verifyTypographyProofs(browser, baseURL) {
     await preview.locator('[data-preview-spacing]').first().waitFor()
     assert.equal(await frames.first().evaluate(node => node.scrollWidth <= node.clientWidth), true)
     await page.reload()
+    await enterWorkshop(page)
     await workshop.getByRole('button', { name: 'Typography', exact: true }).click()
     await openPreviewOptions(preview)
     assert.equal(await width.inputValue(), 'fill')

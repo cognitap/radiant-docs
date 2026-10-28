@@ -629,10 +629,8 @@ export function ThemeWorkshop() {
       }
     }
     void open()
-    window.addEventListener('hashchange', open)
     return () => {
       active = false
-      window.removeEventListener('hashchange', open)
     }
   }, [enter])
   if (stage.kind === 'workshop')

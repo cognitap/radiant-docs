@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict'
+import { openWorkshop } from './workshop-entry.mjs'
 
 /** Narrow screens: the preview is a sticky strip, so each edit happens with its effect in view. */
 export async function verifyNarrow(browser, baseURL) {
@@ -11,8 +12,7 @@ export async function verifyNarrow(browser, baseURL) {
   try {
     for (const width of [320, 375, 390, 768, 1024]) {
       await page.setViewportSize({ width, height: 800 })
-      await page.goto(`${baseURL}/workshop/`)
-      await page.waitForFunction(() => !document.querySelector('.preview-toolbar button').disabled)
+      await openWorkshop(page, baseURL)
       assert.equal(
         await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth),
         true,
@@ -26,8 +26,7 @@ export async function verifyNarrow(browser, baseURL) {
     ]) {
       const label = `${width}x${height}`
       await page.setViewportSize({ width, height })
-      await page.goto(`${baseURL}/workshop/`)
-      await page.waitForFunction(() => !document.querySelector('.preview-toolbar button').disabled)
+      await openWorkshop(page, baseURL)
       const workshop = page.locator('.theme-workshop')
       const preview = page.getByRole('region', { name: 'Theme preview', exact: true })
       const canvas = preview.locator('.preview-page').first()
