@@ -1,4 +1,5 @@
 import { openPreviewOptions } from './preview-options.mjs'
+import { pickRadio, pickedRadio, radioGroup } from './typography-controls.mjs'
 import assert from 'node:assert/strict'
 import { mkdir, writeFile } from 'node:fs/promises'
 
@@ -37,36 +38,113 @@ export async function verifyMotionEditor(browser, baseURL) {
     const resetScene = () =>
       preview.getByRole('button', { name: 'Reset scene', exact: true }).click()
     const number = name => editor.getByRole('spinbutton', { name, exact: true })
-    const scope = editor.getByRole('combobox', { name: 'Profile scope', exact: true })
-    const preset = editor.getByRole('combobox', { name: 'Starting point', exact: true })
+    const scope = value => pickRadio(editor, 'Physics for', value)
+    const preset = value => pickRadio(editor, 'Starting point', value)
+    const words = () => editor.locator('.motion-curve-readout output').innerText()
+    const curve = () => editor.locator('.motion-curve-line').getAttribute('d')
+    const grip = name => editor.getByRole('slider', { name, exact: true })
+    const described = async locator => {
+      const id = await locator.getAttribute('aria-describedby')
+      return id ? page.locator(`[id="${id}"]`).innerText() : ''
+    }
     const primary = () => preview.locator('.preview-frame').first()
     const press = () => primary().getByRole('button', { name: 'Press me', exact: true })
+    assert.equal(await words(), 'Settles in 533 ms · overshoots 1%')
     await number('Stiffness').fill('450')
-    await scope.selectOption('press')
+    assert.equal(await words(), 'Settles in 534 ms · overshoots 4%', 'the words follow the field')
+    await scope('press')
+    assert.equal(await scene.inputValue(), 'motion:actions', 'press shows the press scene')
     await number('Mass').fill('2')
-    await scope.selectOption('follow')
+    assert.equal(
+      await described(radioGroup(editor, 'Physics for').locator('input[value="press"]')),
+      'has its own physics',
+      'an interaction with overrides is marked'
+    )
+    await scope('follow')
+    assert.equal(await scene.inputValue(), 'motion:follow', 'follow shows the moving target')
     await number('Damping').fill('17')
-    await scope.selectOption('press')
+    await scope('drag')
+    assert.equal(await scene.inputValue(), 'motion:drag')
+    await scope('press')
     assert.equal(await number('Stiffness').inputValue(), '450')
     await editor.getByRole('button', { name: 'Use common physics', exact: true }).click()
     assert.equal(await number('Mass').inputValue(), '1')
-    await scope.selectOption('follow')
+    assert.equal(
+      await radioGroup(editor, 'Physics for')
+        .locator('input[value="press"]')
+        .getAttribute('aria-describedby'),
+      null,
+      'clearing the overrides clears the mark'
+    )
+    await scope('follow')
     assert.equal(await number('Damping').inputValue(), '17')
-    await scope.selectOption('shared')
-    const summary = await editor.locator('.motion-physics-summary').innerText()
+    await scope('shared')
+    await scene.selectOption('motion:actions')
+    const summary = await words()
     await number('Mass').fill('0')
-    assert.equal(await editor.getByRole('alert').isVisible(), true)
-    assert.equal(await editor.locator('.motion-physics-summary').innerText(), summary)
+    assert.equal(await number('Mass').getAttribute('aria-invalid'), 'true')
+    assert.equal(await words(), summary, 'an invalid draft keeps the last valid physics')
     await number('Mass').fill('1')
-    await preset.selectOption('restrained')
+    await preset('restrained')
+    assert.equal(await words(), 'Settles in 533 ms · overshoots 1%')
     const original = await press().elementHandle()
-    await preset.selectOption('expressive')
+    await preset('expressive')
+    assert.equal(await words(), 'Settles in 1 s · overshoots 19%')
     assert.equal(
       await press().evaluate((node, previous) => node === previous, original),
       true,
       'physics editing keeps the native host'
     )
-    await preset.selectOption('restrained')
+    await radioGroup(editor, 'Starting point').locator('input[value="expressive"]').focus()
+    await page.keyboard.press('ArrowLeft')
+    assert.equal(await pickedRadio(editor, 'Starting point'), 'restrained', 'arrows pick a card')
+    assert.equal(await words(), 'Settles in 533 ms · overshoots 1%')
+    assert.equal(
+      await radioGroup(editor, 'Starting point').locator('input[value="custom"]').isDisabled(),
+      true,
+      'custom is a state, never a choice'
+    )
+
+    const before = await curve()
+    const overshoot = grip('Overshoot')
+    const peakBox = await overshoot.boundingBox()
+    await page.mouse.move(peakBox.x + peakBox.width / 2, peakBox.y + peakBox.height / 2)
+    await page.mouse.down()
+    await page.mouse.move(peakBox.x + peakBox.width / 2, peakBox.y - 14, { steps: 4 })
+    const during = await curve()
+    assert.notEqual(during, before, 'the curve redraws while the peak is dragged')
+    assert.notEqual(await number('Stiffness').inputValue(), '320', 'the peak sets stiffness')
+    assert.match(await words(), /overshoots (\d+)%/)
+    await page.mouse.up()
+    assert.equal(await curve(), during)
+    assert.equal(await pickedRadio(editor, 'Starting point'), 'custom')
+    const dragged = Number(await number('Stiffness').inputValue())
+    await overshoot.focus()
+    await page.keyboard.press('ArrowUp')
+    assert.equal(
+      Number(await number('Stiffness').inputValue()),
+      dragged + 10,
+      'arrow steps stiffness'
+    )
+    assert.match(await overshoot.getAttribute('aria-valuetext'), /^stiffness \d+, overshoots \d+%$/)
+    const settle = grip('Settle')
+    await settle.focus()
+    await page.keyboard.press('ArrowRight')
+    assert.equal(await number('Damping').inputValue(), '29', 'right settles later: less damping')
+    assert.match(await settle.getAttribute('aria-valuetext'), /^damping 29, settles in \d+ ms$/)
+    const settleBox = await settle.boundingBox()
+    await page.mouse.move(settleBox.x + settleBox.width / 2, settleBox.y + settleBox.height / 2)
+    await page.mouse.down()
+    await page.mouse.move(
+      settleBox.x + settleBox.width / 2 + 60,
+      settleBox.y + settleBox.height / 2,
+      {
+        steps: 4
+      }
+    )
+    await page.mouse.up()
+    assert.ok(Number(await number('Damping').inputValue()) < 29, 'dragging settle right loosens')
+    await preset('restrained')
     await press().focus()
     await page.keyboard.down('Space')
     await page.waitForFunction(
@@ -243,9 +321,19 @@ export async function verifyMotionEditor(browser, baseURL) {
       true
     )
     await compare.selectOption('none')
-    await editor.getByRole('combobox', { name: 'Theme motion', exact: true }).selectOption('off')
+    await pickRadio(editor, 'Theme motion', 'off')
     await primary().getByText('Spatial motion off', { exact: false }).waitFor()
-    await editor.getByRole('combobox', { name: 'Theme motion', exact: true }).selectOption('system')
+    await pickRadio(editor, 'Theme motion', 'system')
+    await page.emulateMedia({ reducedMotion: 'reduce' })
+    await editor.locator('.spring-sample-still').first().waitFor()
+    assert.equal(
+      await editor.locator('.spring-sample-still').count(),
+      3,
+      'reduced motion shows each starting point as a still curve'
+    )
+    await page.emulateMedia({ reducedMotion: 'no-preference' })
+    await editor.locator('.spring-sample-dot').first().waitFor()
+    assert.equal(await editor.locator('.spring-sample-dot').count(), 3)
     for (const width of [390, 320]) {
       await page.setViewportSize({ width, height: 900 })
       await openPreviewOptions(preview)
@@ -274,7 +362,9 @@ export async function verifyMotionEditor(browser, baseURL) {
         {
           passed: true,
           checks: [
-            'profile ownership',
+            'profile ownership and scene switching',
+            'curve handles by pointer and keyboard',
+            'starting point cards',
             'invalid drafts',
             'native press and replay',
             'disclosure reversal',
@@ -296,7 +386,7 @@ export async function verifyMotionEditor(browser, baseURL) {
       )
     )
     console.log(
-      'Motion editor passed: production interactions, profiles/comparisons, inspection/replay, reset ownership, native input, live reduced motion and narrow layouts.'
+      'Motion editor passed: curve handles, starting point cards, scope chips and scenes, production interactions, profiles/comparisons, inspection/replay, reset ownership, native input, live reduced motion and narrow layouts.'
     )
   } catch (error) {
     await mkdir(new URL('../output/docs/', import.meta.url), { recursive: true })

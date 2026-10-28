@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import { readFile, mkdir } from 'node:fs/promises'
 import { handoffAPI, jsonText } from '../examples/workshop/workshop-handoff.ts'
 import { encodeShare } from '../examples/workshop/workshop-share.ts'
+import { pickRadio } from './typography-controls.mjs'
 
 export async function verifyMotionHandoff(browser, baseURL) {
   const context = await browser.newContext({
@@ -19,9 +20,9 @@ export async function verifyMotionHandoff(browser, baseURL) {
     await workshop.getByRole('button', { name: 'Motion', exact: true }).click()
     const editor = workshop.locator('.motion-editor')
     await editor.getByRole('spinbutton', { name: 'Stiffness', exact: true }).fill('450')
-    await editor.getByRole('combobox', { name: 'Profile scope' }).selectOption('layout')
+    await pickRadio(editor, 'Physics for', 'layout')
     await editor.getByRole('spinbutton', { name: 'Damping', exact: true }).fill('25')
-    await editor.getByRole('combobox', { name: 'Theme motion' }).selectOption('off')
+    await pickRadio(editor, 'Theme motion', 'off')
     await handoff.getByText('Reusable configuration JSON', { exact: true }).click()
     const configField = handoff.getByRole('textbox', { name: 'Configuration output', exact: true })
     /** The outputs follow theme changes at low priority; read them once they have caught up. */
@@ -126,7 +127,7 @@ export async function verifyMotionHandoff(browser, baseURL) {
       await shared.getByRole('textbox', { name: 'Configuration output', exact: true }).inputValue(),
       jsonText(invalid)
     )
-    await editor.getByRole('combobox', { name: 'Theme motion' }).selectOption('system')
+    await pickRadio(editor, 'Theme motion', 'system')
     await settled()
     assert.equal(
       JSON.parse(await configField.inputValue()).document.sections.motion.profile.mode,

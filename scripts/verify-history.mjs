@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict'
+import { pickRadio } from './typography-controls.mjs'
 
 /** Undo/redo, changed markers with per-control reset, and editor counts over one theme history. */
 export async function verifyHistory(browser, baseURL) {
@@ -111,17 +112,31 @@ export async function verifyHistory(browser, baseURL) {
     await page.keyboard.press('Control+y')
     assert.equal(await stiffness.inputValue(), '450', 'Ctrl+Y redo')
 
-    const scope = frame.getByRole('combobox', { name: 'Profile scope', exact: true })
-    await scope.selectOption('press')
-    const pressStiffness = frame
-      .locator('.motion-editor')
-      .getByRole('spinbutton', { name: 'Stiffness', exact: true })
+    const motion = frame.locator('.motion-editor')
+    await pickRadio(motion, 'Physics for', 'press')
+    const pressStiffness = motion.getByRole('spinbutton', { name: 'Stiffness', exact: true })
     assert.equal(await pressStiffness.inputValue(), '450', 'press inherits common physics')
     assert.ok(
       !(await described(pressStiffness)).includes('Changed from'),
       'an inherited value is not a change'
     )
-    await scope.selectOption('shared')
+    await pickRadio(motion, 'Physics for', 'shared')
+
+    const peak = motion.getByRole('slider', { name: 'Overshoot', exact: true })
+    await peak.scrollIntoViewIfNeeded()
+    const peakBox = await peak.boundingBox()
+    await page.mouse.move(peakBox.x + peakBox.width / 2, peakBox.y + peakBox.height / 2)
+    await page.mouse.down()
+    await page.mouse.move(peakBox.x + peakBox.width / 2, peakBox.y - 16, { steps: 8 })
+    await page.mouse.up()
+    const peaked = await stiffness.inputValue()
+    assert.notEqual(peaked, '450', 'the drag moved the peak')
+    await undo.click()
+    assert.equal(await stiffness.inputValue(), '450', 'a curve drag is one undo step')
+    assert.equal(await feedback.innerText(), 'Undid common physics stiffness.')
+    await redo.click()
+    assert.equal(await stiffness.inputValue(), peaked)
+    await undo.click()
 
     await button('Color').click()
     const exact = frame.getByRole('textbox', { name: 'Exact role color', exact: true })
@@ -157,7 +172,7 @@ export async function verifyHistory(browser, baseURL) {
     assert.equal(await changedCount('Spacing & surfaces'), 2)
     assert.deepEqual(errors, [], 'no history runtime errors')
     console.log(
-      'History passed: undo/redo by button and keyboard, one step per slider drag, native text undo untouched, changed markers with descriptions, per-control and per-editor resets through history, editor counts.'
+      'History passed: undo/redo by button and keyboard, one step per slider or curve drag, native text undo untouched, changed markers with descriptions, per-control and per-editor resets through history, editor counts.'
     )
   } catch (error) {
     await page
