@@ -1,6 +1,15 @@
 'use client'
 
-import { useDeferredValue, useId, useMemo, useRef, useState } from 'react'
+import {
+  useDeferredValue,
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+  type RefObject
+} from 'react'
 import { Button } from '@cognitap/radiant'
 import { useHydrated } from '../profile/useHydrated'
 import {
@@ -13,29 +22,93 @@ import {
   type Recipes,
   type SectionName
 } from './workshop-handoff'
-import { encodeShare } from './workshop-share'
-import { fontRequirements, fontSetup } from './font-requirements'
+import { setupGuide, setups, type Setup, type SetupGuide, type SetupStep } from './workshop-setup'
+import { fontFamilies, fontPlacement } from './font-requirements'
+import { downloadText } from './workshop-download'
 import './theme-handoff.css'
 
 export interface ImportResult {
   ok: boolean
   message: string
 }
+const setupKey = 'radiant-workshop-setup'
+const isSetup = (value: unknown): value is Setup => setups.some(setup => setup.id === value)
+function rememberedSetup(): Setup | null {
+  try {
+    const value = window.localStorage.getItem(setupKey)
+    return isSetup(value) ? value : null
+  } catch {
+    return null
+  }
+}
+function rememberSetup(setup: Setup) {
+  try {
+    window.localStorage.setItem(setupKey, setup)
+  } catch {
+    /* A blocked store only loses the convenience. */
+  }
+}
+const lines = (text: string) => text.split('\n').length
+const lowerFirst = (text: string) => text[0].toLowerCase() + text.slice(1)
+
+/** A read-only code field that opens at a few lines and expands to its full text. */
+function CodeField({
+  label,
+  text,
+  collapsedRows,
+  expandable = true
+}: {
+  label: string
+  text: string
+  collapsedRows: number
+  expandable?: boolean
+}) {
+  const [expanded, setExpanded] = useState(false)
+  const total = lines(text)
+  const rows = expanded ? total : Math.min(total, collapsedRows)
+  return (
+    <div className="handoff-code">
+      <label>
+        {label}
+        <textarea
+          readOnly
+          rows={rows}
+          wrap="off"
+          value={text}
+        />
+      </label>
+      {expandable && total > collapsedRows && (
+        <button
+          type="button"
+          className="handoff-expand"
+          aria-expanded={expanded}
+          onClick={() => setExpanded(value => !value)}
+        >
+          {expanded ? 'Collapse' : `Expand · ${total} lines`}
+        </button>
+      )}
+    </div>
+  )
+}
+
 export function ThemeHandoff({
   document: themeDocument,
   recipes,
   result,
+  headingRef,
   onImport,
   onError
 }: {
   document: object
   recipes: Recipes
   result: ImportResult | null
+  headingRef: RefObject<HTMLHeadingElement | null>
   onImport: (data: ImportData, mode: 'merge' | 'replace') => void
   onError: (message: string) => void
 }) {
   const resultId = useId()
   const ready = useHydrated()
+  const [setup, setSetup] = useState<Setup>('react')
   const [selected, setSelected] = useState<SectionName[]>([
     'color',
     'surface',
@@ -44,26 +117,32 @@ export function ThemeHandoff({
   ])
   const [applyMode, setApplyMode] = useState<'merge' | 'replace'>('merge')
   const [input, setInput] = useState('')
-  const [link, setLink] = useState('')
   const [feedback, setFeedback] = useState('')
   const [busy, setBusy] = useState('')
   const operation = useRef({ ticket: 0 })
+  useEffect(() => {
+    const remembered = rememberedSetup()
+    if (remembered) setSetup(remembered)
+  }, [])
+  function chooseSetup(next: Setup) {
+    setSetup(next)
+    rememberSetup(next)
+  }
   /* Preparing the exports re-parses the whole document (about 25 ms), so it follows a drag
      at low priority instead of running inside every input event. */
   const deferredDocument = useDeferredValue(themeDocument)
   const deferredRecipes = useDeferredValue(recipes)
+  const deferredSetup = useDeferredValue(setup)
   const prepared = useMemo(() => {
     try {
       const config = handoffAPI.configuration(deferredDocument, deferredRecipes)
-      let css = '',
-        cssError = '',
-        typographyCSS = '',
+      const guide = setupGuide(deferredSetup, config.document)
+      const other =
+        deferredSetup === 'react'
+          ? setupGuide('css', config.document)
+          : setupGuide('react', config.document)
+      let typographyCSS = '',
         typographyCSSError = ''
-      try {
-        css = handoffAPI.cssOutput(config.document)
-      } catch (error) {
-        cssError = errorMessage(error)
-      }
       try {
         typographyCSS = handoffAPI.cssOutput(config.document, ['typography'])
       } catch (error) {
@@ -71,33 +150,27 @@ export function ThemeHandoff({
       }
       return {
         config,
-        typed: handoffAPI.typedTheme(config.document),
-        css,
-        cssError,
+        guide,
+        other,
         typographyTyped: handoffAPI.typedTheme(config.document, ['typography']),
         typographyCSS,
         typographyCSSError,
         motionTyped: handoffAPI.typedTheme(config.document, ['motion']),
-        runtime: handoffAPI.runtimeSetup(),
-        setup: fontSetup(config.document),
         error: ''
       }
     } catch (error) {
       return {
         config: null,
-        typed: '',
-        css: '',
-        cssError: '',
+        guide: null as SetupGuide | null,
+        other: null as SetupGuide | null,
         typographyTyped: '',
         typographyCSS: '',
         typographyCSSError: '',
         motionTyped: '',
-        runtime: { install: '', source: '' },
-        setup: '',
         error: errorMessage(error)
       }
     }
-  }, [deferredDocument, deferredRecipes])
+  }, [deferredDocument, deferredRecipes, deferredSetup])
   const sections = prepared.config
     ? jsonText(handoffAPI.sections(prepared.config.document, selected))
     : ''
@@ -137,59 +210,73 @@ export function ThemeHandoff({
   }
   function download(text: string, name: string, type: string) {
     try {
-      if (
-        type === 'application/json' &&
-        new TextEncoder().encode(text).length > maxConfigurationBytes
-      )
-        throw new Error('Configuration exceeds 256 KiB. Copy the typed theme instead.')
-      const url = URL.createObjectURL(new Blob([text], { type }))
-      const anchor = window.document.createElement('a')
-      anchor.href = url
-      anchor.download = name
-      anchor.click()
-      setTimeout(() => URL.revokeObjectURL(url), 1000)
+      downloadText(text, name, type)
       setFeedback(`${name} downloaded.`)
     } catch (error) {
       setFeedback(`Download failed: ${errorMessage(error)} Copy the field below instead.`)
     }
   }
-  async function share() {
-    if (busy || !configText) return
-    setBusy('Share link')
-    try {
-      const payload = await encodeShare(configText)
-      const url = new URL(window.location.href)
-      url.search = ''
-      url.hash = `workshop=${payload}`
-      setLink(url.href)
-      try {
-        await navigator.clipboard.writeText(url.href)
-        setFeedback(
-          'Share link copied. It includes the theme and editor recipes; specimen form data stays local.'
-        )
-      } catch {
-        setFeedback('Copy failed. Select and copy the share link field below.')
-      }
-    } catch (error) {
-      setFeedback(errorMessage(error))
-    } finally {
-      setBusy('')
-    }
-  }
   const unavailable = !ready || !prepared.config
-  const fonts = prepared.config ? fontRequirements(prepared.config.document) : []
+  const guide = prepared.guide
+  const families = guide ? fontFamilies(guide.fonts) : []
+  const other = prepared.other
+  const outputField = (item: SetupGuide) => `${item.output.label} output`
+  /** Copy and download for one text, named after it. */
+  const actions = (label: string, text: string, name: string, type: string) => (
+    <div className="workshop-actions">
+      <Button
+        variant="outline"
+        aria-disabled={!!busy}
+        onClick={() => void copy(text, label)}
+      >
+        Copy {lowerFirst(label)}
+      </Button>
+      <Button
+        variant="outline"
+        onClick={() => download(text, name, type)}
+      >
+        Download {lowerFirst(label)}
+      </Button>
+    </div>
+  )
+  const format = (name: string, children: ReactNode) => (
+    <details className="handoff-format">
+      <summary>{name}</summary>
+      {children}
+    </details>
+  )
+  function stepBody(step: SetupStep) {
+    if (!step.label || step.code === undefined) return null
+    const label = step.label
+    return (
+      <div className="handoff-step-code">
+        <CodeField
+          label={label}
+          text={step.code}
+          collapsedRows={8}
+        />
+        <Button
+          variant="outline"
+          aria-disabled={!!busy}
+          onClick={() => void copy(step.code!, label)}
+        >
+          Copy {lowerFirst(label)}
+        </Button>
+      </div>
+    )
+  }
   return (
     <section
       className="theme-handoff"
-      data-settling={deferredDocument !== themeDocument || undefined}
+      data-settling={deferredDocument !== themeDocument || deferredSetup !== setup || undefined}
       aria-label="Theme handoff"
     >
-      <h3>Use your theme</h3>
-      <p>
-        Take a typed Radiant theme, save an editable configuration or share an account-free link.
-        Files and links include theme values and available editor recipes. Specimen interactions
-        stay local.
-      </p>
+      <h3
+        ref={headingRef}
+        tabIndex={-1}
+      >
+        Use your theme
+      </h3>
       {prepared.error && <p>{prepared.error}</p>}
       <output className="handoff-feedback">{feedback}</output>
       <output
@@ -198,438 +285,301 @@ export function ThemeHandoff({
       >
         {result?.message ?? ''}
       </output>
-      <fieldset disabled={unavailable}>
-        <legend>Theme and configuration</legend>
-        <div className="workshop-actions">
-          <Button
-            aria-disabled={!!busy}
-            pending={busy === 'Typed theme'}
-            onClick={() => void copy(prepared.typed ?? '', 'Typed theme')}
+      <fieldset
+        className="handoff-setups"
+        disabled={unavailable}
+      >
+        <legend>How do you use Radiant?</legend>
+        {setups.map(choice => (
+          <label
+            key={choice.id}
+            className="handoff-setup"
           >
-            Copy typed theme
-          </Button>
-          <Button
-            variant="outline"
-            onClick={() => download(prepared.typed ?? '', 'radiant-theme.ts', 'text/typescript')}
-          >
-            Download typed theme
-          </Button>
-          <Button
-            variant="outline"
-            onClick={() => download(configText, 'radiant-workshop.json', 'application/json')}
-          >
-            Download configuration
-          </Button>
-          <Button
-            variant="outline"
-            aria-disabled={!!busy}
-            pending={busy === 'Share link'}
-            onClick={() => void share()}
-          >
-            Copy share link
-          </Button>
-        </div>
-        <label>
-          Share link
-          <input
-            type="text"
-            readOnly
-            value={link}
-            onFocus={event => event.target.select()}
-          />
-        </label>
-        <details open>
-          <summary>Typed Radiant theme · primary output</summary>
-          <label>
-            Typed theme output
-            <textarea
-              readOnly
-              rows={14}
-              wrap="off"
-              value={prepared.typed ?? ''}
+            <input
+              type="radio"
+              name="handoff-setup"
+              value={choice.id}
+              checked={setup === choice.id}
+              aria-labelledby={`${resultId}-${choice.id}`}
+              aria-describedby={`${resultId}-${choice.id}-hint`}
+              onChange={() => chooseSetup(choice.id)}
             />
-          </label>
-        </details>
-        <details>
-          <summary>Reusable configuration JSON</summary>
-          <p>
-            Contains the complete authoring document, palette/font metadata and available editor
-            recipes. Import it to resume the same configuration.
-          </p>
-          <Button
-            variant="outline"
-            aria-disabled={!!busy}
-            onClick={() => void copy(configText, 'Configuration')}
-          >
-            Copy configuration
-          </Button>
-          <label>
-            Configuration output
-            <textarea
-              readOnly
-              rows={12}
-              wrap="off"
-              value={configText}
-            />
-          </label>
-        </details>
-        <details>
-          <summary>Selective section JSON</summary>
-          <p>
-            Select whole public sections. Color needs Surface for its canvas; Surface also contains
-            geometry. Component exceptions are included only when selected.
-          </p>
-          <div className="handoff-sections">
-            {sectionNames.map(name => (
-              <label key={name}>
-                <input
-                  type="checkbox"
-                  checked={selected.includes(name)}
-                  onChange={event =>
-                    setSelected(previous =>
-                      event.target.checked
-                        ? [...previous, name]
-                        : previous.filter(value => value !== name)
-                    )
-                  }
-                />
-                {name}
-              </label>
-            ))}
-          </div>
-          <div className="workshop-actions">
-            <Button
-              variant="outline"
-              aria-disabled={!!busy}
-              onClick={() => void copy(sections, 'Sections')}
+            <span
+              id={`${resultId}-${choice.id}`}
+              className="handoff-setup-label"
             >
-              Copy sections
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() => download(sections, 'radiant-sections.json', 'application/json')}
+              {choice.label}
+            </span>
+            <span
+              id={`${resultId}-${choice.id}-hint`}
+              className="handoff-setup-hint"
             >
-              Download sections
-            </Button>
-          </div>
-          <label>
-            Section output
-            <textarea
-              readOnly
-              rows={12}
-              wrap="off"
-              value={sections}
-            />
+              {choice.hint}
+            </span>
           </label>
-        </details>
-        <details>
-          <summary>Scoped CSS · full theme</summary>
-          <p>
-            Load Radiant’s compiled styles first, then this CSS. Put{' '}
-            <code>className="radiant-export"</code> and <code>data-rad-mode="light"</code>,{' '}
-            <code>"dark"</code> or <code>"system"</code> on a plain wrapper. For React ThemeScope
-            and nested modes, use the typed theme instead.
-          </p>
-          <p>
-            This output carries CSS timing tokens, not physical spring profiles. A sampled CSS curve
-            restarts when interrupted; the runtime retains position and momentum. This release
-            provides no sampled spring CSS export. Use the typed theme and runtime setup below for
-            spring motion.
-          </p>
-          {prepared.cssError ? (
-            <p>{prepared.cssError}</p>
+        ))}
+      </fieldset>
+      {guide && (
+        <fieldset
+          className="handoff-output"
+          disabled={unavailable}
+        >
+          <legend>
+            {guide.output.label} · <code>{guide.output.name}</code>
+          </legend>
+          {guide.error ? (
+            <p>{guide.error}</p>
           ) : (
             <>
-              <Button
-                variant="outline"
-                aria-disabled={!!busy}
-                onClick={() => void copy(prepared.css ?? '', 'CSS')}
-              >
-                Copy CSS
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => download(prepared.css ?? '', 'radiant-theme.css', 'text/css')}
-              >
-                Download CSS
-              </Button>
-              <label>
-                CSS output
-                <textarea
-                  readOnly
-                  rows={12}
-                  wrap="off"
-                  value={prepared.css ?? ''}
-                />
-              </label>
+              <div className="workshop-actions">
+                <Button
+                  aria-disabled={!!busy}
+                  aria-label={`Copy ${lowerFirst(guide.output.label)}`}
+                  pending={busy === guide.output.label}
+                  onClick={() => void copy(guide.output.text, guide.output.label)}
+                >
+                  Copy
+                </Button>
+                <Button
+                  variant="outline"
+                  aria-label={`Download ${lowerFirst(guide.output.label)}`}
+                  onClick={() => download(guide.output.text, guide.output.name, guide.output.type)}
+                >
+                  Download
+                </Button>
+              </div>
+              <CodeField
+                label={outputField(guide)}
+                text={guide.output.text}
+                collapsedRows={14}
+              />
             </>
           )}
-        </details>
-        <details>
-          <summary>Motion only · typed configuration</summary>
-          <p>
-            Save this as <code>radiant-motion.ts</code>. Call <code>applyMotion(target)</code>,
-            compile the returned document and pass the theme to ThemeScope. Replace restores omitted
-            motion values to defaults; Merge retains omitted leaves. Other sections stay authored.
-            The file includes physics and legacy CSS timing; a device’s reduced-motion preference is
-            read by the runtime, never saved into the theme.
-          </p>
-          <div className="workshop-actions">
-            <Button
-              variant="outline"
-              aria-disabled={!!busy}
-              onClick={() => void copy(prepared.motionTyped ?? '', 'Motion typed theme')}
-            >
-              Copy motion TypeScript
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() =>
-                download(prepared.motionTyped ?? '', 'radiant-motion.ts', 'text/typescript')
-              }
-            >
-              Download motion TypeScript
-            </Button>
-          </div>
-          <label>
-            Motion TypeScript output
-            <textarea
-              readOnly
-              rows={12}
-              wrap="off"
-              value={prepared.motionTyped ?? ''}
-            />
-          </label>
-        </details>
-        <details>
-          <summary>Typography only · typed and CSS</summary>
-          <p>
-            Apply the typed section to an existing document with <code>applyTypography</code>. It
-            retains colors, surfaces, control sizes, motion and component exceptions. The CSS
-            wrapper uses <code>className="radiant-typography"</code> and the same mode attribute;
-            its declarations affect typography only. Use the typed route for nested ThemeScope
-            modes.
-          </p>
-          <div className="workshop-actions">
-            <Button
-              variant="outline"
-              aria-disabled={!!busy}
-              onClick={() => void copy(prepared.typographyTyped ?? '', 'Typography typed theme')}
-            >
-              Copy typography TypeScript
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() =>
-                download(prepared.typographyTyped ?? '', 'radiant-typography.ts', 'text/typescript')
-              }
-            >
-              Download typography TypeScript
-            </Button>
-            <Button
-              variant="outline"
-              aria-disabled={!!busy}
-              disabled={!!prepared.typographyCSSError}
-              onClick={() => void copy(prepared.typographyCSS ?? '', 'Typography CSS')}
-            >
-              Copy typography CSS
-            </Button>
-            <Button
-              variant="outline"
-              disabled={!!prepared.typographyCSSError}
-              onClick={() =>
-                download(prepared.typographyCSS ?? '', 'radiant-typography.css', 'text/css')
-              }
-            >
-              Download typography CSS
-            </Button>
-          </div>
-          <label>
-            Typography TypeScript output
-            <textarea
-              readOnly
-              rows={12}
-              wrap="off"
-              value={prepared.typographyTyped ?? ''}
-            />
-          </label>
-          {prepared.typographyCSSError && <p>{prepared.typographyCSSError}</p>}
-          <label>
-            Typography CSS output
-            <textarea
-              readOnly
-              rows={12}
-              wrap="off"
-              value={prepared.typographyCSS ?? ''}
-            />
-          </label>
-        </details>
-      </fieldset>
-      <details className="handoff-setup">
-        <summary>Required setup and fonts</summary>
-        <p>
-          Install the exact package versions below. Save the full typed output as{' '}
-          <code>radiant-theme.ts</code> and the runtime setup beside it. Radiant includes the Motion
-          engine; no separate engine installation is needed. A local candidate path requires its
-          archive in the consuming app. Import matching compiled styles once; the reset is optional.
-        </p>
-        <div className="workshop-actions">
-          <Button
-            variant="outline"
-            disabled={unavailable}
-            aria-disabled={!!busy}
-            onClick={() => void copy(prepared.runtime.install ?? '', 'Install command')}
-          >
-            Copy install command
-          </Button>
-          <Button
-            variant="outline"
-            disabled={unavailable}
-            aria-disabled={!!busy}
-            onClick={() => void copy(prepared.runtime.source ?? '', 'Runtime setup')}
-          >
-            Copy runtime setup
-          </Button>
-          <Button
-            variant="outline"
-            disabled={unavailable}
-            onClick={() =>
-              download(prepared.runtime.source ?? '', 'RadiantMotion.tsx', 'text/typescript')
-            }
-          >
-            Download runtime setup
-          </Button>
-        </div>
-        <label>
-          Install command
-          <input
-            type="text"
-            readOnly
-            value={prepared.runtime.install ?? ''}
-          />
-        </label>
-        <label>
-          Runtime setup TypeScript output
-          <textarea
-            readOnly
-            rows={14}
-            wrap="off"
-            value={prepared.runtime.source ?? ''}
-          />
-        </label>
-        <p>
-          Font names and requirements travel with configurations and links. Font files stay local.
-          Load the required fonts in the consuming app; exporting or importing a theme never loads a
-          font file.
-        </p>
-        {fonts.length ? (
-          <ul>
-            {fonts.map(font => (
-              <li key={font.id}>
-                <strong>{font.family}</strong> · {font.source} · weights{' '}
-                {font.weights.join(', ') || 'unspecified'} · styles{' '}
-                {font.styles.join(', ') || 'unspecified'}
-                <p>
-                  Available axes:{' '}
-                  {font.axes
-                    .map(axis => `${axis.tag} ${axis.min}–${axis.max}, default ${axis.default}`)
-                    .join('; ') || 'not verified'}
-                  . Trial-only adjustments are not applied to the theme.
-                </p>
-                <p>{font.instruction}</p>
-                {font.files.map(file => (
-                  <span key={file.style}>
-                    <a
-                      href={file.url}
-                      download
-                    >
-                      {file.style} WOFF2
-                    </a>{' '}
-                  </span>
-                ))}
-                {font.license && (
-                  <a
-                    href={font.license}
-                    download
-                  >
-                    Font license
-                  </a>
+          <ol className="handoff-steps">
+            {guide.steps.map((step, index) => (
+              <li
+                key={index}
+                className={step.fonts ? 'handoff-fonts' : undefined}
+              >
+                <p>{step.text}</p>
+                {step.fonts && (
+                  <>
+                    {families.some(font => font.files.length > 0) && <div>{fontPlacement}</div>}
+                    <ul>
+                      {families.map(font => (
+                        <li key={`${font.source}/${font.family}`}>
+                          <strong>{font.family}</strong>
+                          {font.source !== 'catalog' && ` · ${font.source}`} ·{' '}
+                          {font.weights.join(', ') || 'unspecified'} ·{' '}
+                          {font.styles.join(', ') || 'unspecified'}
+                          {font.note && <> · {font.note}</>}
+                          {font.files.map(file => (
+                            <span key={file.url}>
+                              {' · '}
+                              <a
+                                href={file.url}
+                                download
+                              >
+                                {file.style} WOFF2
+                              </a>
+                            </span>
+                          ))}
+                          {font.license && (
+                            <>
+                              {' · '}
+                              <a
+                                href={font.license}
+                                download
+                              >
+                                Font license
+                              </a>
+                            </>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  </>
                 )}
+                {stepBody(step)}
               </li>
             ))}
-          </ul>
-        ) : (
-          <p>No font descriptors are attached. Verify the chosen CSS families in your app.</p>
-        )}
-        <div className="workshop-actions">
-          <Button
-            variant="outline"
-            disabled={unavailable}
-            aria-disabled={!!busy}
-            onClick={() => void copy(prepared.setup ?? '', 'Font setup CSS')}
-          >
-            Copy font setup
-          </Button>
-          <Button
-            variant="outline"
-            disabled={unavailable}
-            onClick={() => download(prepared.setup ?? '', 'radiant-fonts.css', 'text/css')}
-          >
-            Download font setup
-          </Button>
-        </div>
-        <label>
-          Font setup CSS output
-          <textarea
-            readOnly
-            rows={12}
-            wrap="off"
-            value={prepared.setup ?? ''}
-          />
-        </label>
+          </ol>
+        </fieldset>
+      )}
+      <details className="handoff-more">
+        <summary>Other formats</summary>
+        <fieldset disabled={unavailable}>
+          {format(
+            'Configuration file',
+            <>
+              <p>
+                The whole workshop state: theme document, palette and font metadata, editor recipes.
+              </p>
+              {actions('Configuration', configText, 'radiant-workshop.json', 'application/json')}
+              <CodeField
+                label="Configuration output"
+                text={configText}
+                collapsedRows={12}
+              />
+            </>
+          )}
+          {format(
+            'Selective sections',
+            <>
+              <p>
+                Whole public sections. Color needs Surface for its canvas; Surface includes
+                geometry.
+              </p>
+              <div className="handoff-sections">
+                {sectionNames.map(name => (
+                  <label key={name}>
+                    <input
+                      type="checkbox"
+                      checked={selected.includes(name)}
+                      onChange={event =>
+                        setSelected(previous =>
+                          event.target.checked
+                            ? [...previous, name]
+                            : previous.filter(value => value !== name)
+                        )
+                      }
+                    />
+                    {name}
+                  </label>
+                ))}
+              </div>
+              {actions('Sections', sections, 'radiant-sections.json', 'application/json')}
+              <CodeField
+                label="Section output"
+                text={sections}
+                collapsedRows={12}
+              />
+            </>
+          )}
+          {format(
+            'Motion only',
+            <>
+              <p>
+                Save as <code>radiant-motion.ts</code>; <code>applyMotion(target)</code> returns a
+                document to compile for ThemeScope.
+              </p>
+              {actions(
+                'Motion TypeScript',
+                prepared.motionTyped,
+                'radiant-motion.ts',
+                'text/typescript'
+              )}
+              <CodeField
+                label="Motion TypeScript output"
+                text={prepared.motionTyped}
+                collapsedRows={12}
+              />
+            </>
+          )}
+          {format(
+            'Typography only',
+            <>
+              <p>
+                <code>applyTypography(target)</code> keeps every other section. The CSS scopes to{' '}
+                <code>radiant-typography</code> with the same mode attribute.
+              </p>
+              {actions(
+                'Typography TypeScript',
+                prepared.typographyTyped,
+                'radiant-typography.ts',
+                'text/typescript'
+              )}
+              <CodeField
+                label="Typography TypeScript output"
+                text={prepared.typographyTyped}
+                collapsedRows={12}
+              />
+              {prepared.typographyCSSError ? (
+                <p>{prepared.typographyCSSError}</p>
+              ) : (
+                <>
+                  {actions(
+                    'Typography CSS',
+                    prepared.typographyCSS,
+                    'radiant-typography.css',
+                    'text/css'
+                  )}
+                  <CodeField
+                    label="Typography CSS output"
+                    text={prepared.typographyCSS}
+                    collapsedRows={12}
+                  />
+                </>
+              )}
+            </>
+          )}
+          {other &&
+            format(
+              other.setup === 'react' ? 'Typed theme' : 'Scoped CSS',
+              other.error ? (
+                <p>{other.error}</p>
+              ) : (
+                <>
+                  {actions(
+                    other.output.label,
+                    other.output.text,
+                    other.output.name,
+                    other.output.type
+                  )}
+                  <CodeField
+                    label={outputField(other)}
+                    text={other.output.text}
+                    collapsedRows={12}
+                  />
+                </>
+              )
+            )}
+          {format(
+            'Import',
+            <>
+              <p>
+                A configuration or full theme replaces the current theme. A section file applies the
+                mode below and keeps the rest.
+              </p>
+              <label>
+                Section apply mode
+                <select
+                  value={applyMode}
+                  onChange={event =>
+                    setApplyMode(event.target.value === 'replace' ? 'replace' : 'merge')
+                  }
+                >
+                  <option value="merge">Merge supplied leaves</option>
+                  <option value="replace">Replace supplied sections</option>
+                </select>
+              </label>
+              <label>
+                Import configuration file
+                <input
+                  type="file"
+                  aria-describedby={resultId}
+                  accept="application/json,.json"
+                  onChange={event => {
+                    const file = event.target.files?.[0]
+                    event.target.value = ''
+                    if (file) void importFile(file)
+                  }}
+                />
+              </label>
+              <label>
+                Configuration JSON
+                <textarea
+                  rows={8}
+                  aria-describedby={resultId}
+                  value={input}
+                  onChange={event => setInput(event.target.value)}
+                />
+              </label>
+              <Button onClick={() => importText(input)}>Import JSON</Button>
+            </>
+          )}
+        </fieldset>
       </details>
-      <fieldset disabled={unavailable}>
-        <legend>Import JSON</legend>
-        <p>
-          A full theme or workshop configuration replaces the current theme and identity. Selective
-          files apply the mode below while retaining other sections and component exceptions.
-          Preview mode and specimen interactions stay unchanged. Recipe-free imported Color/Geometry
-          values remain intact until you explicitly reset those editors. Undo reverses an import.
-        </p>
-        <label>
-          Section apply mode
-          <select
-            value={applyMode}
-            onChange={event => setApplyMode(event.target.value === 'replace' ? 'replace' : 'merge')}
-          >
-            <option value="merge">Merge supplied leaves</option>
-            <option value="replace">Replace supplied sections</option>
-          </select>
-        </label>
-        <label>
-          Import configuration file
-          <input
-            type="file"
-            aria-describedby={resultId}
-            accept="application/json,.json"
-            onChange={event => {
-              const file = event.target.files?.[0]
-              event.target.value = ''
-              if (file) void importFile(file)
-            }}
-          />
-        </label>
-        <label>
-          Configuration JSON
-          <textarea
-            rows={8}
-            aria-describedby={resultId}
-            value={input}
-            onChange={event => setInput(event.target.value)}
-          />
-        </label>
-        <Button onClick={() => importText(input)}>Import JSON</Button>
-      </fieldset>
     </section>
   )
 }

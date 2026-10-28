@@ -223,14 +223,20 @@ function cssOutput(document: PortableDocument, names?: SectionName[]): string {
     return `/* Typography only. Load Radiant styles, then apply class="radiant-typography" and data-rad-mode.\n   Color, control metrics, surfaces, motion and component exceptions inherit from your application. */\n.radiant-typography {\n${declarations('light')}\n${typography}\n}\n.radiant-typography[data-rad-mode="dark"] {\n${declarations('dark')}\n}\n@media (prefers-color-scheme: dark) {\n  .radiant-typography[data-rad-mode="system"] {\n${declarations('dark')}\n  }\n}\n`
   return `/* Load @cognitap/radiant/styles.css first. Apply class="radiant-export"\n   and data-rad-mode="light", "dark" or "system" to a plain wrapper.\n   CSS tokens only: spring profiles require the typed theme and MotionProvider.\n   No sampled spring curve is emitted; CSS transitions cannot retain spring momentum. */\n.radiant-export {\n${declarations('light')}\n  color-scheme: light;\n  background: var(--rad-surface-canvas);\n  color: var(--rad-color-foreground);\n${typography}\n}\n.radiant-export[data-rad-mode="dark"] {\n${declarations('dark')}\n  color-scheme: dark;\n}\n@media (prefers-color-scheme: dark) {\n  .radiant-export[data-rad-mode="system"] {\n${declarations('dark')}\n    color-scheme: dark;\n  }\n}\n`
 }
-function runtimeSetup(): { install: string; source: string } {
+/** The exact installed versions; a local candidate path installs from its archive. */
+function installCommand(withReact: boolean): string {
   const dependencies = manifest.dependencies
   const radiant = dependencies['@cognitap/radiant']
   const packageArgument = radiant.startsWith('file:')
     ? radiant.slice('file:'.length)
     : `@cognitap/radiant@${radiant}`
+  return withReact
+    ? `pnpm add ${packageArgument} react@${dependencies.react} react-dom@${dependencies['react-dom']}`
+    : `pnpm add ${packageArgument}`
+}
+function runtimeSetup(): { install: string; source: string } {
   return {
-    install: `pnpm add ${packageArgument} react@${dependencies.react} react-dom@${dependencies['react-dom']}`,
+    install: installCommand(true),
     source: `'use client'\n\nimport type { ReactNode } from 'react'\nimport { Button, Collapsible, CollapsibleTrigger, CollapsibleContent, ThemeScope } from '@cognitap/radiant'\nimport { MotionProvider } from '@cognitap/radiant/motion/react'\nimport { theme } from './radiant-theme'\nimport '@cognitap/radiant/styles.css'\n\n// Save the full typed theme as radiant-theme.ts beside this file.\n// For a motion-only export, applyMotion(target) returns a document; compile it\n// with compileThemeDocument and export that theme from radiant-theme.ts.\n// The installed Radiant package owns its Motion engine dependency.\n// System reduced motion stays live; theme mode 'off' disables spatial motion.\nexport function RadiantMotion({ children }: { children?: ReactNode }) {\n  return (\n    <ThemeScope theme={theme} mode="system">\n      <MotionProvider>{children}</MotionProvider>\n    </ThemeScope>\n  )\n}\n\nexport function MotionExample() {\n  return (\n    <RadiantMotion>\n      <Button type="button">Press me</Button>\n      <Collapsible>\n        <CollapsibleTrigger>Details</CollapsibleTrigger>\n        <CollapsibleContent>Native disclosure with spring presentation.</CollapsibleContent>\n      </Collapsible>\n    </RadiantMotion>\n  )\n}\n`
   }
 }
@@ -240,6 +246,7 @@ export const handoffAPI = {
   apply,
   typedTheme,
   cssOutput,
+  installCommand,
   runtimeSetup,
   sections: (document: object, names: SectionName[]): SectionFile =>
     select(readThemeDocument(document), names)

@@ -9,19 +9,38 @@ import {
   stiffnessForOvershoot
 } from '../examples/workshop/workshop-motion-view.ts'
 
-globalThis.requestAnimationFrame ??= callback => setTimeout(() => callback(performance.now()), 4)
-globalThis.cancelAnimationFrame ??= id => clearTimeout(id)
+let clock = 0
+const frameQueue = new Map()
+let frameId = 0
+performance.now = () => clock
+globalThis.requestAnimationFrame = callback => {
+  frameQueue.set(++frameId, callback)
+  return frameId
+}
+globalThis.cancelAnimationFrame = id => frameQueue.delete(id)
 const { createSpring } = await import('@cognitap/radiant/motion')
 
-/** Run the runtime's own spring through a unit step and record what a subscriber sees. */
+/** Advance the controlled clock one 60 Hz frame, run the queued callbacks, and let the runtime's per-tick time cache clear. */
+async function stepFrame() {
+  clock += 1000 / 60
+  const due = [...frameQueue.entries()]
+  frameQueue.clear()
+  for (const [, callback] of due) callback(clock)
+  await Promise.resolve()
+}
+
+/** Run the runtime's own spring through a unit step on the controlled clock. */
 async function runtimeStep(parameters) {
   const spring = createSpring(0, { parameters })
-  const started = performance.now()
+  const started = clock
   const samples = []
-  spring.subscribe(value => samples.push({ t: (performance.now() - started) / 1000, x: value }))
+  spring.subscribe(value => samples.push({ t: (clock - started) / 1000, x: value }))
   spring.to(1)
-  while (spring.isAnimating()) await new Promise(resolve => setTimeout(resolve, 2))
-  const settleTime = (performance.now() - started) / 1000
+  for (let frames = 0; spring.isAnimating(); frames++) {
+    assert.ok(frames < 60 * 30, 'the spring settles within 30 s of controlled time')
+    await stepFrame()
+  }
+  const settleTime = (clock - started) / 1000
   spring.destroy()
   return { settleTime, peak: Math.max(...samples.map(sample => sample.x)), samples }
 }

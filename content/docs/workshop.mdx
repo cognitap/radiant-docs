@@ -32,23 +32,22 @@ restores one preview scene.
 
 ## Take your theme
 
-Copy typed theme produces a portable document and compiled theme for
-ThemeScope. Download configuration includes supported editor recipes. Selective
-exports transfer only chosen sections. Merge keeps omitted values, while Replace
-removes omitted values within the supplied sections.
+Use this theme asks how you use Radiant. React gives a typed theme for
+ThemeScope; CSS and Tailwind give one scoped stylesheet to load after
+Radiant’s styles or its Tailwind entry. Each answer comes with its steps: the
+install command, where the file goes, the import or wrapper, font setup when the
+theme attaches fonts, and the Motion runtime for spring motion. The stylesheet
+carries timing tokens only, so springs need the React route. Local font files
+are never uploaded or exported.
 
-Selective TypeScript applies Typography or Motion to an existing document.
-Compile the returned document for ThemeScope. Runtime setup supplies exact
-dependency versions and MotionProvider. System reduced motion stays live instead
-of being saved into the theme.
+Other formats hold the configuration file, which includes editor recipes and
+imports back as the same workshop state; selective sections, where Merge keeps
+omitted values and Replace removes them within the supplied sections; Motion
+and Typography on their own, applied to an existing document with
+`applyMotion` or `applyTypography`; and Import.
 
-Typography CSS uses `radiant-typography` with a light/dark/system mode attribute;
-load it after Radiant’s compiled styles. Full scoped CSS emits timing tokens but
-omits spring profiles, so use the typed route when motion needs interruption.
-Local font files are never uploaded or exported. Applications supply the files.
-
-Share links store compressed configuration in the URL fragment without a server
-account. A configuration file handles themes too large for a link.
+Share copies a link that stores the compressed configuration in the URL
+fragment. A theme too large for a link offers the configuration file instead.
 
 See [motion setup and ownership](/docs/foundations/motion/) for production usage.
 The header identifies the installed package. JavaScript and CSS must use matching

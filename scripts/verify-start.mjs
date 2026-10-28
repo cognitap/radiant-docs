@@ -3,6 +3,7 @@ import { startingThemes } from '../examples/workshop/workshop-start.ts'
 import { geometryPreset } from '../examples/workshop/workshop-geometry.ts'
 import { motionPresets } from '../examples/workshop/workshop-motion.ts'
 import {
+  copyShareLink,
   enterWorkshop,
   waitForEditors,
   waitForStartScreen,
@@ -108,14 +109,9 @@ export async function verifyStart(browser, baseURL) {
 
     await frame.getByRole('textbox', { name: 'Brand color', exact: true }).fill('#0F766E')
     assert.equal(await frame.locator('.workshop-nav-count').count(), 1, 'an edit counts')
-    await frame.getByRole('button', { name: 'Copy share link', exact: true }).click()
-    await page.waitForFunction(() =>
-      document.querySelector('.theme-handoff input[readonly]')?.value.includes('#workshop=1.')
-    )
-    const link = await frame
-      .locator('.theme-handoff')
-      .getByRole('textbox', { name: 'Share link', exact: true })
-      .inputValue()
+    const link = await copyShareLink(page)
+    assert.ok(link.includes('#workshop=1.'), 'Share copies a workshop link')
+    assert.equal(await page.evaluate(() => navigator.clipboard.readText()), link)
     const shared = await context.newPage()
     try {
       await shared.goto(link)

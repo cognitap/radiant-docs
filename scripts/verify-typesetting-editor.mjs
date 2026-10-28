@@ -2,7 +2,7 @@ import { closePreviewOptions, openPreviewOptions } from './preview-options.mjs'
 import { pickRadio, pickedRadio, radioGroup } from './typography-controls.mjs'
 import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
-import { openWorkshop, enterWorkshop } from './workshop-entry.mjs'
+import { openWorkshop, enterWorkshop, openFormat } from './workshop-entry.mjs'
 
 export async function verifyTypesettingEditor(browser, baseURL) {
   const context = await browser.newContext({
@@ -387,6 +387,7 @@ export async function verifyTypesettingEditor(browser, baseURL) {
       faces.length / 2,
       'normal/italic pairs are shared without duplicate registration'
     )
+    await openFormat(workshop.page(), 'Import')
     await workshop.getByRole('textbox', { name: 'Configuration JSON', exact: true }).fill(
       JSON.stringify({
         kind: 'radiant-theme',

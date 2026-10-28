@@ -105,3 +105,117 @@
   min-width: 0;
   overflow-wrap: anywhere;
 }
+
+/* The question: three choices as cards, the picked one filled. */
+.handoff-setups {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+  border: 0;
+  padding: 0;
+}
+.handoff-setups legend {
+  font-size: 1rem;
+  margin-block-end: 0.75rem;
+}
+.handoff-setup {
+  position: relative;
+  display: grid;
+  gap: 0.25rem;
+  margin: 0;
+  padding: 0.875rem 1rem;
+  border: 1px solid var(--docs-border);
+  border-radius: 0.5rem;
+  cursor: pointer;
+}
+.handoff-setup input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+.handoff-setup:has(input:checked) {
+  border-color: var(--docs-accent);
+  box-shadow: inset 0 0 0 1px var(--docs-accent);
+}
+.handoff-setup:has(input:focus-visible) {
+  outline: 2px solid var(--docs-accent);
+  outline-offset: 3px;
+}
+.handoff-setup-label {
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+.handoff-setup-hint {
+  color: var(--docs-muted);
+  line-height: 1.4;
+}
+@media (width < 560px) {
+  .handoff-setups {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+.handoff-output legend code {
+  font-weight: 400;
+}
+.handoff-code {
+  display: grid;
+  gap: 0.375rem;
+  justify-items: start;
+  width: 100%;
+}
+.handoff-code label {
+  width: 100%;
+  margin-block: 0.5rem 0;
+}
+.handoff-code textarea[readonly] {
+  max-height: none;
+  resize: none;
+}
+.handoff-expand {
+  font: inherit;
+  font-size: 0.8125rem;
+  padding: 0.125rem 0;
+  border: 0;
+  background: none;
+  color: var(--docs-accent);
+  cursor: pointer;
+}
+.handoff-expand:focus-visible {
+  outline: 2px solid var(--docs-accent);
+  outline-offset: 3px;
+}
+.handoff-steps {
+  display: grid;
+  gap: 0.75rem;
+  margin: 1rem 0 0;
+  padding-inline-start: 1.5rem;
+}
+.handoff-steps > li > p {
+  margin: 0;
+}
+.handoff-steps ul {
+  margin: 0.5rem 0;
+  padding-inline-start: 1rem;
+}
+.handoff-step-code {
+  display: grid;
+  gap: 0.5rem;
+  justify-items: start;
+}
+.handoff-more > summary {
+  font-size: 1rem;
+}
+.handoff-more fieldset {
+  border: 0;
+  padding: 0;
+}
+.handoff-format {
+  border-top: 1px solid var(--docs-border);
+}
+.handoff-format > p {
+  margin-block: 0 0.5rem;
+}
