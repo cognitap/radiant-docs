@@ -1,93 +1,135 @@
 ---
 title: Field
-description: Connect a label, help and errors to one control, or give related controls a shared group.
+description: Connect labels, help and errors to a control or a group.
 ---
 
 import { ControlDemo } from '../../components/ControlDemo'
+import { FieldMotionDemo } from '../../components/FieldDemo'
 import { ProfileFormDemo } from '../../components/ProfileFormDemo'
+
+<FieldMotionDemo />
+
+## One control
+
+Field connects its label to the control's ID, joins help and error IDs in
+`aria-describedby`, and marks the control invalid when `error` has content.
+[Input](/docs/input/), [Checkbox](/docs/checkbox/) and Radio connect automatically.
+
+```tsx
+<Field
+  label="Email"
+  description="Your work address"
+  error={error}
+  required
+>
+  <Input
+    name="email"
+    type="email"
+  />
+</Field>
+```
+
+You own values, touched state, validation, submission and focus. Use `noValidate`
+on the form for custom feedback. Required adds native metadata and an indicator;
+disabled controls are omitted from native form data. A child cannot undo its
+Field's required or disabled state.
 
 <ControlDemo kind="field" />
 
-## One control, connected text
+## Native or custom controls
 
-Field connects a label, optional description and optional error to one
-control. The label targets the control's ID. Description and error IDs are joined in the
-control's `aria-describedby`; an error also marks it invalid.
+Forward every callback prop to one native control. Merge the callback's
+`aria-describedby` with any external description IDs. Radiant controls append
+external IDs once.
 
-Field does not validate, track touched state or save data. You choose when to
-pass `error` and where to focus after a failed submission. Required
-adds the relationship and indicator; a disabled control is unavailable and
-omitted from native form data. Use `noValidate` on the form to show your own
-feedback instead of the browser's validation popup.
+```tsx
+<Field
+  label="Address"
+  controlId="address"
+  error={error}
+>
+  {control => (
+    <input
+      {...control}
+      ref={inputRef}
+      name="address"
+    />
+  )}
+</Field>
+```
 
-## Adapt a native control
+Field's own `id` and `ref` target its wrapper. Put a control ref on the input.
+`useField()` returns the nearest `FieldState`, or `null` outside Field.
+Its `controlProps` contains the callback metadata in control layout.
 
-For an ordinary HTML input, pass a children callback. It receives
-`FieldControlProps`: `id`, `required`, `disabled`, `aria-invalid`,
-`aria-required` and `aria-describedby`. Forward all of them to the input. If
-the adapter sets its own `aria-describedby`, keep the callback's IDs too.
-Radiant controls append external IDs once, without duplicates.
+## Groups
 
-Radiant [Input](/docs/input/), [Checkbox](/docs/checkbox/) and Radio consume
-Field relationships automatically. The Field's own `id` and `ref` target the
-wrapper; put a control ref on the input.
+```tsx
+<Field
+  layout="group"
+  label="Channels"
+  required
+  error={channelError}
+>
+  <Checkbox
+    label="Email"
+    name="channels"
+    value="email"
+  />
+  <Checkbox
+    label="Team feed"
+    name="channels"
+    value="feed"
+  />
+</Field>
+```
 
-## Group related controls
+A group is a native `fieldset` with a `legend`. Each child needs its own label.
+Group help and errors describe the fieldset. Required does not require every
+checkbox: implement “choose at least one” in your form. Disabled propagates to
+nested Fields and Radiant controls. Groups have no `controlId` or children
+callback; `useField().controlProps` is `null`. Use [RadioGroup](/docs/radio-group/)
+for one choice.
 
-`layout="group"` renders a native `fieldset` with a `legend`, description and
-error. It has no single label target, so it does not accept `controlId` or a
-children callback. Give each child its own accessible label, as in
-[mixed checkbox selection](/docs/checkbox/#mixed-selection). For one choice,
-use [RadioGroup](/docs/radio-group/).
+## Motion
 
-A required group does not make every checkbox required. Your form implements
-rules such as “choose at least one”. A disabled group uses native fieldset
-disabling and inherited Field state.
+Import `useSpringLayout` from `@cognitap/radiant/motion/react`. Put each Field
+inside a dedicated motion part and stable layout slot, as in the first example.
+Animate surrounding space, keeping Field's grid and input at their natural size.
+Errors, relationships and focus update immediately. Theme motion off and live
+system reduced motion snap layout to its target. See [layout motion](/docs/foundations/motion/#animate-layout).
 
-## Anatomy and parts
-
-| Part                | Native target / identity                          |
-| ------------------- | ------------------------------------------------- |
-| Root                | `div` or `fieldset`; `data-slot` includes `field` |
-| `parts.label`       | `label` or `legend`; `field-label`                |
-| `parts.description` | Help `div`; `field-description`                   |
-| `parts.error`       | Error `div` with `role="alert"`; `field-error`    |
-| `parts.required`    | Decorative required indicator; `field-required`   |
-
-Each part accepts `className` and `style`, not arbitrary DOM props. Root
-`data-layout` identifies the layout; `data-required`, `data-disabled` and
-`data-invalid` are presence-based state attributes.
-
-## Public props
+## Props and parts
 
 `FieldProps`, `FieldControlProps`, `FieldState` and `FieldLayout` are exported.
 
-| Prop                        | Purpose / default                                                                      |
-| --------------------------- | -------------------------------------------------------------------------------------- |
-| `label`                     | Required accessible label or group legend                                              |
-| `layout`                    | `control` (default) or `group`                                                         |
-| `controlId`                 | Explicit input ID in control layout; otherwise generated                               |
-| `description`, `error`      | Optional help and validation content; a nonempty error marks invalid                   |
-| `required`, `disabled`      | Boolean state; both default to `false`                                                 |
-| `requiredIndicator`         | Decorative content; defaults to `*`                                                    |
-| `children`                  | Content; control layout also accepts `(control: FieldControlProps) => ReactNode`       |
-| `parts`                     | Label, description, error and required-indicator styling                               |
-| `className`, `style`, `ref` | Root customization and ref to `div` / `fieldset`                                       |
-| Other native props          | Attributes and events for the selected root; group also accepts native `form` / `name` |
+| Prop                                      | Purpose / default                                                       |
+| ----------------------------------------- | ----------------------------------------------------------------------- |
+| `label`                                   | Required control label or group legend                                  |
+| `layout`                                  | `control` (default) or `group`                                          |
+| `controlId`                               | Input ID; otherwise generated                                           |
+| `description`, `error`                    | Optional help / consumer-owned validation content                       |
+| `required`, `disabled`                    | Both default to `false`                                                 |
+| `requiredIndicator`                       | Decorative content; default `*`                                         |
+| `children`                                | Content; control layout also accepts `(FieldControlProps) => ReactNode` |
+| `parts`                                   | Presentation hooks below                                                |
+| Native props, `className`, `style`, `ref` | Target the root; group accepts `form` / `name`                          |
 
-`useField()` returns the nearest Field state, or `null` outside a Field. In
-group layout its `controlProps` is `null`.
+| Part          | Native target / `data-slot`          |
+| ------------- | ------------------------------------ |
+| Root          | `div` / `fieldset`; includes `field` |
+| `label`       | `label` / `legend`; `field-label`    |
+| `description` | Help `div`; `field-description`      |
+| `error`       | `div role="alert"`; `field-error`    |
+| `required`    | Decorative `span`; `field-required`  |
 
-## Build a complete form
+Parts accept `className` and `style`; Field keeps IDs and ARIA. Root
+`data-layout` identifies the layout. `data-required`, `data-disabled` and
+`data-invalid` are presence attributes.
 
-The [profile recipe](/docs/recipes/profile-form/) combines Field with Input,
-Checkbox and RadioGroup.
+## Complete form
 
 <ProfileFormDemo />
 
-## Use the examples
-
-Keep the `controls/` and `profile/` paths when copying so the shared hydration
-helper resolves; it keeps submit disabled until handlers are ready. The focused
-example needs only React and Radiant; the profile selector also imports optional
-TanStack Form ([recipe setup](/docs/recipes/profile-form/#use-the-recipe)).
+Copy source files with their shown paths. The [profile recipe](/docs/recipes/profile-form/)
+also supports optional TanStack Form.

@@ -9,6 +9,7 @@ import { verifyProfileRecipes } from './verify-profile-recipes.mjs'
 import { verifyNavigation } from './verify-navigation.mjs'
 import { verifyActions } from './verify-actions.mjs'
 import { verifyControls } from './verify-controls.mjs'
+import { verifyField } from './verify-field.mjs'
 import { verifyCompositions } from './verify-compositions.mjs'
 import { verifyHandoff } from './verify-handoff.mjs'
 import { verifyHandoffConsumer } from './verify-handoff-consumer.mjs'
@@ -236,6 +237,7 @@ try {
   await verifyActions(browser, baseURL)
   await verifyActionHydration(browser, baseURL)
   await verifyControls(browser, baseURL)
+  await verifyField(browser, baseURL)
   await verifyCompositions(browser, baseURL)
   await verifyFoundations(browser, baseURL)
   await verifyWorkshop(browser, baseURL)
