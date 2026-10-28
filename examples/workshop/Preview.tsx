@@ -3,6 +3,9 @@
 import { useRef, useState, type Dispatch } from 'react'
 import { Button, type Theme, type ThemeMode } from '@cognitap/radiant'
 import type { Editor } from './workshop-theme'
+import type { ColorRecipe } from './workshop-color'
+import { authoredMotion } from './workshop-motion'
+import type { ControlTarget } from './workshop-inspect'
 import {
   compareChoices,
   compareId,
@@ -23,7 +26,7 @@ import { Page } from './PageScenes'
 import { ComponentScene } from './ComponentScene'
 import { MotionFrame } from './MotionScenes'
 import { PreviewFrame } from './PreviewFrame'
-import { TextInspection } from './TypographyTools'
+import { Inspection, Inspector, type Selection } from './PreviewInspection'
 import { previewTools } from './preview-tools'
 import './preview.css'
 
@@ -77,23 +80,34 @@ export function Preview({
   editor,
   theme,
   document,
+  color,
   preview,
   dispatch,
   ready,
   role,
-  onRole
+  onRole,
+  onJump
 }: {
   editor: Editor
   theme: Theme
   document: object
+  color: ColorRecipe | null
   preview: PreviewModel
   dispatch: Dispatch<PreviewAction>
   ready: boolean
   role: string
   onRole: (role: string) => void
+  onJump: (target: ControlTarget) => void
 }) {
   const { view, session } = preview
   const [feedback, setFeedback] = useState('')
+  const [selection, setSelection] = useState<Selection | null>(null)
+  const inspecting = view.probes.inspect
+  const setInspecting = (on: boolean) => {
+    dispatch({ type: 'probe', probe: 'inspect', on })
+    if (!on) setSelection(null)
+  }
+  const inspectMode = view.mode === 'dark' ? 'dark' : 'light'
   const primaryReplay = useRef<(() => void) | null>(null)
   const secondaryReplay = useRef<(() => void) | null>(null)
   const replays = { primary: primaryReplay, secondary: secondaryReplay }
@@ -192,7 +206,27 @@ export function Preview({
           >
             Reset scene
           </Button>
+          <Button
+            variant={inspecting ? 'solid' : 'outline'}
+            aria-pressed={inspecting}
+            disabled={!ready}
+            onClick={() => setInspecting(!inspecting)}
+          >
+            Inspect
+          </Button>
         </div>
+        {inspecting && (
+          <Inspector
+            selection={selection}
+            context={{
+              values: theme.modes[inspectMode],
+              mode: inspectMode,
+              color,
+              motion: authoredMotion(document)
+            }}
+            onJump={onJump}
+          />
+        )}
         {Tools && (
           <Tools
             view={view}
@@ -210,10 +244,13 @@ export function Preview({
         <output className="preview-feedback">{feedback}</output>
       </fieldset>
       <div className="preview-body">
-        <TextInspection
-          enabled={view.probes.inspectText}
+        <Inspection
+          enabled={inspecting}
           role={role}
+          selection={selection}
+          onSelect={setSelection}
           onRole={onRole}
+          onExit={() => setInspecting(false)}
         >
           <div
             className="preview-frames"
@@ -261,7 +298,7 @@ export function Preview({
               )
             )}
           </div>
-        </TextInspection>
+        </Inspection>
       </div>
     </section>
   )

@@ -21,7 +21,7 @@ export interface PreviewState {
   mode: ThemeMode
   width: PreviewWidth
   compare: Compare
-  probes: { textSpacing: boolean; inspectText: boolean }
+  probes: { textSpacing: boolean; inspect: boolean }
   /** Where each editor family returns to when it becomes relevant again. */
   resume: { theme: ThemeScene; motion: MotionScene }
 }
@@ -77,7 +77,7 @@ export function initialPreview(): Preview {
       mode: 'light',
       width: { kind: 'fill' },
       compare: { kind: 'none' },
-      probes: { textSpacing: false, inspectText: false },
+      probes: { textSpacing: false, inspect: false },
       resume: { theme: scene, motion: 'actions' }
     },
     session: {
@@ -306,17 +306,7 @@ export function previewReducer(preview: Preview, action: PreviewAction): Preview
           : view.scene.kind === 'motion'
             ? view.resume.theme
             : view.scene
-      const next = relevant === view.scene ? view : changeScene(view, relevant)
-      return {
-        ...preview,
-        view: {
-          ...next,
-          probes: {
-            ...next.probes,
-            inspectText: action.editor === 'typography' && next.probes.inspectText
-          }
-        }
-      }
+      return relevant === view.scene ? preview : { ...preview, view: changeScene(view, relevant) }
     }
     case 'copy':
       return {

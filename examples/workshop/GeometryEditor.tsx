@@ -21,6 +21,7 @@ import {
 import { Changed } from './ControlChange'
 import type { Change } from './workshop-history'
 import type { Changes } from './workshop-fields'
+import type { ControlTarget } from './workshop-inspect'
 import './geometry-editor.css'
 
 type Dial = (typeof geometryDials)[number]
@@ -103,6 +104,9 @@ function NumberControl({
   )
 }
 
+const scopes: readonly GeometryScope[] = ['shared', 'light', 'dark']
+const targetScope = (target: ControlTarget | undefined) =>
+  scopes.find(scope => target?.field.startsWith(`${scope}.`))
 const settingNames: Record<keyof GeometrySettings, string> = {
   ...Object.fromEntries(geometryDials.map(dial => [dial.key, dial.label])),
   borderStyle: 'Border style',
@@ -113,15 +117,24 @@ export function GeometryEditor({
   changes,
   theme,
   disabled,
+  target,
   onChange
 }: {
   recipe: GeometryRecipe | null
   changes: Changes<GeometryFields> | null
   theme: Theme
   disabled: boolean
+  /** The field the shell is jumping to; the editor shows the scope that holds it. */
+  target?: ControlTarget
   onChange: (recipe: GeometryRecipe, change: Change) => void
 }) {
   const [scope, setScope] = useState<GeometryScope>('shared')
+  const [seen, setSeen] = useState(target)
+  if (target !== seen) {
+    setSeen(target)
+    const next = targetScope(target)
+    if (next) setScope(next)
+  }
   const values = geometryValues(recipe ?? geometryPreset(), scope)
   const overrides = scope === 'shared' ? undefined : recipe?.modes?.[scope]
   const name = (key: keyof GeometrySettings) =>

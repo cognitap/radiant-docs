@@ -30,6 +30,8 @@ import {
 } from './workshop-history'
 import { initialPreview, previewReducer } from './workshop-preview'
 import { Preview } from './Preview'
+import { focusControl } from './ControlChange'
+import type { ControlTarget } from './workshop-inspect'
 import { ThemeHandoff, type ImportResult } from './ThemeHandoff'
 import { handoffAPI, errorMessage, type ImportData } from './workshop-handoff'
 import { GeometryEditor } from './GeometryEditor'
@@ -113,6 +115,7 @@ export function ThemeWorkshop() {
   const [localFont, setLocalFont] = useState<TrialFont | null>(null)
   const [selectedRole, setSelectedRole] = useState('prose-body')
   const [editor, setEditor] = useState<Editor>('color')
+  const [jump, setJump] = useState<ControlTarget | null>(null)
   const [feedback, setFeedback] = useState('')
   const ready = useHydrated()
   const panelId = useId()
@@ -249,6 +252,22 @@ export function ThemeWorkshop() {
     setSelectedRole(role)
     workshopHost.current?.querySelector<HTMLSelectElement>('.typesetting-inspector select')?.focus()
   }
+  /** The preview names an editor field; the editors open its scope during render, then the shell focuses it. */
+  function jumpTo(target: ControlTarget) {
+    const role = target.field.match(/^style\.([a-z-]+)\./)?.[1]
+    if (role) setSelectedRole(role)
+    chooseEditor(target.editor)
+    setJump({ ...target })
+  }
+  useEffect(() => {
+    if (!jump || !workshopHost.current) return
+    const control = focusControl(workshopHost.current, jump.field)
+    setFeedback(
+      control
+        ? `Showing ${editors.find(item => item.id === jump.editor)!.label}.`
+        : `No control for ${jump.field} in ${editors.find(item => item.id === jump.editor)!.label}.`
+    )
+  }, [jump])
   return (
     <div
       ref={workshopHost}
@@ -342,6 +361,7 @@ export function ThemeWorkshop() {
                   session={color}
                   changes={changes.color.changes}
                   disabled={!ready}
+                  target={jump?.editor === 'color' ? jump : undefined}
                   onChange={updateColor}
                 />
               </div>
@@ -408,6 +428,7 @@ export function ThemeWorkshop() {
                   changes={changes.geometry.changes}
                   theme={theme}
                   disabled={!ready}
+                  target={jump?.editor === 'geometry' ? jump : undefined}
                   onChange={updateGeometry}
                 />
               </div>
@@ -418,6 +439,7 @@ export function ThemeWorkshop() {
                 <MotionEditor
                   document={document}
                   changes={changes.motion.changes}
+                  target={jump?.editor === 'motion' ? jump : undefined}
                   onChange={updateDocument}
                 />
               </div>
@@ -446,11 +468,13 @@ export function ThemeWorkshop() {
           editor={editor}
           theme={theme}
           document={document}
+          color={color?.recipe ?? null}
           preview={preview}
           dispatch={dispatch}
           ready={ready}
           role={selectedRole}
           onRole={selectRole}
+          onJump={jumpTo}
         />
       </div>
       <ThemeHandoff
