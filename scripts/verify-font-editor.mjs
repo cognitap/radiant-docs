@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { readFile, mkdir } from 'node:fs/promises'
 import { pickRadio, pickedRadio, radioGroup } from './typography-controls.mjs'
-import { openWorkshop, enterWorkshop } from './workshop-entry.mjs'
+import { openWorkshop, enterWorkshop, openFormat } from './workshop-entry.mjs'
 
 export async function verifyFontEditor(browser, baseURL) {
   await mkdir(new URL('../output/docs/', import.meta.url), { recursive: true })
@@ -175,12 +175,11 @@ export async function verifyFontEditor(browser, baseURL) {
       'local bytes produce no upload or font request'
     )
     await panel.getByRole('button', { name: 'Use family in theme', exact: true }).click()
-    await frame.getByText('Required setup and fonts', { exact: true }).click()
     assert.match(
-      await frame.locator('.handoff-setup').innerText(),
+      await frame.locator('.handoff-fonts').innerText(),
       /Brand font.*File not included/s
     )
-    await frame.getByText('Reusable configuration JSON', { exact: true }).click()
+    await openFormat(frame.page(), 'Configuration file')
     const exported = JSON.parse(
       await frame.getByRole('textbox', { name: 'Configuration output', exact: true }).inputValue()
     )

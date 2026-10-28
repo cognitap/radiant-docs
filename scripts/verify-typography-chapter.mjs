@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { pickRadio } from './typography-controls.mjs'
-import { openWorkshop } from './workshop-entry.mjs'
+import { openWorkshop, openFormat } from './workshop-entry.mjs'
 
 // Recorded font/layout examples, not a synthetic readability or quality score.
 export async function verifyTypographyChapter(browser, baseURL) {
@@ -147,20 +147,16 @@ export async function verifyTypographyChapter(browser, baseURL) {
     }
     // A shared/imported custom requirement must never carry the private file.
     const handoff = workshop.locator('.theme-handoff')
-    const configDetails = handoff
-      .locator('details')
-      .filter({ hasText: 'Reusable configuration JSON' })
-      .first()
-    if (!(await configDetails.evaluate(node => node.open)))
-      await configDetails.locator(':scope > summary').click()
+    await openFormat(page, 'Configuration file')
     const configuration = await handoff
       .getByRole('textbox', { name: 'Configuration output', exact: true })
       .inputValue()
     assert.doesNotMatch(configuration, /private-chapter-asset|blob:|data:|arrayBuffer|bytes/)
     assert.match(configuration, /Chapter brand/)
-    const setup = handoff.locator('.handoff-setup')
-    if (!(await setup.evaluate(node => node.open))) await setup.locator(':scope > summary').click()
-    assert.match(await setup.innerText(), /Chapter brand[\s\S]*File not included/)
+    assert.match(
+      await handoff.locator('.handoff-fonts').innerText(),
+      /Chapter brand[\s\S]*File not included/
+    )
     await workshop
       .locator('.font-editor')
       .getByRole('button', { name: 'Remove local font', exact: true })
