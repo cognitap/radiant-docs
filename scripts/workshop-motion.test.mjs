@@ -16,7 +16,8 @@ import {
   matchingMotionPreset,
   motionPreview
 } from '../examples/workshop/workshop-motion.ts'
-import { resetEditor } from '../examples/workshop/workshop-theme.ts'
+import { initialDocument } from '../examples/workshop/workshop-theme.ts'
+import { resetEditor } from '../examples/workshop/workshop-snapshot.ts'
 
 const original = () =>
   themeDocumentFromDefinition({
@@ -96,7 +97,8 @@ test('section reset and selective export retain public profile semantics and oth
   const base = original()
   const selected = exportThemeSections(base, ['motion'])
   assert.deepEqual(selected.sections.motion.profile, base.sections.motion.profile)
-  const next = resetEditor(base, 'motion')
+  const snapshot = document => ({ document, color: null, geometry: null })
+  const next = resetEditor(snapshot(base), snapshot(initialDocument()), 'motion').document
   assert.deepEqual(compileThemeDocument(next).motion, defineMotionProfile())
   for (const name of ['color', 'typography', 'components'])
     assert.deepEqual(next.sections[name], base.sections[name])

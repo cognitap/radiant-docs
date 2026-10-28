@@ -30,11 +30,16 @@ export interface ColorSession {
   palette: PaletteView
 }
 export const colorPresets = colorCalibrationPresets
+// The shell derives the session from the recipe it stores, so the same recipe
+// object is created once for the edit and again for the view.
+const sessions = new WeakMap<ColorRecipe, ColorSession>()
 export const colorAPI = {
   create(recipe: ColorRecipe): ColorSession {
+    const known = sessions.get(recipe)
+    if (known) return known
     const wall = generateColorWall(recipe.input)
     const palette = recommendColorPalette(wall, { working: recipe.working, modes: recipe.modes })
-    return {
+    const session: ColorSession = {
       recipe: {
         ...recipe,
         input: {
@@ -46,6 +51,9 @@ export const colorAPI = {
       wall,
       palette
     }
+    sessions.set(recipe, session)
+    sessions.set(session.recipe, session)
+    return session
   },
   apply(document: object, session: ColorSession): object {
     return updateThemeAppearance(readThemeDocument(document), { palette: session.palette })
@@ -87,6 +95,16 @@ export function roleValue(session: ColorSession, mode: Mode, role: Role): string
     ? session.palette.surface.modes[mode].canvas
     : session.palette.color.modes[mode][role]
 }
+export function chooseWorkingFamily(
+  recipe: ColorRecipe,
+  name: WorkingRole,
+  paletteId?: string
+): ColorRecipe {
+  const working = { ...recipe.working }
+  if (paletteId === undefined) delete working[name]
+  else working[name] = paletteId
+  return { ...recipe, working: Object.keys(working).length ? working : undefined }
+}
 export function overrideRole(
   recipe: ColorRecipe,
   mode: Mode,
@@ -116,4 +134,42 @@ export function selectColorPreset(
     delete input.brandVividness
   }
   return { ...recipe, input }
+}
+
+/** Generator dials show their resolved value; vividness, families and roles are overrides. */
+export type ColorFields = {
+  brand: string
+  wallPreset: ColorPreset
+  rampPreset: ColorPreset
+  fidelity: 'anchored' | 'unanchored'
+  lightness: 'hue-aware' | 'shared'
+  vividness: number | undefined
+  brandVividness: number | undefined
+  distribution: number
+  neutralTint: number
+  hueAlignment: number
+  neutralHue: number
+} & { [K in `working.${WorkingRole}`]: string | undefined } & {
+  [K in `role.${Mode}.${Role}`]: string | undefined
+}
+export function colorFields(session: ColorSession): ColorFields {
+  const { input } = session.wall
+  const fields: Record<string, string | number | undefined> = {
+    brand: input.brand,
+    wallPreset: input.wallPreset,
+    rampPreset: input.rampPreset,
+    fidelity: input.fidelity,
+    lightness: input.lightness,
+    vividness: session.recipe.input.vividness,
+    brandVividness: session.recipe.input.brandVividness,
+    distribution: input.distribution,
+    neutralTint: input.neutralTint,
+    hueAlignment: input.hueAlignment,
+    neutralHue: input.neutralHue
+  }
+  for (const name of workingRoles) fields[`working.${name}`] = session.recipe.working?.[name]
+  for (const mode of ['light', 'dark'] as const)
+    for (const role of Object.keys(roleNames) as Role[])
+      fields[`role.${mode}.${role}`] = session.recipe.modes?.[mode]?.[role]
+  return fields as ColorFields
 }

@@ -115,6 +115,21 @@ export function matchingGeometryPreset(recipe: GeometryRecipe): string {
     })?.id ?? 'custom'
   )
 }
+/** Shared values are what the dials show; mode fields are the overrides themselves. */
+export type GeometryFields = { preset: string } & {
+  [K in `shared.${keyof GeometrySettings}`]: number | string
+} & { [K in `${'light' | 'dark'}.${keyof GeometrySettings}`]: number | string | undefined }
+export function geometryFields(recipe: GeometryRecipe): GeometryFields {
+  const fields: Record<string, number | string | undefined> = {
+    preset: matchingGeometryPreset(recipe)
+  }
+  for (const key of Object.keys(balanced) as (keyof GeometrySettings)[]) {
+    fields[`shared.${key}`] = recipe.values[key]
+    fields[`light.${key}`] = recipe.modes?.light?.[key]
+    fields[`dark.${key}`] = recipe.modes?.dark?.[key]
+  }
+  return fields as GeometryFields
+}
 export const geometryDials = [
   {
     key: 'spacing',

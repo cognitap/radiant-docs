@@ -1,6 +1,5 @@
 import {
   compileThemeDocument,
-  defaultTheme,
   parseThemeDocument,
   themeDocumentFromDefinition,
   updateThemeDocument,
@@ -45,38 +44,4 @@ export const documentAPI = {
 
 export function initialDocument(): WorkshopDocument {
   return documentAPI.create({ id: 'workshop', name: 'Workshop' })
-}
-
-export function resetEditor(document: WorkshopDocument, editor: Editor): WorkshopDocument {
-  if (editor === 'geometry') {
-    const theme = documentAPI.compile(document)
-    // Geometry owns surface geometry; Color owns canvas. Preserve the actual
-    // per-mode canvas when resetting their shared surface section.
-    return documentAPI.update(
-      document,
-      {
-        control: {},
-        spacing: {},
-        surface: {
-          modes: {
-            light: { canvas: String(theme.modes.light['--rad-surface-canvas']) },
-            dark: { canvas: String(theme.modes.dark['--rad-surface-canvas']) }
-          }
-        }
-      },
-      'replace'
-    )
-  }
-  if (editor === 'color') {
-    const next = documentAPI.update(document, { color: {} }, 'replace')
-    return documentAPI.update(next, {
-      surface: {
-        modes: {
-          light: { canvas: String(defaultTheme.modes.light['--rad-surface-canvas']) },
-          dark: { canvas: String(defaultTheme.modes.dark['--rad-surface-canvas']) }
-        }
-      }
-    })
-  }
-  return documentAPI.update(document, { [editor]: {} }, 'replace')
 }

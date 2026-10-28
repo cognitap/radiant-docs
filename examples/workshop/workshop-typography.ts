@@ -8,11 +8,35 @@ import {
   type TypographyInput,
   type TypographyPreset,
   type TypographyProfile,
+  type TypographyProseRhythm,
   type TypographyResult,
-  type TypographyRole
+  type TypographyRole,
+  type TypographyStyle,
+  type TypographyUIRhythm
 } from '@cognitap/radiant'
 import { readThemeDocument } from './workshop-theme.ts'
 import { curatedFonts, fontFamily, type TrialFont } from './workshop-fonts.ts'
+
+export const proseKeys = [
+  'size',
+  'lineHeight',
+  'paragraphSpacing',
+  'measure',
+  'headingScale'
+] as const satisfies readonly (keyof TypographyProseRhythm)[]
+export const uiKeys = [
+  'size',
+  'lineHeight'
+] as const satisfies readonly (keyof TypographyUIRhythm)[]
+export const styleKeys = [
+  'assignment',
+  'narrow',
+  'wide',
+  'weight',
+  'lineHeight',
+  'tracking',
+  'measure'
+] as const satisfies readonly (keyof TypographyStyle)[]
 
 export const startingPoints = (Object.keys(typographyPresets) as TypographyPreset[]).map(id => ({
   id,
@@ -56,6 +80,41 @@ export function chooseAssignment(
   }
 }
 type Mutable<T> = { -readonly [K in keyof T]: T[K] }
+/** A family that is not a curated or local trial becomes a manual assignment. */
+export function assignFamily(
+  input: TypographyInput,
+  assignment: TypographyAssignment,
+  family: string,
+  local?: TrialFont | null
+): TypographyInput {
+  const trial = [...curatedFonts, ...(local ? [local] : [])].find(
+    font => fontFamily(font) === family
+  )
+  if (trial) return chooseAssignment(input, assignment, trial)
+  return { ...input, fonts: { ...input.fonts, [assignment]: { family, profile: 'manual' } } }
+}
+export function setRhythm(
+  input: TypographyInput,
+  context: 'prose' | 'ui',
+  key: keyof TypographyProseRhythm,
+  value: number | undefined
+): TypographyInput {
+  const rhythm: Record<string, number | undefined> = { ...input[context] }
+  if (value === undefined) delete rhythm[key]
+  else rhythm[key] = value
+  return { ...input, [context]: rhythm }
+}
+export function setStyle<K extends keyof TypographyStyle>(
+  input: TypographyInput,
+  role: TypographyRole,
+  key: K,
+  value: TypographyStyle[K] | undefined
+): TypographyInput {
+  const style: Partial<Mutable<TypographyStyle>> = { ...input.styles?.[role] }
+  if (value === undefined) delete style[key]
+  else style[key] = value
+  return { ...input, styles: { ...input.styles, [role]: style } }
+}
 export function resetRhythm(input: TypographyInput, context: 'prose' | 'ui'): TypographyInput {
   const next: Mutable<TypographyInput> = { ...input }
   delete next[context]
@@ -119,4 +178,25 @@ export function applyTypesetting(
   }
   const parsed = readThemeDocument({ ...current, sections: { ...current.sections, ...sections } })
   return updateThemeDocument(current, { typography: parsed.sections.typography }, 'replace')
+}
+
+/** Preset and families are explicit; rhythm and style fields are the manual overrides. */
+type NumericStyleKey = Exclude<(typeof styleKeys)[number], 'assignment'>
+export type TypographyFields = { preset: TypographyPreset | undefined } & {
+  [K in `font.${TypographyAssignment}`]: string
+} & { [K in `prose.${(typeof proseKeys)[number]}`]: number | undefined } & {
+  [K in `ui.${(typeof uiKeys)[number]}`]: number | undefined
+} & { [K in `style.${TypographyRole}.assignment`]: TypographyAssignment | undefined } & {
+  [K in `style.${TypographyRole}.${NumericStyleKey}`]: number | undefined
+}
+export function typographyFields(result: TypographyResult): TypographyFields {
+  const { input } = result
+  const fields: Record<string, string | number | undefined> = { preset: input.preset }
+  for (const assignment of assignments)
+    fields[`font.${assignment}`] = input.fonts?.[assignment]?.family
+  for (const key of proseKeys) fields[`prose.${key}`] = input.prose?.[key]
+  for (const key of uiKeys) fields[`ui.${key}`] = input.ui?.[key]
+  for (const role of Object.keys(result.styles) as TypographyRole[])
+    for (const key of styleKeys) fields[`style.${role}.${key}`] = input.styles?.[role]?.[key]
+  return fields as TypographyFields
 }
