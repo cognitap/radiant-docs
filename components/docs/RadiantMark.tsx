@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
-import { createRadiantLogo, getGeometry, sceneMarkup } from '@/lib/radiant-logo.mjs'
+import { createRadiantLogo, getGeometry, sceneMarkup } from '@/lib/radiant-logo'
 
 // The engine's first frame, so the mark is drawn before the script runs and
 // mounting it does not shift the header.
