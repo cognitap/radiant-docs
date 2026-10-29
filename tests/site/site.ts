@@ -2,6 +2,7 @@ import { execFileSync } from 'node:child_process'
 import { mkdir, readdir, readFile } from 'node:fs/promises'
 import path from 'node:path'
 import { chromium, type Browser, type Page } from 'playwright'
+import { waitForDeployment } from '../../scripts/deployment-readiness.mjs'
 import { createDocsServer } from '../../scripts/serve-docs.mjs'
 import { radiantPackage } from '../../scripts/radiant-package.mjs'
 
@@ -44,17 +45,47 @@ export function track(page: Page) {
   return errors
 }
 
+/** A deployed origin, or the local static export when `DOCS_URL` is unset. */
+export function deploymentOrigin() {
+  const value = process.env.DOCS_URL
+  if (!value) return undefined
+  const url = new URL(value)
+  const loopback = ['127.0.0.1', 'localhost', '[::1]'].includes(url.hostname)
+  if (
+    (url.protocol !== 'https:' && !(url.protocol === 'http:' && loopback)) ||
+    url.username ||
+    url.password
+  ) {
+    throw new Error('Deployment verification requires an HTTPS origin, or HTTP on loopback.')
+  }
+  return url.origin
+}
+
 export async function withSite(run: (baseURL: string, browser: Browser) => Promise<void>) {
-  const server = createDocsServer()
-  await new Promise<void>(resolve => server.listen(0, '127.0.0.1', resolve))
-  const address = server.address()
-  if (address === null || typeof address === 'string') throw new Error('Docs server has no port')
+  const remote = deploymentOrigin()
   const browser = await chromium.launch()
+  const server = remote ? undefined : createDocsServer()
+  if (server) await new Promise<void>(resolve => server.listen(0, '127.0.0.1', resolve))
   try {
+    if (remote) {
+      await waitForDeployment((timeout: number) =>
+        browser.newContext().then(async context => {
+          try {
+            return await context.request.get(`${remote}/deployment.json`, { timeout })
+          } finally {
+            await context.close()
+          }
+        })
+      )
+      await run(remote, browser)
+      return
+    }
+    const address = server?.address()
+    if (address == null || typeof address === 'string') throw new Error('Docs server has no port')
     await run(`http://127.0.0.1:${address.port}`, browser)
   } finally {
     await browser.close()
-    await new Promise(resolve => server.close(resolve))
+    if (server) await new Promise(resolve => server.close(resolve))
   }
 }
 

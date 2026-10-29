@@ -15,7 +15,17 @@ import {
   themeChanges,
   viewTheme
 } from '../examples/workshop/workshop-snapshot.ts'
-import { handoffAPI, jsonText } from '../examples/workshop/workshop-handoff.ts'
+import {
+  handoffAPI,
+  jsonText,
+  type Configuration,
+  type ImportData
+} from '../examples/workshop/workshop-handoff.ts'
+
+function configurationOf(value: ImportData): Configuration {
+  if (value.kind !== 'radiant-workshop') throw new TypeError('Expected a workshop configuration.')
+  return value
+}
 import { sharePayload } from '../examples/workshop/workshop-share.ts'
 import { readThemeDocument } from '../examples/workshop/workshop-theme.ts'
 import { colorAPI, colorFields, defaultColorRecipe } from '../examples/workshop/workshop-color.ts'
@@ -39,7 +49,7 @@ test('every example opens as the exact theme the package publishes', () => {
     const view = viewTheme(snapshot)
     assert.deepEqual(view.theme, themes[index], `${theme.id}: compiled theme`)
     const changes = themeChanges(view, viewTheme(exampleSnapshot(theme)))
-    for (const editor of ['color', 'typography', 'geometry', 'motion'])
+    for (const editor of ['color', 'typography', 'geometry', 'motion'] as const)
       assert.equal(changes[editor].count, 0, `${theme.id}: ${editor} unchanged against itself`)
   })
 })
@@ -48,22 +58,27 @@ test('every example round-trips through the handoff configuration', () => {
   for (const theme of startingThemes) {
     const snapshot = exampleSnapshot(theme)
     const text = jsonText(snapshotConfiguration(snapshot))
-    assert.deepEqual(snapshotFromConfiguration(handoffAPI.read(text)), snapshot, theme.id)
+    assert.deepEqual(
+      snapshotFromConfiguration(configurationOf(handoffAPI.read(text))),
+      snapshot,
+      theme.id
+    )
     assert.deepEqual(readSharedTheme(text), snapshot, `${theme.id}: shared theme`)
   }
 })
 
 test('an example adopts a color recipe from its own accent', () => {
-  const jelly = startingThemes.find(theme => theme.id === 'jelly')
+  const jelly = startingThemes.find(theme => theme.id === 'jelly')!
   const before = viewTheme(exampleSnapshot(jelly))
   const accent = before.theme.modes.light['--rad-color-accent']
+  if (typeof accent !== 'string') throw new TypeError('Expected a color string.')
   const color = colorAPI.create({ input: { ...defaultColorRecipe().input, brand: accent } })
   const after = viewTheme({
     ...exampleSnapshot(jelly),
     document: colorAPI.apply(exampleSnapshot(jelly).document, color),
     color: color.recipe
   })
-  assert.equal(colorFields(after.color).brand, accent)
+  assert.equal(colorFields(after.color!).brand, accent)
   assert.equal(after.theme.modes.light['--rad-color-accent'], accent)
   assert.equal(
     after.theme.modes.light['--rad-button-shadow'],
@@ -76,9 +91,9 @@ test('a brand color keeps the default recipe around it', () => {
   const snapshot = brandSnapshot('#166534')
   const view = viewTheme(snapshot)
   assert.equal(view.theme.modes.light['--rad-color-accent'], '#166534')
-  assert.equal(colorFields(view.color).wallPreset, defaultRecipe.wall)
-  assert.equal(geometryFields(snapshot.geometry).preset, defaultRecipe.geometry)
-  assert.equal(view.typography.input.preset, defaultRecipe.typography)
+  assert.equal(colorFields(view.color!).wallPreset, defaultRecipe.wall)
+  assert.equal(geometryFields(snapshot.geometry!).preset, defaultRecipe.geometry)
+  assert.equal(view.typography!.input.preset, defaultRecipe.typography)
   assert.deepEqual(brandSnapshot(defaultRecipe.brand), startingSnapshot(defaultRecipe))
 })
 

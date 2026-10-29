@@ -7,13 +7,14 @@ import {
   selectColorPreset,
   overrideRole,
   roleValue,
-  workingRoles
+  workingRoles,
+  type ColorInput
 } from '../examples/workshop/workshop-color.ts'
 import { documentAPI } from '../examples/workshop/workshop-theme.ts'
 
 test('default color recipes are independent copies', () => {
   const a = defaultColorRecipe()
-  a.input.brand = '#000000'
+  ;(a.input as { -readonly [K in keyof ColorInput]: ColorInput[K] }).brand = '#000000'
   assert.equal(defaultColorRecipe().input.brand, '#7C3AED')
 })
 
@@ -81,7 +82,7 @@ test('applying and resetting the color recipe preserves independent document sec
   const session = colorAPI.create(overrideRole(defaultColorRecipe(), 'dark', 'canvas', '#112233'))
   const edited = colorAPI.apply(original, session)
   const reset = documentAPI.compile(colorAPI.apply(edited, colorAPI.create(defaultColorRecipe())))
-  for (const mode of ['light', 'dark']) {
+  for (const mode of ['light', 'dark'] as const) {
     assert.equal(reset.modes[mode]['--rad-typography-family'], 'Georgia, serif')
     assert.equal(reset.modes[mode]['--rad-motion-release-duration'], '280ms')
     assert.equal(reset.modes[mode]['--rad-surface-radius'], '2rem')

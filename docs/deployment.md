@@ -47,9 +47,8 @@ pnpm install --frozen-lockfile
 pnpm test:deployment https://<deployment>.pages.dev
 ```
 
-It first confirms that `/deployment.json` matches the checkout, waiting up to
-three minutes for a new deployment to come up. Then it runs the full browser
-suite over HTTPS.
+It waits until the deployment answers, then runs the site tests over HTTPS.
+`/deployment.json` must match this checkout.
 
 ## Roll back
 

@@ -5,15 +5,33 @@ import {
   themeDocumentFromDefinition,
   compileThemeDocument,
   updateThemeDocument,
-  defineMotionProfile
+  defineMotionProfile,
+  type MotionProfileInput,
+  type ThemeSectionExport,
+  type ThemeSections
 } from '@cognitap/radiant'
-import { handoffAPI, jsonText } from '../examples/workshop/workshop-handoff.ts'
+import {
+  handoffAPI,
+  jsonText,
+  type Configuration,
+  type ImportData,
+  type Recipes
+} from '../examples/workshop/workshop-handoff.ts'
+
+function configurationOf(value: ImportData): Configuration {
+  if (value.kind !== 'radiant-workshop') throw new TypeError('Expected a workshop configuration.')
+  return value
+}
+function sectionsOf(value: ImportData): ThemeSectionExport {
+  if (value.kind !== 'radiant-theme-sections') throw new TypeError('Expected theme sections.')
+  return value
+}
 import { encodeShare, decodeShare } from '../examples/workshop/workshop-share.ts'
-import { handoffFixture } from './handoff-fixture.mjs'
+import { handoffFixture } from '../scripts/handoff-fixture.mjs'
 
 test('defaults, inherited overrides and off survive full, motion-only and shared configuration round trips', async () => {
   const { document, recipes } = handoffFixture()
-  for (const profile of [
+  const profiles: readonly MotionProfileInput[] = [
     {},
     { mode: 'off' },
     {
@@ -21,26 +39,32 @@ test('defaults, inherited overrides and off survive full, motion-only and shared
       spring: { mass: 2 },
       interactions: { press: { damping: 35 }, layout: { stiffness: 180 } }
     }
-  ]) {
+  ]
+  for (const profile of profiles) {
     const edited = updateThemeDocument(
       document,
       { motion: { ...document.sections.motion, profile } },
       'replace'
     )
-    const config = handoffAPI.configuration(edited, recipes)
+    const config = handoffAPI.configuration(edited, recipes as Recipes)
     const text = jsonText(config)
     const shared = handoffAPI.read(await decodeShare(await encodeShare(text)))
     assert.equal(jsonText(shared), text)
-    assert.deepEqual(compileThemeDocument(shared.document).motion, defineMotionProfile(profile))
-    const section = handoffAPI.read(jsonText(handoffAPI.sections(edited, ['motion'])))
+    assert.deepEqual(
+      compileThemeDocument(configurationOf(shared).document).motion,
+      defineMotionProfile(profile)
+    )
+    const section = sectionsOf(handoffAPI.read(jsonText(handoffAPI.sections(edited, ['motion']))))
     assert.deepEqual(Object.keys(section.sections), ['motion'])
     const restored = handoffAPI.apply(
-      handoffAPI.configuration(document, recipes),
+      handoffAPI.configuration(document, recipes as Recipes),
       section,
       'replace'
     )
     assert.deepEqual(restored.document.sections.motion, edited.sections.motion)
-    for (const key of Object.keys(document.sections).filter(key => key !== 'motion'))
+    for (const key of Object.keys(document.sections).filter(
+      (key): key is keyof ThemeSections => key !== 'motion'
+    ))
       assert.deepEqual(restored.document.sections[key], document.sections[key])
     assert.deepEqual(restored.recipes, recipes)
     assert.equal(
@@ -52,7 +76,7 @@ test('defaults, inherited overrides and off survive full, motion-only and shared
 
 test('motion replacement restores omitted defaults while merge preserves omitted profile leaves', () => {
   const { document, recipes } = handoffFixture()
-  const current = handoffAPI.configuration(document, recipes)
+  const current = handoffAPI.configuration(document, recipes as Recipes)
   const partial = handoffAPI.read(
     jsonText({
       kind: 'radiant-theme-sections',
@@ -77,7 +101,7 @@ test('motion replacement restores omitted defaults while merge preserves omitted
 
 test('invalid or unsupported motion imports and decoded links fail before replacing current settings', async () => {
   const { document, recipes } = handoffFixture()
-  const current = handoffAPI.configuration(document, recipes)
+  const current = handoffAPI.configuration(document, recipes as Recipes)
   const before = jsonText(current)
   for (const profile of [
     { mode: 'always' },
@@ -110,7 +134,9 @@ test('motion TypeScript and runtime setup preserve the public boundary without g
   assert.throws(() => handoffAPI.cssOutput(document, ['motion']), /Typography only/)
   assert.match(handoffAPI.cssOutput(document), /No sampled spring curve/)
   const { install, source } = handoffAPI.runtimeSetup()
-  const manifest = JSON.parse(await readFile(new URL('../package.json', import.meta.url)))
+  const manifest = JSON.parse(
+    (await readFile(new URL('../package.json', import.meta.url))).toString()
+  )
   const version = manifest.dependencies['@cognitap/radiant']
   assert.ok(
     install.includes(

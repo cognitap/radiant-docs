@@ -1,16 +1,21 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { updateThemeDocument } from '@cognitap/radiant'
-import { setupGuide, setups, springMotion } from '../examples/workshop/workshop-setup.ts'
+import {
+  setupGuide,
+  setups,
+  springMotion,
+  type SetupGuide
+} from '../examples/workshop/workshop-setup.ts'
 import { handoffAPI } from '../examples/workshop/workshop-handoff.ts'
 import { fontSetup } from '../examples/workshop/font-requirements.ts'
 import { initialDocument, readThemeDocument } from '../examples/workshop/workshop-theme.ts'
-import { handoffFixture } from './handoff-fixture.mjs'
+import { handoffFixture } from '../scripts/handoff-fixture.mjs'
 
 const withFonts = handoffFixture().document
 const plain = readThemeDocument(initialDocument())
 const motionOff = updateThemeDocument(withFonts, { motion: { profile: { mode: 'off' } } })
-const labels = guide => guide.steps.map(step => step.label ?? step.text)
+const labels = (guide: SetupGuide) => guide.steps.map(step => step.label ?? step.text)
 
 test('three setups, each with a one-line hint', () => {
   assert.deepEqual(
@@ -41,12 +46,12 @@ test('React yields the typed theme, the install command and the motion runtime',
 
 test('CSS and Tailwind yield the scoped CSS with their own entry step and the spring note', () => {
   const css = handoffAPI.cssOutput(withFonts)
-  for (const setup of ['css', 'tailwind']) {
+  for (const setup of ['css', 'tailwind'] as const) {
     const guide = setupGuide(setup, withFonts)
     assert.equal(guide.output.name, 'radiant-theme.css')
     assert.equal(guide.output.text, css)
     assert.equal(guide.error, '')
-    assert.doesNotMatch(guide.steps[0].code, /react@/, `${setup}: installs the package alone`)
+    assert.doesNotMatch(guide.steps[0].code!, /react@/, `${setup}: installs the package alone`)
     assert.deepEqual(labels(guide), [
       'Install command',
       'Save the theme as radiant-theme.css in your app.',
@@ -56,12 +61,12 @@ test('CSS and Tailwind yield the scoped CSS with their own entry step and the sp
       'This CSS carries timing tokens only. Spring profiles need the React runtime: choose React for spring motion.'
     ])
   }
-  assert.match(setupGuide('css', withFonts).steps[2].code, /styles\.css/)
+  assert.match(setupGuide('css', withFonts).steps[2].code!, /styles\.css/)
   assert.match(
-    setupGuide('tailwind', withFonts).steps[2].code,
+    setupGuide('tailwind', withFonts).steps[2].code!,
     /tailwindcss';\n@import '@cognitap\/radiant\/tailwind\.css'/
   )
-  assert.match(setupGuide('css', withFonts).steps[3].code, /class="radiant-export" data-rad-mode/)
+  assert.match(setupGuide('css', withFonts).steps[3].code!, /class="radiant-export" data-rad-mode/)
 })
 
 test('font and spring steps appear only when the theme needs them', () => {
@@ -72,8 +77,8 @@ test('font and spring steps appear only when the theme needs them', () => {
   assert.ok(!labels(setupGuide('css', plain)).includes('Font setup CSS'))
   assert.ok(labels(setupGuide('react', motionOff)).includes('Theme scope'))
   assert.ok(!labels(setupGuide('react', motionOff)).includes('Runtime setup'))
-  assert.match(setupGuide('react', motionOff).steps[2].code, /ThemeScope/)
-  assert.doesNotMatch(setupGuide('react', motionOff).steps[2].code, /MotionProvider/)
+  assert.match(setupGuide('react', motionOff).steps[2].code!, /ThemeScope/)
+  assert.doesNotMatch(setupGuide('react', motionOff).steps[2].code!, /MotionProvider/)
   assert.ok(!labels(setupGuide('tailwind', motionOff)).some(label => label.includes('Spring')))
 })
 

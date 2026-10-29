@@ -7,10 +7,11 @@ import {
   matchedTokens,
   normalizeSelector,
   textRole,
-  tokensIn
+  tokensIn,
+  type SourceContext
 } from '../examples/workshop/workshop-inspect.ts'
 
-const context = (overrides = {}) => ({
+const context = (overrides: Partial<SourceContext> = {}): SourceContext => ({
   values: {
     '--rad-color-accent': 'oklch(0.21 0.006 286)',
     '--rad-control-radius': '0.5rem',
@@ -98,7 +99,7 @@ test('a solid button maps to action color, control radius, density, its label st
   assert.equal(accent.kind, 'color')
   assert.equal(accent.value, 'oklch(0.21 0.006 286)')
   assert.equal(accent.note, 'Automatic')
-  assert.match(groups[0].hint, /follow Brand color/)
+  assert.match(groups[0].hint!, /follow Brand color/)
   assert.equal(groups[2].hint, undefined)
   const press = groups[3].items[0]
   assert.equal(press.label, 'Button press physics')
@@ -120,10 +121,10 @@ test('pinned roles and overridden interactions point at their own controls witho
       motion: { interactions: { disclosure: { damping: 12 } } }
     })
   )
-  const accent = groups.find(group => group.editor === 'color').items[0]
+  const accent = groups.find(group => group.editor === 'color')!.items[0]
   assert.equal(accent.field, 'role.dark.accent')
   assert.equal(accent.note, 'Pinned')
-  const disclosure = groups.find(group => group.editor === 'motion').items[0]
+  const disclosure = groups.find(group => group.editor === 'motion')!.items[0]
   assert.equal(disclosure.field, 'disclosure.stiffness')
   assert.equal(disclosure.label, 'Disclosure physics')
   assert.equal(disclosure.note, undefined)
@@ -170,8 +171,8 @@ test('inheritedColorToken follows the nearest ancestor whose rules set color', (
     { selector: '.plain', cssText: 'color:red', color: 'red' }
   ]
   const is =
-    (...names) =>
-    selector =>
+    (...names: string[]) =>
+    (selector: string) =>
       names.includes(selector)
   assert.equal(
     inheritedColorToken(rules, [is('h2'), is('article'), is('.page')]),

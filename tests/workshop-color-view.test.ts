@@ -39,13 +39,13 @@ test('strips sample their own range and speak plain words', () => {
     const inputs = stripInputs(strip, wall.input)
     assert.equal(inputs.length, strip.samples)
     assert.equal(inputs[0][strip.field], strip.min)
-    assert.equal(inputs.at(-1)[strip.field], strip.max)
+    assert.equal(inputs.at(-1)![strip.field], strip.max)
     const words = stripWords(strip, wall.input[strip.field], false)
     assert.doesNotMatch(words, /undefined|NaN/)
     const walls = inputs.map(input => colorAPI.create({ input }).wall)
     const { bands } = strip
     const background = bandBackground(walls, bands)
-    assert.equal(background.backgroundImage.split('linear-gradient').length - 1, bands.length)
+    assert.equal(background!.backgroundImage.split('linear-gradient').length - 1, bands.length)
     assert.equal(bandBackground([undefined, walls[0]], bands), undefined)
   }
   assert.equal(stripWords(strips[0], 0.83, true), 'automatic, intense (0.83)')
@@ -59,7 +59,7 @@ test('choice groups produce the same recipe as picking a preset', () => {
     input: { ...defaultColorRecipe().input, vividness: 0.3, brandVividness: 0.2 }
   })
   const wallPreset = choiceGroups.find(group => group.field === 'wallPreset')
-  const next = wallPreset.input(wall.input, 'classic')
+  const next = wallPreset!.input(wall.input, 'classic')
   assert.equal(next.wallPreset, 'classic')
   assert.equal(next.vividness, undefined)
   assert.equal(next.brandVividness, 0.2, 'the ramp keeps its own vividness')
@@ -81,18 +81,18 @@ test('contrast problems land on the pinned role and offer a working fix', () => 
   const pair = problems.find(
     p => p.check.foregroundRole === 'accentForeground' && p.check.backgroundRole === 'accent'
   )
-  assert.equal(pair.role, 'accentForeground', 'the pinned foreground carries the warning')
-  assert.equal(pair.pinned, true)
-  assert.equal(pair.brandDerived, false)
-  assert.ok(pair.fix, 'a fix exists')
-  const fixed = colorAPI.create(pair.fix.recipe)
+  assert.equal(pair!.role, 'accentForeground', 'the pinned foreground carries the warning')
+  assert.equal(pair!.pinned, true)
+  assert.equal(pair!.brandDerived, false)
+  assert.ok(pair!.fix, 'a fix exists')
+  const fixed = colorAPI.create(pair!.fix!.recipe)
   assert.equal(
     fixed.palette.checks.find(
       c =>
         c.mode === 'light' &&
         c.foregroundRole === 'accentForeground' &&
         c.backgroundRole === 'accent'
-    ).pass,
+    )!.pass,
     true
   )
   assert.equal(contrastProblems(whiteOnWhite), problems, 'memoized per session')
@@ -102,10 +102,10 @@ test('contrast problems land on the pinned role and offer a working fix', () => 
   const onCanvas = contrastProblems(pinnedBackground).find(
     p => p.check.foregroundRole === 'accent' && p.check.backgroundRole === 'canvas'
   )
-  assert.equal(onCanvas.role, 'accent', 'the pinned fill is the culprit')
-  assert.equal(onCanvas.fix.label, 'Use the automatic color')
+  assert.equal(onCanvas!.role, 'accent', 'the pinned fill is the culprit')
+  assert.equal(onCanvas!.fix!.label, 'Use the automatic color')
   const pinnedText = colorAPI.create(overrideRole(base, 'light', 'accentForeground', '#7C3AED'))
   const onFill = contrastProblems(pinnedText).find(p => p.check.backgroundRole === 'accent')
-  assert.equal(onFill.role, 'accentForeground')
-  assert.equal(onFill.fix.label, 'Use the automatic color')
+  assert.equal(onFill!.role, 'accentForeground')
+  assert.equal(onFill!.fix!.label, 'Use the automatic color')
 })

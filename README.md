@@ -26,11 +26,11 @@ pnpm exec playwright install chromium   # add --with-deps on Linux
 pnpm check
 ```
 
-`pnpm check` runs formatting, lint, the docs word check, types, unit tests, the
-static build, the page check in `tests/site/` and the browser checks in
-`scripts/verify-docs.mjs`. A failed page check saves a screenshot under
-`output/docs/`. `pnpm preview` serves the built `out/` folder, and
-`pnpm test:smoke` checks it without rebuilding.
+`pnpm check` runs formatting, lint, the docs word check, types, the Node tests,
+the static build and the site tests. A failed page check saves a screenshot
+under `output/docs/`. `pnpm preview` serves the built `out/` folder.
+`pnpm test:deployment https://<deployment>` runs those site tests against a
+deployed origin and waits until that origin answers.
 
 ## Add a page
 
