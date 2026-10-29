@@ -107,11 +107,14 @@ test('portable documents carry normalized recipes and requested font requirement
   const removed = applyTypesetting(applied, documentTypesetting(applied)!.input)
   const removedDocument = readThemeDocument(removed)
   assert.equal(
-    removedDocument.sections.typography!.fonts!.find(font => font.id === 'typesetting-body')!.source,
+    removedDocument.sections.typography!.fonts!.find(font => font.id === 'typesetting-body')!
+      .source,
     'local'
   )
   assert.ok(
-    removedDocument.sections.typography!.fonts!.find(font => font.id === 'typesetting-body')!.weights!.includes(620)
+    removedDocument.sections
+      .typography!.fonts!.find(font => font.id === 'typesetting-body')!
+      .weights!.includes(620)
   )
   const text = JSON.stringify(removed)
   assert.doesNotMatch(text, /blob:|arrayBuffer|bytes|files|woff/)

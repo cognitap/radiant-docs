@@ -11,7 +11,7 @@ import {
   type History
 } from '../examples/workshop/workshop-history.ts'
 
-const states = <T,>(history: History<T>) => [
+const states = <T>(history: History<T>) => [
   history.past.map(entry => entry.state),
   history.present.state,
   history.future.map(entry => entry.state)

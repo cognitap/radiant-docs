@@ -31,16 +31,28 @@ async function journey(page: Page, baseURL: string, width: number) {
   await frame.getByRole('button', { name: /^Start from Radiant:/ }).click()
 
   const colorBefore = await section(page, 'color')
+  const generate = frame.getByRole('button', { name: 'Generate from the accent', exact: true })
+  if ((await generate.count()) > 0) {
+    await generate.click()
+    await untilChanges(page, 'color', colorBefore, where)
+  }
   const brand = frame.getByRole('textbox', { name: 'Brand color', exact: true })
   const nextBrand = (await brand.inputValue()).toLowerCase() === '#166534' ? '#1d4ed8' : '#166534'
+  const branded = await section(page, 'color')
   await brand.fill(nextBrand)
-  const colorAfter = await untilChanges(page, 'color', colorBefore, where)
+  const colorAfter = await untilChanges(page, 'color', branded, where)
 
   await frame.getByRole('button', { name: 'Spacing & surfaces', exact: true }).click()
   const spacingBefore = await section(page, 'spacing')
+  const preset = frame.getByRole('button', { name: 'Start from Balanced', exact: true })
+  if ((await preset.count()) > 0) {
+    await preset.click()
+    await untilChanges(page, 'spacing', spacingBefore, where)
+  }
   const spacing = frame.getByRole('spinbutton', { name: 'Breathing room', exact: true })
+  const spaced = await section(page, 'spacing')
   await spacing.fill((await spacing.inputValue()) === '1.5' ? '0.75' : '1.5')
-  await untilChanges(page, 'spacing', spacingBefore, where)
+  await untilChanges(page, 'spacing', spaced, where)
 
   await frame.getByRole('button', { name: 'Motion', exact: true }).click()
   const motionBefore = await section(page, 'motion')
@@ -51,7 +63,12 @@ async function journey(page: Page, baseURL: string, width: number) {
   await untilChanges(page, 'motion', motionBefore, where)
 
   await frame.getByRole('button', { name: 'Typography', exact: true }).click()
-  const typeBefore = await section(page, 'typography')
+  let typed = await section(page, 'typography')
+  const startType = frame.getByRole('button', { name: 'Start with Inter', exact: true })
+  if ((await startType.count()) > 0) {
+    await startType.click()
+    typed = await untilChanges(page, 'typography', typed, where)
+  }
   const families = frame.getByRole('radiogroup', { name: 'UI assignment', exact: true })
   const radios = families.getByRole('radio')
   const count = await radios.count()
@@ -64,10 +81,10 @@ async function journey(page: Page, baseURL: string, width: number) {
     break
   }
   assert.equal(picked, true, `${where} has another type family`)
-  const typeAfter = await untilChanges(page, 'typography', typeBefore, where)
+  const typeAfter = await untilChanges(page, 'typography', typed, where)
 
   await frame.getByRole('button', { name: 'Undo', exact: true }).click()
-  assert.equal(await untilSection(page, 'typography', typeBefore), typeBefore, `${where} undo`)
+  assert.equal(await untilSection(page, 'typography', typed), typed, `${where} undo`)
   await frame.getByRole('button', { name: 'Redo', exact: true }).click()
   assert.equal(await untilSection(page, 'typography', typeAfter), typeAfter, `${where} redo`)
   assert.equal(await section(page, 'color'), colorAfter, `${where} keeps the brand edit`)

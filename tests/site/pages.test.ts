@@ -74,11 +74,26 @@ async function openSources(frame: Locator) {
   if ((await details.getAttribute('open')) === null) await details.locator('summary').click()
 }
 
+async function settledText(canvas: Locator) {
+  let text = await canvas.innerText()
+  let stableSince = Date.now()
+  const started = Date.now()
+  while (Date.now() - started < 4_000) {
+    await canvas.page().waitForTimeout(50)
+    const next = await canvas.innerText()
+    if (next !== text) {
+      text = next
+      stableSince = Date.now()
+    } else if (Date.now() - stableSince >= 300) return text
+  }
+  return text
+}
+
 async function resetFrame(frame: Locator, page: Page) {
   const reset = frame.getByRole('button', { name: 'Reset preview', exact: true })
   if ((await reset.count()) === 0) return
   const canvas = frame.locator('.demo-canvas')
-  const before = (await canvas.count()) > 0 ? await canvas.innerText() : ''
+  const before = (await canvas.count()) > 0 ? await settledText(canvas) : ''
   const field = canvas.getByRole('textbox').first()
   const box = canvas.getByRole('checkbox').first()
   let value: string | undefined
@@ -99,7 +114,7 @@ async function resetFrame(frame: Locator, page: Page) {
   await reset.click()
   await frame.locator('.demo-feedback').getByText('Preview reset.', { exact: true }).waitFor()
   if ((await canvas.count()) === 0) return
-  assert.equal(await canvas.innerText(), before)
+  assert.equal(await settledText(canvas), before)
   if (value !== undefined)
     assert.equal(await canvas.getByRole('textbox').first().inputValue(), value)
   if (checked !== undefined)

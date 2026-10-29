@@ -144,7 +144,9 @@ test('local available axes survive native full/selective configuration handoff',
       ]
     }
   })
-  const config = configurationOf(handoffAPI.read(JSON.stringify(handoffAPI.configuration(document, {}))))
+  const config = configurationOf(
+    handoffAPI.read(JSON.stringify(handoffAPI.configuration(document, {})))
+  )
   assert.deepEqual(fontRequirements(config.document)[0].axes, axes)
   const selected = handoffAPI.sections(document, ['typography'])
   const restored = handoffAPI.apply(handoffAPI.configuration(base(), {}), selected, 'replace')

@@ -137,7 +137,11 @@ test('full-theme and selective geometry handoff preserve modes, canvas ownership
   assert.deepEqual(full, document)
   assert.deepEqual(documentAPI.compile(full).modes, documentAPI.compile(document).modes)
   const selective = parseThemeDocument(
-    JSON.parse(JSON.stringify(exportThemeSections(readThemeDocument(document), ['control', 'spacing', 'surface'])))
+    JSON.parse(
+      JSON.stringify(
+        exportThemeSections(readThemeDocument(document), ['control', 'spacing', 'surface'])
+      )
+    )
   )
   assert.equal(selective.kind, 'radiant-theme-sections')
   assert.equal('id' in selective ? selective.id : undefined, undefined)

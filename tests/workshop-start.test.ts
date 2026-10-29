@@ -58,7 +58,11 @@ test('every example round-trips through the handoff configuration', () => {
   for (const theme of startingThemes) {
     const snapshot = exampleSnapshot(theme)
     const text = jsonText(snapshotConfiguration(snapshot))
-    assert.deepEqual(snapshotFromConfiguration(configurationOf(handoffAPI.read(text))), snapshot, theme.id)
+    assert.deepEqual(
+      snapshotFromConfiguration(configurationOf(handoffAPI.read(text))),
+      snapshot,
+      theme.id
+    )
     assert.deepEqual(readSharedTheme(text), snapshot, `${theme.id}: shared theme`)
   }
 })

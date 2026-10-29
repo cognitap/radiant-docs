@@ -91,10 +91,7 @@ test('partial merge/replacement preserve unrelated sections and invalidate only 
   assert.equal(merged.document.id, document.id)
   assert.deepEqual(merged.document.sections.components, document.sections.components)
   assert.deepEqual(merged.recipes, original.recipes)
-  assert.deepEqual(
-    merged.document.sections.typography!.fonts,
-    document.sections.typography!.fonts
-  )
+  assert.deepEqual(merged.document.sections.typography!.fonts, document.sections.typography!.fonts)
   const replaced = handoffAPI.apply(original, partial, 'replace')
   assert.equal(replaced.document.sections.typography!.fonts, undefined)
   assert.deepEqual(replaced.document.sections.color, document.sections.color)

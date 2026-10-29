@@ -1,7 +1,12 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { updateThemeDocument } from '@cognitap/radiant'
-import { setupGuide, setups, springMotion, type SetupGuide } from '../examples/workshop/workshop-setup.ts'
+import {
+  setupGuide,
+  setups,
+  springMotion,
+  type SetupGuide
+} from '../examples/workshop/workshop-setup.ts'
 import { handoffAPI } from '../examples/workshop/workshop-handoff.ts'
 import { fontSetup } from '../examples/workshop/font-requirements.ts'
 import { initialDocument, readThemeDocument } from '../examples/workshop/workshop-theme.ts'

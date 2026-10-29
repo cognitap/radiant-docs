@@ -1,7 +1,12 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { defaultTheme } from '@cognitap/radiant'
-import { documentAPI, initialDocument, type Editor, type WorkshopDocument } from '../examples/workshop/workshop-theme.ts'
+import {
+  documentAPI,
+  initialDocument,
+  type Editor,
+  type WorkshopDocument
+} from '../examples/workshop/workshop-theme.ts'
 import { resetEditor, type ThemeSnapshot } from '../examples/workshop/workshop-snapshot.ts'
 
 const snapshot = (document: WorkshopDocument): ThemeSnapshot => ({
