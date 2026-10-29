@@ -201,3 +201,45 @@ test('Progress keeps native labels and unknown ranges while announcing only comp
     }
   })
 })
+
+test('Spinner separates decorative and named loading, honors motion off, and clears busy state on completion', async () => {
+  await withSite(async (baseURL, browser) => {
+    const page = await browser.newPage()
+    const errors = track(page)
+    try {
+      await capture(page, 'spinner-loading', async () => {
+        await page.goto(`${baseURL}/docs/spinner/`)
+        const demo = page.getByRole('region', { name: 'Account loading', exact: true })
+        await page.waitForFunction(
+          () => !document.querySelector<HTMLButtonElement>('.demo-heading button')?.disabled
+        )
+        const details = demo.getByRole('region', { name: 'Account details', exact: true })
+        const status = demo.getByRole('status', { name: 'Account result', exact: true })
+        assert.equal(await details.getAttribute('aria-busy'), 'true')
+        assert.equal(await details.locator('svg').getAttribute('aria-hidden'), 'true')
+        assert.equal(await details.getByRole('img').count(), 0)
+        await details.getByText('Loading account…', { exact: true }).waitFor()
+        assert.equal(await status.innerText(), '')
+        await demo.getByRole('checkbox', { name: 'Standalone indicator', exact: true }).check()
+        const spinner = details.getByRole('img', { name: 'Loading account', exact: true })
+        await spinner.waitFor()
+        await demo.getByRole('checkbox', { name: 'Disable indicator motion', exact: true }).check()
+        assert.equal(await spinner.evaluate(node => getComputedStyle(node).animationName), 'none')
+        const complete = demo.getByRole('button', { name: 'Simulate account loaded', exact: true })
+        await complete.click()
+        await status.getByText('Account loaded.', { exact: true }).waitFor()
+        assert.equal(await details.getAttribute('aria-busy'), 'false')
+        assert.equal(await details.locator('svg').count(), 0)
+        await demo.getByRole('button', { name: 'Reload account', exact: true }).click()
+        assert.equal(await details.getAttribute('aria-busy'), 'true')
+        assert.equal(await status.innerText(), '')
+        await demo.getByRole('button', { name: 'Reset preview', exact: true }).click()
+        assert.equal(await details.getByRole('img').count(), 0)
+        assert.equal(await details.locator('svg').getAttribute('aria-hidden'), 'true')
+        assert.deepEqual(errors, [])
+      })
+    } finally {
+      await page.close()
+    }
+  })
+})

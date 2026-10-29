@@ -1,0 +1,52 @@
+---
+title: Spinner
+description: Compact decorative or named activity feedback.
+---
+
+import { SpinnerDemo } from '../../components/SpinnerDemo'
+
+<SpinnerDemo />
+
+## Choose one loading description
+
+Spinner is a visual activity indicator. Beside visible loading text, leave
+`label` unset: the SVG is decorative and hidden from assistive technology.
+[Button](/docs/button/)'s pending state uses this treatment while preserving
+the action's name and activation guard.
+
+For a standalone indicator, supply a meaningful nonempty `label`, such as
+`"Loading account"`. It becomes an image with that accessible name. Whitespace-only
+labels throw. Avoid repeating the same loading message through adjacent text,
+a named image and a live region.
+
+Spinner adds no live region, focus movement, timers or fetching state. A named
+image can be discovered while reading; it does not automatically announce
+when inserted. When an announcement is useful, let the application own a
+concise status message through [Alert](/docs/alert/).
+
+## Own the loading lifecycle
+
+Set `aria-busy` on the content region being updated. Remove Spinner and clear
+busy state when content is ready. Keep completion or failure announcements
+outside the busy region so they are not held back. Keep useful text, retry or
+cancellation actions available; a spinner alone cannot explain a stalled request.
+
+Use [Progress](/docs/progress/) when a measurable amount of work is known.
+Spinner does not expose a percentage or simulate progress.
+
+## Customize
+
+`controlSize` accepts `small`, `medium` (default) and `large`. Native SVG props,
+`className`, `style` and an `SVGSVGElement` ref reach the actual SVG. Spinner
+owns its view box, focusability and decorative/named semantics. It takes no
+children. `SpinnerProps` is exported.
+
+Use `components.spinner` or local `--rad-spinner-*` variables for `size`,
+`sizeSmall`, `sizeLarge`, `color`, `strokeWidth`, `duration` and `trackOpacity`.
+The `track` and `indicator` parts accept only `className` and `style`; root and
+part slots are `spinner`, `spinner-track` and `spinner-indicator`.
+
+Reduced motion, `motion="off"` and the theme's motion-off setting stop rotation
+while keeping a visible static arc. No MotionProvider or animation engine is
+required. Forced colors use system text color. Preserve a visible indicator
+and useful loading description when restyling.
