@@ -27,7 +27,12 @@ const byFace = <T>(fn: (face: Face) => T) =>
 const byGlow = <T>(fn: (name: GlowName) => T) =>
   Object.fromEntries(GLOW_NAMES.map(name => [name, fn(name)])) as Record<GlowName, T>
 const clamp = (n: number, min: number, max: number) => Math.min(max, Math.max(min, n))
-const num = (n: number) => Number(n.toFixed(3))
+/**
+ * Numbers written into the SVG are rounded. The server and the browser can
+ * disagree in the last digit of the same maths, and rounding keeps the
+ * hydrated attributes identical.
+ */
+export const num = (n: number) => Number(n.toFixed(3))
 
 /* Geometry */
 
@@ -346,10 +351,10 @@ export interface Stop {
 function stop(offset: number, lab: Vec3, opacity: number): Stop {
   const p3 = fit(lab, linearP3).map(c => encode(clamp(c, 0, 1)))
   return {
-    offset,
+    offset: Number(offset.toFixed(4)),
     color: toHex(fit(lab, linearSrgb).map(c => encode(clamp(c, 0, 1)))),
     p3: `color(display-p3 ${p3.map(c => c.toFixed(4)).join(' ')})`,
-    opacity
+    opacity: num(opacity)
   }
 }
 

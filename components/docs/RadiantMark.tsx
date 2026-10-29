@@ -12,6 +12,7 @@ import {
   createMotion,
   getGeometry,
   lightStops,
+  num,
   type Face,
   type Frame,
   type Input,
@@ -153,7 +154,7 @@ function sheen(face: Face, { yaw, pitch }: Pose) {
 
 // Map a plate's own (u, v) coordinates onto the screen, so a circle drawn in
 // that plane becomes the correctly foreshortened ellipse.
-const matrix = (f: Frame) => `matrix(${[...f.u, ...f.v, ...f.origin].join(' ')})`
+const matrix = (f: Frame) => `matrix(${[...f.u, ...f.v, ...f.origin].map(num).join(' ')})`
 
 // Where a stop has a P3 colour, the style wins with it and the attribute is the sRGB fallback.
 const stops = (list: (Pick<Stop, 'offset' | 'color'> & Partial<Stop>)[]) =>
@@ -189,11 +190,11 @@ function Scene({ pose }: { pose: Pose }) {
   const glowCircle = (cx: number, cy: number, r: number, fill: string, opacity?: number) => (
     <circle
       key={fill}
-      cx={cx}
-      cy={cy}
-      r={r}
+      cx={num(cx)}
+      cy={num(cy)}
+      r={num(r)}
       fill={url(fill)}
-      opacity={opacity}
+      opacity={opacity === undefined ? undefined : num(opacity)}
       style={{ mixBlendMode: 'screen' }}
     />
   )
@@ -227,14 +228,14 @@ function Scene({ pose }: { pose: Pose }) {
               key={`${face}-sheen`}
               id={id(`${face}-sheen`)}
               gradientUnits="userSpaceOnUse"
-              cx={s.cx}
-              cy={s.cy}
+              cx={num(s.cx)}
+              cy={num(s.cy)}
               r={s.r}
               gradientTransform={matrix(g.frames[face])}
             >
               {stops([
                 { offset: 0, color: '#f1ebf8', opacity: s.opacity },
-                { offset: 0.55, color: '#f1ebf8', opacity: s.opacity * 0.35 },
+                { offset: 0.55, color: '#f1ebf8', opacity: num(s.opacity * 0.35) },
                 { offset: 1, color: '#f1ebf8', opacity: 0 }
               ])}
             </radialGradient>,
@@ -250,9 +251,9 @@ function Scene({ pose }: { pose: Pose }) {
             key={name}
             id={id(`${name}-light`)}
             gradientUnits="userSpaceOnUse"
-            cx={g.glows[name][0]}
-            cy={g.glows[name][1]}
-            r={glowRadius}
+            cx={num(g.glows[name][0])}
+            cy={num(g.glows[name][1])}
+            r={num(glowRadius)}
           >
             {stops(light.glows[name])}
           </radialGradient>
@@ -260,18 +261,18 @@ function Scene({ pose }: { pose: Pose }) {
         <radialGradient
           id={id('haze-light')}
           gradientUnits="userSpaceOnUse"
-          cx={sx}
-          cy={sy}
-          r={hazeRadius}
+          cx={num(sx)}
+          cy={num(sy)}
+          r={num(hazeRadius)}
         >
           {stops(light.haze)}
         </radialGradient>
         <radialGradient
           id={id('fade')}
           gradientUnits="userSpaceOnUse"
-          cx={g.center[0]}
-          cy={g.center[1]}
-          r={FADE * g.unit}
+          cx={num(g.center[0])}
+          cy={num(g.center[1])}
+          r={num(FADE * g.unit)}
         >
           {stops([
             { offset: 0, color: '#fff' },
@@ -400,7 +401,7 @@ function Scene({ pose }: { pose: Pose }) {
         <use
           href={`#${id('emitter')}`}
           filter={url('bloom')}
-          opacity={bloom(pose)}
+          opacity={num(bloom(pose))}
         />
       </g>
     </svg>
