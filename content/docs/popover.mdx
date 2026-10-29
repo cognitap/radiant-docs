@@ -1,0 +1,77 @@
+---
+title: Popover
+description: Nonmodal anchored content that preserves the surrounding page.
+---
+
+```tsx
+import {
+  Popover,
+  PopoverTrigger,
+  PopoverPortal,
+  PopoverContent,
+  PopoverClose
+} from '@cognitap/radiant'
+
+;<Popover>
+  <PopoverTrigger>Delivery details</PopoverTrigger>
+  <PopoverPortal>
+    <PopoverContent
+      side="bottom"
+      align="start"
+    >
+      <p>Standard delivery takes three to five working days.</p>
+      <PopoverClose variant="outline">Got it</PopoverClose>
+    </PopoverContent>
+  </PopoverPortal>
+</Popover>
+```
+
+## Own the content semantics
+
+Popover supplies a nonmodal top-layer surface. Content stays a `div` without
+an implicit role. Supply appropriate semantics and names: an interactive
+preferences panel can use `role="dialog"` with `aria-label`. A menu or listbox
+also needs its own keyboard and selection behavior; a role alone is insufficient.
+Use [Dialog](/docs/dialog/) when the surrounding page must become inert.
+
+Trigger owns `aria-expanded` and `aria-controls`; it adds no `aria-haspopup`.
+Trigger and Close compose [Button](/docs/button/), including guards, native
+form props, `render` and refs. Forward all resolved props to one button.
+`preventDefault()` in their click handler cancels the state request.
+
+## Focus and dismissal
+
+Opening keeps focus on the trigger. Content's `initialFocusRef` can target a
+descendant on each open. Native navigation places content after the trigger
+in Tab order. Focus is never trapped. Moving focus outside dismisses it.
+
+Escape dismisses the top Popover layer; Close dismisses its owner. They return
+focus to the trigger when focus was inside. Outside pointer/focus dismissal
+preserves the new target. Closing an ancestor Popover or Dialog hides its
+descendants. Unmount removes observers, listeners and motion bindings.
+
+Choose controlled `open`/`onOpenChange` or initial `defaultOpen`. Controlled
+owners may refuse requests. Independent controlled surfaces may coexist.
+Keep the trigger mounted and visible while using its content.
+
+## Position and customize
+
+Content accepts `side` (`top`, `right`, `bottom`, `left`), `align` (`start`,
+`center`, `end`), `sideOffset` (8) and `collisionPadding` (8). Numeric values
+must be finite and nonnegative. Placement flips and shifts within the visual
+viewport and updates after scrolling, resizing and content changes. Top/bottom
+start/end follow RTL; left/right are physical sides.
+
+Root and Portal add no wrapper. Portal mounts beside the trigger, preserving
+themes, native forms and modal ancestry while the top layer escapes clipping.
+Content owns its style/ref target. Use `components.popover` or local
+`--rad-popover-*` variables, such as `width`, `padding`, `radius` and `shadow`.
+Retain bounded scrolling, visible focus and hidden closed content.
+
+Content exposes `data-state`, effective `data-side`/`data-align`, and
+`data-slot="popover-content"`. Buttons add `popover-trigger` or `popover-close`
+to their Button identity. Optional MotionProvider entry feedback honors
+Content's `motion="off"` and reduced motion; closing stays immediate.
+
+Each part's prop type, `PopoverRenderProps`, `PopoverSide`, `PopoverAlign` and
+`PopoverState` are exported. `usePopover()` returns state or `null` outside its owner.
