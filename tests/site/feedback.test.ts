@@ -243,3 +243,65 @@ test('Spinner separates decorative and named loading, honors motion off, and cle
     }
   })
 })
+
+test('Skeleton hides placeholder shapes and leaves meaningful loading status to the application', async () => {
+  await withSite(async (baseURL, browser) => {
+    const page = await browser.newPage()
+    const errors = track(page)
+    try {
+      await capture(page, 'skeleton-loading', async () => {
+        await page.goto(`${baseURL}/docs/skeleton/`)
+        const demo = page.getByRole('region', { name: 'Account placeholders', exact: true })
+        await page.waitForFunction(
+          () => !document.querySelector<HTMLButtonElement>('.demo-heading button')?.disabled
+        )
+        const details = demo.getByRole('region', { name: 'Account details', exact: true })
+        const status = demo.getByRole('status', { name: 'Account loading status', exact: true })
+        const shapes = details.locator('[data-slot~="skeleton"]')
+        assert.equal(await shapes.count(), 4)
+        assert.equal(await details.getAttribute('aria-busy'), 'true')
+        assert.deepEqual(
+          await shapes.evaluateAll(nodes =>
+            nodes.map(node => ({
+              hidden: node.getAttribute('aria-hidden'),
+              text: node.textContent
+            }))
+          ),
+          Array.from({ length: 4 }, () => ({ hidden: 'true', text: '' }))
+        )
+        await status.getByText('Loading account…', { exact: true }).waitFor()
+        await demo
+          .getByRole('checkbox', { name: 'Disable placeholder motion', exact: true })
+          .check()
+        assert.deepEqual(
+          await shapes.evaluateAll(nodes =>
+            nodes.map(node => getComputedStyle(node).animationName)
+          ),
+          ['none', 'none', 'none', 'none']
+        )
+        await demo.getByRole('button', { name: 'Simulate account loaded', exact: true }).click()
+        await details.getByRole('heading', { name: 'Jordan Rivera', exact: true }).waitFor()
+        await status.getByText('Account loaded.', { exact: true }).waitFor()
+        assert.equal(await details.getAttribute('aria-busy'), 'false')
+        assert.equal(await shapes.count(), 0)
+        const reload = demo.getByRole('button', { name: 'Reload account', exact: true })
+        assert.equal(await reload.evaluate(node => node === document.activeElement), true)
+        await reload.click()
+        await status.getByText('Loading account…', { exact: true }).waitFor()
+        assert.equal(await shapes.count(), 4)
+        assert.equal(await details.getAttribute('aria-busy'), 'true')
+        await demo.getByRole('button', { name: 'Reset preview', exact: true }).click()
+        assert.equal(
+          await demo
+            .getByRole('checkbox', { name: 'Disable placeholder motion', exact: true })
+            .isChecked(),
+          false
+        )
+        assert.equal(await shapes.count(), 4)
+        assert.deepEqual(errors, [])
+      })
+    } finally {
+      await page.close()
+    }
+  })
+})
