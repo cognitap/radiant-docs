@@ -1,0 +1,56 @@
+---
+title: Tooltip
+description: Supplementary descriptions on hover and keyboard focus.
+---
+
+import { TooltipDemo } from '../../components/TooltipDemo'
+
+<TooltipDemo />
+
+## Keep the action understandable
+
+Use Tooltip for brief, nonessential descriptions. Keep names, instructions and
+critical information visible without hovering. Content must contain no links,
+buttons or other interactive elements. Use [Popover](/docs/popover/) for
+interactive anchored content.
+
+Trigger composes [Button](/docs/button/), including native props, guards,
+`render` and refs. Forward all resolved props to one button. Tooltip owns an
+`aria-describedby` relationship and merges existing description IDs; it does
+not replace the accessible name. Content is a nonfocusable `span` with
+`role="tooltip"`. Native disabled buttons cannot receive focus: place any
+explanation in visible text rather than depending on their tooltip.
+
+## Timing and dismissal
+
+Keyboard focus opens immediately. Mouse and pen hover open after `openDelay`
+(default 500 ms). Leaving both trigger and content closes after `closeDelay`
+(default 150 ms); moving across the placement gap keeps the description open.
+Both delays must be finite and nonnegative.
+
+Escape dismisses the top overlay without moving focus. The current hover/focus
+session stays dismissed; leaving and entering again permits reopening.
+Clicking the trigger dismisses the tooltip while preserving its action. Touch
+activation does not open it. No essential information should depend on touch
+users discovering a tooltip.
+
+Choose controlled `open`/`onOpenChange` or initial `defaultOpen`. Owners may
+refuse state requests. Unmount cancels timers and listeners.
+
+## Position and style
+
+Content accepts `side`, `align`, `sideOffset` and `collisionPadding`, following
+[Popover positioning](/docs/popover/#position-and-customize). Portal mounts
+beside the trigger to preserve themes and modal ancestry; the top layer
+escapes clipping. Keep the trigger mounted and visible.
+
+Style Content through `className`, `style`, a span ref, `components.tooltip`
+or local `--rad-tooltip-*` variables. Overrides include `maxWidth`, `padding`,
+`radius`, `background`, `color`, borders, `shadow`, `fontSize` and `fontWeight`.
+Preserve hidden closed content and readable wrapping. Optional popup motion
+honors `motion="off"` and reduced motion.
+
+Parts expose `tooltip-trigger` and `tooltip-content` slots plus `data-state`,
+`data-side` and `data-align`. Root and Portal add no host. All part prop types,
+`TooltipRenderProps` and `TooltipState` are exported; `useTooltip()` returns
+state or `null` outside its owner.
