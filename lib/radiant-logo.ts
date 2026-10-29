@@ -1,71 +1,33 @@
 /**
- * The Radiant mark: three rounded plates on a cube around a light that lives
- * inside. Ported from identity lab v28 (radiant-logo/radiant-v28.html); the
- * geometry, light and motion are the same. No runtime dependencies.
+ * The Radiant mark, from identity lab v28 (radiant-logo/radiant-v28.html):
+ * three rounded plates on a cube around a light that lives inside. This module
+ * holds the geometry, the light and the motion; RadiantMark draws them.
  */
 
+export type Face = 'top' | 'left' | 'right'
+export type GlowName = 'upperLeft' | 'upperRight' | 'lower'
 type Vec3 = [number, number, number]
 type Point = [number, number]
-type Face = 'top' | 'left' | 'right'
-type Cut = 'display' | 'small'
-type GlowName = 'upperLeft' | 'upperRight' | 'lower'
-type SpringKey = 'yaw' | 'pitch' | 'open' | 'press' | 'energy'
 /** A path command and its coordinates, such as ['Q', cx, cy, x, y]. */
 type Command = [string, ...number[]]
 
-export type Pose = Record<SpringKey | 'drift', number>
-export type Appearance = 'material' | 'xray' | 'ink'
-export type MotionMode = 'auto' | 'reduced' | 'off'
-export type Variant = (typeof VARIANTS)[number]
-
-export interface LogoOptions {
-  intensity: number
-  spread: number
-  glow: number
-  chroma: number
-  interactive: boolean
-  motion: MotionMode
-  appearance: Appearance
-  colors: readonly string[]
-  decorative: boolean
-  label: string
+export interface Pose {
+  yaw: number
+  pitch: number
+  open: number
+  press: number
+  energy: number
+  drift: number
 }
 
-type LookOptions = Partial<Pick<LogoOptions, 'chroma' | 'glow' | 'colors' | 'label'>>
-
-interface Frame {
-  origin: Point
-  u: number[]
-  v: number[]
-}
-
-interface Interior {
-  source: Point
-  center: Point
-  glows: Record<GlowName, Point>
-  glowLevels: Record<GlowName, number>
-  hull: Point[]
-  core: string
-  unit: number
-}
-
-export interface Geometry {
-  paths: Record<Face, string>
-  frames: Record<Face, Frame>
-  aperture: string
-  interior: Interior
-  pose: Pose
-}
-
-const clamp = (n: number, min: number, max: number) => Math.min(max, Math.max(min, n))
-const num = (n: number) => Number(n.toFixed(3))
-const FACES: Face[] = ['top', 'left', 'right']
-// The slits, in the order `colors` lists them.
-const GLOW_NAMES: GlowName[] = ['upperLeft', 'upperRight', 'lower']
-const byGlow = <T>(fn: (name: GlowName) => T) =>
-  Object.fromEntries(GLOW_NAMES.map(name => [name, fn(name)])) as Record<GlowName, T>
+export const FACES: Face[] = ['top', 'left', 'right']
+export const GLOW_NAMES: GlowName[] = ['upperLeft', 'upperRight', 'lower']
 const byFace = <T>(fn: (face: Face) => T) =>
   Object.fromEntries(FACES.map(face => [face, fn(face)])) as Record<Face, T>
+const byGlow = <T>(fn: (name: GlowName) => T) =>
+  Object.fromEntries(GLOW_NAMES.map(name => [name, fn(name)])) as Record<GlowName, T>
+const clamp = (n: number, min: number, max: number) => Math.min(max, Math.max(min, n))
+const num = (n: number) => Number(n.toFixed(3))
 
 /* Geometry */
 
@@ -76,11 +38,8 @@ const byFace = <T>(fn: (face: Face) => T) =>
  * moves a plate off its face, so the silhouette is always the same cube.
  * Every corner of a plate shares one radius.
  */
-const CUTS: Readonly<Record<Cut, { gap: number; radius: number }>> = Object.freeze({
-  display: { gap: 0.11, radius: 0.2 },
-  // A wider seam and tighter corners so the Y survives at 16px.
-  small: { gap: 0.2, radius: 0.14 }
-})
+const GAP = 0.11
+const RADIUS = 0.2
 // How much the seam widens per unit of `open`.
 const OPENING = 0.5
 const PLANE: Record<Face, (u: number, v: number) => Vec3> = {
@@ -91,40 +50,23 @@ const PLANE: Record<Face, (u: number, v: number) => Vec3> = {
 // The light lives in a smaller cube inside, so its edge sits behind the plates
 // and only shows, softly, deep inside each slit.
 const INNER = 0.8
-/**
- * A warm-white core sits on the cube's diagonal at (s, s, s): at rest it
- * projects onto the junction, and pressing draws it forward.
- */
-const SOURCE = Object.freeze({ rest: 0.12, pressed: 0.5 })
-/**
- * One coloured glow under each slit, named for where the slit sits. Each is a
- * point in the cube just behind its edge of the Y, so it slides behind the
- * plates when you tilt.
- */
-const GLOWS: Readonly<Record<GlowName, Vec3>> = Object.freeze({
+// A warm-white core sits on the cube's diagonal at (s, s, s): at rest it
+// projects onto the junction, and pressing draws it forward.
+const SOURCE = { rest: 0.12, pressed: 0.5 }
+// One coloured glow under each slit, just behind its edge of the Y, so it
+// slides behind the plates when you tilt.
+const GLOWS: Record<GlowName, Vec3> = {
   upperLeft: [-0.5, 0.62, 0.62],
   upperRight: [0.62, 0.62, -0.5],
   lower: [0.62, -0.5, 0.62]
-})
-/**
- * Idle sway: each glow drifts in and out along its own slit, rises and sinks
- * a little in depth, and breathes in brightness. Phases are spread so the
- * three never move in unison, and no colour ever leaves its slit.
- */
-const SWAY: Readonly<Record<GlowName, { along: number; phase: number }>> = Object.freeze({
+}
+// Idle sway: each glow drifts along its own slit (`along` is that axis), rises
+// and sinks a little in depth, and breathes in brightness. Phases are spread so
+// the three never move in unison, and no colour ever leaves its slit.
+const SWAY: Record<GlowName, { along: number; phase: number }> = {
   upperLeft: { along: 0, phase: 0 },
   upperRight: { along: 2, phase: 2.1 },
   lower: { along: 1, phase: 4.2 }
-})
-function swayed(name: GlowName, t: number) {
-  const { along, phase } = SWAY[name]
-  const p = GLOWS[name].slice()
-  p[along] += 0.36 * Math.sin(3 * t + phase)
-  const depth = 0.12 * Math.sin(2 * t + phase + 1)
-  return {
-    point: p.map((v, i) => (i === along ? v : v + depth)),
-    level: 0.84 + 0.16 * Math.sin(5 * t + phase + 2)
-  }
 }
 // The cube's outline in this range of views, clockwise from the top vertex.
 const HULL: Vec3[] = [
@@ -136,8 +78,30 @@ const HULL: Vec3[] = [
   [-1, 1, 1]
 ]
 
+/** The resting pose: a three-quarter turn with the seam just widened. */
+export const REST: Readonly<Pose> = {
+  yaw: 0.1615,
+  pitch: 0,
+  open: 0.02,
+  press: 0,
+  energy: 0.57,
+  drift: 0
+}
+
+function swayed(name: GlowName, t: number) {
+  const { along, phase } = SWAY[name]
+  const p = GLOWS[name].slice()
+  p[along] += 0.36 * Math.sin(3 * t + phase)
+  const depth = 0.12 * Math.sin(2 * t + phase + 1)
+  return {
+    point: p.map((v, i) => (i === along ? v : v + depth)),
+    level: 0.84 + 0.16 * Math.sin(5 * t + phase + 2)
+  }
+}
+
 /** One plate in its own plane, starting along the outer edge v = -1. */
-function outline({ gap, radius: r }: { gap: number; radius: number }): Command[] {
+function outline(gap: number): Command[] {
+  const r = RADIUS
   const edge = 1 - gap
   return [
     ['M', -1 + r, -1],
@@ -174,185 +138,137 @@ function project(point: readonly number[], pose: Pose): Point {
 }
 
 const coordinatesOf = ([, ...coords]: Command) => coords
-
-function faceCommands(face: Face, pose: Pose, outlineCommands: Command[]): Command[] {
-  return outlineCommands.map(command => {
-    const coords = coordinatesOf(command)
-    const out: Command = [command[0]]
-    for (let i = 0; i < coords.length; i += 2) {
-      out.push(...project(PLANE[face](coords[i], coords[i + 1]), pose))
-    }
-    return out
-  })
-}
-
-function pathData(commands: Command[]) {
-  return commands
-    .map(command => `${command[0]}${coordinatesOf(command).map(num).join(' ')}`)
-    .join(' ')
-}
-
-// The resting pose: a three-quarter turn with the seam just widened. Every
-// export, Still mode and the springs' home all use it.
-const REST: Readonly<Pose> = Object.freeze({
-  yaw: 0.1615,
-  pitch: 0,
-  open: 0.02,
-  press: 0,
-  energy: 0.57,
-  drift: 0
-})
+const pathData = (commands: Command[]) =>
+  commands.map(command => `${command[0]}${coordinatesOf(command).map(num).join(' ')}`).join(' ')
 
 /**
  * The inner cube's outline, with every corner rounded like the plates': the
  * same radius in each face's plane, scaled with the cube. Built in cube space
  * and projected, so the rounding foreshortens exactly as the plates' does.
  */
-function coreOutline(state: Pose, radius: number) {
+function coreOutline(pose: Pose) {
   const corners = HULL.map(p => p.map(v => v * INNER))
   // Hull edges are one cube edge long, 2 plane units, so the curve starts radius / 2 along it.
   const toward = (from: number[], to: number[]) =>
-    from.map((c, k) => c + ((to[k] - c) * radius) / 2)
-  const commands = corners.flatMap((v, i): Command[] => {
-    const before = toward(v, corners[(i + 5) % 6])
-    const after = toward(v, corners[(i + 1) % 6])
-    return [
-      [i ? 'L' : 'M', ...project(before, state)],
-      ['Q', ...project(v, state), ...project(after, state)]
-    ]
-  })
+    from.map((c, k) => c + ((to[k] - c) * RADIUS) / 2)
+  const commands = corners.flatMap((v, i): Command[] => [
+    [i ? 'L' : 'M', ...project(toward(v, corners[(i + 5) % 6]), pose)],
+    ['Q', ...project(v, pose), ...project(toward(v, corners[(i + 1) % 6]), pose)]
+  ])
   return pathData([...commands, ['Z']])
 }
 
-function interior(state: Pose, radius: number): Interior {
-  const s = SOURCE.rest + (SOURCE.pressed - SOURCE.rest) * clamp(state.press, 0, 1)
-  const at = (p: readonly number[]) => project(p, state)
-  const origin = at([0, 0, 0])
-  const axis = (i: number) => at([0, 1, 2].map(k => (k === i ? 1 : 0))).map((c, k) => c - origin[k])
-  // Screen pixels per cube unit, measured across the line of sight.
-  const across = axis(0).map((c, k) => c - axis(2)[k])
-  return {
-    source: at([s, s, s]),
-    center: origin,
-    glows: byGlow(name => at(swayed(name, state.drift).point)),
-    glowLevels: byGlow(name => swayed(name, state.drift).level),
-    hull: HULL.map(at),
-    core: coreOutline(state, radius),
-    unit: Math.hypot(...across) / Math.SQRT2
-  }
+export interface Frame {
+  origin: Point
+  u: number[]
+  v: number[]
 }
 
-/**
- * Everything the renderer needs for one pose. The aperture walks the plates'
- * own edges, so the light fills exactly the gap the plates leave, and closes
- * each tip between the two plates' outer corners. The light never reaches
- * that line: it ends, softly, at the smaller inner cube.
- */
-export function getGeometry(pose: Partial<Pose> = {}, cut: Cut = 'display'): Geometry {
-  if (!CUTS[cut]) throw new TypeError(`Unknown cut: ${cut}`)
-  const state: Pose = { ...REST, ...pose }
-  for (const key of Object.keys(REST) as (keyof Pose)[]) {
-    if (!Number.isFinite(state[key])) throw new TypeError(`Non-finite pose: ${key}`)
-  }
-  state.yaw = clamp(state.yaw, -0.2, 0.45)
-  state.pitch = clamp(state.pitch, -0.23, 0.23)
-  state.open = clamp(state.open, -0.012, 0.24)
-  state.press = clamp(state.press, -0.2, 1.2)
-  const shape = outline({ ...CUTS[cut], gap: CUTS[cut].gap + OPENING * state.open })
-  const commands = byFace(face => faceCommands(face, state, shape))
-  const paths = byFace(face => pathData(commands[face]))
+export interface Geometry {
+  paths: Record<Face, string>
+  /** Each plate's own axes on screen, for anything drawn in the plate's plane. */
+  frames: Record<Face, Frame>
+  aperture: string
+  core: string
+  source: Point
+  center: Point
+  glows: Record<GlowName, Point>
+  glowLevels: Record<GlowName, number>
+  /** Screen pixels per cube unit, measured across the line of sight. */
+  unit: number
+}
 
+export function getGeometry(pose: Pose): Geometry {
+  const at = (p: readonly number[]) => project(p, pose)
+  const shape = outline(GAP + OPENING * pose.open)
+  const commands = byFace(face =>
+    shape.map(command => {
+      const coords = coordinatesOf(command)
+      const out: Command = [command[0]]
+      for (let i = 0; i < coords.length; i += 2)
+        out.push(...at(PLANE[face](coords[i], coords[i + 1])))
+      return out
+    })
+  )
   const end = (face: Face, i: number) => coordinatesOf(commands[face][i]).slice(-2)
   const ctrl = (face: Face, i: number) => coordinatesOf(commands[face][i]).slice(0, 2)
+  /** A plate's edge from the end of command `from` to the end of command `to`, either way round. */
+  const walk = (face: Face, from: number, to: number) => {
+    const out: Command[] = []
+    if (from < to) for (let i = from + 1; i <= to; i++) out.push(commands[face][i])
+    else
+      for (let i = from; i > to; i--)
+        out.push(
+          commands[face][i][0] === 'Q'
+            ? ['Q', ...ctrl(face, i), ...end(face, i - 1)]
+            : ['L', ...end(face, i - 1)]
+        )
+    return out
+  }
+  // The light's opening walks the plates' inner edges, so it fills exactly the
+  // gap they leave, and crosses each tip between two plates' outer corners.
   const aperture = pathData([
     ['M', ...end('top', 5)],
-    ['L', ...end('top', 4)],
-    ['Q', ...ctrl('top', 4), ...end('top', 3)],
-    ['L', ...end('top', 2)],
-    ['Q', ...ctrl('top', 2), ...end('top', 1)],
+    ...walk('top', 5, 1),
     ['L', ...end('right', 6)],
-    ['Q', ...ctrl('right', 6), ...end('right', 5)],
-    ['L', ...end('right', 4)],
-    ['Q', ...ctrl('right', 4), ...end('right', 3)],
-    ['L', ...end('right', 2)],
-    ['Q', ...ctrl('right', 2), ...end('right', 1)],
+    ...walk('right', 6, 1),
     ['L', ...end('left', 1)],
-    ['Q', ...ctrl('left', 2), ...end('left', 2)],
-    ['L', ...end('left', 3)],
-    ['Q', ...ctrl('left', 4), ...end('left', 4)],
-    ['L', ...end('left', 5)],
-    ['Q', ...ctrl('left', 6), ...end('left', 6)],
+    ...walk('left', 1, 6),
     ['L', ...end('top', 6)],
-    ['Q', ...ctrl('top', 6), ...end('top', 5)],
+    ...walk('top', 6, 5),
     ['Z']
   ])
 
-  // Each plate's own axes on screen, for anything drawn in the plate's plane.
-  const frames = byFace(face => {
-    const origin = project(PLANE[face](0, 0), state)
-    const axis = (u: number, v: number) =>
-      project(PLANE[face](u, v), state).map((c, k) => c - origin[k])
-    return { origin, u: axis(1, 0), v: axis(0, 1) }
-  })
-
-  return { paths, frames, aperture, interior: interior(state, CUTS[cut].radius), pose: state }
+  const origin = at([0, 0, 0])
+  const axis = (i: number) => at([0, 1, 2].map(k => (k === i ? 1 : 0))).map((c, k) => c - origin[k])
+  const across = axis(0).map((c, k) => c - axis(2)[k])
+  const s = SOURCE.rest + (SOURCE.pressed - SOURCE.rest) * clamp(pose.press, 0, 1)
+  return {
+    paths: byFace(face => pathData(commands[face])),
+    frames: byFace(face => {
+      const o = at(PLANE[face](0, 0))
+      const along = (u: number, v: number) => at(PLANE[face](u, v)).map((c, k) => c - o[k])
+      return { origin: o, u: along(1, 0), v: along(0, 1) }
+    }),
+    aperture,
+    core: coreOutline(pose),
+    source: at([s, s, s]),
+    center: origin,
+    glows: byGlow(name => at(swayed(name, pose.drift).point)),
+    glowLevels: byGlow(name => swayed(name, pose.drift).level),
+    unit: Math.hypot(...across) / Math.SQRT2
+  }
 }
 
 /* Light */
 
 /*
- * The inside of the cube is a glowing volume, not a set of walls: a white
- * core and three coloured glows, each a soft disc that overlaps the others,
- * so the colours meet in continuous blends and nothing inside has an edge.
- *
- * It adapts to any background and any three colours. A glow keeps its own
- * colour as it fades and loses opacity, never brightness, so it thins into
- * whatever is behind the mark, black, paper or anything between, without
- * passing through a darker shade on the way. Towards its centre it lifts
- * toward white, the way bright light reads. The colours are used as given:
- * nothing here is tuned to a particular hue.
+ * The inside of the cube is a glowing volume, not a set of walls: a white core
+ * and three coloured glows, each a soft disc that overlaps the others, so the
+ * colours meet in continuous blends and nothing inside has an edge. A glow
+ * keeps its own colour as it fades and loses opacity, never brightness, so it
+ * thins into whatever is behind the mark without passing through a darker
+ * shade. Towards its centre it lifts toward white, the way bright light reads.
  */
-const PALETTE: readonly string[] = Object.freeze(['#ff8e61', '#6a72ff', '#c25cf6'])
+const PALETTE: Record<GlowName, string> = {
+  upperLeft: '#ff8e61',
+  upperRight: '#6a72ff',
+  lower: '#c25cf6'
+}
 // Gradient reach, in cube units: the glows overlap well past each other's centres.
-const GLOW_RADIUS = 1.8
+export const GLOW_RADIUS = 1.8
 const GLOW_CORE = 0.4
-const HAZE_RADIUS = 1.9
+export const HAZE_RADIUS = 1.9
 const HAZE_LENGTH = 0.4
 // Light runs a touch richer than the colour it is given, so the band between a
 // glow's hot centre and its tail reads vivid rather than flat.
 const VIVID = 1.3
 const CORE: Vec3 = [1, 0.985, 0.96]
-const toHex = (rgb: number[]) =>
-  '#' +
-  rgb
-    .map(v =>
-      Math.round(clamp(v, 0, 1) * 255)
-        .toString(16)
-        .padStart(2, '0')
-    )
-    .join('')
-
-interface Paint {
-  color: string
-  p3: string
-}
-interface Stop extends Paint {
-  offset: number
-  opacity: number
-}
-interface Look {
-  colors: Record<GlowName, Vec3>
-  palette: string
-  lift: number
-  haze: number
-  bloom: number
-}
 
 /*
- * Colour maths runs in OKLab/OKLCH, where mixing toward white keeps hue and
- * vividness instead of greying out, and chroma is real perceptual
- * saturation. Each colour is then fitted to two gamuts: Display P3 for screens
- * that have it, so the vivid band can run past what sRGB can show, and sRGB as
+ * Colour maths runs in OKLab, where mixing toward white keeps hue and
+ * vividness instead of greying out. Each colour is fitted to Display P3 for
+ * screens that have it, so the vivid band can run past sRGB, and to sRGB as
  * the fallback everywhere else.
  */
 const decode = (c: number) => (c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4)
@@ -390,8 +306,8 @@ const inGamut = (rgb: Vec3) => rgb.every(c => c >= -1e-6 && c <= 1 + 1e-6)
 /** Pull chroma in, keeping lightness and hue, until the colour fits the gamut. */
 function fit([L, a, b]: Vec3, toLinear: (lab: Vec3) => Vec3) {
   if (inGamut(toLinear([L, a, b]))) return toLinear([L, a, b])
-  let lo = 0,
-    hi = 1
+  let lo = 0
+  let hi = 1
   for (let i = 0; i < 18; i++) {
     const k = (lo + hi) / 2
     if (inGamut(toLinear([L, a * k, b * k]))) lo = k
@@ -399,690 +315,167 @@ function fit([L, a, b]: Vec3, toLinear: (lab: Vec3) => Vec3) {
   }
   return toLinear([L, a * lo, b * lo])
 }
-/** A colour as an sRGB hex fallback and a Display P3 CSS colour. */
-function paint(lab: Vec3): Paint {
-  const p3 = fit(lab, linearP3).map(c => encode(clamp(c, 0, 1)))
-  return {
-    color: toHex(fit(lab, linearSrgb).map(c => encode(clamp(c, 0, 1)))),
-    p3: `color(display-p3 ${p3.map(c => c.toFixed(4)).join(' ')})`
-  }
-}
-/** Scale chroma, the perceptual saturation, keeping lightness and hue. */
-const saturate = ([L, a, b]: Vec3, k: number): Vec3 => [L, a * k, b * k]
+const toHex = (rgb: number[]) =>
+  '#' +
+  rgb
+    .map(v =>
+      Math.round(clamp(v, 0, 1) * 255)
+        .toString(16)
+        .padStart(2, '0')
+    )
+    .join('')
 /** Mix toward white in OKLab, so hue holds all the way to the white-hot centre. */
 const towardWhite = ([L, a, b]: Vec3, t: number): Vec3 => [
   L + (1 - L) * t,
   a * (1 - t),
   b * (1 - t)
 ]
+const GLOW_COLORS = byGlow((name): Vec3 => {
+  const n = parseInt(PALETTE[name].slice(1), 16)
+  const [L, a, b] = toOklab([n >> 16, (n >> 8) & 255, n & 255].map(v => v / 255))
+  return [L, a * VIVID, b * VIVID]
+})
 
-function parseColor(hex: string) {
-  const match = /^#?([0-9a-f]{6})$/i.exec(String(hex))
-  if (!match) throw new TypeError(`Colour must be #rrggbb: ${hex}`)
-  const n = parseInt(match[1], 16)
-  return [n >> 16, (n >> 8) & 255, n & 255].map(v => v / 255)
+/** One gradient stop: an sRGB hex fallback, and a Display P3 colour where supported. */
+export interface Stop {
+  offset: number
+  color: string
+  p3: string
+  opacity: number
 }
-
-function levels(pose: Pose, { chroma = 1, glow = 1, colors = PALETTE }: LookOptions = {}): Look {
-  const e = clamp(pose.energy, 0, 1.5)
-  // A wider seam shows more light; hold total bloom roughly steady.
-  const open = Math.max(0, pose.open)
+function stop(offset: number, lab: Vec3, opacity: number): Stop {
+  const p3 = fit(lab, linearP3).map(c => encode(clamp(c, 0, 1)))
   return {
-    colors: Object.fromEntries(
-      GLOW_NAMES.map((name, i) => [
-        name,
-        saturate(toOklab(parseColor(colors[i])), clamp(chroma, 0.4, 1.35) * VIVID)
-      ])
-    ) as Record<GlowName, Vec3>,
-    palette: `${colors.join('')}${chroma}`,
-    // How far each glow's centre lifts toward white.
-    lift: 0.3 + 0.16 * e,
-    haze: 0.12 * (1 + 1.2 * e),
-    bloom: ((0.4 + 0.18 * e) * glow) / (1 + 2 * open)
+    offset,
+    color: toHex(fit(lab, linearSrgb).map(c => encode(clamp(c, 0, 1)))),
+    p3: `color(display-p3 ${p3.map(c => c.toFixed(4)).join(' ')})`,
+    opacity
   }
 }
 
-/** A glow seen edge-on: a soft core, then a long tail that thins, not darkens. */
-function glowStops(name: GlowName, { colors, lift }: Look): Stop[] {
-  const edge = (1 + (GLOW_RADIUS / GLOW_CORE) ** 2) ** -1.4
-  return Array.from({ length: 18 }, (_, i) => {
-    const t = i / 17
-    const d = t * GLOW_RADIUS
-    const falloff = ((1 + (d / GLOW_CORE) ** 2) ** -1.4 - edge) / (1 - edge)
-    // White-hot only at the very centre: the lift falls off much faster than the colour.
-    return {
-      offset: t,
-      ...paint(towardWhite(colors[name], lift * falloff ** 3)),
-      opacity: falloff ** 0.45
-    }
-  })
-}
-
-/** In-scatter along a sight line passing d from the core: ∝ atan(L/d)/d. */
-function hazeStops({ haze }: Look): Stop[] {
+/** The gradients for one level of energy; they do not change with the pose. */
+export function lightStops(energy: number) {
+  // How far each glow's centre lifts toward white, and how bright the core's haze is.
+  const lift = 0.3 + 0.16 * energy
+  const haze = 0.12 * (1 + 1.2 * energy)
+  // A glow seen edge-on: a soft core, then a long tail that thins, not darkens.
+  const glowEdge = (1 + (GLOW_RADIUS / GLOW_CORE) ** 2) ** -1.4
+  const glow = (name: GlowName) =>
+    Array.from({ length: 18 }, (_, i) => {
+      const t = i / 17
+      const falloff =
+        ((1 + ((t * GLOW_RADIUS) / GLOW_CORE) ** 2) ** -1.4 - glowEdge) / (1 - glowEdge)
+      // White-hot only at the very centre: the lift falls off much faster than the colour.
+      return stop(t, towardWhite(GLOW_COLORS[name], lift * falloff ** 3), falloff ** 0.45)
+    })
+  // In-scatter along a sight line passing d from the core: ∝ atan(L/d)/d.
   const scatter = (d: number) => Math.atan(HAZE_LENGTH / d) / d
-  const edge = scatter(HAZE_RADIUS)
-  return Array.from({ length: 18 }, (_, i) => {
-    const t = (i / 17) ** 2
-    const x = haze * (scatter(Math.hypot(t * HAZE_RADIUS, 0.03)) - edge)
-    return { offset: t, ...paint(toOklab(CORE)), opacity: 1 - Math.exp(-x / 3.2) }
-  })
+  const core = toOklab(CORE)
+  return {
+    glows: byGlow(glow),
+    haze: Array.from({ length: 18 }, (_, i) => {
+      const t = (i / 17) ** 2
+      const x = haze * (scatter(Math.hypot(t * HAZE_RADIUS, 0.03)) - scatter(HAZE_RADIUS))
+      return stop(t, core, 1 - Math.exp(-x / 3.2))
+    })
+  }
 }
 
-// The attribute is the sRGB fallback; the style, where supported, wins with P3.
-const STOPS = (stops: Stop[]) =>
-  stops
-    .map(
-      s =>
-        `<stop offset="${s.offset.toFixed(4)}" stop-color="${s.color}" stop-opacity="${Number(s.opacity.toFixed(3))}" style="stop-color:${s.p3}"/>`
-    )
-    .join('')
+/** A wider seam shows more light, so bloom eases off to hold the total steady. */
+export const bloom = (pose: Pose) => (0.4 + 0.18 * pose.energy) / (1 + 2 * Math.max(0, pose.open))
 
 /* Motion */
 
-// Exact solution of m*x'' + c*x' + k*(x-target) = 0 over a time step.
-// A target change preserves velocity, so pointer reversals do not restart an ease.
-class Spring {
-  value: number
-  target: number
-  velocity = 0
-  stiffness: number
-  damping: number
-  mass: number
-
-  constructor(value = 0, stiffness = 190, damping = 22, mass = 1) {
-    if (
-      ![value, stiffness, damping, mass].every(Number.isFinite) ||
-      stiffness <= 0 ||
-      damping <= 0 ||
-      mass <= 0
-    ) {
-      throw new TypeError('Spring requires finite values and positive stiffness, damping and mass')
-    }
-    this.value = value
-    this.target = value
-    this.stiffness = stiffness
-    this.damping = damping
-    this.mass = mass
-  }
-  snap(value = this.target) {
-    this.value = this.target = value
-    this.velocity = 0
-  }
-  step(dt: number) {
-    if (!(dt > 0)) return
-    const w = Math.sqrt(this.stiffness / this.mass)
-    const a = this.damping / (2 * this.mass)
-    const x = this.value - this.target
-    const v = this.velocity
-    let position, velocity
-    if (Math.abs(a - w) < 1e-5) {
-      const e = Math.exp(-w * dt)
-      const b = v + w * x
-      position = e * (x + b * dt)
-      velocity = e * (v - w * b * dt)
-    } else if (a < w) {
-      const wd = Math.sqrt(w * w - a * a)
-      const e = Math.exp(-a * dt)
-      const c = Math.cos(wd * dt)
-      const s = Math.sin(wd * dt)
-      const b = (v + a * x) / wd
-      position = e * (x * c + b * s)
-      velocity = e * ((-a * x + b * wd) * c + (-a * b - x * wd) * s)
-    } else {
-      const d = Math.sqrt(a * a - w * w)
-      const r1 = -a + d
-      const r2 = -a - d
-      const c1 = (v - r2 * x) / (r1 - r2)
-      const c2 = x - c1
-      position = c1 * Math.exp(r1 * dt) + c2 * Math.exp(r2 * dt)
-      velocity = c1 * r1 * Math.exp(r1 * dt) + c2 * r2 * Math.exp(r2 * dt)
-    }
-    this.value = this.target + position
-    this.velocity = velocity
-    if (Math.abs(position) < 0.00004 && Math.abs(velocity) < 0.0004) this.snap()
-  }
-  get settled() {
-    return this.value === this.target && this.velocity === 0
-  }
-}
-
-/* Render */
-
-const esc = (s: string) =>
-  String(s).replace(
-    /[&<>"']/g,
-    c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&apos;' })[c] ?? c
-  )
-const pts = (points: number[][]) => points.map(p => p.map(num).join(',')).join(' ')
-// Map a plate's own (u, v) coordinates onto the screen, so a circle drawn in
-// that plane becomes the correctly foreshortened ellipse.
-const faceMatrix = (f: Frame) => `matrix(${[...f.u, ...f.v, ...f.origin].map(num).join(' ')})`
-// Light dims gently toward the cube's edge, in cube units from the centre.
-const FADE = 1.75
-
-/**
- * A studio softbox reflected in each plate, placed in the plate's own plane.
- * It slides against the tilt while the light behind the plates slides with
- * depth: two motions that tell surface from interior.
- */
-function sheen(face: Face, { yaw, pitch }: Pose) {
-  const k = 1.8
-  if (face === 'top')
-    return { cx: -0.5 - k * (yaw - pitch), cy: -0.35 + k * (yaw + pitch), r: 1.25, opacity: 0.1 }
-  if (face === 'left') return { cx: -0.35 - k * yaw, cy: 0.7 - k * pitch, r: 1, opacity: 0.055 }
-  return { cx: -0.35 + k * yaw, cy: 0.7 - k * pitch, r: 1, opacity: 0.045 }
-}
-
-/**
- * Layers, back to front: the glowing inner cube seen through the seam, the
- * plate faces with their reflections, then bloom of whatever light is visible.
- * Bloom blends normally, so it reads the same over the plates and over any
- * background, and reaches over the plate edges so light and plates share the
- * same air. The inner cube is smaller than the plates and its edge is soft,
- * so near each corner the light dims away inside the slit and the open end
- * shows what is behind the cube.
- */
-export function sceneMarkup(prefix: string, g = getGeometry(), options: LookOptions = {}) {
-  const id = (n: string) => `${prefix}-${n}`
-  const ref = (n: string) => `url(#${id(n)})`
-  const it = g.interior
-  const look = levels(g.pose, options)
-  const [sx, sy] = it.source.map(num)
-  const [ox, oy] = it.center.map(num)
-  const glowRadius = num(GLOW_RADIUS * it.unit)
-  const hazeRadius = num(HAZE_RADIUS * it.unit)
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="80 78 440 440" width="440" height="440" role="img" aria-labelledby="${id('title')}" focusable="false" data-radiant-svg="" style="display:block;width:100%;height:100%;overflow:visible">
-<title id="${id('title')}">${esc(options.label || 'Radiant')}</title>
-<defs>
-<linearGradient id="${id('top-fill')}" gradientUnits="userSpaceOnUse" x1="300" y1="130" x2="300" y2="300"><stop stop-color="#36333f"/><stop offset="1" stop-color="#24222c"/></linearGradient>
-<linearGradient id="${id('left-fill')}" gradientUnits="userSpaceOnUse" x1="220" y1="235" x2="220" y2="470"><stop stop-color="#211f29"/><stop offset="1" stop-color="#141319"/></linearGradient>
-<linearGradient id="${id('right-fill')}" gradientUnits="userSpaceOnUse" x1="380" y1="235" x2="380" y2="470"><stop stop-color="#1b1a23"/><stop offset="1" stop-color="#0f0f14"/></linearGradient>
-${FACES.map(face => {
-  const s = sheen(face, g.pose)
-  return `<radialGradient id="${id(`${face}-sheen`)}" gradientUnits="userSpaceOnUse" cx="${num(s.cx)}" cy="${num(s.cy)}" r="${s.r}" gradientTransform="${faceMatrix(g.frames[face])}"><stop stop-color="#f1ebf8" stop-opacity="${s.opacity}"/><stop offset=".55" stop-color="#f1ebf8" stop-opacity="${num(s.opacity * 0.35)}"/><stop offset="1" stop-color="#f1ebf8" stop-opacity="0"/></radialGradient>`
-}).join('\n')}
-${GLOW_NAMES.map(name => `<radialGradient id="${id(`${name}-light`)}" gradientUnits="userSpaceOnUse" cx="${num(it.glows[name][0])}" cy="${num(it.glows[name][1])}" r="${glowRadius}">${STOPS(glowStops(name, look))}</radialGradient>`).join('\n')}
-<radialGradient id="${id('haze-light')}" gradientUnits="userSpaceOnUse" cx="${sx}" cy="${sy}" r="${hazeRadius}">${STOPS(hazeStops(look))}</radialGradient>
-<radialGradient id="${id('fade')}" gradientUnits="userSpaceOnUse" cx="${ox}" cy="${oy}" r="${num(FADE * it.unit)}"><stop stop-color="#fff"/><stop offset=".55" stop-color="#fff"/><stop offset=".85" stop-color="#dcdcdc"/><stop offset="1" stop-color="#c8c8c8"/></radialGradient>
-<filter id="${id('bloom-filter')}" filterUnits="userSpaceOnUse" x="0" y="0" width="600" height="600" color-interpolation-filters="sRGB"><feGaussianBlur stdDeviation="2.6" result="near"/><feGaussianBlur in="SourceGraphic" stdDeviation="9" result="mid"/><feGaussianBlur in="SourceGraphic" stdDeviation="28" result="far"/><feComposite in="near" in2="mid" operator="arithmetic" k2=".55" k3=".75" result="nearmid"/><feComposite in="nearmid" in2="far" operator="arithmetic" k2="1" k3="1"/></filter>
-<filter id="${id('core-filter')}" filterUnits="userSpaceOnUse" x="0" y="0" width="600" height="600"><feGaussianBlur stdDeviation="4"/></filter>
-${FACES.map(face => `<path id="${id(face)}" d="${g.paths[face]}"/>`).join('\n')}
-<path id="${id('aperture')}" d="${g.aperture}"/>
-<polygon id="${id('hull')}" points="${pts(it.hull)}"/>
-<path id="${id('core')}" d="${it.core}"/>
-<mask id="${id('core-mask')}" maskUnits="userSpaceOnUse" x="0" y="0" width="600" height="600"><use href="#${id('core')}" fill="#fff" filter="${ref('core-filter')}"/></mask>
-<clipPath id="${id('aperture-clip')}"><use href="#${id('aperture')}"/></clipPath>
-<mask id="${id('fade-mask')}" maskUnits="userSpaceOnUse" x="0" y="0" width="600" height="600"><rect x="0" y="0" width="600" height="600" fill="${ref('fade')}"/></mask>
-<mask id="${id('bloom-mask')}" maskUnits="userSpaceOnUse" x="0" y="0" width="600" height="600"><rect x="0" y="0" width="600" height="600" fill="#fff"/>${FACES.map(face => `<use href="#${id(face)}" fill="#a0a0a0"/>`).join('')}</mask>
-<g id="${id('interior')}" mask="${ref('core-mask')}" style="isolation:isolate">
-<g mask="${ref('fade-mask')}">
-${GLOW_NAMES.map(name => `<circle id="${id(`${name}-glow`)}" cx="${num(it.glows[name][0])}" cy="${num(it.glows[name][1])}" r="${glowRadius}" fill="${ref(`${name}-light`)}" opacity="${num(it.glowLevels[name])}" style="mix-blend-mode:screen"/>`).join('\n')}
-<circle id="${id('haze')}" cx="${sx}" cy="${sy}" r="${hazeRadius}" fill="${ref('haze-light')}" style="mix-blend-mode:screen"/>
-</g>
-</g>
-<g id="${id('emitter')}" clip-path="${ref('aperture-clip')}"><use href="#${id('interior')}"/></g>
-</defs>
-<g id="${id('material')}">
-<use href="#${id('emitter')}"/>
-${(['left', 'right', 'top'] as const).map(face => `<use href="#${id(face)}" fill="${ref(`${face}-fill`)}"/><use href="#${id(face)}" fill="${ref(`${face}-sheen`)}"/>`).join('')}
-<g mask="${ref('bloom-mask')}"><use id="${id('bloom')}" href="#${id('emitter')}" filter="${ref('bloom-filter')}" opacity="${num(look.bloom)}"/></g>
-</g>
-<g id="${id('xray')}" display="none">
-<use href="#${id('interior')}"/>
-${FACES.map(face => `<use href="#${id(face)}" fill="#d9d3e6" fill-opacity=".05" stroke="#ece6f5" stroke-opacity=".55" stroke-width=".9"/>`).join('')}
-<use href="#${id('hull')}" fill="none" stroke="#ece6f5" stroke-opacity=".25" stroke-width=".8" stroke-dasharray="3 4"/>
-<circle id="${id('source-marker')}" cx="${sx}" cy="${sy}" r="3.2" fill="none" stroke="#ffffff" stroke-width="1.2"/>
-${GLOW_NAMES.map(name => `<circle id="${id(`${name}-marker`)}" cx="${num(it.glows[name][0])}" cy="${num(it.glows[name][1])}" r="2.4" fill="none" stroke="#ffffff" stroke-opacity=".8" stroke-width="1"/>`).join('')}
-</g>
-<g id="${id('ink')}" fill="currentColor" display="none">${FACES.map(face => `<use href="#${id(face)}"/>`).join('')}</g>
-</svg>`
-}
-
-/** Returns draw(geometry, options), which updates the mounted scene in place each frame. */
-function connectScene(svg: SVGSVGElement, prefix: string) {
-  const n = (name: string) => {
-    const node = svg.querySelector(`#${prefix}-${name}`)
-    if (!node) throw new Error(`Radiant scene is missing #${prefix}-${name}`)
-    return node
-  }
-  const nodes = Object.fromEntries(
-    [
-      ...FACES.flatMap(f => [f, `${f}-sheen`]),
-      'aperture',
-      'hull',
-      'core',
-      'haze',
-      'haze-light',
-      'fade',
-      'bloom',
-      'material',
-      'xray',
-      'ink',
-      'source-marker',
-      ...GLOW_NAMES.flatMap(w => [`${w}-glow`, `${w}-light`, `${w}-marker`])
-    ].map(name => [name, n(name)])
-  )
-  const stopsOf = (name: string) => Array.from(nodes[name].querySelectorAll('stop'))
-  const glowStopNodes = byGlow(w => stopsOf(`${w}-light`))
-  const hazeStopNodes = stopsOf('haze-light')
-  const attrs = (el: Element, dict: Record<string, number | string>) =>
-    Object.entries(dict).forEach(([k, v]) =>
-      el.setAttribute(k, String(typeof v === 'number' ? num(v) : v))
-    )
-  const paintStop = (node: SVGStopElement, stop: Stop) => {
-    attrs(node, { 'stop-color': stop.color, 'stop-opacity': stop.opacity })
-    node.style.stopColor = stop.p3
-  }
-  // Gradient stops only change with the palette and the light's level, not
-  // with the pose, so they are repainted only when those change.
-  let toneKey = ''
-  return (g: Geometry, config: LogoOptions) => {
-    const it = g.interior
-    const look = levels(g.pose, config)
-    const [cx, cy] = it.source
-    for (const f of FACES) {
-      nodes[f].setAttribute('d', g.paths[f])
-      const s = sheen(f, g.pose)
-      attrs(nodes[`${f}-sheen`], { cx: s.cx, cy: s.cy, gradientTransform: faceMatrix(g.frames[f]) })
-    }
-    nodes.aperture.setAttribute('d', g.aperture)
-    nodes.hull.setAttribute('points', pts(it.hull))
-    nodes.core.setAttribute('d', it.core)
-    const glowRadius = GLOW_RADIUS * it.unit
-    for (const w of GLOW_NAMES) {
-      const [x, y] = it.glows[w]
-      attrs(nodes[`${w}-glow`], { cx: x, cy: y, r: glowRadius, opacity: it.glowLevels[w] })
-      attrs(nodes[`${w}-light`], { cx: x, cy: y, r: glowRadius })
-      attrs(nodes[`${w}-marker`], { cx: x, cy: y })
-    }
-    const hazeRadius = HAZE_RADIUS * it.unit
-    attrs(nodes['haze-light'], { cx, cy, r: hazeRadius })
-    attrs(nodes.haze, { cx, cy, r: hazeRadius })
-    attrs(nodes['source-marker'], { cx, cy })
-    attrs(nodes.fade, { cx: it.center[0], cy: it.center[1], r: FADE * it.unit })
-    const key = [look.lift, look.haze].map(v => Math.round(v * 60)).join(',') + look.palette
-    if (key !== toneKey) {
-      toneKey = key
-      for (const w of GLOW_NAMES)
-        glowStops(w, look).forEach((s, i) => paintStop(glowStopNodes[w][i], s))
-      hazeStops(look).forEach((s, i) => paintStop(hazeStopNodes[i], s))
-    }
-    attrs(nodes.bloom, { opacity: look.bloom })
-    const mode = config.appearance
-    nodes.material.setAttribute('display', mode === 'material' ? 'inline' : 'none')
-    nodes.xray.setAttribute('display', mode === 'xray' ? 'inline' : 'none')
-    nodes.ink.setAttribute('display', mode === 'ink' ? 'inline' : 'none')
-  }
-}
-
-const VARIANTS = ['digital', 'icon', 'black', 'white', 'small', 'small-white'] as const
-
-/**
- * Export static vector geometry without runtime scripts or external assets.
- * `icon` is the illuminated mark on the small-size cut, for app icons and
- * anything under about 64px; `small` and `small-white` are its one-colour forms.
- */
-export function getStaticSVG({
-  variant = 'digital',
-  label = 'Radiant',
-  prefix = 'radiant-static',
-  pose = {},
-  chroma = 1,
-  glow = 1,
-  colors = [...PALETTE]
-}: LookOptions & { variant?: Variant; prefix?: string; pose?: Partial<Pose> } = {}) {
-  if (!VARIANTS.includes(variant)) throw new TypeError('Unknown SVG variant')
-  const small = variant === 'icon' || variant.startsWith('small')
-  const g = getGeometry(small ? {} : pose, small ? 'small' : 'display')
-  if (variant !== 'digital' && variant !== 'icon') {
-    const fill = variant.endsWith('white') ? '#ffffff' : '#000000'
-    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="106 114 388 388" width="388" height="388" role="img" aria-label="${esc(label)}"><title>${esc(label)}</title><g fill="${fill}">${FACES.map(f => `<path d="${g.paths[f]}"/>`).join('')}</g></svg>`
-  }
-  return sceneMarkup(prefix, g, { label, chroma, glow, colors })
-    .replace(
-      'viewBox="80 78 440 440" width="440" height="440"',
-      'viewBox="90 100 420 420" width="420" height="420"'
-    )
-    .replace(/<g id="[^"]+-xray"[\s\S]*?<\/g>/, '')
-    .replace(' style="display:block;width:100%;height:100%;overflow:visible"', '')
-}
-
-/* Engine */
-
-interface Input {
+export interface Input {
+  /** The pointer, from -1 to 1 on each axis, relative to the mark. */
   x: number
   y: number
   active: boolean
   pressed: boolean
 }
+export const IDLE: Input = { x: 0, y: 0, active: false, pressed: false }
 
-export interface RadiantLogo {
-  setInput(next: Partial<Input>): void
-  reset(options?: { immediate?: boolean }): void
-  setOptions(next: Partial<LogoOptions>): void
-  previewPose(next?: Partial<Pose>): void
-  getState(): {
-    pose: Pose
-    targets: Record<SpringKey, number>
-    running: boolean
-    reducedMotion: boolean
-    visible: boolean
-    renderedFrames: number
-    options: LogoOptions
-  }
-  exportSVG(variant?: Variant): string
-  destroy(): void
+interface Spring {
+  value: number
+  target: number
+  velocity: number
+  stiffness: number
+  damping: number
+}
+const spring = (value: number, stiffness: number, damping: number): Spring => ({
+  value,
+  target: value,
+  velocity: 0,
+  stiffness,
+  damping
+})
+const snap = (s: Spring) => {
+  s.value = s.target
+  s.velocity = 0
 }
 
-let instance = 0
-
 /**
- * Mount into an empty, sized element. This is decorative by default: no extra
- * focus stop. Use a real button/link outside the host for meaningful actions.
+ * Exact solution of x'' + c x' + k (x - target) = 0 over a time step, so a
+ * dropped frame never changes the path. Every spring here is underdamped. A
+ * new target keeps the velocity, so pointer reversals do not restart an ease.
  */
-export function createRadiantLogo(
-  host: HTMLElement,
-  options: Partial<LogoOptions> = {}
-): RadiantLogo {
-  if (!host || host.nodeType !== 1) throw new TypeError('Radiant needs a host element')
-  const doc = host.ownerDocument
-  const view = doc.defaultView
-  if (!view) throw new Error('Radiant requires a browser window')
-  const win = view
-  const cfg: LogoOptions = {
-    intensity: 1,
-    spread: 0,
-    glow: 1,
-    chroma: 1,
-    interactive: true,
-    motion: 'auto',
-    appearance: 'material',
-    colors: [...PALETTE],
-    decorative: true,
-    label: 'Radiant',
-    ...options
+function step(s: Spring, dt: number) {
+  const a = s.damping / 2
+  const w = Math.sqrt(s.stiffness)
+  const wd = Math.sqrt(w * w - a * a)
+  const x = s.value - s.target
+  const e = Math.exp(-a * dt)
+  const cos = Math.cos(wd * dt)
+  const sin = Math.sin(wd * dt)
+  const b = (s.velocity + a * x) / wd
+  const position = e * (x * cos + b * sin)
+  s.velocity = e * ((-a * x + b * wd) * cos + (-a * b - x * wd) * sin)
+  s.value = s.target + position
+  if (Math.abs(position) < 0.00004 && Math.abs(s.velocity) < 0.0004) snap(s)
+}
+
+// The colours sway through one full cycle every 36 seconds.
+const DRIFT_SPEED = (2 * Math.PI) / 36
+
+/** Springs from the pointer to a pose. */
+export function createMotion() {
+  const springs = {
+    yaw: spring(REST.yaw, 170, 22),
+    pitch: spring(REST.pitch, 170, 22),
+    open: spring(REST.open, 210, 20),
+    press: spring(REST.press, 260, 24),
+    // A little looser, so a press lands with a small pulse of light.
+    energy: spring(REST.energy, 170, 15)
   }
-  const validate = (opt: LogoOptions) => {
-    if (!['auto', 'reduced', 'off'].includes(opt.motion))
-      throw new TypeError('motion must be auto, reduced, or off')
-    if (!['material', 'xray', 'ink'].includes(opt.appearance))
-      throw new TypeError('appearance must be material, xray or ink')
-    if (!Array.isArray(opt.colors) || opt.colors.length !== 3)
-      throw new TypeError('colors must be three #rrggbb colours')
-    opt.colors.forEach(parseColor)
-    for (const [key, min, max] of [
-      ['spread', 0, 1],
-      ['glow', 0, 1.7],
-      ['chroma', 0.4, 1.35]
-    ] as const) {
-      if (!Number.isFinite(opt[key]) || opt[key] < min || opt[key] > max)
-        throw new RangeError(`${key} must be between ${min} and ${max}`)
-    }
-    if (!Number.isFinite(opt.intensity) || opt.intensity < 0 || opt.intensity > 1.5)
-      throw new RangeError('intensity must be between 0 and 1.5')
-  }
-  validate(cfg)
-  const prefix = `radiant-${++instance}`
-  const original = Array.from(host.childNodes)
-  host.innerHTML = sceneMarkup(prefix, getGeometry(), cfg)
-  const mounted = host.querySelector('svg')
-  if (!mounted) throw new Error('Radiant could not mount its scene')
-  const svg = mounted
-  const title = svg.querySelector(`#${prefix}-title`)
-  const draw = connectScene(svg, prefix)
-  // Energy is a little underdamped, so a press lands with a small pulse.
-  const springs: Record<SpringKey, Spring> = {
-    yaw: new Spring(REST.yaw, 170, 22),
-    pitch: new Spring(REST.pitch, 170, 22),
-    open: new Spring(REST.open, 210, 20),
-    press: new Spring(REST.press, 260, 24),
-    energy: new Spring(REST.energy, 170, 15)
-  }
-  const springEntries = () => Object.entries(springs) as [SpringKey, Spring][]
-  let input: Input = { x: 0, y: 0, active: false, pressed: false }
-  let pointerId: number | null = null
-  let frame = 0
-  let previous = 0
-  let destroyed = false
-  let intersecting = true
-  let renderedFrames = 0
-  const mql = win.matchMedia('(prefers-reduced-motion: reduce)')
-  const reduced = () => cfg.motion !== 'auto' || mql.matches
-  // Drives the colours' idle sway; Still and reduced motion hold it.
-  const DRIFT_SPEED = (2 * Math.PI) / 36
+  const all = Object.values(springs)
   let drift = REST.drift
-  const visible = () => doc.visibilityState !== 'hidden' && intersecting
-  const springPose = () =>
-    Object.fromEntries(springEntries().map(([key, s]) => [key, s.value])) as Record<
-      SpringKey,
-      number
-    >
-  const cleanups: (() => void)[] = []
-  const listen = <E extends Event>(target: EventTarget, event: string, fn: (e: E) => void) => {
-    const listener = fn as EventListener
-    target.addEventListener(event, listener)
-    cleanups.push(() => target.removeEventListener(event, listener))
-  }
-
-  function semantics() {
-    if (title) title.textContent = cfg.label
-    if (cfg.decorative) {
-      svg.setAttribute('aria-hidden', 'true')
-      svg.removeAttribute('role')
-      svg.removeAttribute('aria-labelledby')
-    } else {
-      svg.removeAttribute('aria-hidden')
-      svg.setAttribute('role', 'img')
-      svg.setAttribute('aria-labelledby', `${prefix}-title`)
-    }
-    svg.setAttribute('focusable', 'false')
-  }
-
-  function render() {
-    draw(getGeometry({ ...springPose(), drift }), cfg)
-    renderedFrames++
-  }
-
-  function stop() {
-    if (frame) win.cancelAnimationFrame(frame)
-    frame = 0
-    previous = 0
-  }
-  function tick(time: number) {
-    frame = 0
-    if (destroyed || !visible()) return
-    const dt = previous ? Math.min((time - previous) / 1000, 0.05) : 1 / 60
-    previous = time
-    for (const s of Object.values(springs)) s.step(dt)
-    if (!reduced()) drift = (drift + dt * DRIFT_SPEED) % (2 * Math.PI)
-    render()
-    if (!reduced() || Object.values(springs).some(s => !s.settled))
-      frame = win.requestAnimationFrame(tick)
-    else previous = 0
-  }
-  function wake() {
-    if (!destroyed && visible() && !frame) frame = win.requestAnimationFrame(tick)
-  }
-  function applyInput() {
-    const r = Math.min(1, Math.hypot(input.x, input.y))
-    const active = input.active && cfg.interactive && cfg.motion !== 'off'
-    const motionOff = reduced()
-    const intensity = cfg.intensity
-    // Everything is relative to the resting pose, which reduced motion keeps.
-    const moving = !motionOff && active
-    const targets: Record<SpringKey, number> = {
-      yaw: REST.yaw + (moving ? input.x * 0.19 * intensity : 0),
-      pitch: REST.pitch + (moving ? -input.y * 0.13 * intensity : 0),
-      open: motionOff
-        ? REST.open
-        : moving && input.pressed
-          ? -0.01
-          : REST.open + cfg.spread * 0.16 + (moving ? r * 0.035 * intensity : 0),
-      press: moving && input.pressed ? 1 : 0,
-      // A non-spatial, immediate light response remains in reduced-motion mode.
-      energy:
-        REST.energy +
-        (cfg.motion === 'off'
-          ? 0
-          : (active ? (input.pressed ? 0.55 : 0.2 * r) * intensity : 0) +
-            (motionOff ? 0 : cfg.spread * 0.45))
-    }
-    for (const [key, s] of springEntries()) s.target = targets[key]
-    if (motionOff) {
-      stop()
-      for (const s of Object.values(springs)) s.snap()
-      if (visible()) render()
-    } else wake()
-  }
-  function coordinates(e: PointerEvent) {
-    const box = host.getBoundingClientRect()
-    return {
-      x: clamp(((e.clientX - box.left) / Math.max(1, box.width)) * 2 - 1, -1, 1),
-      y: clamp(((e.clientY - box.top) / Math.max(1, box.height)) * 2 - 1, -1, 1)
-    }
-  }
-  function setInput(next: Partial<Input>) {
-    if (destroyed) return
-    if (
-      (next.x !== undefined && !Number.isFinite(next.x)) ||
-      (next.y !== undefined && !Number.isFinite(next.y))
-    )
-      throw new TypeError('Pointer coordinates must be finite')
-    input = { ...input, ...next }
-    input.x = clamp(input.x, -1, 1)
-    input.y = clamp(input.y, -1, 1)
-    applyInput()
-  }
-  function reset({ immediate = false } = {}) {
-    if (destroyed) return
-    input = { x: 0, y: 0, active: false, pressed: false }
-    if (pointerId !== null && host.hasPointerCapture(pointerId))
-      host.releasePointerCapture(pointerId)
-    pointerId = null
-    if (immediate) {
-      stop()
-      for (const [key, s] of springEntries()) s.snap(REST[key])
-      if (visible()) render()
-    } else applyInput()
-  }
-
-  listen(host, 'pointerenter', (e: PointerEvent) => {
-    if (e.pointerType !== 'touch' && pointerId === null)
-      setInput({ ...coordinates(e), active: true })
-  })
-  listen(host, 'pointermove', (e: PointerEvent) => {
-    if (!e.isPrimary || (pointerId !== null && pointerId !== e.pointerId)) return
-    if (e.pointerType === 'touch' && pointerId === null) return
-    setInput({ ...coordinates(e), active: true })
-  })
-  listen(host, 'pointerdown', (e: PointerEvent) => {
-    if (!e.isPrimary || e.button !== 0 || pointerId !== null) return
-    pointerId = e.pointerId
-    host.setPointerCapture(pointerId)
-    setInput({ ...coordinates(e), active: true, pressed: true })
-    // Never preventDefault: decorative interaction must not hijack page scrolling.
-  })
-  listen(host, 'pointerup', (e: PointerEvent) => {
-    if (pointerId !== e.pointerId) return
-    const box = host.getBoundingClientRect()
-    const inside =
-      e.clientX >= box.left &&
-      e.clientX <= box.right &&
-      e.clientY >= box.top &&
-      e.clientY <= box.bottom
-    pointerId = null
-    if (host.hasPointerCapture(e.pointerId)) host.releasePointerCapture(e.pointerId)
-    setInput({ ...coordinates(e), pressed: false, active: e.pointerType !== 'touch' && inside })
-  })
-  listen(host, 'pointerleave', () => {
-    if (pointerId === null) reset()
-  })
-  listen(host, 'pointercancel', () => reset())
-  listen(host, 'lostpointercapture', () => {
-    if (pointerId !== null) reset()
-  })
-  listen(win, 'blur', () => reset({ immediate: true }))
-  listen(mql, 'change', applyInput)
-  listen(doc, 'visibilitychange', () => {
-    if (!visible()) {
-      reset({ immediate: true })
-      stop()
-    } else {
-      render()
-      applyInput()
-    }
-  })
-  let observer: IntersectionObserver | undefined
-  if ('IntersectionObserver' in win) {
-    observer = new win.IntersectionObserver(entries => {
-      intersecting = entries[0].isIntersecting
-      if (!intersecting) {
-        reset({ immediate: true })
-        stop()
-      } else {
-        render()
-        applyInput()
-      }
-    })
-    observer.observe(host)
-  }
-  semantics()
-  render()
-  applyInput()
-
   return {
-    setInput,
-    reset,
-    setOptions(next) {
-      if (destroyed) return
-      const proposed = { ...cfg, ...next }
-      validate(proposed)
-      Object.assign(cfg, proposed)
-      semantics()
-      applyInput()
-      if (visible()) render()
+    /** Reduced motion holds the geometry at rest; only the light still responds. */
+    aim(input: Input, reduced: boolean) {
+      const r = Math.min(1, Math.hypot(input.x, input.y))
+      const moving = input.active && !reduced
+      const pressed = moving && input.pressed
+      springs.yaw.target = REST.yaw + (moving ? input.x * 0.19 : 0)
+      springs.pitch.target = REST.pitch + (moving ? -input.y * 0.13 : 0)
+      springs.open.target = pressed ? -0.01 : REST.open + (moving ? r * 0.035 : 0)
+      springs.press.target = pressed ? 1 : 0
+      springs.energy.target = REST.energy + (input.active ? (input.pressed ? 0.55 : 0.2 * r) : 0)
+      if (reduced) all.forEach(snap)
     },
-    /** Deterministic preview pose. Does not override reduced-motion preferences. */
-    previewPose(next = {}) {
-      if (destroyed) return
-      const pose = getGeometry(next).pose
-      stop()
-      for (const [key, s] of springEntries())
-        s.snap(reduced() && key !== 'energy' ? REST[key] : pose[key])
-      if (visible()) render()
-    },
-    getState() {
+    step(dt: number, reduced: boolean): Pose {
+      for (const s of all) step(s, dt)
+      if (!reduced) drift = (drift + dt * DRIFT_SPEED) % (2 * Math.PI)
       return {
-        pose: { ...springPose(), drift },
-        targets: Object.fromEntries(springEntries().map(([key, s]) => [key, s.target])) as Record<
-          SpringKey,
-          number
-        >,
-        running: frame !== 0,
-        reducedMotion: reduced(),
-        visible: visible(),
-        renderedFrames,
-        options: { ...cfg }
+        yaw: springs.yaw.value,
+        pitch: springs.pitch.value,
+        open: springs.open.value,
+        press: springs.press.value,
+        energy: springs.energy.value,
+        drift
       }
     },
-    exportSVG(variant = 'digital') {
-      return getStaticSVG({
-        variant,
-        label: cfg.label,
-        chroma: cfg.chroma,
-        glow: cfg.glow,
-        colors: cfg.colors
-      })
-    },
-    destroy() {
-      if (destroyed) return
-      reset({ immediate: true })
-      destroyed = true
-      stop()
-      cleanups.forEach(cleanup => cleanup())
-      observer?.disconnect()
-      host.replaceChildren(...original)
+    get settled() {
+      return all.every(s => s.value === s.target && s.velocity === 0)
     }
   }
 }
