@@ -1,0 +1,60 @@
+---
+title: Progress
+description: Native task progress with determinate and indeterminate feedback.
+---
+
+import { ProgressDemo } from '../../components/ProgressDemo'
+
+<ProgressDemo />
+
+## Describe the task
+
+Progress renders a native `progress` element. Give it a meaningful name using
+a native `label` with `htmlFor`, `aria-label`, or `aria-labelledby`. Its fallback
+text is not an accessible name. Keep a visible phase or completion description
+nearby so the amount is understandable without relying on color.
+
+Use Progress for task completion. Resource usage or measurements belong in a
+`meter`; user-adjustable values belong in [Slider](/docs/slider/).
+
+## Values and limits
+
+`max` defaults to 100 and must be positive and finite. The native minimum is
+always zero; there is no `min` prop. Numeric `value` must be finite and between
+zero and `max`, including both boundaries. Invalid ranges throw instead of
+silently presenting a different value.
+
+Omit `value` or pass `null` when the remaining amount is unknown. The native
+value attribute is then absent, preserving indeterminate semantics. `0` means
+known progress with no work completed. `data-state` is `indeterminate`,
+`loading`, or `complete`; complete means the amount reached `max`, while the
+application owns the actual outcome.
+
+The browser supplies progressbar range semantics. Radiant owns the role and
+numeric ARIA relationships. Optional `aria-valuetext` can express a meaningful
+phase or unit when a percentage alone is insufficient.
+
+## Announce milestones
+
+Progress adds no live region, timers or focus management. Values update
+immediately. Avoid announcing every rapid change: use [Alert](/docs/alert/) with
+polite feedback for useful milestones such as completion or a failure.
+
+Set `aria-busy` on the region whose content is changing, and clear it when that
+work finishes. Keep the milestone live region outside that busy region so
+updates are not held back. Applications own loading, cancellation and errors.
+
+## Customize
+
+Native props, events, `className`, `style` and an `HTMLProgressElement` ref reach
+the actual element. It exposes the `progress` slot. No provider is required;
+[themes](/docs/foundations/theming/) apply normally.
+
+Use `components.progress` or local `--rad-progress-*` variables for `height`,
+`radius`, `trackColor`, `indicatorColor`, `borderColor`, `borderWidth` and
+`borderStyle`. Native WebKit and Firefox tracks/values receive these colors.
+Preserve readable bounds and meaningful contrast when replacing appearance.
+
+Indeterminate feedback uses static stripes and a dashed frame. Forced colors
+retain a system-color track, fill and border. No authored movement is added.
+`ProgressProps` is exported.
