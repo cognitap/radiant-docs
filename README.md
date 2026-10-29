@@ -27,8 +27,9 @@ pnpm check
 ```
 
 `pnpm check` runs formatting, lint, the docs word check, types, unit tests, the
-static build and the browser checks in `scripts/verify-docs.mjs`. Screenshots go
-to `output/docs/`. `pnpm preview` serves the built `out/` folder, and
+static build, the page check in `tests/site/` and the browser checks in
+`scripts/verify-docs.mjs`. A failed page check saves a screenshot under
+`output/docs/`. `pnpm preview` serves the built `out/` folder, and
 `pnpm test:smoke` checks it without rebuilding.
 
 ## Add a page
@@ -53,7 +54,8 @@ content/docs/button.mdx
    example imports. The source panel shows those files as they are.
 3. Inside the playground, use `DemoControls` and `DemoPreview`. Reset remounts
    them, so keep state local.
-4. Add browser checks under `scripts/` and call them from `verify-docs.mjs`.
+4. The page check already covers a new doc page. Add a case in
+   `tests/site/demos.test.ts` only when the example has its own site wiring.
 
 ## Try an unreleased Radiant build
 
