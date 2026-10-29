@@ -1,0 +1,88 @@
+---
+title: AlertDialog
+description: An urgent modal decision with a safe cancel action.
+---
+
+```tsx
+import {
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogCancel,
+  AlertDialogAction
+} from '@cognitap/radiant'
+
+;<AlertDialog>
+  <AlertDialogTrigger>Delete project</AlertDialogTrigger>
+  <AlertDialogContent>
+    <AlertDialogTitle>Delete this project?</AlertDialogTitle>
+    <AlertDialogDescription>
+      This permanently deletes its files for everyone.
+    </AlertDialogDescription>
+    <AlertDialogCancel
+      variant="outline"
+      tone="neutral"
+    >
+      Keep project
+    </AlertDialogCancel>
+    <AlertDialogAction
+      tone="danger"
+      onClick={deleteProject}
+    >
+      Delete permanently
+    </AlertDialogAction>
+  </AlertDialogContent>
+</AlertDialog>
+```
+
+Use AlertDialog when a message needs an immediate response. Use
+[Dialog](/docs/dialog/) for ordinary tasks.
+
+## Choose a deliberate response
+
+Content is a native modal `dialog` with protected `role="alertdialog"` and
+`aria-modal="true"`. Title supplies its name; Description supplies the alert
+message. Keep one of each. An `aria-label` can replace the title relationship.
+Additional `aria-describedby` IDs join the description.
+
+Cancel receives initial focus on every open, even after Action in DOM order.
+Set Cancel's `autoFocus={false}` when supplying another initial target. Keep
+the least destructive choice focused for irreversible work.
+
+Backdrop clicks leave it open. Escape cancels by default. Set
+`closeOnEscape={false}` or prevent Content's `onCancel` event to require an
+explicit response. Neither dismissal runs Action's handler.
+
+Action and Cancel compose [Button](/docs/button/). Their caller handler runs
+before the close request; `preventDefault()` keeps the decision open. Disabled
+and pending actions block activation. Both default to `type="button"`.
+
+## Own the consequence
+
+Choose controlled `open`/`onOpenChange` or initial `defaultOpen`. The controlled
+owner may refuse requests. Async actions must prevent default immediately,
+manage pending/error state, then close explicitly after success. Disable
+Cancel and Escape during work when cancellation is unavailable.
+
+The browser restores focus to the opener. If deletion removes it, focus the
+next useful element after closing. Nested dialogs and unmount cleanup reuse
+[Dialog's lifecycle and motion](/docs/dialog/).
+
+## Style and target parts
+
+AlertDialog adds no DOM host. Content, Title and Description target `dialog`,
+`h2` and `p`; actions target native buttons. All accept their host's styles
+and refs. Actions support `render`, forwarding resolved props/ref/children.
+
+Parts retain Dialog's `data-slot` tokens and add `alert-dialog`,
+`alert-dialog-title`, `alert-dialog-description`, `alert-dialog-trigger`,
+`alert-dialog-action` or `alert-dialog-cancel`. Match tokens with `~=`.
+Content exposes `data-state="open|closed"` and uses `components.dialog`
+overrides, `--rad-dialog-*` variables and optional MotionProvider feedback.
+Preserve bounded scrolling, visible focus and hidden closed content.
+
+Each part exports its `AlertDialog…Props` type. `AlertDialogRenderProps` and
+`AlertDialogState` are exported; `useAlertDialog()` returns state or `null`
+outside its family.
