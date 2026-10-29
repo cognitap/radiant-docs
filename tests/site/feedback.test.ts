@@ -112,3 +112,47 @@ test('Alert keeps static information quiet and updates mounted live feedback wit
     }
   })
 })
+
+test('Toast queues repeated feedback, preserves focus, and exposes a reachable undo action', async () => {
+  await withSite(async (baseURL, browser) => {
+    const page = await browser.newPage()
+    const errors = track(page)
+    try {
+      await capture(page, 'toast-queue', async () => {
+        await page.goto(`${baseURL}/docs/toast/`)
+        const demo = page.getByRole('region', { name: 'Queued draft notifications', exact: true })
+        await page.waitForFunction(
+          () => !document.querySelector<HTMLButtonElement>('.demo-heading button')?.disabled
+        )
+        const save = demo.getByRole('button', { name: 'Save draft', exact: true })
+        await save.click()
+        await save.click()
+        assert.equal(await save.evaluate(node => node === document.activeElement), true)
+        const viewport = demo.getByRole('region', { name: 'Draft notifications', exact: true })
+        assert.equal(
+          await viewport.getByRole('button', { name: 'Dismiss notification', exact: true }).count(),
+          1
+        )
+        await viewport.getByRole('button', { name: 'Dismiss notification', exact: true }).click()
+        await viewport.getByRole('heading', { name: 'Draft saved', exact: true }).waitFor()
+        await viewport.getByRole('button', { name: 'Dismiss notification', exact: true }).click()
+        await demo.getByRole('button', { name: 'Archive draft', exact: true }).click()
+        await page.keyboard.press('F8')
+        await page.keyboard.press('Tab')
+        const undo = viewport.getByRole('button', { name: 'Undo archive', exact: true })
+        assert.equal(await undo.evaluate(node => node === document.activeElement), true)
+        await page.keyboard.press('Enter')
+        await demo
+          .getByText('Draft: active. Saved locally. Notifications: 0.', { exact: true })
+          .waitFor()
+        await demo.getByRole('button', { name: 'Reset preview', exact: true }).click()
+        await demo
+          .getByText('Draft: active. Not saved yet. Notifications: 0.', { exact: true })
+          .waitFor()
+        assert.deepEqual(errors, [])
+      })
+    } finally {
+      await page.close()
+    }
+  })
+})
