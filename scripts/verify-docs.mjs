@@ -11,6 +11,7 @@ import { verifyActions } from './verify-actions.mjs'
 import { verifyControls } from './verify-controls.mjs'
 import { verifyField } from './verify-field.mjs'
 import { verifyInput } from './verify-input.mjs'
+import { verifyTextarea } from './verify-textarea.mjs'
 import { verifyCheckbox } from './verify-checkbox.mjs'
 import { verifyRadio } from './verify-radio.mjs'
 import { verifyDialog } from './verify-dialog.mjs'
@@ -250,6 +251,7 @@ try {
   await verifyControls(browser, baseURL)
   await verifyField(browser, baseURL)
   await verifyInput(browser, baseURL)
+  await verifyTextarea(browser, baseURL)
   await verifyCheckbox(browser, baseURL)
   await verifyRadio(browser, baseURL)
   await verifyDialog(browser, baseURL)

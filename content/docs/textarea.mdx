@@ -1,0 +1,89 @@
+---
+title: Textarea
+description: Native multiline editing with shared control sizes and Field relationships.
+---
+
+import { TextareaDemo } from '../../components/TextareaDemo'
+
+<TextareaDemo />
+
+## Start with a label
+
+```tsx
+import { Field, Textarea } from '@cognitap/radiant'
+
+export function Introduction() {
+  return (
+    <Field
+      label="Introduction"
+      description="Shown to your team."
+      required
+    >
+      <Textarea
+        name="introduction"
+        defaultValue="A place for new ideas."
+        rows={4}
+      />
+    </Field>
+  )
+}
+```
+
+Textarea renders one native `textarea`. [Field](/docs/field/) connects its label,
+control ID, description, error and required/disabled states. Outside Field, use
+a native label with matching `htmlFor` and `id`. A placeholder is not a label.
+
+## Choose a value owner
+
+`defaultValue` sets initial browser-owned text. Native form reset restores it.
+For controlled text, pass `value` and update it from `onChange`:
+
+```tsx
+const [notes, setNotes] = useState('')
+
+<Field label="Notes">
+  <Textarea value={notes} onChange={event => setNotes(event.target.value)} />
+</Field>
+```
+
+Keep raw text while editing; line breaks, selection, composition and native
+keyboard shortcuts stay with the browser. Initialize controlled text with `''`,
+not `null`. Do not combine value owners or switch ownership during a mount.
+Set initial content through `defaultValue`, rather than children.
+
+## Validate and submit
+
+Pass validation text to Field's `error`. Native `required`, `minLength` and
+`maxLength` remain available. Use a ref to focus an invalid textarea; validation,
+touched state and persistence belong to your application.
+
+Named values participate in `new FormData(form)`. Read-only text remains
+focusable and submits; disabled controls are omitted. Field's required and
+disabled state cannot be undone by its child. A controlled form resets its own
+values and validation metadata in `onReset`.
+
+## Size and customize
+
+`rows` defaults to three. `cols` remains a native width hint; the default CSS
+fills the available width. `controlSize` chooses `small`, `medium` or `large`
+metrics shared with [Input](/docs/input/).
+
+Vertical resizing is enabled by default. Change it with `resize-none`, `resize`
+or native `style`. Constrain height when long content should scroll:
+
+```tsx
+<Textarea
+  aria-label="Notes"
+  rows={6}
+  className="max-h-48 resize-none"
+  style={{ '--rad-textarea-radius': '1rem' }}
+/>
+```
+
+`className`, typed `style`, native attributes/events and `ref` target the
+`HTMLTextAreaElement`. Keep its focus ring visible. Use shared tokens or
+`components.textarea` overrides; Input-only overrides do not affect Textarea.
+See [theming](/docs/foundations/theming/).
+
+`TextareaProps` is exported. Identity is `data-slot="textarea"`, with
+`data-control-size` and presence-based `data-invalid` alongside `aria-invalid`.
