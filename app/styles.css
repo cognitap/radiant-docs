@@ -95,14 +95,18 @@ body {
 }
 
 .wordmark {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
   font-size: 1.25rem;
   font-weight: 650;
   text-decoration: none;
 }
 
-.wordmark span {
-  color: var(--docs-accent);
-  margin-inline-start: 0.35rem;
+.radiant-mark {
+  display: flex;
+  width: 3em;
+  height: 3em;
 }
 
 .preview-label,

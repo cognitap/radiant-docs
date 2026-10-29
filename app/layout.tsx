@@ -4,6 +4,7 @@ import { radiantCandidate, radiantLabel } from '@/lib/radiant'
 import NextLink from 'next/link'
 import { AppearanceControl, SiteTheme } from '@/components/docs/SiteTheme'
 import { Search } from '@/components/docs/Search'
+import { RadiantMark } from '@/components/docs/RadiantMark'
 import '@cognitap/radiant/styles.css'
 import './styles.css'
 
@@ -30,7 +31,8 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                 href="/"
                 className="wordmark"
               >
-                Radiant<span aria-hidden="true"> ✳</span>
+                <RadiantMark />
+                Radiant
               </NextLink>
               <nav
                 aria-label="Site"
