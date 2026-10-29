@@ -1,0 +1,101 @@
+---
+title: Slider
+description: Native numeric adjustment with Field relationships, shared sizes and themed tracks.
+---
+
+import { SliderDemo } from '../../components/SliderDemo'
+
+<SliderDemo />
+
+## Label a range
+
+Slider renders one native `input type="range"` with a single thumb.
+[Field](/docs/field/) supplies its protected control ID, label, description,
+error and inherited disabled state. Outside Field, use a native label with
+matching `htmlFor` and `id`.
+
+```tsx
+import { Field, Slider } from '@cognitap/radiant'
+
+export function Volume() {
+  return (
+    <Field
+      label="Volume"
+      description="Choose a comfortable level."
+    >
+      <Slider
+        name="volume"
+        min={0}
+        max={100}
+        step={5}
+        defaultValue={40}
+      />
+    </Field>
+  )
+}
+```
+
+## Choose a value owner
+
+`defaultValue` sets a browser-owned initial number. For controlled selection,
+pass a numeric `value` and update it from `event.target.valueAsNumber`:
+
+```tsx
+const [volume, setVolume] = useState(40)
+
+<Slider
+  aria-label="Volume"
+  value={volume}
+  onChange={event => setVolume(event.target.valueAsNumber)}
+  aria-valuetext={`${volume} percent`}
+/>
+```
+
+Keep one owner for the entire mount. Do not combine `value` and `defaultValue`
+or switch ownership. Values must be finite numbers. Native defaults are
+`min={0}`, `max={100}` and `step={1}`; without an initial value, the browser
+chooses the range midpoint. It clamps and rounds values to the bounds and step.
+Keep controlled values within that domain.
+
+`aria-valuetext` supplies readable units or labels. Native range state supplies
+accessible current/minimum/maximum values. Applications own formatting.
+
+## Operate and submit
+
+Pointer input, focus and keyboard adjustment stay native. Horizontal sliders
+inherit direction; RTL arrow mapping follows the browser. Set
+`orientation="vertical"` for a bottom-to-top range.
+
+Named values enter `new FormData(form)` as strings; disabled sliders are omitted.
+Native reset restores an uncontrolled default. Reset controlled values in your
+form's `onReset`. An external `form` association remains available.
+
+Range always has a numeric value: `required` and `readOnly` do not apply.
+Omit Field's `required` flag for Slider. Use Field's `error` for application
+validation and a ref to focus the input.
+
+## Size and customize
+
+`controlSize` chooses `small`, `medium` (default) or `large` metrics shared with
+[Input](/docs/input/). Root `className`, typed `style`, native attributes/events
+and `ref` reach the `HTMLInputElement`. `SliderProps` is exported.
+
+Use independent `components.slider` overrides or local variables for the track,
+thumb and focus ring:
+
+```tsx
+<Slider
+  aria-label="Volume"
+  defaultValue={40}
+  style={{
+    '--rad-slider-track-size': '.5rem',
+    '--rad-slider-thumb-size': '1.5rem',
+    '--rad-slider-thumb-radius': '999px'
+  }}
+/>
+```
+
+Preserve focus, invalid and disabled cues. Forced colors restore native
+appearance. See [theming](/docs/foundations/theming/).
+Identity is `data-slot="slider"`, with `data-control-size`, `data-orientation`
+and presence-based `data-invalid`.
