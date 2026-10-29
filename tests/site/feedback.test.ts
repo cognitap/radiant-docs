@@ -156,3 +156,48 @@ test('Toast queues repeated feedback, preserves focus, and exposes a reachable u
     }
   })
 })
+
+test('Progress keeps native labels and unknown ranges while announcing only completion', async () => {
+  await withSite(async (baseURL, browser) => {
+    const page = await browser.newPage()
+    const errors = track(page)
+    try {
+      await capture(page, 'progress-values', async () => {
+        await page.goto(`${baseURL}/docs/progress/`)
+        const demo = page.getByRole('region', { name: 'Export progress', exact: true })
+        await page.waitForFunction(
+          () => !document.querySelector<HTMLButtonElement>('.demo-heading button')?.disabled
+        )
+        const bar = demo.getByRole('progressbar', { name: 'Export progress', exact: true })
+        const status = demo.getByRole('status', { name: 'Export result', exact: true })
+        assert.equal(await bar.getAttribute('value'), '0')
+        await demo.getByRole('checkbox', { name: 'Unknown remaining amount', exact: true }).check()
+        assert.equal(await bar.getAttribute('value'), null)
+        assert.equal(await bar.evaluate(node => (node as HTMLProgressElement).position), -1)
+        await demo
+          .getByRole('checkbox', { name: 'Unknown remaining amount', exact: true })
+          .uncheck()
+        const advance = demo.getByRole('button', { name: 'Advance export', exact: true })
+        await advance.click()
+        assert.equal(await bar.getAttribute('value'), '25')
+        assert.equal(await status.innerText(), '')
+        await advance.click()
+        await advance.click()
+        await advance.click()
+        await status.getByText('Export complete.', { exact: true }).waitFor()
+        assert.equal(await bar.getAttribute('value'), '100')
+        assert.equal(
+          await demo
+            .getByRole('region', { name: 'Export package', exact: true })
+            .getAttribute('aria-busy'),
+          'false'
+        )
+        await demo.getByRole('button', { name: 'Reset preview', exact: true }).click()
+        assert.equal(await bar.getAttribute('value'), '0')
+        assert.deepEqual(errors, [])
+      })
+    } finally {
+      await page.close()
+    }
+  })
+})
