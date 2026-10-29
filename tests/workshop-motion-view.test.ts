@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
+import type { SpringParameters } from '@cognitap/radiant'
 import {
   curveHorizon,
   dampingForSettle,
@@ -30,10 +31,10 @@ async function stepFrame() {
 }
 
 /** Run the runtime's own spring through a unit step on the controlled clock. */
-async function runtimeStep(parameters) {
+async function runtimeStep(parameters: SpringParameters) {
   const spring = createSpring(0, { parameters })
   const started = clock
-  const samples = []
+  const samples: { t: number; x: number }[] = []
   spring.subscribe(value => samples.push({ t: (clock - started) / 1000, x: value }))
   spring.to(1)
   for (let frames = 0; spring.isAnimating(); frames++) {

@@ -15,7 +15,8 @@ import {
   resetRhythm,
   resetTextStyle
 } from '../examples/workshop/workshop-typography.ts'
-import { curatedFonts } from '../examples/workshop/workshop-fonts.ts'
+import { curatedFonts, type TrialFont } from '../examples/workshop/workshop-fonts.ts'
+import { readThemeDocument } from '../examples/workshop/workshop-theme.ts'
 
 test('family changes retain deliberate rhythm/style overrides; resets have independent ownership', () => {
   const initial = generateTypography({
@@ -53,16 +54,16 @@ test('theme edits and starting-point resets preserve unrelated sections and comp
     prose: { size: 23 },
     styles: { 'ui-label': { weight: 650 } }
   })
-  const before = compileThemeDocument(edited)
+  const before = compileThemeDocument(readThemeDocument(edited))
   assert.equal(before.modes.dark['--rad-typography-body-weight'], 500)
   assert.equal(before.modes.light['--rad-typography-body-size'], '1.125rem')
   const reset = applyTypesetting(edited, { preset: 'inter' }, null, true)
-  const after = compileThemeDocument(reset)
+  const after = compileThemeDocument(readThemeDocument(reset))
   assert.equal(after.modes.light['--rad-color-accent'], '#166534')
   assert.equal(after.modes.dark['--rad-motion-release-duration'], '280ms')
   assert.equal(after.modes.light['--rad-button-radius'], '23px')
   assert.notEqual(after.modes.light['--rad-typography-body-size'], '1.125rem')
-  assert.equal(documentTypesetting(reset).prose.size, 20)
+  assert.equal(documentTypesetting(reset)!.prose.size, 20)
   assert.equal(JSON.stringify(document), original)
 })
 test('manual families stay uncalibrated and invalid changes cannot mutate a document', () => {
@@ -91,28 +92,33 @@ test('manual families stay uncalibrated and invalid changes cannot mutate a docu
 })
 test('portable documents carry normalized recipes and requested font requirements, never local bytes', () => {
   const document = themeDocumentFromDefinition({ id: 'portable', name: 'Portable' })
-  const local = { ...curatedFonts[0], id: 'local', family: 'Brand proof', source: 'local' }
+  const local: TrialFont = {
+    ...curatedFonts[0],
+    id: 'local',
+    family: 'Brand proof',
+    source: 'local'
+  }
   const input = chooseAssignment(generateTypography().input, 'body', local)
   const applied = applyTypesetting(
     document,
     { ...input, styles: { 'prose-body': { weight: 620 } } },
     local
   )
-  const removed = applyTypesetting(applied, documentTypesetting(applied).input)
+  const removed = applyTypesetting(applied, documentTypesetting(applied)!.input)
+  const removedDocument = readThemeDocument(removed)
   assert.equal(
-    removed.sections.typography.fonts.find(font => font.id === 'typesetting-body').source,
+    removedDocument.sections.typography!.fonts!.find(font => font.id === 'typesetting-body')!.source,
     'local'
   )
   assert.ok(
-    removed.sections.typography.fonts
-      .find(font => font.id === 'typesetting-body')
-      .weights.includes(620)
+    removedDocument.sections.typography!.fonts!.find(font => font.id === 'typesetting-body')!.weights!.includes(620)
   )
   const text = JSON.stringify(removed)
   assert.doesNotMatch(text, /blob:|arrayBuffer|bytes|files|woff/)
   const parsed = parseThemeDocument(JSON.parse(text))
-  assert.deepEqual(documentTypesetting(parsed).input, documentTypesetting(applied).input)
+  if (parsed.kind !== 'radiant-theme') throw new TypeError('Expected a full theme document.')
+  assert.deepEqual(documentTypesetting(parsed)!.input, documentTypesetting(applied)!.input)
   const section = exportThemeSections(parsed, ['typography'])
   const restored = updateThemeDocument(document, section.sections, 'replace')
-  assert.deepEqual(documentTypesetting(restored).input, documentTypesetting(applied).input)
+  assert.deepEqual(documentTypesetting(restored)!.input, documentTypesetting(applied)!.input)
 })

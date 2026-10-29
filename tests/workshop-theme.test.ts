@@ -1,11 +1,15 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { defaultTheme } from '@cognitap/radiant'
-import { documentAPI, initialDocument } from '../examples/workshop/workshop-theme.ts'
-import { resetEditor } from '../examples/workshop/workshop-snapshot.ts'
+import { documentAPI, initialDocument, type Editor, type WorkshopDocument } from '../examples/workshop/workshop-theme.ts'
+import { resetEditor, type ThemeSnapshot } from '../examples/workshop/workshop-snapshot.ts'
 
-const snapshot = document => ({ document, color: null, geometry: null })
-const reset = (document, editor) =>
+const snapshot = (document: WorkshopDocument): ThemeSnapshot => ({
+  document,
+  color: null,
+  geometry: null
+})
+const reset = (document: WorkshopDocument, editor: Editor) =>
   resetEditor(snapshot(document), snapshot(initialDocument()), editor).document
 
 test('the workshop compiles its initial document through the released library API', () => {
@@ -32,7 +36,7 @@ test('geometry reset preserves independent canvas colors, other sections and com
   const theme = documentAPI.compile(next)
   assert.equal(theme.modes.light['--rad-surface-canvas'], '#FFEECC')
   assert.equal(theme.modes.dark['--rad-surface-canvas'], '#112233')
-  for (const mode of ['light', 'dark']) {
+  for (const mode of ['light', 'dark'] as const) {
     assert.equal(
       theme.modes[mode]['--rad-surface-radius'],
       defaultTheme.modes[mode]['--rad-surface-radius']
@@ -69,9 +73,9 @@ test('each editor resets only its owned decisions through the public document AP
     ['color', '--rad-color-accent'],
     ['typography', '--rad-typography-family'],
     ['motion', '--rad-motion-release-duration']
-  ]) {
+  ] as const) {
     const theme = documentAPI.compile(reset(original, editor))
-    for (const mode of ['light', 'dark']) {
+    for (const mode of ['light', 'dark'] as const) {
       assert.equal(theme.modes[mode][owned], defaultTheme.modes[mode][owned])
       assert.equal(theme.modes[mode]['--rad-surface-radius'], '2rem')
       assert.equal(theme.modes[mode]['--rad-input-radius'], '19px')

@@ -79,10 +79,7 @@ try {
   console.log(`Candidate: ${tarball}\nIsolated checkout: ${staging}`)
   await run(['install', '--no-frozen-lockfile'])
   if (option === '--check') {
-    await run(['typecheck'])
-    await run(['test:workshop'])
-    await run(['build'])
-    await run(['test:smoke'])
+    await run(['check'])
   } else {
     await run(['build'])
     env.PORT = process.env.PORT ?? '3002'

@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { exportThemeSections, parseThemeDocument } from '@cognitap/radiant'
-import { documentAPI } from '../examples/workshop/workshop-theme.ts'
+import { documentAPI, readThemeDocument } from '../examples/workshop/workshop-theme.ts'
 import { colorAPI, defaultColorRecipe } from '../examples/workshop/workshop-color.ts'
 import {
   changeGeometry,
@@ -10,7 +10,8 @@ import {
   geometryPreset,
   geometryPresets,
   geometryValues,
-  matchingGeometryPreset
+  matchingGeometryPreset,
+  type GeometrySettings
 } from '../examples/workshop/workshop-geometry.ts'
 
 const fixture = () => {
@@ -55,8 +56,8 @@ test('presets are independent recipes and mode edits retain shared and other-mod
   assert.equal(geometryValues(cleared, 'dark').surfaceRadius, 20)
   assert.equal(geometryValues(cleared, 'dark').density, 0.8)
   assert.equal(geometryValues(cleared, 'light').surfaceRadius, 0)
-  assert.equal(clearGeometryOverride(cleared, 'dark').modes.dark, undefined)
-  baseline.values.spacing = 2
+  assert.equal(clearGeometryOverride(cleared, 'dark').modes!.dark, undefined)
+  ;(baseline.values as { -readonly [K in keyof GeometrySettings]: GeometrySettings[K] }).spacing = 2
   assert.equal(geometryPreset().values.spacing, 1)
 })
 
@@ -67,11 +68,13 @@ test('each starting preset uses production mapping and preserves unrelated theme
   for (const preset of geometryPresets) {
     const next = geometryAPI.apply(original, geometryPreset(preset.id))
     const theme = documentAPI.compile(next)
-    assert.deepEqual(next.sections.color, original.sections.color)
-    assert.deepEqual(next.sections.components, original.sections.components)
-    for (const section of ['typography', 'motion', 'focus', 'state'])
-      assert.deepEqual(next.sections[section], original.sections[section])
-    for (const mode of ['light', 'dark']) {
+    const nextDocument = readThemeDocument(next)
+    const originalDocument = readThemeDocument(original)
+    assert.deepEqual(nextDocument.sections.color, originalDocument.sections.color)
+    assert.deepEqual(nextDocument.sections.components, originalDocument.sections.components)
+    for (const section of ['typography', 'motion', 'focus', 'state'] as const)
+      assert.deepEqual(nextDocument.sections[section], originalDocument.sections[section])
+    for (const mode of ['light', 'dark'] as const) {
       const values = theme.modes[mode]
       assert.equal(
         values['--rad-surface-canvas'],
@@ -134,14 +137,14 @@ test('full-theme and selective geometry handoff preserve modes, canvas ownership
   assert.deepEqual(full, document)
   assert.deepEqual(documentAPI.compile(full).modes, documentAPI.compile(document).modes)
   const selective = parseThemeDocument(
-    JSON.parse(JSON.stringify(exportThemeSections(document, ['control', 'spacing', 'surface'])))
+    JSON.parse(JSON.stringify(exportThemeSections(readThemeDocument(document), ['control', 'spacing', 'surface'])))
   )
   assert.equal(selective.kind, 'radiant-theme-sections')
-  assert.equal(selective.id, undefined)
+  assert.equal('id' in selective ? selective.id : undefined, undefined)
   assert.deepEqual(Object.keys(selective.sections).sort(), ['control', 'spacing', 'surface'])
   assert.deepEqual(
     selective.sections.surface,
-    document.sections.surface,
+    readThemeDocument(document).sections.surface,
     'surface sections include the independently retained canvas'
   )
   const target = documentAPI.create({
@@ -151,10 +154,13 @@ test('full-theme and selective geometry handoff preserve modes, canvas ownership
     components: { input: { radius: '19px' } }
   })
   const applied = documentAPI.update(target, selective.sections)
-  assert.equal(applied.id, 'consumer')
-  assert.deepEqual(applied.sections.color, target.sections.color)
-  assert.deepEqual(applied.sections.typography, target.sections.typography)
-  assert.deepEqual(applied.sections.components, target.sections.components)
-  for (const section of ['control', 'spacing', 'surface'])
-    assert.deepEqual(applied.sections[section], document.sections[section])
+  const appliedDocument = readThemeDocument(applied)
+  const targetDocument = readThemeDocument(target)
+  const sourceDocument = readThemeDocument(document)
+  assert.equal(appliedDocument.id, 'consumer')
+  assert.deepEqual(appliedDocument.sections.color, targetDocument.sections.color)
+  assert.deepEqual(appliedDocument.sections.typography, targetDocument.sections.typography)
+  assert.deepEqual(appliedDocument.sections.components, targetDocument.sections.components)
+  for (const section of ['control', 'spacing', 'surface'] as const)
+    assert.deepEqual(appliedDocument.sections[section], sourceDocument.sections[section])
 })

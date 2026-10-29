@@ -7,10 +7,11 @@ import {
   historyLimit,
   historyReducer,
   redo,
-  undo
+  undo,
+  type History
 } from '../examples/workshop/workshop-history.ts'
 
-const states = history => [
+const states = <T,>(history: History<T>) => [
   history.past.map(entry => entry.state),
   history.present.state,
   history.future.map(entry => entry.state)

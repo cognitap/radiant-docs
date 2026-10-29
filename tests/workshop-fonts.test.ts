@@ -9,18 +9,34 @@ import {
   localFont,
   applyTrialFont
 } from '../examples/workshop/workshop-fonts.ts'
+import type { ThemeSections } from '@cognitap/radiant'
 import {
   initialDocument,
   documentAPI,
-  readThemeDocument
+  readThemeDocument,
+  type SectionPatch
 } from '../examples/workshop/workshop-theme.ts'
-import { handoffAPI, jsonText } from '../examples/workshop/workshop-handoff.ts'
+import {
+  handoffAPI,
+  jsonText,
+  type Configuration,
+  type ImportData
+} from '../examples/workshop/workshop-handoff.ts'
 import { encodeShare, decodeShare } from '../examples/workshop/workshop-share.ts'
 
-const read = path => readFileSync(new URL('../' + path, import.meta.url))
-const buffer = data => data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength)
+function configurationOf(value: ImportData): Configuration {
+  if (value.kind !== 'radiant-workshop') throw new TypeError('Expected a workshop configuration.')
+  return value
+}
+
+const read = (path: string) => readFileSync(new URL('../' + path, import.meta.url))
+const buffer = (data: Buffer): ArrayBuffer => {
+  const bytes = data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength)
+  if (!(bytes instanceof ArrayBuffer)) throw new TypeError('Expected an ArrayBuffer.')
+  return bytes
+}
 test('pinned curated files and local variable-font fixture match the studied bytes', () => {
-  const manifest = JSON.parse(read('public/fonts/workshop/manifest.json'))
+  const manifest = JSON.parse(read('public/fonts/workshop/manifest.json').toString())
   for (const entry of [...manifest.fonts, manifest.fixture]) {
     const data = read(
       entry === manifest.fixture ? entry.file : 'public/fonts/workshop/' + entry.file
@@ -32,7 +48,7 @@ test('pinned curated files and local variable-font fixture match the studied byt
   for (const font of curatedFonts) {
     assert.match(read('public' + font.license).toString(), /SIL OPEN FONT LICENSE/i)
     assert.equal(font.styles.length, 2)
-    for (const path of Object.values(font.files))
+    for (const path of Object.values(font.files!))
       assert.equal(
         read('public' + path)
           .subarray(0, 4)
@@ -64,7 +80,7 @@ test('actual pinned TTF metadata exposes its weight/optical ranges and normal st
   const info = inspectLocalFont(bytes)
   assert.equal(info.style, 'normal')
   assert.equal(info.weight, 400)
-  assert.match(info.family, /Inter/)
+  assert.match(info.family!, /Inter/)
   assert.deepEqual(
     info.axes.map(({ tag, min, default: base, max }) => [tag, min, base, max]),
     [
@@ -102,16 +118,17 @@ test('truncated tables, malformed axes, oversized files and invalid CSS names fa
 })
 test('theme and share handoff carry requirements only, preserving unrelated settings', async () => {
   const bytes = buffer(read('scripts/fixtures/InterVariable.ttf'))
-  const original = documentAPI.update(initialDocument(), {
+  const sections = {
     color: { values: { accent: '#123456' } },
     components: { values: { button: { fontWeight: 775 } } }
-  })
+  } satisfies ThemeSections
+  const original = documentAPI.update(initialDocument(), sections as SectionPatch)
   const next = applyTrialFont(original, localFont(bytes, 'Brand font', 'normal', 400), 650)
   const d = readThemeDocument(next)
   assert.deepEqual(d.sections.color, readThemeDocument(original).sections.color)
   assert.deepEqual(d.sections.components, readThemeDocument(original).sections.components)
   assert.equal(documentAPI.compile(next).modes.light['--rad-typography-body-weight'], 650)
-  assert.deepEqual(d.sections.typography.fonts, [
+  assert.deepEqual(d.sections.typography!.fonts, [
     {
       id: 'workshop-font',
       family: 'Brand font',
@@ -126,7 +143,10 @@ test('theme and share handoff carry requirements only, preserving unrelated sett
     text,
     /bytes|blob:|data:|InterVariable|arrayBuffer|files|variationSettings|selectedAxes/
   )
-  assert.deepEqual(handoffAPI.read(await decodeShare(await encodeShare(text))).document, d)
+  assert.deepEqual(
+    configurationOf(handoffAPI.read(await decodeShare(await encodeShare(text)))).document,
+    d
+  )
   const partial = handoffAPI.sections(next, ['typography'])
   assert.deepEqual(partial.sections.typography, d.sections.typography)
   assert.throws(() => applyTrialFont(original, curatedFonts[2], 900), /available/)
