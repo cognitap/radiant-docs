@@ -1,0 +1,60 @@
+---
+title: Menu
+description: Command menus with deliberate keyboard navigation and dismissal.
+---
+
+import { MenuDemo } from '../../components/MenuDemo'
+
+<MenuDemo />
+
+## Offer commands
+
+Menu supplies a single-level command menu. Use [Link](/docs/link/) for
+navigation and [Select](/docs/select/) for choosing a form value. Submenus,
+menubars, checkbox/radio items and context-menu triggers are outside this API.
+Keep Content limited to MenuItems; do not nest unrelated interactive controls.
+
+Trigger composes [Button](/docs/button/), owns its ID and sets
+`aria-haspopup="menu"`, `aria-expanded` and `aria-controls`. Content is a
+`div` with `role="menu"`, named by the trigger. Give the trigger a meaningful
+accessible name.
+
+Items are Button hosts with protected `role="menuitem"`. `disabled` maps to
+`aria-disabled`: commands remain discoverable through arrows but cannot
+activate. `pending` retains Button's busy presentation and activation guard.
+Native form props, refs and `render` remain available. Forward all resolved
+props to one button.
+
+## Navigate and activate
+
+Enter, Space or Down on Trigger opens and focuses the first item; Up opens
+the last. Within Content, Up/Down wrap, Home/End jump, and printable characters
+search labels. Repeating a character cycles matches. Supply `textValue` for
+rich labels; matching resets after 700 ms. Disabled items remain focusable.
+
+Enter, Space or click runs `onClick`, then `onSelect`, then requests close.
+`preventDefault()` cancels subsequent work and dismissal. Guards run before
+consumer handlers. Native form submission remains the button's default action.
+
+Escape dismisses the top overlay and returns focus to Trigger. Tab and
+Shift+Tab close and continue from Trigger through the surrounding page.
+Outside pointer/focus dismissal preserves the new target. Focus is never trapped.
+
+Choose controlled `open`/`onOpenChange` or initial `defaultOpen`. Owners may
+refuse requests. `useMenu()` returns state or `null` outside Menu. All part
+prop types, `MenuState` and `MenuRenderProps` are exported.
+
+## Position and customize
+
+Content and Portal compose [Popover](/docs/popover/): local theme/modal
+ancestry, collision-aware positioning, nested dismissal, cleanup and optional
+popup motion travel together. Root and Portal add no wrapper.
+
+Use Content's `className`, `style` and div ref or `components.menu` overrides:
+`width`, `padding`, `radius`, surface colors/borders/shadow, `itemPadding`,
+`itemRadius`, `itemFocusBackground` and `itemFocusColor`. Local variables use
+`--rad-menu-*`. Preserve closed hiding, scrolling and visible focus.
+
+Composed parts retain Button/Popover identities and add `menu-trigger`,
+`menu-content` and `menu-item`. Content retains Popover's state, placement and
+motion attributes. Reduced-motion and forced-colors preferences remain supported.
