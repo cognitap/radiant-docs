@@ -1,4 +1,4 @@
-import { spawn } from 'node:child_process'
+import { execFileSync, spawn } from 'node:child_process'
 import { cp, mkdir, mkdtemp, readFile, readdir, rm, stat, writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -58,6 +58,9 @@ async function run(args) {
 }
 
 try {
+  // A Git boundary keeps parent scratch ignores out of format/lint and gives
+  // docs policy and deployment metadata the candidate's source revision.
+  execFileSync('git', ['clone', '--shared', '--no-checkout', '--quiet', root, staging])
   for (const entry of await readdir(root)) {
     await cp(path.join(root, entry), path.join(staging, entry), {
       recursive: true,
