@@ -6,33 +6,27 @@ description: Match the examples you read to the Radiant version you install.
 Radiant is experimental. The header identifies the exact installed package used
 by this site. Keep package JavaScript and CSS on the same version.
 
-## Radiant 0.0.8
+## Latest release
 
-Install `@cognitap/radiant@0.0.8`. It adds Select, with a themed picker that
-works inside Field and native forms and opens at the trigger's width. Nothing
-from 0.0.7 changes. See the
-[release notes](https://github.com/cognitap/radiant/releases/tag/v0.0.8).
+The current release adds [Textarea](/docs/textarea/), with Field relationships,
+native forms, shared sizing, themes and vertical resizing. See the
+[release notes](https://github.com/cognitap/radiant/releases/tag/v0.0.9).
 
 ## Upgrade existing themes
 
-Version 0.0.7 moves `themes`, `radiant`, `soft`, `expressive`, `glass`,
-`sharp`, `jelly` and `ticket` to `@cognitap/radiant/examples`. Change those
-imports; the themes themselves are unchanged.
+Example themes live at `@cognitap/radiant/examples`. Move imports of `themes`,
+`radiant`, `soft`, `expressive`, `glass`, `sharp`, `jelly` and `ticket` there;
+the theme definitions are unchanged. The core entry retains `defaultTheme`.
 
-Version 0.0.6 added the complete theme workshop and explicit motion entrypoints. Import the runtime where needed
-and use the exported setup alongside your typed theme. Layout motion uses
-dedicated slots/parts; review its geometry requirements before adopting it.
+Motion uses explicit entrypoints and dedicated layout slots/parts. Review the
+[motion guide](/docs/foundations/motion/) before adopting layout animation.
+Custom fonts remain application-owned. Earlier themes may need to adopt
+[typography roles](https://github.com/cognitap/radiant/blob/v0.0.5/docs/theming.md#component-roles-and-earlier-themes),
+which can change wrapping and layout.
 
-Version 0.0.5 introduced typography roles in production components, which can
-change wrapping and layout. Review the [typography migration](https://github.com/cognitap/radiant/blob/v0.0.5/docs/theming.md#component-roles-and-earlier-themes)
-when upgrading earlier themes. Custom fonts remain application-owned.
-
-Version 0.0.4 introduced the color wall, independent wall/ramp presets, nearby
-readable semantic fills, geometry editing and portable theme documents.
-Version 0.0.3 introduced the harmonised ten-family system, ThemeScope and eight
-presets. The earlier 0.0.2 package was Button-only. Consult the
-[0.0.3 migration](https://github.com/cognitap/radiant/blob/v0.0.3/docs/theming.md#migration-from-button-centred-themes)
-for removed action props, theme helpers and token names.
+For older Button-only integrations, consult the
+[theme migration](https://github.com/cognitap/radiant/blob/v0.0.3/docs/theming.md#migration-from-button-centred-themes)
+and [release history](https://github.com/cognitap/radiant/releases).
 
 ## Preview a library change
 
