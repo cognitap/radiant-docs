@@ -67,3 +67,48 @@ test('Menu commands update local state, close, and reset', async () => {
     }
   })
 })
+
+test('Alert keeps static information quiet and updates mounted live feedback without focus loss', async () => {
+  await withSite(async (baseURL, browser) => {
+    const page = await browser.newPage()
+    const errors = track(page)
+    try {
+      await capture(page, 'alert-feedback', async () => {
+        await page.goto(`${baseURL}/docs/alert/`)
+        const demo = page.getByRole('region', { name: 'Inline save feedback', exact: true })
+        await page.waitForFunction(
+          () => !document.querySelector<HTMLButtonElement>('.demo-heading button')?.disabled
+        )
+        const status = demo.getByRole('status', { name: 'Save result', exact: true })
+        const original = await status.elementHandle()
+        assert.ok(original)
+        const save = demo.getByRole('button', { name: 'Save draft', exact: true })
+        await save.click()
+        await status.getByText('Draft saved locally', { exact: true }).waitFor()
+        assert.equal(await save.evaluate(node => node === document.activeElement), true)
+        assert.equal(await original.evaluate(node => node.isConnected), true)
+        await demo.getByRole('button', { name: 'Simulate connection error', exact: true }).click()
+        await status.getByText('Save failed', { exact: true }).waitFor()
+        assert.equal(
+          await demo.getByText('Private draft', { exact: true }).locator('..').getAttribute('role'),
+          null
+        )
+        const urgent = demo.getByRole('button', {
+          name: 'Simulate urgent interruption',
+          exact: true
+        })
+        await urgent.click()
+        await demo
+          .getByRole('alert', { name: 'Urgent example', exact: true })
+          .getByText('Example interruption', { exact: true })
+          .waitFor()
+        assert.equal(await urgent.evaluate(node => node === document.activeElement), true)
+        await demo.getByRole('button', { name: 'Reset preview', exact: true }).click()
+        assert.equal(await status.innerText(), '')
+        assert.deepEqual(errors, [])
+      })
+    } finally {
+      await page.close()
+    }
+  })
+})
