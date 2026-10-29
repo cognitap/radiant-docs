@@ -1,0 +1,88 @@
+---
+title: Switch
+description: Native on/off settings with Field relationships and shared control sizes.
+---
+
+import { SwitchDemo } from '../../components/SwitchDemo'
+
+<SwitchDemo />
+
+## Label a setting
+
+Use Switch for an on/off setting. Use [Checkbox](/docs/checkbox/) for checklist
+choices or mixed selection. Keep the label stable when the state changes.
+
+```tsx
+import { Field, Switch } from '@cognitap/radiant'
+
+export function Notifications() {
+  return (
+    <Field
+      label="Desktop notifications"
+      description="Show a notification when someone mentions you."
+    >
+      <Switch
+        name="desktop"
+        value="enabled"
+        defaultChecked
+      />
+    </Field>
+  )
+}
+```
+
+Switch renders a native `input type="checkbox"` with `role="switch"`. Its thumb
+is decorative. [Field](/docs/field/) supplies the control ID, accessible label,
+description, error and required/disabled states. Omit Switch's convenience
+`label` inside Field. Outside Field, supply `label` or a native label with
+matching `htmlFor` and `id`.
+
+## Choose a state owner
+
+`defaultChecked` sets browser-owned initial state. For controlled state, pass
+`checked` and update it from `onChange`:
+
+```tsx
+const [quiet, setQuiet] = useState(false)
+
+<Switch
+  label="Do not disturb"
+  checked={quiet}
+  onChange={event => setQuiet(event.target.checked)}
+/>
+```
+
+Choose one owner for the entire mount. Do not combine `checked` and
+`defaultChecked` or switch ownership. `event.target.checked` is the boolean
+state; `value` is the submitted string.
+
+Click and Space use native activation. Pointer movement can preview the thumb
+position; release commits the nearer endpoint. Cancellation preserves the
+current state. A controlled owner still decides whether to accept a change.
+
+## Submit and reset
+
+A named, checked switch contributes its `value` to `new FormData(form)`;
+omitting `value` uses `on`. Unchecked and disabled switches contribute no entry.
+Native `required` validation remains available. Field's required and disabled
+states cannot be undone by its child.
+
+Native reset restores an uncontrolled default. Reset controlled state in the
+form's `onReset`. Switch has no mixed state or read-only mode.
+
+## Size and customize
+
+`controlSize` selects `small`, `medium` (default) or `large`, sharing metrics
+with Checkbox. Root `className`, typed `style`, native attributes/events and
+`ref` target the `HTMLInputElement`. `SwitchProps` is exported.
+
+| Part              | Target                     |
+| ----------------- | -------------------------- |
+| `parts.wrapper`   | Label or unlabeled wrapper |
+| `parts.label`     | Convenience label text     |
+| `parts.indicator` | Decorative thumb           |
+
+Use shared tokens or independent `components.switch` overrides. See
+[theming](/docs/foundations/theming/). Preserve focus, checked and disabled cues.
+The input exposes `data-slot="switch"`, `data-control-size` and presence-based
+`data-invalid`. `data-dragging` describes provisional pointer feedback only.
