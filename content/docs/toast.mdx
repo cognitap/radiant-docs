@@ -1,0 +1,60 @@
+---
+title: Toast
+description: Queued feedback with deliberate announcements, timing and reachable actions.
+---
+
+import { ToastDemo } from '../../components/ToastDemo'
+
+<ToastDemo />
+
+## Queue notifications
+
+Keep ToastProvider mounted before messages arrive. Place Toast roots inside
+ToastViewport. One notification is visible at a time, in registration order;
+closed or removed roots release the next slot. Queued roots stay hidden and
+inert. They consume no timeout. Server markup keeps them hidden until hydration.
+
+Use controlled `open`/`onOpenChange` or initial `defaultOpen`. A controlled owner
+may refuse requests. `useToast()` exposes `open`, `visible` and `setOpen`, or
+returns `null` outside its root. Remount distinct events with unique keys;
+identical text in two notifications remains two events.
+
+## Choose announcements and timing
+
+`announce` defaults to `polite`; `assertive` is for urgent interruptions, and
+`off` suppresses announcements. Persistent provider live hosts receive Title,
+Description and Action's required `altText`; Close is excluded. Unchanged text
+is not replayed. Optional `announcement` supplies replacement text for rich
+content. Root's name defaults to Title text; native ARIA naming overrides it.
+
+Provider and Root accept `duration` in milliseconds from 0–2147483647.
+Default `0` persists. Positive timeouts begin when visible, pause on mouse/pen
+hover, focus within, or hidden documents, and resume with remaining time.
+Changing duration restarts the timer. Cleanup cancels timers and announcements.
+
+Pausing alone does not make a time limit accessible. Offer timing controls or
+an untimed equivalent. Keep essential outcomes and actions available through
+[Alert](/docs/alert/) or ordinary page content. Use [AlertDialog](/docs/alert-dialog/)
+for an urgent decision requiring interruption.
+
+## Reach actions
+
+Opening preserves focus. F8 focuses the current toast; Viewport's `hotkey={false}`
+disables this shortcut. Focus never leaves an unrelated modal. Put the viewport
+inside an active Dialog when its actions belong there.
+
+Action and Close compose [Button](/docs/button/). Guards run before handlers;
+`preventDefault()` cancels dismissal. Native forms, `render` and refs remain
+available. Escape inside dismisses. Closing returns focus to the control used
+to enter the toast when it remains available; deliberate outside focus is preserved.
+
+## Style the parts
+
+Root is an Alert `div`, Viewport a named `section`, Title a heading and
+Description a paragraph. Actions are buttons. Parts retain their base slots
+and add `toast-*`; Root exposes `data-state`, `data-queued` and `data-urgency`.
+
+Use `components.toast`, local `--rad-toast-*` variables, classes, styles and
+native refs. Viewport defaults to fixed bottom-right placement; preserve bounds,
+scrolling and focus rings when restyling. Optional popup motion honors off and
+reduced motion. All part prop types and `ToastState` are exported.
