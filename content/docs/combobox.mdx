@@ -1,0 +1,88 @@
+---
+title: Combobox
+description: Search local options or asynchronous results and commit one value.
+---
+
+import { ComboboxDemo, AsyncComboboxDemo } from '../../components/ComboboxDemo'
+
+<ComboboxDemo />
+
+## Search and choose
+
+```tsx
+import { Combobox, Field } from '@cognitap/radiant'
+
+const cities = [
+  { value: 'budapest', label: 'Budapest' },
+  { value: 'oslo', label: 'Oslo' },
+]
+
+<Field label="Destination" required>
+  <Combobox items={cities} name="city" defaultValue="budapest" />
+</Field>
+```
+
+Items need distinct string values. Rich labels also need plain `textValue`.
+Local filtering matches text without case sensitivity; supply `filter(item, query)`
+for different matching.
+
+[Field](/docs/field/) connects the input's label, description, error, disabled and
+required states. Search text never becomes a selection. A hidden native input
+submits the committed key through `name` and `form`. `null` clears selection;
+`''` is a valid key, including when required. Disabled controls submit nothing.
+
+## Own state once
+
+Selection, query and expansion each accept `value`, `query` or `open`, their
+`default*` counterpart, and `onValueChange`, `onQueryChange` or `onOpenChange`.
+Choose one owner per axis for the entire mount. Controlled owners may decline
+requests; prop updates do not notify or move focus.
+
+Native reset silently restores uncontrolled selection and query. Controlled
+values remain the application's responsibility. Commit and dismissal request an
+empty query. `useCombobox()` reads state and exposes requests, or returns `null`
+outside its owner.
+
+## Supply async results
+
+<AsyncComboboxDemo />
+
+Pass `filter={null}` with application-filtered `items`. The application owns
+fetching, cancellation and response ordering. Supply `selectedItem` when the
+initial selected option is absent from results; chosen labels survive result
+replacement.
+
+`loading` and `error` hide options while a request is unavailable. They are
+separate from Field validation. `loadingText`, `emptyText` and `error` provide
+polite status content without announcing result counts on every keystroke.
+
+## Navigate
+
+Focus stays in the input. Arrows highlight enabled results; Enter or a click
+commits. Tab leaves the control; Tab, blur and Escape discard unfinished search.
+Escape while closed clears selection. Home/End and normal text editing retain
+native behavior. The default control has one trailing chevron; `ComboboxClear`
+is optional.
+
+## Compose and customize
+
+```tsx
+<Combobox items={cities}>
+  <ComboboxInput placeholder="Find a city" />
+  <ComboboxPortal>
+    <ComboboxContent motion="off" />
+  </ComboboxPortal>
+</Combobox>
+```
+
+The root and portal have no host. Input refs/props reach the native input;
+content, item and status refs/props reach divs. Trigger and clear parts follow
+[Button's render contract](/docs/button/), with independent adornment styling.
+
+Content uses the local top layer with viewport collision handling; adjust
+`sideOffset` and `collisionPadding`. Use `ComboboxItem` for custom options and
+`ComboboxStatus` for status presentation. Preserve owned ARIA and visible cues.
+
+`controlSize` shares small, medium and large metrics. Use `components.combobox`
+and part styles for [theming](/docs/foundations/theming/).
+[MotionProvider](/docs/foundations/motion/) adds popup opacity; closing is immediate.
