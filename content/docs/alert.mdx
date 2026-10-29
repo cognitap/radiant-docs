@@ -1,0 +1,59 @@
+---
+title: Alert
+description: Inline feedback with independent visual tone and announcement urgency.
+---
+
+import { AlertDemo } from '../../components/AlertDemo'
+
+<AlertDemo />
+
+## Choose urgency deliberately
+
+Alert groups inline feedback. `announce="off"` is the default for static
+information: it adds no live role. A static Alert with `aria-label` or
+`aria-labelledby` becomes a named `group`.
+
+Use `announce="polite"` for nonurgent updates such as a save result. It supplies
+`role="status"`. Reserve `announce="assertive"`, which supplies `role="alert"`,
+for interruptions requiring immediate attention. Both roles provide implicit
+live and atomic semantics; Alert does not add redundant `aria-live` attributes.
+These role/live settings are owned by Alert.
+
+`tone` selects `neutral` (default), `accent`, `warning` or `danger`. Color never
+chooses urgency. State the outcome and next step in text; icons and color can
+reinforce that meaning. Applications supply meaningful content and optional
+accessible names through native ARIA naming props.
+
+## Update without repetition
+
+Mount the empty live Alert before a message arrives, then update its children
+in place. Keep its urgency stable and avoid changing its key. Static server
+content does not promise an announcement on arrival.
+
+Keep feedback brief, announce meaningful changes once, and avoid frequent
+updates, duplicated live regions or announcement-only copies of visible text.
+Alert adds no timers, replay or announcement queue. Assistive technology
+determines how live changes are presented.
+
+Alert leaves focus where it is and never dismisses itself. Keep messages
+available long enough to read. Put recovery actions outside the live text so
+updates do not repeat control names. Use [AlertDialog](/docs/alert-dialog/) for
+an urgent decision that must interrupt the workflow; use [Field](/docs/field/)
+for errors tied to a particular control.
+
+## Compose and customize
+
+Root is a `div`; AlertTitle is an `h2` by default, with `level` from 1–6 for
+the surrounding outline. AlertDescription is a `p`. Each forwards native props,
+`className`, `style` and its native ref. Title and Description are optional.
+The parts expose `alert`, `alert-title` and `alert-description` slots; Root
+adds `data-tone` and `data-announce`.
+
+Use `components.alert` or local `--rad-alert-*` variables for `padding`, `gap`,
+`radius`, surface colors/borders/shadow, `titleSize`, `titleWeight` and
+`descriptionSize`. Preserve readable text, wrapping and forced-colors meaning.
+Color transitions honor reduced motion. No provider is required; [themes](/docs/foundations/theming/)
+apply normally.
+
+`AlertProps`, part prop types, `AlertTone`, `AlertAnnouncement` and
+`AlertHeadingLevel` are exported.
