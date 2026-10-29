@@ -1,0 +1,86 @@
+---
+title: Select
+description: Choose one value through a themed picker with native form integration.
+---
+
+import { SelectDemo } from '../../components/SelectDemo'
+
+<SelectDemo />
+
+## Choose one value
+
+```tsx
+const workspaces = [
+  { value: 'personal', label: 'Personal' },
+  { value: 'studio', label: 'Studio' },
+  { value: 'archive', label: 'Archive', disabled: true },
+]
+
+<Field label="Workspace" description="Where new ideas land." required>
+  <Select items={workspaces} name="workspace" defaultValue="studio" />
+</Field>
+```
+
+The visible control is a button and custom listbox. A visually hidden native
+select handles form submission and constraint validation. [Field](/docs/field/)
+connects the visible label, description, error, disabled and required states.
+
+Each item has a distinct string `value` and a `label`. Rich labels also need
+plain `textValue` for keyboard matching and native options. Keep this registry
+stable during an interaction. Use a searchable combobox for long filtered lists.
+
+## Own state once
+
+Use `defaultValue` for uncontrolled selection. Native form reset restores it
+without firing `onValueChange`. Use `value` and `onValueChange` for controlled
+selection; the owner may decline a request. Controlled form reset restores the
+application's values. `null` shows the placeholder; `''` is an option value and
+fails native required validation. Do not combine owners or switch them while mounted.
+
+`open`, `defaultOpen` and `onOpenChange` follow the same ownership rules.
+`name`, `form` and `autoComplete` reach the native select. Disabled controls
+contribute no form value. Programmatic prop updates do not emit form change.
+
+## Compose the picker
+
+```tsx
+<Select items={workspaces}>
+  <SelectTrigger>
+    <SelectValue placeholder="Choose a workspace" />
+    <SelectIcon />
+  </SelectTrigger>
+  <SelectPortal>
+    <SelectContent position="popper">
+      <SelectViewport>
+        {workspaces.map(item => (
+          <SelectItem
+            key={item.value}
+            value={item.value}
+          />
+        ))}
+      </SelectViewport>
+    </SelectContent>
+  </SelectPortal>
+</Select>
+```
+
+Content aligns the selected item with the trigger by default. `position="popper"`
+places it beside the trigger with viewport collision handling. The portal stays
+in the local theme and modal ancestry while the top layer escapes clipping.
+SelectGroup labels related items; SelectItemText and SelectItemIndicator customize
+their content. Root state has no host; refs and native props target each named part.
+
+Enter, Space or arrows open the picker. Arrows, Home, End and typing move option
+focus while selection stays unchanged. Enter or Space commits. Escape dismisses
+and restores trigger focus; Tab stays within the open picker. Closed-trigger
+typing selects directly. Disabled options are skipped.
+
+## Motion and appearance
+
+MotionProvider adds spring press feedback and popup opacity. SelectContent
+accepts `motion="off"`; theme off and reduced motion settle immediately. Closing
+never waits for animation. Follow the shared [motion guide](/docs/foundations/motion/).
+
+Use `controlSize`, shared theme roles, `components.select` overrides and each
+part's `className` or `style`. Preserve focus cues, selected/disabled distinctions,
+listbox semantics and functional positioning when customizing.
