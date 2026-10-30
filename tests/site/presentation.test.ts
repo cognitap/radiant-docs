@@ -76,3 +76,60 @@ test('Badge conveys status in text and only hides repeated decorative meaning', 
     }
   })
 })
+
+test('Avatar keeps one name through native image failure, fallback and recovery', async () => {
+  await withSite(async (baseURL, browser) => {
+    const page = await browser.newPage()
+    const errors = track(page)
+    try {
+      await capture(page, 'avatar-identity', async () => {
+        await page.goto(`${baseURL}/docs/avatar/`)
+        const demo = page.getByRole('region', { name: 'Profile identity', exact: true })
+        await page.waitForFunction(
+          () => !document.querySelector<HTMLButtonElement>('.demo-heading button')?.disabled
+        )
+        const root = demo.locator('[data-slot~="avatar"]')
+        await demo
+          .locator('[data-slot="avatar-image"][data-state="loaded"]')
+          .waitFor({ state: 'attached' })
+        assert.equal(await demo.getByRole('img').count(), 0)
+        assert.equal(await root.getAttribute('aria-hidden'), 'true')
+        await demo.getByRole('checkbox', { name: 'Use adjacent name', exact: true }).uncheck()
+        assert.equal(await demo.getByRole('img', { name: 'Jordan Rivera', exact: true }).count(), 1)
+        const before = await root.boundingBox()
+        await demo
+          .getByRole('combobox', { name: 'Image source', exact: true })
+          .selectOption('missing')
+        await demo
+          .locator('[data-slot="avatar-image"][data-state="error"]')
+          .waitFor({ state: 'attached' })
+        assert.equal(await demo.locator('[data-slot="avatar-fallback"]').innerText(), 'JR')
+        assert.equal(await demo.getByRole('img').count(), 1)
+        const after = await root.boundingBox()
+        assert.equal(after?.width, before?.width)
+        assert.equal(after?.height, before?.height)
+        await demo
+          .getByRole('combobox', { name: 'Image source', exact: true })
+          .selectOption('fallback')
+        assert.equal(await demo.locator('[data-slot="avatar-image"]').count(), 0)
+        assert.equal(
+          await demo.locator('[data-slot="avatar-fallback"]').getAttribute('data-state'),
+          'fallback'
+        )
+        await demo
+          .getByRole('combobox', { name: 'Image source', exact: true })
+          .selectOption('image')
+        await demo
+          .locator('[data-slot="avatar-image"][data-state="loaded"]')
+          .waitFor({ state: 'attached' })
+        assert.equal(await demo.locator('[data-slot="avatar-fallback"]').count(), 0)
+        await demo.getByRole('button', { name: 'Reset preview', exact: true }).click()
+        assert.equal(await root.getAttribute('aria-hidden'), 'true')
+        assert.equal(await demo.getByRole('img').count(), 0)
+        assert.deepEqual(errors, [])
+      })
+    } finally {
+      await page.close()
+    }
+  })
+})
