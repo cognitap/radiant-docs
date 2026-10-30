@@ -1,0 +1,79 @@
+---
+title: CheckboxGroup
+description: Related native checkboxes with shared feedback and mixed selection.
+---
+
+import {
+  CheckboxGroupDemo,
+  CheckboxGroupAvailableDemo,
+  CheckboxGroupSavingDemo
+} from '../../components/CheckboxGroupDemo'
+
+<CheckboxGroupDemo />
+
+## Usage
+
+Use `CheckboxGroup` for several related choices and [Checkbox](/docs/checkbox/) for one independent setting. Use [RadioGroup](/docs/radio-group/) when exactly one option is allowed.
+
+```tsx
+<CheckboxGroup
+  legend="Notifications"
+  name="channels"
+  items={[
+    { value: 'email', label: 'Email' },
+    { value: 'sms', label: 'SMS' }
+  ]}
+  defaultValue={['email']}
+/>
+```
+
+## Examples
+
+### Select available channels
+
+<CheckboxGroupAvailableDemo />
+
+### Save preferences
+
+<CheckboxGroupSavingDemo />
+
+## State
+
+Choose `value` with `onValueChange`, or initial `defaultValue`. Values are unique strings; empty strings are valid. Controlled callbacks request changes and may be refused. Default changes after mounting do not replace choices.
+
+Native forms submit repeated entries under `name`. Disabled options are excluded. Uncontrolled reset silently restores initial choices; controlled resets belong to your form. Applications own validation and persistence.
+
+## Accessibility
+
+The legend names a real Fieldset; every native checkbox has its own label. Help and errors describe the group. “Select all” reflects enabled options, announces mixed state and preserves disabled selections; it never submits a value. Disabling the group disables every option.
+
+| Key             | Behavior                        |
+| --------------- | ------------------------------- |
+| Tab / Shift+Tab | Move between enabled checkboxes |
+| Space           | Toggle the focused checkbox     |
+
+## Styling
+
+Root props and ref reach the fieldset. Root identities are `field fieldset checkbox-group`. `parts` styles legend, description, error and options; item and parent configurations retain Checkbox's `parts`, `className`, `style` and input ref. Set `components.checkboxGroup.gap` or `--rad-checkbox-group-gap` for option spacing. Checkbox tokens style the controls.
+
+## API
+
+| CheckboxGroup prop                           | Type                                               | Default         |
+| -------------------------------------------- | -------------------------------------------------- | --------------- |
+| legend / items                               | ReactNode / readonly CheckboxGroupItem[]           | Required        |
+| value / defaultValue                         | readonly string[]                                  | Uncontrolled [] |
+| onValueChange                                | (value: string[]) => void                          | None            |
+| selectAll                                    | CheckboxGroupSelectAll                             | None            |
+| controlSize                                  | small / medium / large                             | medium          |
+| description / error                          | ReactNode                                          | None            |
+| disabled                                     | boolean                                            | false           |
+| parts                                        | legend / description / error / options style hooks | None            |
+| name / form                                  | string                                             | None            |
+| Native fieldset props, className, style, ref | Includes `Ref<HTMLFieldSetElement>`                | Native defaults |
+
+| Configuration          | Properties                                                                                       |
+| ---------------------- | ------------------------------------------------------------------------------------------------ |
+| CheckboxGroupItem      | Required unique string value and label; native Checkbox presentation, disabled, id and input ref |
+| CheckboxGroupSelectAll | Required label; Checkbox presentation, disabled, id and input ref                                |
+
+Configuration cannot replace selection, change handling, submitted names, form ownership or native checkbox semantics. Exports: `CheckboxGroup`, `CheckboxGroupProps`, `CheckboxGroupItem`, `CheckboxGroupSelectAll`.
