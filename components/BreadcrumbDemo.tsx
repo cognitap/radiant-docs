@@ -1,12 +1,12 @@
 import { Demo } from './demo/Demo'
-import { BreadcrumbExample } from '@/examples/breadcrumb/BreadcrumbExample'
+import { BreadcrumbPlayground } from '@/examples/breadcrumb/BreadcrumbPlayground'
 export function BreadcrumbDemo() {
   return (
     <Demo
       title="Location hierarchy"
       files={['breadcrumb/BreadcrumbExample.tsx']}
     >
-      <BreadcrumbExample />
+      <BreadcrumbPlayground />
     </Demo>
   )
 }

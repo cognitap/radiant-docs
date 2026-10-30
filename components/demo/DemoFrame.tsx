@@ -8,6 +8,7 @@ import {
   useMemo,
   useRef,
   useState,
+  type KeyboardEvent,
   type ReactNode
 } from 'react'
 import { Button, ThemeScope, type Theme, type ThemeMode } from '@cognitap/radiant'
@@ -137,13 +138,78 @@ function PreviewTheme({ children }: { children: ReactNode }) {
   )
 }
 
+/** Every file renders on the server; once hydrated, more than one file becomes tabs. */
 function SourceFiles({ sources }: { sources: readonly DemoSource[] }) {
-  return sources.map(source => (
-    <SourceFile
-      key={source.name}
-      source={source}
-    />
-  ))
+  const ready = useHydrated()
+  const baseId = useId()
+  const [selected, setSelected] = useState(0)
+  const tabs = useRef<(HTMLButtonElement | null)[]>([])
+  const tabbed = ready && sources.length > 1
+
+  function select(index: number) {
+    const next = (index + sources.length) % sources.length
+    setSelected(next)
+    tabs.current[next]?.focus()
+  }
+
+  function onTabKeyDown(event: KeyboardEvent<HTMLButtonElement>) {
+    const target = {
+      ArrowRight: selected + 1,
+      ArrowLeft: selected - 1,
+      Home: 0,
+      End: sources.length - 1
+    }[event.key]
+    if (target === undefined) return
+    event.preventDefault()
+    select(target)
+  }
+
+  return (
+    <>
+      {tabbed && (
+        <div
+          role="tablist"
+          aria-label="Source files"
+          className="demo-source-tabs"
+        >
+          {sources.map((source, index) => (
+            <button
+              key={source.name}
+              ref={node => {
+                tabs.current[index] = node
+              }}
+              type="button"
+              role="tab"
+              id={`${baseId}-tab-${index}`}
+              aria-controls={`${baseId}-panel-${index}`}
+              aria-selected={index === selected}
+              tabIndex={index === selected ? 0 : -1}
+              title={source.name}
+              onClick={() => setSelected(index)}
+              onKeyDown={onTabKeyDown}
+            >
+              {source.name.split('/').at(-1)}
+            </button>
+          ))}
+        </div>
+      )}
+      {sources.map((source, index) => (
+        <SourceFile
+          key={source.name}
+          source={source}
+          panel={
+            tabbed
+              ? {
+                  id: `${baseId}-panel-${index}`,
+                  tab: `${baseId}-tab-${index}`,
+                  hidden: index !== selected
+                }
+              : undefined
+          }
+        />
+      ))}
+    </>
+  )
 }
 
 type Listing =
@@ -210,7 +276,13 @@ function RemoteSources({ url }: { url: string }) {
   )
 }
 
-function SourceFile({ source }: { source: DemoSource }) {
+function SourceFile({
+  source,
+  panel
+}: {
+  source: DemoSource
+  panel?: { id: string; tab: string; hidden: boolean }
+}) {
   const [feedback, setFeedback] = useState('')
   const [copying, setCopying] = useState(false)
   const ready = useHydrated()
@@ -229,23 +301,77 @@ function SourceFile({ source }: { source: DemoSource }) {
   }
 
   return (
-    <div className="demo-source">
-      <div className="demo-source-heading">
-        <span className="demo-filename">{source.name}</span>
+    <div
+      className="demo-source"
+      {...(panel && {
+        id: panel.id,
+        role: 'tabpanel',
+        'aria-labelledby': panel.tab,
+        hidden: panel.hidden
+      })}
+    >
+      {!panel && <div className="demo-filename">{source.name}</div>}
+      <div className="demo-source-actions">
+        <output className="demo-copy-feedback">{feedback}</output>
         <Button
+          variant="ghost"
+          tone="neutral"
+          controlSize="small"
           aria-label={`Copy ${source.name}`}
+          title="Copy"
           disabled={!ready}
           aria-disabled={!ready || copying}
           onClick={() => {
             if (!copying) void copy()
           }}
         >
-          {copying ? 'Copying…' : 'Copy'}
+          {feedback.startsWith('Copied') ? <CheckIcon /> : <CopyIcon />}
         </Button>
       </div>
-      <output className="demo-copy-feedback">{feedback}</output>
       <div dangerouslySetInnerHTML={{ __html: source.html }} />
     </div>
+  )
+}
+
+function CopyIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 16 16"
+      width="16"
+      height="16"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinejoin="round"
+    >
+      <rect
+        x="5.5"
+        y="5.5"
+        width="8"
+        height="8"
+        rx="1.5"
+      />
+      <path d="M10.5 3.5v-.5a1.5 1.5 0 0 0-1.5-1.5H4A1.5 1.5 0 0 0 2.5 3v5A1.5 1.5 0 0 0 4 9.5h.5" />
+    </svg>
+  )
+}
+
+function CheckIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 16 16"
+      width="16"
+      height="16"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="m3 8.5 3.5 3.5L13 4.5" />
+    </svg>
   )
 }
 

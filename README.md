@@ -49,7 +49,8 @@ content/docs/button.mdx
 ```
 
 1. Put the copyable example and its CSS under `examples/`. Keep site controls in
-   a separate `*Playground.tsx` client component.
+   a separate `*Playground.tsx` client component. `pnpm lint` rejects site imports
+   anywhere else under `examples/`.
 2. In a server component, wrap the playground in `Demo` and list every file the
    example imports. The source panel shows those files as they are.
 3. Inside the playground, use `DemoControls` and `DemoPreview`. Reset remounts

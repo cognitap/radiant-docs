@@ -1,12 +1,12 @@
 import { Demo } from './demo/Demo'
-import { PaginationExample } from '@/examples/pagination/PaginationExample'
+import { PaginationPlayground } from '@/examples/pagination/PaginationPlayground'
 export function PaginationDemo() {
   return (
     <Demo
       title="Local record pages"
       files={['pagination/PaginationExample.tsx']}
     >
-      <PaginationExample />
+      <PaginationPlayground />
     </Demo>
   )
 }

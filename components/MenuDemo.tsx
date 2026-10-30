@@ -1,12 +1,12 @@
 import { Demo } from './demo/Demo'
-import { MenuExample } from '@/examples/menu/MenuExample'
+import { MenuPlayground } from '@/examples/menu/MenuPlayground'
 export function MenuDemo() {
   return (
     <Demo
       title="Project commands"
       files={['menu/MenuExample.tsx']}
     >
-      <MenuExample />
+      <MenuPlayground />
     </Demo>
   )
 }
