@@ -1471,3 +1471,61 @@ test('NativeSelect docs preserve platform controls, grouped choices and native s
     }
   })
 })
+
+test('Meter docs retain native passive gauges and meaningful storage, recorder and room tasks', async () => {
+  await withSite(async (baseURL, browser) => {
+    const page = await browser.newPage(),
+      errors = track(page)
+    try {
+      await capture(page, 'meter-tasks', async () => {
+        await page.goto(`${baseURL}/docs/meter/`)
+        await page.waitForFunction(
+          () => !document.querySelector<HTMLButtonElement>('.demo-heading button')?.disabled
+        )
+        const storage = page.getByRole('region', { name: 'Manage recording storage', exact: true }),
+          gauge = storage.getByRole('meter', { name: 'Recording storage used' })
+        assert.equal(await gauge.evaluate(n => n.tagName), 'METER')
+        assert.equal(await gauge.getAttribute('value'), '7.2')
+        await storage.getByRole('combobox', { name: 'Direction', exact: true }).selectOption('rtl')
+        assert.equal(await gauge.evaluate(n => getComputedStyle(n).direction), 'rtl')
+        await storage
+          .getByRole('combobox', { name: 'Gauge height', exact: true })
+          .selectOption('large')
+        assert.equal(await gauge.evaluate(n => n.getBoundingClientRect().height), 16)
+        await storage.getByRole('button', { name: 'Archive interviews', exact: true }).click()
+        assert.equal(await gauge.getAttribute('value'), '3')
+        assert.equal(await gauge.getAttribute('data-tone'), 'accent')
+        assert.match(
+          await storage.getByRole('status').last().innerText(),
+          /Archived interview recordings/
+        )
+        await storage.getByRole('button', { name: 'Add sample recording', exact: true }).click()
+        assert.equal(await gauge.getAttribute('value'), '3.8')
+        const recorder = page.getByRole('region', { name: 'Choose a recorder', exact: true })
+        await recorder
+          .getByRole('combobox', { name: 'Recorder', exact: true })
+          .selectOption('travel')
+        assert.equal(await recorder.getByRole('meter').getAttribute('value'), '10')
+        assert.equal(await recorder.getByRole('meter').getAttribute('data-tone'), 'danger')
+        assert.match(await recorder.innerText(), /20 minutes estimated recording time/)
+        const room = page.getByRole('region', { name: 'Choose a study room', exact: true })
+        await room.getByRole('combobox', { name: 'Study room', exact: true }).selectOption('studio')
+        assert.equal(await room.getByRole('meter').getAttribute('value'), '28')
+        assert.match(await room.innerText(), /4 seats/)
+        await page.setViewportSize({ width: 320, height: 900 })
+        assert.equal(
+          await page.getByRole('meter').evaluateAll(nodes =>
+            nodes.every(node => {
+              const bounds = node.getBoundingClientRect()
+              return bounds.left >= 0 && bounds.right <= window.innerWidth
+            })
+          ),
+          true
+        )
+        assert.deepEqual(errors, [])
+      })
+    } finally {
+      await page.close()
+    }
+  })
+})
