@@ -1,5 +1,5 @@
 import { Demo } from './demo/Demo'
-import { TooltipExample } from '@/examples/tooltip/TooltipExample'
+import { TooltipPlayground } from '@/examples/tooltip/TooltipPlayground'
 
 export function TooltipDemo() {
   return (
@@ -7,7 +7,7 @@ export function TooltipDemo() {
       title="A little more context"
       files={['tooltip/TooltipExample.tsx']}
     >
-      <TooltipExample />
+      <TooltipPlayground />
     </Demo>
   )
 }
