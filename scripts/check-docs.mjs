@@ -67,7 +67,10 @@ for (const file of files.filter(
 for (const file of pending) {
   if (!existsSync(file)) errors.push(`${file}: gone; remove it from pending in docs-policy.json.`)
 }
-for (const file of ['package.json', 'pnpm-workspace.yaml', 'pnpm-lock.yaml']) {
+// preview:candidate stages an uncommitted copy that installs the tarball through file:.
+for (const file of process.env.RADIANT_CANDIDATE
+  ? []
+  : ['package.json', 'pnpm-workspace.yaml', 'pnpm-lock.yaml']) {
   const text = readFileSync(file, 'utf8')
   if (
     /@cognitap\/radiant['"]?(?:\s*:\s*['"]?|@)(?:link|file):|(?:specifier|version): (?:link|file):/.test(
