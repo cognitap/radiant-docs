@@ -788,3 +788,60 @@ test('Toolbar shares one focus entry while native actions and nested dialog keep
     }
   })
 })
+
+test('HoverCard opens supplementary real-link previews and preserves keyboard, controlled and touch-safe destinations', async () => {
+  await withSite(async (baseURL, browser) => {
+    const page = await browser.newPage(),
+      errors = track(page)
+    try {
+      await capture(page, 'hover-card-links', async () => {
+        await page.goto(`${baseURL}/docs/hover-card/`)
+        await page.waitForFunction(
+          () => !document.querySelector<HTMLButtonElement>('.demo-heading button')?.disabled
+        )
+        const demo = page.getByRole('region', { name: 'Preview a contributor', exact: true }),
+          trigger = demo.getByRole('link', { name: 'Lee Chen', exact: true })
+        await trigger.focus()
+        const preview = demo.locator('[data-slot~="hover-card-content"]')
+        await preview.waitFor({ state: 'visible' })
+        assert.equal(await trigger.evaluate(node => node === document.activeElement), true)
+        await page.keyboard.press('Tab')
+        assert.equal(
+          await preview
+            .getByRole('link', { name: 'Read full profile', exact: true })
+            .evaluate(node => node === document.activeElement),
+          true
+        )
+        await page.keyboard.press('Escape')
+        assert.equal(await trigger.getAttribute('aria-expanded'), 'false')
+        assert.equal(await trigger.evaluate(node => node === document.activeElement), true)
+        const project = page.getByRole('region', { name: 'Review project progress', exact: true })
+        await project
+          .getByRole('checkbox', { name: 'Keep project preview open', exact: true })
+          .check()
+        assert.equal(
+          await project
+            .getByRole('link', { name: 'Website refresh', exact: true })
+            .getAttribute('aria-expanded'),
+          'true'
+        )
+        await project.getByRole('button', { name: 'Reset preview', exact: true }).click()
+        assert.equal(
+          await project
+            .getByRole('checkbox', { name: 'Keep project preview open', exact: true })
+            .isChecked(),
+          false
+        )
+        const resource = page.getByRole('region', { name: 'Open reference material', exact: true })
+        await resource.getByRole('link', { name: 'Accessibility resources', exact: true }).click()
+        assert.match(
+          await resource.locator('output[aria-live="polite"]').innerText(),
+          /External resource is ready/
+        )
+        assert.deepEqual(errors, [])
+      })
+    } finally {
+      await page.close()
+    }
+  })
+})

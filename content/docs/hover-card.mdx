@@ -1,0 +1,96 @@
+---
+title: HoverCard
+description: Supplementary previews for real links.
+---
+
+import {
+  HoverCardDemo,
+  HoverCardProjectDemo,
+  HoverCardResourceDemo,
+  HoverCardRelatedDemo
+} from '../../components/HoverCardDemo'
+
+<HoverCardDemo />
+
+## Usage
+
+Use HoverCard for supplementary link previews. Keep the destination useful without a preview. Use [Tooltip](/docs/tooltip/) for a short control description, or [Popover](/docs/popover/) for an explicitly opened surface.
+
+```tsx
+<HoverCard>
+  <HoverCardTrigger href="/people/lee">Lee Chen</HoverCardTrigger>
+  <HoverCardPortal>
+    <HoverCardContent>Design systems engineer.</HoverCardContent>
+  </HoverCardPortal>
+</HoverCard>
+```
+
+## Examples
+
+### Review project progress
+
+<HoverCardProjectDemo />
+
+### Open reference material
+
+<HoverCardResourceDemo />
+
+### Explore related reading
+
+<HoverCardRelatedDemo />
+
+## State
+
+Use `open` or `defaultOpen`, never both; ownership stays fixed per mount. `onOpenChange` requests changes and a controlled owner may refuse. Prop synchronization emits no callback. `useHoverCard()` returns open state, `setOpen` and the content ID, or `null` outside an owner.
+
+## Accessibility
+
+The trigger is a real [Link](/docs/link/): ordinary, modified and touch activation keep native navigation. Hover and focus wait `openDelay`; leaving both trigger and content waits `closeDelay`. The pointer can cross the placement gap. Opening keeps focus on the link. Touch does not require a preview; essential information belongs at the destination.
+
+| Key             | Behavior                                                  |
+| --------------- | --------------------------------------------------------- |
+| Tab / Shift+Tab | Reach the link and open content's interactive descendants |
+| Enter           | Follow the focused link                                   |
+| Escape          | Dismiss the nearest surface; return focus from content    |
+
+Content is a non-modal div. Add semantics appropriate to its contents; it is not automatically a tooltip or dialog. Trigger relationships are owned by HoverCard. Outside focus or pointer interaction dismisses without stealing focus. Local portals preserve theme and modal ancestry.
+
+## Motion
+
+The optional `MotionProvider` from `@cognitap/radiant/motion/react` supplies Popover's entry feedback. Reduced motion and local off win; dismissal is immediate.
+
+## Styling
+
+Refs and native props target the trigger's anchor or content's div. `data-slot` retains `link hover-card-trigger` and `popover-content hover-card-content`. Content exposes effective `data-side`, `data-align`, open/closed `data-state` and `data-motion`.
+
+Use `components.hoverCard.width` or `--rad-hover-card-width`; other surface overrides inherit [Popover](/docs/popover/#styling). Caller classes and styles win. A custom trigger `render` forwards all resolved props, ref and children to one compatible anchor.
+
+## API
+
+| HoverCard prop         | Type                            | Default   |
+| ---------------------- | ------------------------------- | --------- |
+| open / defaultOpen     | boolean; exclusive owner        | false     |
+| onOpenChange           | (open: boolean) => void         | None      |
+| openDelay / closeDelay | Finite nonnegative milliseconds | 500 / 150 |
+| children               | ReactNode                       | None      |
+
+| HoverCardTrigger prop            | Type                                                          | Default       |
+| -------------------------------- | ------------------------------------------------------------- | ------------- |
+| href                             | string; required                                              | None          |
+| render                           | (props: HoverCardRenderProps) => ReactElement                 | Native anchor |
+| Link props and native attributes | Includes external, variant, tone, className, style and events | Link defaults |
+| ref                              | `Ref<HTMLAnchorElement>`                                      | None          |
+
+| HoverCardContent prop            | Type                                | Default         |
+| -------------------------------- | ----------------------------------- | --------------- |
+| side                             | top / right / bottom / left         | bottom          |
+| align                            | start / center / end                | start           |
+| sideOffset / collisionPadding    | Finite nonnegative pixels           | 8 / 8           |
+| motion                           | inherit / off                       | inherit         |
+| className / style                | string / ThemeStyle                 | None            |
+| ref                              | `Ref<HTMLDivElement>`               | None            |
+| Native div attributes and events | Includes role and accessible naming | Native defaults |
+
+`HoverCardPortal` accepts children and has no host.
+
+Exports: `HoverCard`, `HoverCardTrigger`, `HoverCardContent`, `HoverCardPortal`, `useHoverCard`; types `HoverCardProps`, `HoverCardState`, `HoverCardTriggerProps`, `HoverCardContentProps`, `HoverCardPortalProps`, `HoverCardRenderProps`.
