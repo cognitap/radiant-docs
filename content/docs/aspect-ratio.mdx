@@ -1,0 +1,62 @@
+---
+title: AspectRatio
+description: Reserves fixed proportions for images, video and embedded content.
+---
+
+import {
+  AspectRatioDemo,
+  AspectRatioVideoDemo,
+  AspectRatioEmbedDemo
+} from '../../components/AspectRatioDemo'
+
+<AspectRatioDemo />
+
+## Usage
+
+Use `AspectRatio` to reserve media space before content loads. Use [Card](/docs/card/) when text and controls should determine a surface's height.
+
+```tsx
+<AspectRatio ratio={4 / 3}>
+  <img
+    src="/mountains.jpg"
+    alt="Green mountains"
+    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+  />
+</AspectRatio>
+```
+
+## Examples
+
+### Play a video
+
+<AspectRatioVideoDemo />
+
+### Embed a document
+
+<AspectRatioEmbedDemo />
+
+## Accessibility
+
+The wrapper adds no role or focus stop. Supply image alt text, name videos and iframe content, and provide captions or transcripts when media conveys speech or meaningful sound. Keep native media controls available and let visitors start playback.
+
+| Key             | Behavior                                              |
+| --------------- | ----------------------------------------------------- |
+| Tab / Shift+Tab | Reach the media's native controls or embedded content |
+
+## Styling
+
+`className`, typed `style`, native attributes and ref reach the div, identified by `data-slot="aspect-ratio"`. The default uses border-box sizing, fills available width, permits shrinking and clips overflow. Border, radius and background are caller styles.
+
+One dimension must stay automatic for CSS `aspect-ratio` to work. Size the child to fill the box; use its `object-fit: cover` to crop or `contain` to preserve the complete image. The wrapper's ratio is present during server rendering and stays consistent through hydration.
+
+## API
+
+| AspectRatio prop      | Type                                   | Default         |
+| --------------------- | -------------------------------------- | --------------- |
+| ratio                 | Finite positive number: width / height | 1               |
+| children              | ReactNode                              | None            |
+| className / style     | string / ThemeStyle                    | None            |
+| ref                   | `Ref<HTMLDivElement>`                  | None            |
+| Native div attributes | Includes id, ARIA and events           | Native defaults |
+
+Exports: `AspectRatio`, `AspectRatioProps`. Caller styles merge after defaults, including `aspectRatio`.

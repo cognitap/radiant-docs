@@ -491,3 +491,64 @@ test('CheckboxGroup preserves mixed selection, disabled values and controlled va
     }
   })
 })
+
+test('AspectRatio reserves image, native video and embed space through responsive reflow', async () => {
+  await withSite(async (baseURL, browser) => {
+    const page = await browser.newPage()
+    const errors = track(page)
+    try {
+      await capture(page, 'aspect-ratio-tasks', async () => {
+        await page.goto(`${baseURL}/docs/aspect-ratio/`)
+        await page.waitForFunction(() =>
+          [...document.querySelectorAll<HTMLButtonElement>('.demo-heading button')].every(
+            button => !button.disabled
+          )
+        )
+        const image = page.getByRole('region', { name: 'Crop a landscape image', exact: true })
+        assert.equal(
+          await image
+            .getByRole('img', { name: 'Green mountains beneath a golden sun', exact: true })
+            .count(),
+          1
+        )
+        assert.equal(await image.locator('[data-slot="aspect-ratio"]').getAttribute('role'), null)
+        const video = page
+          .getByRole('region', { name: 'Play a video', exact: true })
+          .locator('video')
+        assert.deepEqual(
+          await video.evaluate(node => ({
+            controls: node.hasAttribute('controls'),
+            autoplay: node.hasAttribute('autoplay'),
+            preload: node.getAttribute('preload')
+          })),
+          { controls: true, autoplay: false, preload: 'none' }
+        )
+        assert.equal(
+          await page
+            .getByRole('region', { name: 'Embed a document', exact: true })
+            .getByTitle('Studio notes')
+            .count(),
+          1
+        )
+        const ratios = [1, 16 / 9, 4 / 3]
+        for (const width of [1280, 390]) {
+          await page.setViewportSize({ width, height: 900 })
+          const boxes = await page.locator('[data-slot="aspect-ratio"]').evaluateAll(nodes =>
+            nodes.map(node => {
+              const box = node.getBoundingClientRect()
+              return { width: box.width, height: box.height }
+            })
+          )
+          assert.equal(boxes.length, 3)
+          boxes.forEach((box, index) => {
+            assert.ok(Math.abs(box.width / box.height - ratios[index]!) < 0.01)
+            assert.ok(box.width <= width)
+          })
+        }
+        assert.deepEqual(errors, [])
+      })
+    } finally {
+      await page.close()
+    }
+  })
+})
