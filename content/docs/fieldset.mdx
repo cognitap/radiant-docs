@@ -1,0 +1,71 @@
+---
+title: Fieldset
+description: Groups related fields under one native legend.
+---
+
+import {
+  FieldsetDemo,
+  FieldsetLockedDemo,
+  FieldsetValidationDemo
+} from '../../components/FieldsetDemo'
+
+<FieldsetDemo />
+
+## Usage
+
+Use `Fieldset` for related fields and `Field` for each control. A legend names the group; individual labels remain independent. Use [RadioGroup](/docs/radio-group/) for one choice.
+
+```tsx
+<Fieldset legend="Address">
+  <Field label="Street">
+    <Input name="street" />
+  </Field>
+  <Field label="City">
+    <Input name="city" />
+  </Field>
+</Fieldset>
+```
+
+## Examples
+
+### Lock a saved address
+
+<FieldsetLockedDemo />
+
+### Require a contact method
+
+<FieldsetValidationDemo />
+
+## State
+
+Values and validation belong to your form. Native reset restores uncontrolled inputs; reset validation in your handler. Put `required` on individual Fields. Disabling the group excludes its controls from native form submission.
+
+## Accessibility
+
+Provide descriptive legend text and label every control. Group help and errors describe the fieldset; nested Fields keep their own relationships. Error content is announced through Field's alert part. Disabled body controls are skipped by keyboard navigation.
+
+| Key             | Behavior                           |
+| --------------- | ---------------------------------- |
+| Tab / Shift+Tab | Move between enabled controls      |
+| Enter / Space   | Activate the focused native button |
+
+## Styling
+
+Refs, native attributes, `className` and typed `style` reach the fieldset. `parts.legend`, `description` and `error` style their native parts without replacing IDs. The root retains `field fieldset` identities and Field's `data-disabled` / `data-invalid` states. Part identities remain `field-label`, `field-description` and `field-error`.
+
+Set `components.fieldset.gap` or `--rad-fieldset-gap` for legend and field spacing. Field supplies typography and feedback presentation.
+
+## API
+
+| Fieldset prop              | Type                                     | Default         |
+| -------------------------- | ---------------------------------------- | --------------- |
+| legend                     | ReactNode                                | Required        |
+| description / error        | ReactNode                                | None            |
+| disabled                   | boolean                                  | false           |
+| children                   | ReactNode                                | None            |
+| parts                      | legend / description / error style hooks | None            |
+| className / style          | string / ThemeStyle                      | None            |
+| ref                        | `Ref<HTMLFieldSetElement>`               | None            |
+| Native fieldset attributes | Includes id, name, form and ARIA         | Native defaults |
+
+Exports: `Fieldset`, `FieldsetProps`. Fieldset composes Field's group behavior and owns no value or validation engine.

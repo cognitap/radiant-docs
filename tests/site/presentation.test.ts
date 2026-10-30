@@ -322,3 +322,93 @@ test('Table preserves native relationships, interactive cells and keyboard overf
     }
   })
 })
+
+test('Fieldset keeps group ownership, native disabled forms and consumer validation independent', async () => {
+  await withSite(async (baseURL, browser) => {
+    const page = await browser.newPage()
+    const errors = track(page)
+    try {
+      await capture(page, 'fieldset-tasks', async () => {
+        await page.goto(`${baseURL}/docs/fieldset/`)
+        await page.waitForFunction(() =>
+          [...document.querySelectorAll<HTMLButtonElement>('.demo-heading button')].every(
+            button => !button.disabled
+          )
+        )
+        const shipping = page.getByRole('region', { name: 'Shipping fields', exact: true })
+        assert.equal(
+          await shipping.getByRole('group', { name: 'Shipping address', exact: true }).count(),
+          1
+        )
+        assert.equal(
+          await shipping
+            .getByRole('textbox', { name: 'Street', exact: true })
+            .getAttribute('aria-required'),
+          'true'
+        )
+        await shipping
+          .getByRole('textbox', { name: 'Street', exact: true })
+          .fill('A changed address')
+        await shipping.getByRole('button', { name: 'Reset fields', exact: true }).click()
+        assert.equal(
+          await shipping.getByRole('textbox', { name: 'Street', exact: true }).inputValue(),
+          '10 Main St'
+        )
+        const locked = page.getByRole('region', { name: 'Locked address section', exact: true })
+        const street = locked.getByRole('textbox', { name: 'Street', exact: true })
+        assert.equal(await street.isDisabled(), true)
+        assert.equal(
+          await locked.getByRole('button', { name: 'Use address', exact: true }).isDisabled(),
+          true
+        )
+        assert.deepEqual(
+          await locked
+            .locator('form')
+            .evaluate(form => Object.fromEntries(new FormData(form as HTMLFormElement))),
+          {}
+        )
+        await locked.getByRole('button', { name: 'Unlock address', exact: true }).click()
+        assert.equal(await street.isDisabled(), false)
+        assert.deepEqual(
+          await locked
+            .locator('form')
+            .evaluate(form => Object.fromEntries(new FormData(form as HTMLFormElement))),
+          { street: '10 Main St', city: 'Budapest' }
+        )
+        await locked.getByRole('button', { name: 'Reset preview', exact: true }).click()
+        assert.equal(await street.isDisabled(), true)
+        const validation = page.getByRole('region', {
+          name: 'Validate contact details',
+          exact: true
+        })
+        const group = validation.getByRole('group', { name: 'Contact details', exact: true })
+        await validation.getByRole('button', { name: 'Check contact details', exact: true }).click()
+        assert.equal(await group.getAttribute('aria-invalid'), 'true')
+        const error = group.getByRole('alert')
+        assert.equal(await error.textContent(), 'Enter at least one contact method.')
+        assert.ok(
+          (await group.getAttribute('aria-describedby'))!
+            .split(' ')
+            .includes((await error.getAttribute('id'))!)
+        )
+        const email = validation.getByRole('textbox', { name: 'Email', exact: true })
+        assert.equal(await email.getAttribute('aria-describedby'), null)
+        await email.fill('jordan@example.com')
+        await validation.getByRole('button', { name: 'Check contact details', exact: true }).click()
+        assert.equal(await group.getByRole('alert').count(), 0)
+        assert.equal(
+          await validation
+            .getByRole('status', { name: 'Contact result', exact: true })
+            .textContent(),
+          'Contact details accepted'
+        )
+        await validation.getByRole('button', { name: 'Reset preview', exact: true }).click()
+        assert.equal(await email.inputValue(), '')
+        assert.equal(await group.getByRole('alert').count(), 0)
+        assert.deepEqual(errors, [])
+      })
+    } finally {
+      await page.close()
+    }
+  })
+})
