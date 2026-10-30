@@ -1,29 +1,42 @@
 import { Demo } from './demo/Demo'
 import { ButtonPlayground } from '@/examples/button/ButtonPlayground'
-import { ButtonCompositionPlayground } from '@/examples/button/ButtonCompositionPlayground'
-
-export function ButtonDemo({ disabled = false }: { disabled?: boolean }) {
+export function ButtonDemo() {
   return (
     <Demo
-      title={disabled ? 'Disabled Button' : 'Interactive Button'}
-      files={['button/ButtonExample.tsx', 'button/button-example.css', 'profile/useHydrated.ts']}
+      title="Save workspace"
+      files={['button/ButtonExample.tsx']}
     >
-      <ButtonPlayground defaultDisabled={disabled} />
+      <ButtonPlayground />
     </Demo>
   )
 }
-
+export function ButtonFormattingDemo() {
+  return (
+    <Demo
+      title="Format a draft"
+      files={['button/ButtonExample.tsx']}
+    >
+      <ButtonPlayground task="format" />
+    </Demo>
+  )
+}
+export function ButtonBookmarkDemo() {
+  return (
+    <Demo
+      title="Save an article for later"
+      files={['button/ButtonExample.tsx']}
+    >
+      <ButtonPlayground task="bookmark" />
+    </Demo>
+  )
+}
 export function ButtonCompositionDemo() {
   return (
     <Demo
-      title="Custom button and ref"
-      files={[
-        'button/ButtonComposition.tsx',
-        'button/button-example.css',
-        'profile/useHydrated.ts'
-      ]}
+      title="Forward a native action"
+      files={['button/ButtonExample.tsx']}
     >
-      <ButtonCompositionPlayground />
+      <ButtonPlayground task="adapter" />
     </Demo>
   )
 }
