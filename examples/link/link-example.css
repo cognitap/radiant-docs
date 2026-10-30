@@ -40,3 +40,18 @@
   min-width: 0;
   max-width: 100%;
 }
+
+.link-prose {
+  max-width: 32rem;
+  justify-items: start;
+}
+
+.link-prose p {
+  text-align: start;
+  font-size: 1rem;
+}
+
+.link-prose nav {
+  display: flex;
+  gap: 1rem;
+}

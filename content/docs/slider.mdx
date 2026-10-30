@@ -1,101 +1,96 @@
 ---
 title: Slider
-description: Native numeric adjustment with Field relationships, shared sizes and themed tracks.
+description: Pick one number from a continuous or stepped range with a native range input.
 ---
 
-import { SliderDemo } from '../../components/SliderDemo'
+import { SliderDemo, SliderStepsDemo, SliderValueDemo } from '../../components/SliderDemo'
 
 <SliderDemo />
 
-## Label a range
+## Usage
 
-Slider renders one native `input type="range"` with a single thumb.
-[Field](/docs/field/) supplies its protected control ID, label, description,
-error and inherited disabled state. Outside Field, use a native label with
-matching `htmlFor` and `id`.
+Use Slider when an approximate value is easier to choose by feel, such as volume or brightness. Use [Input](/docs/input/) with `type="number"` for exact or very large values, [Meter](/docs/meter/) or [Progress](/docs/progress/) for read-only levels, and [RadioGroup](/docs/radio-group/) for a few named options. Slider has one thumb, so it cannot select a start and an end.
 
 ```tsx
-import { Field, Slider } from '@cognitap/radiant'
-
-export function Volume() {
-  return (
-    <Field
-      label="Volume"
-      description="Choose a comfortable level."
-    >
-      <Slider
-        name="volume"
-        min={0}
-        max={100}
-        step={5}
-        defaultValue={40}
-      />
-    </Field>
-  )
-}
+<Field label="Volume">
+  <Slider
+    name="volume"
+    min={0}
+    max={100}
+    step={5}
+    defaultValue={40}
+  />
+</Field>
 ```
 
-## Choose a value owner
+## Examples
 
-`defaultValue` sets a browser-owned initial number. For controlled selection,
-pass a numeric `value` and update it from `event.target.valueAsNumber`:
+### Show the current value
 
-```tsx
-const [volume, setVolume] = useState(40)
+<SliderValueDemo />
 
-<Slider
-  aria-label="Volume"
-  value={volume}
-  onChange={event => setVolume(event.target.valueAsNumber)}
-  aria-valuetext={`${volume} percent`}
-/>
-```
+### Label stepped marks
 
-Keep one owner for the entire mount. Do not combine `value` and `defaultValue`
-or switch ownership. Values must be finite numbers. Native defaults are
-`min={0}`, `max={100}` and `step={1}`; without an initial value, the browser
-chooses the range midpoint. It clamps and rounds values to the bounds and step.
-Keep controlled values within that domain.
+Native `<datalist>` ticks do not draw on the styled track, so render the marks yourself and hide them from assistive technology.
 
-`aria-valuetext` supplies readable units or labels. Native range state supplies
-accessible current/minimum/maximum values. Applications own formatting.
+<SliderStepsDemo />
 
-## Operate and submit
+## State
 
-Pointer input, focus and keyboard adjustment stay native. Horizontal sliders
-inherit direction; RTL arrow mapping follows the browser. Set
-`orientation="vertical"` for a bottom-to-top range.
+Choose one value owner per mount: `value` with `onChange`, or `defaultValue`. Read `event.target.valueAsNumber`. Passing both, switching owners or passing a non-finite number throws a TypeError; remount with a new `key` to change owners. With neither, the value starts at the midpoint of `min` and `max`. The browser clamps values to the range and snaps them to `step`.
 
-Named values enter `new FormData(form)` as strings; disabled sliders are omitted.
-Native reset restores an uncontrolled default. Reset controlled values in your
-form's `onReset`. An external `form` association remains available.
+With `name`, the form submits the value as a string, such as `"1.25"`. A disabled slider submits nothing. Reset restores `defaultValue`; controlled owners reset their own state in `onReset`. A range always has a value, so `required` and `readOnly` are not accepted.
 
-Range always has a numeric value: `required` and `readOnly` do not apply.
-Omit Field's `required` flag for Slider. Use Field's `error` for application
-validation and a ref to focus the input.
+## Accessibility
 
-## Size and customize
+The input has the native slider role. Give it a name with [Field](/docs/field/), `aria-label` or `aria-labelledby`. The browser supplies the current, minimum and maximum values. Add `aria-valuetext` for units, such as "40 percent". Inside Field, its description and error IDs come before your own `aria-describedby`.
 
-`controlSize` chooses `small`, `medium` (default) or `large` metrics shared with
-[Input](/docs/input/). Root `className`, typed `style`, native attributes/events
-and `ref` reach the `HTMLInputElement`. `SliderProps` is exported.
+| Key                   | Behavior                                   |
+| --------------------- | ------------------------------------------ |
+| ArrowRight / ArrowUp  | Increase by `step`; ArrowLeft in RTL       |
+| ArrowLeft / ArrowDown | Decrease by `step`; ArrowRight in RTL      |
+| PageUp / PageDown     | Change by a larger, browser-defined amount |
+| Home / End            | Set to `min` / `max`                       |
 
-Use independent `components.slider` overrides or local variables for the track,
-thumb and focus ring:
+## Styling
+
+Slider renders one native `<input>`, so `className`, `style` and `ref` all target it. It carries `data-slot="slider"`, `data-control-size`, `data-orientation` and `data-invalid` when invalid; style disabled with `:disabled`. Vertical sliders put higher values at the top and default to a 12rem length. Forced colors restore the native slider.
+
+Override `--rad-slider-*` variables in `style` or `components.slider` in a theme:
 
 ```tsx
 <Slider
   aria-label="Volume"
-  defaultValue={40}
   style={{
     '--rad-slider-track-size': '.5rem',
-    '--rad-slider-thumb-size': '1.5rem',
-    '--rad-slider-thumb-radius': '999px'
+    '--rad-slider-thumb-size': '1.5rem'
   }}
 />
 ```
 
-Preserve focus, invalid and disabled cues. Forced colors restore native
-appearance. See [theming](/docs/foundations/theming/).
-Identity is `data-slot="slider"`, with `data-control-size`, `data-orientation`
-and presence-based `data-invalid`.
+Variables cover height, length, track size, radius and color, thumb size, radius, color, border and shadow, corner shape, invalid and disabled colors, and focus.
+
+## API
+
+### Slider
+
+| Prop                 | Type                                      | Default             |
+| -------------------- | ----------------------------------------- | ------------------- |
+| value / defaultValue | number                                    | None; one owner     |
+| onChange             | `ChangeEventHandler<HTMLInputElement>`    | None                |
+| min                  | number / string                           | 0                   |
+| max                  | number / string                           | 100                 |
+| step                 | number / string; `"any"` removes snapping | 1                   |
+| orientation          | `Orientation`: horizontal / vertical      | horizontal          |
+| controlSize          | small / medium / large                    | medium              |
+| name / form          | string                                    | None                |
+| disabled             | boolean                                   | Field's, else false |
+| aria-invalid         | Native; mirrored as `data-invalid`        | Field's             |
+| aria-valuetext       | string                                    | None                |
+| className / style    | string / ThemeStyle                       | None                |
+| ref                  | `Ref<HTMLInputElement>`                   | None                |
+| Other props          | Native input attributes and events        | Native defaults     |
+
+Not accepted: `type`, `role`, `required`, `readOnly`, `size`, `children` and the `aria-valuenow`, `aria-valuemin`, `aria-valuemax` and `aria-orientation` attributes.
+
+Exports `Slider`, `SliderProps` and `Orientation`.

@@ -1,16 +1,32 @@
 import { Demo } from './demo/Demo'
-import { SliderSettingsExample } from '@/examples/slider/SliderExample'
-
+import { SliderPlayground } from '@/examples/slider/SliderPlayground'
 export function SliderDemo() {
   return (
     <Demo
-      title="Find your balance"
+      title="Set listening preferences"
       files={['slider/SliderExample.tsx', 'profile/useHydrated.ts']}
     >
-      <SliderSettingsExample />
-      <noscript className="demo-feedback">
-        Enable JavaScript to save this demo. Its source is available below.
-      </noscript>
+      <SliderPlayground />
+    </Demo>
+  )
+}
+export function SliderValueDemo() {
+  return (
+    <Demo
+      title="Show the current value"
+      files={['slider/SliderExample.tsx']}
+    >
+      <SliderPlayground task="value" />
+    </Demo>
+  )
+}
+export function SliderStepsDemo() {
+  return (
+    <Demo
+      title="Label stepped marks"
+      files={['slider/SliderExample.tsx']}
+    >
+      <SliderPlayground task="steps" />
     </Demo>
   )
 }
