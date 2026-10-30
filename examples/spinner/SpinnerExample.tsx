@@ -1,32 +1,15 @@
 'use client'
 import { useState } from 'react'
-import {
-  Spinner,
-  Button,
-  Alert,
-  AlertDescription,
-  ThemeScope,
-  type ThemeMode
-} from '@cognitap/radiant'
-import { radiant } from '@cognitap/radiant/examples'
+import { Spinner, Alert, AlertDescription } from '@cognitap/radiant'
 import { DemoControls, DemoPreview } from '@/components/demo/DemoFrame'
-import { PreviewThemeControls } from '@/components/demo/ActionControls'
 import '@cognitap/radiant/styles.css'
 export function SpinnerExample() {
-  const [theme, setTheme] = useState(radiant)
-  const [mode, setMode] = useState<ThemeMode>('light')
   const [loaded, setLoaded] = useState(false)
   const [standalone, setStandalone] = useState(false)
   const [motionOff, setMotionOff] = useState(false)
   return (
     <>
       <DemoControls>
-        <PreviewThemeControls
-          theme={theme}
-          mode={mode}
-          onThemeChange={setTheme}
-          onModeChange={setMode}
-        />
         <label>
           <input
             type="checkbox"
@@ -43,18 +26,28 @@ export function SpinnerExample() {
           />{' '}
           Disable indicator motion
         </label>
+        <button
+          type="button"
+          disabled={loaded}
+          onClick={() => setLoaded(true)}
+        >
+          Simulate account loaded
+        </button>
+        <button
+          type="button"
+          disabled={!loaded}
+          onClick={() => setLoaded(false)}
+        >
+          Reload account
+        </button>
       </DemoControls>
       <DemoPreview>
-        <ThemeScope
-          theme={theme}
-          mode={mode}
+        <div
           style={{
             display: 'grid',
             gap: '1rem',
-            padding: '1rem',
             width: '100%',
-            maxWidth: '32rem',
-            boxSizing: 'border-box'
+            maxWidth: '32rem'
           }}
         >
           <section
@@ -74,22 +67,6 @@ export function SpinnerExample() {
               </>
             )}
           </section>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '.5rem' }}>
-            <Button
-              disabled={loaded}
-              onClick={() => setLoaded(true)}
-            >
-              Simulate account loaded
-            </Button>
-            <Button
-              variant="outline"
-              tone="neutral"
-              disabled={!loaded}
-              onClick={() => setLoaded(false)}
-            >
-              Reload account
-            </Button>
-          </div>
           <Alert
             announce="polite"
             aria-label="Account result"
@@ -97,7 +74,7 @@ export function SpinnerExample() {
           >
             {loaded && <AlertDescription>Account loaded.</AlertDescription>}
           </Alert>
-        </ThemeScope>
+        </div>
       </DemoPreview>
     </>
   )
