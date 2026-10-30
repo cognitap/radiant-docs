@@ -257,3 +257,68 @@ test('Pagination actions update local records, preserve current page and expose 
     }
   })
 })
+
+test('Table preserves native relationships, interactive cells and keyboard overflow', async () => {
+  await withSite(async (baseURL, browser) => {
+    const page = await browser.newPage()
+    const errors = track(page)
+    try {
+      await capture(page, 'table-directory', async () => {
+        await page.goto(`${baseURL}/docs/table/`)
+        const demo = page.getByRole('region', { name: 'Team directory', exact: true })
+        await page.waitForFunction(
+          () => !document.querySelector<HTMLButtonElement>('.demo-heading button')?.disabled
+        )
+        const table = demo.getByRole('table', { name: 'Team members', exact: true })
+        assert.equal(await table.getByRole('columnheader').count(), 3)
+        assert.equal(
+          await table
+            .getByRole('rowheader', { name: 'Jordan Rivera', exact: true })
+            .getAttribute('scope'),
+          'row'
+        )
+        assert.equal(
+          await table
+            .getByRole('columnheader', { name: 'Name', exact: true })
+            .getAttribute('scope'),
+          'col'
+        )
+        assert.equal(
+          await table
+            .getByRole('link', { name: 'About cell actions', exact: true })
+            .getAttribute('href'),
+          '/docs/button/'
+        )
+        const select = table.getByRole('button', { name: 'Select Jordan', exact: true })
+        await select.focus()
+        await page.keyboard.press('Enter')
+        assert.equal(
+          await demo.getByRole('status', { name: 'Selected member', exact: true }).textContent(),
+          'Selected: Jordan Rivera'
+        )
+        const region = demo.getByRole('region', { name: 'Scrollable team directory', exact: true })
+        assert.equal(await region.evaluate(node => node.scrollWidth <= node.clientWidth), true)
+        await demo.getByRole('checkbox', { name: 'Use wide columns', exact: true }).check()
+        assert.equal(await region.evaluate(node => node.scrollWidth > node.clientWidth), true)
+        await region.focus()
+        await page.keyboard.press('ArrowRight')
+        await page.waitForFunction(
+          () => document.querySelector<HTMLElement>('[data-slot="table-container"]')!.scrollLeft > 0
+        )
+        assert.equal(await table.evaluate(node => getComputedStyle(node).display), 'table')
+        await demo.getByRole('button', { name: 'Reset preview', exact: true }).click()
+        assert.equal(
+          await demo.getByRole('status', { name: 'Selected member', exact: true }).textContent(),
+          'Selected: None'
+        )
+        assert.equal(
+          await demo.getByRole('checkbox', { name: 'Use wide columns', exact: true }).isChecked(),
+          false
+        )
+        assert.deepEqual(errors, [])
+      })
+    } finally {
+      await page.close()
+    }
+  })
+})
