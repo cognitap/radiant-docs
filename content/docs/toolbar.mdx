@@ -1,0 +1,79 @@
+---
+title: Toolbar
+description: Related native commands with one keyboard entry.
+---
+
+import {
+  ToolbarDemo,
+  ToolbarDocumentsDemo,
+  ToolbarResourcesDemo,
+  ToolbarCanvasDemo
+} from '../../components/ToolbarDemo'
+
+<ToolbarDemo />
+
+## Usage
+
+Use Toolbar for related commands. Use [Fieldset](/docs/fieldset/) to group form fields, or ordinary layout when each action needs a separate Tab stop.
+
+```tsx
+<Toolbar aria-label="Document actions">
+  <Button onClick={save}>Save</Button>
+  <Button onClick={print}>Print</Button>
+</Toolbar>
+```
+
+## Examples
+
+### Manage document actions
+
+<ToolbarDocumentsDemo />
+
+### Open project resources
+
+<ToolbarResourcesDemo />
+
+### Choose canvas tools
+
+<ToolbarCanvasDemo />
+
+## State
+
+Toolbar owns focus navigation. Buttons, links, [ToggleGroup](/docs/toggle-group/) and [Menu](/docs/menu/) keep their own activation, selection and callbacks. Changing focus does not activate an action. Disabled and hidden actions are skipped; newly enabled actions join native DOM order.
+
+## Accessibility
+
+Name the toolbar with `aria-label` or `aria-labelledby`. Use real actions with stable labels. Decorative [Separator](/docs/separator/) elements do not add focus stops. Keep text inputs outside the toolbar.
+
+Nested menu, popover and dialog surfaces keep their own keyboard navigation. A ToggleGroup directly inside the toolbar shares its focus navigation.
+
+| Key               | Behavior                                                |
+| ----------------- | ------------------------------------------------------- |
+| Tab / Shift+Tab   | One entry into the toolbar, then leave                  |
+| Horizontal arrows | Move focus in horizontal bars; native direction applies |
+| Vertical arrows   | Move focus in vertical bars                             |
+| Home / End        | First / last enabled action                             |
+| Enter / Space     | The focused action's native behavior                    |
+
+## Motion
+
+Toolbar adds no animation. Each child retains its own motion settings and reduced-motion behavior.
+
+## Styling
+
+Props, ref, classes and typed styles target one native div. Toolbar owns `role="toolbar"`, `aria-orientation` and its root Tab index. `data-slot` retains `toolbar`; `data-orientation` reflects layout. Use `components.toolbar` or `--rad-toolbar-gap`, `-padding`, `-radius` and `-background`. Caller classes override the defaults.
+
+## API
+
+| Toolbar prop                 | Type                                                             | Default         |
+| ---------------------------- | ---------------------------------------------------------------- | --------------- |
+| aria-label / aria-labelledby | string; a name is required                                       | None            |
+| orientation                  | horizontal / vertical                                            | horizontal      |
+| loop                         | boolean                                                          | true            |
+| children                     | ReactNode                                                        | None            |
+| className / style            | string / ThemeStyle                                              | None            |
+| data-slot                    | Additional identity tokens                                       | toolbar         |
+| ref                          | `Ref<HTMLDivElement>`                                            | None            |
+| Native attributes and events | Includes dir and onKeyDown; prevent default to cancel navigation | Native defaults |
+
+Exports: `Toolbar`, `ToolbarProps`, `ToolbarOrientation`.

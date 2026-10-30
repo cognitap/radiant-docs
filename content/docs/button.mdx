@@ -80,4 +80,6 @@ Use `components.button` or `--rad-button-*` overrides. A custom `render` forward
 | ref                          | `Ref<HTMLButtonElement>`                      | None                |
 | Native attributes and events | Includes form, name, value and onClick        | Native defaults     |
 
+`ButtonProps` is a union. Compose wrapper props with `type Props = ButtonProps & { hint?: string }`; interface extension cannot preserve the union. Use distributive omission when removing props from every branch.
+
 Exports: `Button`, `ButtonProps`, `ButtonRenderProps`, `ButtonVariant`.
