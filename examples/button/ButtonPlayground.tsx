@@ -1,20 +1,18 @@
 'use client'
-
 import { useState } from 'react'
-import dynamic from 'next/dynamic'
-import { type ButtonVariant, type Tone, type ControlSize } from '@cognitap/radiant'
+import type { ButtonProps } from '@cognitap/radiant'
 import { SelectControl } from '@/components/demo/ActionControls'
 import { DemoControls, DemoPreview } from '@/components/demo/DemoFrame'
-
-const ButtonExample = dynamic(() => import('./ButtonExample').then(module => module.ButtonExample))
-
-export function ButtonPlayground({ defaultDisabled = false }: { defaultDisabled?: boolean }) {
-  const [disabled, setDisabled] = useState(defaultDisabled)
-  const [pending, setPending] = useState(false)
-  const [variant, setVariant] = useState<ButtonVariant>('solid')
-  const [tone, setTone] = useState<Tone>('accent')
-  const [controlSize, setControlSize] = useState<ControlSize>('medium')
-
+import { ButtonExample, type ButtonTask } from './ButtonExample'
+export function ButtonPlayground({ task = 'save' }: { task?: ButtonTask }) {
+  const [disabled, setDisabled] = useState(false),
+    [pending, setPending] = useState(false),
+    [variant, setVariant] = useState<NonNullable<ButtonProps['variant']>>(
+      task === 'save' ? 'solid' : task === 'bookmark' ? 'soft' : 'outline'
+    ),
+    [tone, setTone] = useState<NonNullable<ButtonProps['tone']>>('accent'),
+    [controlSize, setSize] = useState<NonNullable<ButtonProps['controlSize']>>('medium'),
+    [off, setOff] = useState(false)
   return (
     <>
       <DemoControls>
@@ -35,7 +33,7 @@ export function ButtonPlayground({ defaultDisabled = false }: { defaultDisabled?
             label="Control size"
             value={controlSize}
             options={['small', 'medium', 'large']}
-            onChange={setControlSize}
+            onChange={setSize}
           />
         </div>
         <div className="action-toggles">
@@ -55,15 +53,25 @@ export function ButtonPlayground({ defaultDisabled = false }: { defaultDisabled?
             />
             Pending
           </label>
+          <label>
+            <input
+              type="checkbox"
+              checked={off}
+              onChange={event => setOff(event.target.checked)}
+            />
+            Motion off
+          </label>
         </div>
       </DemoControls>
       <DemoPreview>
         <ButtonExample
+          task={task}
           disabled={disabled}
           pending={pending}
           variant={variant}
           tone={tone}
           controlSize={controlSize}
+          motion={off ? 'off' : 'inherit'}
         />
       </DemoPreview>
     </>

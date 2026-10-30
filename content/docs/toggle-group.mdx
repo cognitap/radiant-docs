@@ -1,0 +1,101 @@
+---
+title: ToggleGroup
+description: Related native Buttons with single or multiple pressed selection.
+---
+
+import {
+  ToggleGroupDemo,
+  ToggleGroupFormattingDemo,
+  ToggleGroupViewsDemo,
+  ToggleGroupFilterDemo
+} from '../../components/ToggleGroupDemo'
+
+<ToggleGroupDemo />
+
+## Usage
+
+Use ToggleGroup for related pressed actions. Use [RadioGroup](/docs/radio-group/) for native form choices, [Tabs](/docs/tabs/) to switch panels, or [Button](/docs/button/) for one toggle.
+
+```tsx
+<ToggleGroup
+  aria-label="Formatting"
+  type="multiple"
+  defaultValue={['bold']}
+>
+  <ToggleGroupItem value="bold">Bold</ToggleGroupItem>
+  <ToggleGroupItem value="italic">Italic</ToggleGroupItem>
+</ToggleGroup>
+```
+
+## Examples
+
+### Format a note
+
+<ToggleGroupFormattingDemo />
+
+### Switch record views
+
+<ToggleGroupViewsDemo />
+
+### Review filter requests
+
+<ToggleGroupFilterDemo />
+
+## State
+
+Single selection allows one string or `null`; multiple selection uses distinct strings. Use `value` or `defaultValue`, never both; ownership and type stay fixed per mount. Callbacks request changes and controlled owners may refuse. Form reset leaves selection unchanged. The application owns submission values.
+
+`useToggleGroup()` reads state and requests item changes; it returns `null` outside a group. Item values must be distinct. Prevent default in an item's `onClick` to cancel activation.
+
+## Accessibility
+
+Name the group with `aria-label` or `aria-labelledby`. Items are real pressed Buttons. Focus navigation does not change selection. Disabled items are skipped. Keep labels and selected/focus cues visible.
+
+| Key               | Behavior                                |
+| ----------------- | --------------------------------------- |
+| Tab / Shift+Tab   | One group entry, then leave             |
+| Horizontal arrows | Move focus, respecting native direction |
+| Vertical arrows   | Move focus in vertical groups           |
+| Home / End        | First / last enabled item               |
+| Enter / Space     | Toggle the focused item                 |
+
+## Motion
+
+The single-selection `segmented` appearance adds an indicator. `MotionProvider` from `@cognitap/radiant/motion/react` enables its theme `follow` spring. Without it, geometry updates directly. Reduced motion and local off stop spatial feedback; selection remains immediate.
+
+## Styling
+
+Root props, styles and ref reach the div; item props reach Button. Keep the root positioned for its indicator. `parts.indicator` styles the visual span without replacing geometry.
+
+Identities: `toggle-group`, `button toggle-group-item`, `toggle-group-indicator`. Items expose `data-value`, `data-state="on|off"`; root exposes type, appearance, orientation and disabled data attributes.
+
+Theme hooks: `components.toggleGroup.gap`, `padding`, `radius`, `background`, `indicatorColor`, `indicatorRadius`, `indicatorShadow`, or `--rad-toggle-group-*` variables. Item presentation follows Button.
+
+## API
+
+| ToggleGroup prop                 | Type                                       | Default         |
+| -------------------------------- | ------------------------------------------ | --------------- |
+| aria-label / aria-labelledby     | string                                     | One required    |
+| type                             | single / multiple                          | single          |
+| value / defaultValue             | string or null / string[]                  | null / []       |
+| onValueChange                    | (matching value) => void                   | None            |
+| appearance                       | buttons / segmented; multiple uses buttons | buttons         |
+| orientation                      | horizontal / vertical                      | horizontal      |
+| loop / disabled                  | boolean                                    | true / false    |
+| controlSize                      | small / medium / large                     | medium          |
+| motion                           | inherit / off; includes item presses       | inherit         |
+| parts                            | indicator visual style hook                | None            |
+| className / style / children     | string / ThemeStyle / ReactNode            | None            |
+| ref                              | `Ref<HTMLDivElement>`                      | None            |
+| Native div attributes and events | Includes dir, onFocus and onKeyDown        | Native defaults |
+
+| ToggleGroupItem prop | Type                                                 | Default           |
+| -------------------- | ---------------------------------------------------- | ----------------- |
+| value                | Distinct string                                      | Required          |
+| disabled             | boolean; adds to group disabled                      | false             |
+| controlSize          | Overrides group size                                 | Inherited         |
+| variant / tone       | Button presentation; segmented owns ghost treatment  | outline / neutral |
+| ref                  | `Ref<HTMLButtonElement>`                             | None              |
+| Other Button props   | Includes pending, render, classes, styles and events | Button defaults   |
+
+Exports: `ToggleGroup`, `ToggleGroupItem`, `useToggleGroup`, `ToggleGroupProps`, `ToggleGroupItemProps`, `ToggleGroupState`, `ToggleGroupValue`, `ToggleGroupOrientation`, `ToggleGroupAppearance`.
