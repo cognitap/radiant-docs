@@ -188,3 +188,72 @@ test('Breadcrumb keeps ordered hierarchy, decorative separators and one current 
     }
   })
 })
+
+test('Pagination actions update local records, preserve current page and expose native boundaries', async () => {
+  await withSite(async (baseURL, browser) => {
+    const page = await browser.newPage()
+    const errors = track(page)
+    try {
+      await capture(page, 'pagination-pages', async () => {
+        await page.goto(`${baseURL}/docs/pagination/`)
+        const demo = page.getByRole('region', { name: 'Local record pages', exact: true })
+        await page.waitForFunction(
+          () => !document.querySelector<HTMLButtonElement>('.demo-heading button')?.disabled
+        )
+        const nav = demo.getByRole('navigation', { name: 'Record pages', exact: true })
+        assert.equal(
+          await nav.getByRole('button', { name: 'Previous', exact: true }).isDisabled(),
+          true
+        )
+        assert.equal(
+          await nav
+            .getByRole('button', { name: 'Page 1', exact: true })
+            .getAttribute('aria-current'),
+          'page'
+        )
+        await nav.getByRole('button', { name: 'Next', exact: true }).click()
+        assert.equal(
+          await demo.getByRole('status', { name: 'Record page', exact: true }).textContent(),
+          'Page 2 of 3'
+        )
+        assert.equal(
+          await demo.getByRole('list', { name: 'Visible records', exact: true }).textContent(),
+          'Avery ChenAlex Morgan'
+        )
+        await nav.getByRole('button', { name: 'Next', exact: true }).click()
+        assert.equal(
+          await nav.getByRole('button', { name: 'Next', exact: true }).isDisabled(),
+          true
+        )
+        assert.equal(
+          await nav
+            .getByRole('button', { name: 'Page 3', exact: true })
+            .evaluate(node => node === document.activeElement),
+          true
+        )
+        assert.equal(await nav.locator('[aria-current="page"]').count(), 1)
+        await nav.getByRole('button', { name: 'Previous', exact: true }).click()
+        await nav.getByRole('button', { name: 'Previous', exact: true }).click()
+        assert.equal(
+          await nav
+            .getByRole('button', { name: 'Page 1', exact: true })
+            .evaluate(node => node === document.activeElement),
+          true
+        )
+        await demo.getByRole('checkbox', { name: 'Compact spacing', exact: true }).check()
+        await demo.getByRole('button', { name: 'Reset preview', exact: true }).click()
+        assert.equal(
+          await demo.getByRole('checkbox', { name: 'Compact spacing', exact: true }).isChecked(),
+          false
+        )
+        assert.equal(
+          await demo.getByRole('status', { name: 'Record page', exact: true }).textContent(),
+          'Page 1 of 3'
+        )
+        assert.deepEqual(errors, [])
+      })
+    } finally {
+      await page.close()
+    }
+  })
+})
