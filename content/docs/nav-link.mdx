@@ -1,0 +1,109 @@
+---
+title: NavLink
+description: Navigate application destinations with current-page links and native disclosures.
+---
+
+import { NavLinkDemo, NavLinkProjectsDemo, NavLinkSettingsDemo } from '../../components/NavLinkDemo'
+
+<NavLinkDemo />
+
+## Usage
+
+Use NavLink for destinations in an application sidebar. The consumer's router chooses active; the current anchor exposes aria-current="page". Use [Link](/docs/link/) for ordinary links and [Menu](/docs/menu/) for action menus.
+
+```tsx
+<nav aria-label="Workspace">
+  <NavLink
+    href="/overview"
+    active
+    description="Study health"
+  >
+    Overview
+  </NavLink>
+  <NavLinkGroup defaultOpen>
+    <NavLinkGroupTrigger>Projects</NavLinkGroupTrigger>
+    <NavLinkGroupContent>
+      <NavLink href="/projects/reader">Reader study</NavLink>
+    </NavLinkGroupContent>
+  </NavLinkGroup>
+</nav>
+```
+
+## Examples
+
+### Browse a project library
+
+<NavLinkProjectsDemo />
+
+### Navigate team settings
+
+<NavLinkSettingsDemo />
+
+## State
+
+Routing belongs to the application. active changes presentation and current-page semantics without intercepting navigation. Supply render to forward resolved props, children and ref to your router's anchor. Preserve native modified clicks, targets and downloads.
+
+NavLinkGroup composes [Collapsible](/docs/collapsible/). Choose open with onOpenChange or defaultOpen; controlled owners may refuse requests. Prop synchronization fires no request. A destination and a group disclosure are separate controls.
+
+## Accessibility
+
+Place links inside a named nav landmark. Keep labels, icons and descriptions noninteractive; nested destinations belong in GroupContent. Icons are decorative. Visible descriptions are part of each link’s accessible name. Explicit names and external description IDs are preserved.
+
+| Key                      | Behavior                                |
+| ------------------------ | --------------------------------------- |
+| Tab / Shift+Tab          | Visit visible links and group summaries |
+| Enter on link            | Follow its native destination           |
+| Enter / Space on summary | Toggle the native disclosure            |
+
+Closed groups exclude their links from keyboard traversal. Applications handle route announcements and accepted-page focus; these examples focus the updated content.
+
+## Motion
+
+Group disclosures inherit Collapsible's spring adapter and reduced-motion behavior. motion="off" disables disclosure motion. Link navigation remains immediate.
+
+## Styling
+
+Root className, style, events and ref reach the actual anchor, details, summary or content div. Slot tokens retain Link and Collapsible identities and add nav-link, nav-link-group, nav-link-group-trigger and nav-link-group-content.
+
+parts.icon, parts.label and parts.description style visible content. `components.navLink` provides typography, spacing, active, hover, description, focus and nested-indent tokens. Logical borders and indentation follow direction.
+
+## API
+
+### NavLink
+
+| Prop                          | Type / default                    |
+| ----------------------------- | --------------------------------- |
+| href                          | Required string                   |
+| active                        | boolean; false                    |
+| icon / description / children | ReactNode; children required      |
+| controlSize                   | small / medium / large; medium    |
+| parts                         | icon / label / description styles |
+| render                        | Resolved Link props → anchor      |
+| external / target / download  | Link and native anchor behavior   |
+| ref                           | HTMLAnchorElement                 |
+
+### NavLinkGroup
+
+| Prop               | Type / default                       |
+| ------------------ | ------------------------------------ |
+| open / defaultOpen | boolean; one owner; initially closed |
+| onOpenChange       | (open: boolean) → void               |
+| motion             | inherit / off; inherit               |
+| ref                | HTMLDetailsElement                   |
+
+### NavLinkGroupTrigger
+
+| Prop                          | Type / default                  |
+| ----------------------------- | ------------------------------- |
+| icon / description / children | ReactNode; children required    |
+| controlSize / parts           | Same content styling as NavLink |
+| ref                           | HTMLElement summary             |
+
+### NavLinkGroupContent
+
+| Prop     | Type / default            |
+| -------- | ------------------------- |
+| children | Nested navigation content |
+| ref      | HTMLDivElement            |
+
+All parts accept native host props and ThemeStyle. Exports each component's Props type and NavLinkRenderProps.

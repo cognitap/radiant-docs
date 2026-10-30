@@ -1609,3 +1609,84 @@ test('PasswordInput docs preserve autofill hosts, pressed reveal state and hidde
     }
   })
 })
+
+test('NavLink docs connect native destinations, disclosure ownership and router content focus at narrow widths', async () => {
+  await withSite(async (baseURL, browser) => {
+    const page = await browser.newPage(),
+      errors = track(page)
+    try {
+      await capture(page, 'nav-link-tasks', async () => {
+        await page.goto(`${baseURL}/docs/nav-link/`)
+        await page.waitForFunction(
+          () => !document.querySelector<HTMLButtonElement>('.demo-heading button')?.disabled
+        )
+        const workspace = page.getByRole('region', {
+          name: 'Browse a study workspace',
+          exact: true
+        })
+        await workspace.getByRole('link', { name: /^Participants/ }).click()
+        assert.equal(
+          await workspace.getByRole('link', { name: /^Participants/ }).getAttribute('aria-current'),
+          'page'
+        )
+        await page.getByRole('heading', { name: 'Study participants', exact: true }).waitFor()
+        assert.equal(
+          await workspace
+            .locator('section[aria-label="Workspace page"]')
+            .evaluate(n => n === document.activeElement),
+          true
+        )
+        const projects = page.getByRole('region', { name: 'Browse a project library', exact: true })
+        await projects.getByRole('link', { name: /^Component kit/ }).click()
+        assert.match(
+          await projects.locator('section[aria-label="Project page"]').innerText(),
+          /8 participants/
+        )
+        await projects.locator('[data-slot~="nav-link-group-trigger"]').click()
+        assert.equal(
+          await projects
+            .locator('[data-slot~="nav-link-group"]')
+            .evaluate((n: HTMLDetailsElement) => n.open),
+          false
+        )
+        await projects.locator('[data-slot~="nav-link-group-trigger"]').press('Enter')
+        assert.equal(
+          await projects
+            .locator('[data-slot~="nav-link-group"]')
+            .evaluate((n: HTMLDetailsElement) => n.open),
+          true
+        )
+        const settings = page.getByRole('region', { name: 'Navigate team settings', exact: true })
+        await settings.getByRole('link', { name: /^Access rules/ }).click()
+        assert.match(
+          await settings.locator('section[aria-label="Settings page"]').innerText(),
+          /Two administrators/
+        )
+        assert.equal(
+          await settings.getByRole('link', { name: /^Access rules/ }).getAttribute('aria-current'),
+          'page'
+        )
+        await settings.getByRole('combobox', { name: 'Direction', exact: true }).selectOption('rtl')
+        assert.equal(
+          await settings
+            .getByRole('link', { name: /^Access rules/ })
+            .evaluate(n => getComputedStyle(n).direction),
+          'rtl'
+        )
+        await page.setViewportSize({ width: 320, height: 900 })
+        assert.equal(
+          await page.locator('[data-slot~="nav-link"]').evaluateAll(nodes =>
+            nodes.every(node => {
+              const b = node.getBoundingClientRect()
+              return b.width === 0 || (b.left >= 0 && b.right <= window.innerWidth)
+            })
+          ),
+          true
+        )
+        assert.deepEqual(errors, [])
+      })
+    } finally {
+      await page.close()
+    }
+  })
+})
