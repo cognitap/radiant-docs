@@ -1,0 +1,46 @@
+---
+title: Pagination
+description: Native page links and application-owned page actions.
+---
+
+import { PaginationDemo } from '../../components/PaginationDemo'
+
+<PaginationDemo />
+
+## Usage
+
+`Pagination` is a named `nav`. Put `PaginationItem` list items inside `PaginationList` and give each page a meaningful label, such as “Page 2”. Set `current` on exactly one page. It supplies `aria-current="page"`; it does not select or fetch anything.
+
+For URL navigation, use `PaginationLink`, `PaginationPrevious` and `PaginationNext` with real `href` values. Native modified clicks, downloads and browser history remain available. At an unavailable boundary, render `PaginationUnavailable` text instead of a link. `PaginationEllipsis` is decorative; include it inside an item.
+
+```tsx
+<Pagination aria-label="Search result pages">
+  <PaginationList>
+    <PaginationItem>
+      <PaginationUnavailable>Previous</PaginationUnavailable>
+    </PaginationItem>
+    <PaginationItem>
+      <PaginationLink
+        href="/results?page=1"
+        current
+        aria-label="Page 1"
+      >
+        1
+      </PaginationLink>
+    </PaginationItem>
+    <PaginationItem>
+      <PaginationNext href="/results?page=2" />
+    </PaginationItem>
+  </PaginationList>
+</Pagination>
+```
+
+For local actions, `PaginationButton` composes [Button](/docs/button/), including native `disabled`, pending guards and `render`. The example owns its records, current page, status announcement and focus when a boundary action becomes disabled. Applications own routing, page counts, loading, cancellation, content focus and scroll restoration.
+
+## Customize
+
+Actions accept `variant`, `tone` and `controlSize`; current pages default to solid accent, other pages to ghost neutral, in small size. `render` on links forwards resolved props, children and ref to one anchor, including router anchors.
+
+Root props and refs reach the native `nav`; list, item, link, button and text props reach their respective hosts. `aria-label` defaults to “Pagination”; use distinct names for multiple pagers or `aria-labelledby` for a visible heading.
+
+Use `className`, typed `style`, or `components.pagination` in `defineTheme` to set `gap`, `radius` and `itemMinWidth`. Button and Link retain their base identities alongside pagination identities.
