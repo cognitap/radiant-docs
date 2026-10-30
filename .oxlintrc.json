@@ -1,7 +1,9 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
   "plugins": ["typescript", "unicorn", "oxc", "react", "jsx-a11y"],
-  "categories": { "correctness": "error" },
+  "categories": {
+    "correctness": "error"
+  },
   "ignorePatterns": [
     "node_modules/**",
     ".next/**",
@@ -9,5 +11,29 @@
     ".scratch/**",
     "out/**",
     "output/**"
+  ],
+  "overrides": [
+    {
+      "files": ["examples/**/*.ts", "examples/**/*.tsx"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "group": ["@/components/*", "@/components/**", "**/components/**"],
+                "message": "Copyable examples cannot import site code. Put demo controls in a *Playground.tsx file."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": ["examples/**/*Playground.tsx"],
+      "rules": {
+        "no-restricted-imports": "off"
+      }
+    }
   ]
 }
