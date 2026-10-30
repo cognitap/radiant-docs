@@ -1,7 +1,7 @@
 'use client'
 
 import '@cognitap/radiant/styles.css'
-import { useEffect, useId, useMemo, useRef, useState, useSyncExternalStore } from 'react'
+import { useEffect, useId, useRef, useState, useSyncExternalStore } from 'react'
 import {
   Button,
   Card,
@@ -15,11 +15,9 @@ import {
   ThemeScope,
   useField,
   type RadioProps,
-  type ControlSize,
-  type Theme,
-  type ThemeMode
+  type ControlSize
 } from '@cognitap/radiant'
-import { radiant } from '@cognitap/radiant/examples'
+import { usePreviewMotionTheme } from '@/components/demo/DemoFrame'
 import { MotionProvider, useReducedMotion, useSpring } from '@cognitap/radiant/motion/react'
 
 const subscribe = () => () => {}
@@ -108,24 +106,12 @@ const plans = [
   }
 ]
 
-export function RadioPlanExample({
-  theme = radiant,
-  mode = 'light',
-  controlSize = 'medium'
-}: {
-  theme?: Theme
-  mode?: ThemeMode
-  controlSize?: ControlSize
-}) {
+export function RadioPlanExample({ controlSize = 'medium' }: { controlSize?: ControlSize }) {
   const [off, setOff] = useState(false)
-  const selected = useMemo<Theme>(
-    () => ({ ...theme, motion: { ...theme.motion, mode: off ? 'off' : theme.motion.mode } }),
-    [theme, off]
-  )
+  const selected = usePreviewMotionTheme(off)
   return (
     <ThemeScope
       theme={selected}
-      mode={mode}
       style={{
         maxWidth: '42rem',
         minWidth: 0,
