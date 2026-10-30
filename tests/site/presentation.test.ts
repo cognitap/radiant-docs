@@ -1888,3 +1888,108 @@ test('Command docs register scoped shortcuts, update project records, focus real
     }
   })
 })
+
+test('EmptyState docs create real table records, recover an empty Combobox and retry Command without implicit activation', async () => {
+  await withSite(async (baseURL, browser) => {
+    const page = await browser.newPage(),
+      errors = track(page)
+    try {
+      await capture(page, 'empty-state-tasks', async () => {
+        await page.goto(baseURL + '/docs/empty-state/')
+        await page.waitForFunction(
+          () => !document.querySelector<HTMLButtonElement>('.demo-heading button')?.disabled
+        )
+        const table = page.getByRole('region', { name: 'Project table', exact: true })
+        await table.getByRole('button', { name: 'Create study project', exact: true }).click()
+        const open = table.getByRole('button', { name: 'Open Reader study', exact: true })
+        assert.equal(await open.evaluate(node => node === document.activeElement), true)
+        await open.press('Enter')
+        const details = table
+          .getByRole('region', { name: 'Project details', exact: true })
+          .getByRole('heading', { name: 'Reader study', exact: true })
+        assert.equal(await details.evaluate(node => node === document.activeElement), true)
+        await open.click()
+        assert.equal(await details.evaluate(node => node === document.activeElement), true)
+        const finder = page.getByRole('form', { name: 'Project finder', exact: true })
+        const query = finder.getByRole('combobox', { name: 'Project', exact: true })
+        await query.fill('Missing')
+        const empty = page.getByRole('heading', { name: 'No matching projects', exact: true })
+        await empty.waitFor()
+        assert.equal(await empty.evaluate(node => node.closest('[role="listbox"]') === null), true)
+        await query.press('Tab')
+        const clear = finder.getByRole('button', { name: 'Clear search', exact: true })
+        assert.equal(await clear.evaluate(node => node === document.activeElement), true)
+        await clear.press('Enter')
+        assert.equal(await query.evaluate(node => node === document.activeElement), true)
+        await query.press('ArrowDown')
+        await query.press('Enter')
+        assert.equal(
+          await finder.evaluate(form => {
+            if (!(form instanceof HTMLFormElement))
+              throw new Error('Project finder must be a native form')
+            return new FormData(form).get('project')
+          }),
+          'reader'
+        )
+        await finder.getByRole('button', { name: 'Open project', exact: true }).click()
+        await finder
+          .getByRole('region', { name: 'Selected project', exact: true })
+          .getByRole('heading', { name: 'Reader study', exact: true })
+          .waitFor()
+        const demo = page.getByRole('region', { name: 'Recover study reports', exact: true })
+        const recovery = demo.getByRole('region', { name: 'Report recovery', exact: true })
+        await recovery.getByRole('button', { name: 'Find a study report', exact: true }).click()
+        const dialog = recovery.getByRole('dialog')
+        const search = dialog.getByRole('combobox', { name: 'Search commands', exact: true })
+        await search.fill('Reader')
+        await search.press('Tab')
+        const retry = dialog.getByRole('button', { name: 'Retry report search', exact: true })
+        assert.equal(await retry.evaluate(node => node === document.activeElement), true)
+        await retry.press('Enter')
+        assert.equal(await search.evaluate(node => node === document.activeElement), true)
+        assert.equal(await search.inputValue(), 'Reader')
+        await dialog.getByRole('option', { name: 'Reader study report', exact: true }).waitFor()
+        assert.equal(
+          await recovery.getByRole('region', { name: 'Report details', exact: true }).count(),
+          0
+        )
+        await search.press('ArrowDown')
+        await search.press('Enter')
+        const report = recovery.getByRole('heading', { name: 'Reader study report', exact: true })
+        await report.waitFor()
+        assert.equal(await report.evaluate(node => node === document.activeElement), true)
+        await demo.getByRole('combobox', { name: 'Direction', exact: true }).selectOption('rtl')
+        await page.setViewportSize({ width: 320, height: 600 })
+        await recovery.getByRole('button', { name: 'Find a study report', exact: true }).click()
+        await dialog.getByRole('button', { name: 'Disconnect catalog', exact: true }).click()
+        await search.fill('Reader')
+        await dialog.evaluate(node => {
+          node.style.maxHeight = '190px'
+        })
+        await search.press('Tab')
+        assert.equal(await retry.evaluate(node => node === document.activeElement), true)
+        assert.equal(
+          await retry.evaluate(
+            node =>
+              node.getBoundingClientRect().bottom <=
+              node.closest('dialog')!.getBoundingClientRect().bottom
+          ),
+          true
+        )
+        assert.equal(await search.evaluate(node => getComputedStyle(node).direction), 'rtl')
+        assert.equal(
+          await dialog.evaluate(node => {
+            const box = node.getBoundingClientRect()
+            return box.left >= 0 && box.right <= innerWidth
+          }),
+          true
+        )
+        await search.press('Escape')
+        await dialog.waitFor({ state: 'hidden' })
+        assert.deepEqual(errors, [])
+      })
+    } finally {
+      await page.close()
+    }
+  })
+})
