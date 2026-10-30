@@ -1,0 +1,78 @@
+---
+title: Kbd
+description: Show native keyboard notation alongside application-owned shortcuts.
+---
+
+import { KbdDemo, KbdDuplicateDemo, KbdSaveDemo } from '../../components/KbdDemo'
+
+<KbdDemo />
+
+## Usage
+
+Use Kbd for a key or shortcut. Use [Button](/docs/button/) for an action the user can activate. Nest individual keys inside KbdGroup for a combination.
+
+```tsx
+<KbdGroup>
+  <Kbd>Control</Kbd>+<Kbd>K</Kbd>
+</KbdGroup>
+```
+
+## Examples
+
+### Duplicate a study note
+
+<KbdDuplicateDemo />
+
+### Save a study note
+
+<KbdSaveDemo />
+
+## State
+
+Kbd displays consumer content and owns no state or bindings. Applications choose modifier labels and register shortcuts in their own scope. The examples let the caller choose Control or Command explicitly; the same choice determines the label, `aria-keyshortcuts` and event matching. Server and client render the same notation.
+
+Keep a visible action available alongside a shortcut. These examples share one action callback between the control and its shortcut, and prevent browser defaults only for the matching application action.
+
+## Accessibility
+
+Each key and combination uses native `kbd`. Kbd adds no tab stop, role or keyboard handler. Name the containing action independently. Hide a redundant visual hint with `aria-hidden` when the action name and shortcut metadata already convey it. Spell out modifier names when symbols might be unclear.
+
+| Key                | Behavior                                |
+| ------------------ | --------------------------------------- |
+| Tab / Shift+Tab    | Visit the surrounding native controls   |
+| Enter / Space      | Follow the focused control's contract   |
+| Displayed shortcut | Runs only when the application binds it |
+
+## Motion
+
+Key notation has no animation. Composed controls retain their own motion and reduced-motion behavior.
+
+## Styling
+
+Native props, className, ThemeStyle and ref reach the actual `kbd`. KbdGroup composes Kbd and keeps both `kbd` and `kbd-group` data-slot tokens. Use `[data-slot~="kbd"]` for a composed identity.
+
+KbdGroup is unboxed and defaults to `dir="ltr"` to preserve written chord order inside RTL text; override native dir when needed. It wraps combinations in narrow spaces. Individual keys use the shared code font.
+
+`components.kbd` exposes background, color, borderColor, radius, fontSize, paddingInline, paddingBlock, shadow and gap; matching variables use `--rad-kbd-*`. Gap styles the group. Caller classes and inline styles override defaults. Forced colors preserve visible key boundaries.
+
+## API
+
+### Kbd
+
+| Prop              | Type / default                                                  |
+| ----------------- | --------------------------------------------------------------- |
+| children          | Required ReactNode                                              |
+| ref               | HTMLElement                                                     |
+| className / style | string / ThemeStyle; native kbd host                            |
+| data-slot         | Additional identity tokens; kbd retained                        |
+| Native props      | kbd attributes/events except role, tabIndex and contentEditable |
+
+### KbdGroup
+
+| Prop        | Type / default                            |
+| ----------- | ----------------------------------------- |
+| children    | Required ReactNode; nest Kbd keys         |
+| dir         | Native direction; ltr                     |
+| Other props | KbdProps; same native host and forwarding |
+
+Exports KbdProps and KbdGroupProps.
