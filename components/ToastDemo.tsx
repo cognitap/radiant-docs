@@ -1,12 +1,12 @@
 import { Demo } from './demo/Demo'
-import { ToastExample } from '@/examples/toast/ToastExample'
+import { ToastPlayground } from '@/examples/toast/ToastPlayground'
 export function ToastDemo() {
   return (
     <Demo
       title="Queued draft notifications"
       files={['toast/ToastExample.tsx']}
     >
-      <ToastExample />
+      <ToastPlayground />
     </Demo>
   )
 }
