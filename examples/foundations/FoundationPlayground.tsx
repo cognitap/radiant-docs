@@ -2,10 +2,7 @@
 
 import { useState } from 'react'
 import dynamic from 'next/dynamic'
-import { type ThemeMode } from '@cognitap/radiant'
-import { sharp, jelly } from '@cognitap/radiant/examples'
 import { DemoControls, DemoPreview } from '@/components/demo/DemoFrame'
-import { PreviewThemeControls, SelectControl } from '@/components/demo/ActionControls'
 import { garden, gardenWithButtonCorners } from './garden'
 
 const FollowButton = dynamic(() => import('./FollowButton').then(module => module.FollowButton))
@@ -15,31 +12,12 @@ const NestedScopes = dynamic(() => import('./NestedScopes').then(module => modul
 export type FoundationKind = 'setup' | 'presets' | 'authoring' | 'scopes'
 
 export function FoundationPlayground({ kind }: { kind: FoundationKind }) {
-  const [theme, setTheme] = useState(kind === 'scopes' ? jelly : sharp)
-  const [mode, setMode] = useState<ThemeMode>('light')
   const [buttonCorners, setButtonCorners] = useState(false)
   const [rounded, setRounded] = useState(true)
   return (
     <>
       {kind !== 'setup' && (
         <DemoControls>
-          <div className="action-options">
-            {kind === 'authoring' ? (
-              <SelectControl
-                label="Mode"
-                value={mode}
-                options={['light', 'dark', 'system']}
-                onChange={setMode}
-              />
-            ) : (
-              <PreviewThemeControls
-                theme={theme}
-                mode={mode}
-                onThemeChange={setTheme}
-                onModeChange={setMode}
-              />
-            )}
-          </div>
           {kind === 'authoring' && (
             <label>
               <input
@@ -66,17 +44,12 @@ export function FoundationPlayground({ kind }: { kind: FoundationKind }) {
         {kind === 'setup' ? (
           <FollowButton />
         ) : kind === 'scopes' ? (
-          <NestedScopes
-            theme={theme}
-            mode={mode}
-            rounded={rounded}
-          />
+          <NestedScopes rounded={rounded} />
         ) : (
           <ThemeExample
             theme={
-              kind === 'authoring' ? (buttonCorners ? gardenWithButtonCorners : garden) : theme
+              kind === 'authoring' ? (buttonCorners ? gardenWithButtonCorners : garden) : undefined
             }
-            mode={mode}
           />
         )}
       </DemoPreview>

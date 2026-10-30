@@ -1,31 +1,14 @@
 'use client'
 
 import { useState } from 'react'
-import {
-  Button,
-  Input,
-  ThemeScope,
-  defaultTheme,
-  type Theme,
-  type ThemeMode
-} from '@cognitap/radiant'
+import { Button, Input, ThemeScope, defaultTheme } from '@cognitap/radiant'
 import { useHydrated } from '../profile/useHydrated'
 import '@cognitap/radiant/styles.css'
 import './foundation-example.css'
 
-export function NestedScopes({
-  theme,
-  mode,
-  rounded
-}: {
-  theme: Theme
-  mode: ThemeMode
-  rounded: boolean
-}) {
+export function NestedScopes({ rounded }: { rounded: boolean }) {
   return (
     <ThemeScope
-      theme={theme}
-      mode={mode}
       style={rounded ? { '--rad-control-radius': '1.5rem' } : undefined}
       className="foundation-example foundation-scopes"
     >

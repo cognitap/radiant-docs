@@ -13,20 +13,18 @@ import {
   Field,
   Input,
   ThemeScope,
-  type Theme,
-  type ThemeMode
+  type Theme
 } from '@cognitap/radiant'
 import { useHydrated } from '../profile/useHydrated'
 import '@cognitap/radiant/styles.css'
 import './foundation-example.css'
 
-export function ThemeExample({ theme, mode }: { theme: Theme; mode: ThemeMode }) {
+export function ThemeExample({ theme }: { theme?: Theme }) {
   const [saved, setSaved] = useState('Nothing saved yet.')
   const ready = useHydrated()
   return (
     <ThemeScope
       theme={theme}
-      mode={mode}
       className="foundation-example"
     >
       <form
