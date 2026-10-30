@@ -1,12 +1,12 @@
 import { Demo } from './demo/Demo'
-import { SkeletonExample } from '@/examples/skeleton/SkeletonExample'
+import { SkeletonPlayground } from '@/examples/skeleton/SkeletonPlayground'
 export function SkeletonDemo() {
   return (
     <Demo
       title="Account placeholders"
       files={['skeleton/SkeletonExample.tsx']}
     >
-      <SkeletonExample />
+      <SkeletonPlayground />
     </Demo>
   )
 }
