@@ -552,3 +552,83 @@ test('AspectRatio reserves image, native video and embed space through responsiv
     }
   })
 })
+
+test('ScrollArea keeps native scrolling, both-axis content, popup selection and shrinking datasets usable', async () => {
+  await withSite(async (baseURL, browser) => {
+    const page = await browser.newPage()
+    const errors = track(page)
+    try {
+      await capture(page, 'scroll-area-tasks', async () => {
+        await page.goto(`${baseURL}/docs/scroll-area/`)
+        await page.waitForFunction(() =>
+          [...document.querySelectorAll<HTMLButtonElement>('.demo-heading button')].every(
+            button => !button.disabled
+          )
+        )
+        const activity = page.getByRole('region', { name: 'Scroll recent activity', exact: true })
+        const viewport = activity.getByRole('group', { name: 'Recent activity', exact: true })
+        await viewport.focus()
+        // Native keyboard scrolling is animated independently of React.
+        // Finish that action before testing a second scroll command.
+        await Promise.all([
+          viewport.evaluate(
+            node =>
+              new Promise<void>((resolve, reject) => {
+                const timer = setTimeout(() => {
+                  node.removeEventListener('scrollend', done)
+                  reject(new Error('Native PageDown did not finish scrolling.'))
+                }, 3000)
+                function done() {
+                  clearTimeout(timer)
+                  resolve()
+                }
+                node.addEventListener('scrollend', done, { once: true })
+              })
+          ),
+          page.keyboard.press('PageDown')
+        ])
+        assert.ok((await viewport.evaluate(node => node.scrollTop)) > 0)
+        await activity.getByRole('button', { name: 'Back to top', exact: true }).click()
+        assert.equal(await viewport.evaluate(node => node.scrollTop), 0)
+        const table = page
+          .getByRole('region', { name: 'Explore wide records', exact: true })
+          .getByRole('group', { name: 'Quarterly estimates', exact: true })
+        assert.deepEqual(
+          await table.evaluate(node => ({
+            x: node.scrollWidth > node.clientWidth,
+            y: node.scrollHeight > node.clientHeight
+          })),
+          { x: true, y: true }
+        )
+        assert.equal(await table.locator('[data-slot="scroll-area-scrollbar"]').count(), 2)
+        const choosing = page.getByRole('region', { name: 'Choose from a long list', exact: true })
+        const project = choosing.getByRole('combobox', { name: 'Project', exact: true })
+        await project.click()
+        await page.keyboard.press('End')
+        await page.keyboard.press('Enter')
+        assert.ok((await project.textContent())!.includes('Project 24'))
+        await choosing.getByRole('button', { name: 'Reset preview', exact: true }).click()
+        assert.ok((await project.textContent())!.includes('Choose a project'))
+        const filtering = page.getByRole('region', { name: 'Filter activity', exact: true })
+        const filtered = filtering.getByRole('group', { name: 'Filtered activity', exact: true })
+        await filtered.evaluate(node => {
+          node.scrollTop = 1e5
+        })
+        await filtering.getByRole('button', { name: 'Show recent activity', exact: true }).click()
+        assert.equal(await filtered.getByRole('listitem').count(), 2)
+        assert.deepEqual(
+          await filtered.evaluate(node => ({
+            top: node.scrollTop,
+            overflow: node.scrollHeight > node.clientHeight
+          })),
+          { top: 0, overflow: false }
+        )
+        await filtering.getByRole('button', { name: 'Reset preview', exact: true }).click()
+        assert.equal(await filtered.getByRole('listitem').count(), 24)
+        assert.deepEqual(errors, [])
+      })
+    } finally {
+      await page.close()
+    }
+  })
+})
