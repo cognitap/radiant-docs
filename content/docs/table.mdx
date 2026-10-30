@@ -1,0 +1,44 @@
+---
+title: Table
+description: Native tables with captions, headers and ordinary interactive cells.
+---
+
+import { TableDemo } from '../../components/TableDemo'
+
+<TableDemo />
+
+## Usage
+
+`Table` renders a native `table`. Put `TableCaption` first to name its content, then compose `TableHead`, `TableBody` and optional `TableFoot` with `TableRow` children. Use tables for tabular data.
+
+`TableHeader` is a `th` with `scope="col"` by default. Set `scope="row"` for a row heading. `TableCell` is a `td`. Native `id`, `headers`, `colSpan` and `rowSpan` support more complex relationships; applications must supply accurate associations and meaningful header text.
+
+```tsx
+<Table>
+  <TableCaption>Team members</TableCaption>
+  <TableHead>
+    <TableRow>
+      <TableHeader>Name</TableHeader>
+      <TableHeader>Role</TableHeader>
+    </TableRow>
+  </TableHead>
+  <TableBody>
+    <TableRow>
+      <TableHeader scope="row">Jordan</TableHeader>
+      <TableCell>Designer</TableCell>
+    </TableRow>
+  </TableBody>
+</Table>
+```
+
+## Overflow and actions
+
+Text wraps by default. For wide content, wrap the table in `TableContainer`, which provides a focusable native `section` scroll region. Supply exactly one nonempty `aria-label` or `aria-labelledby` for that region; it names the scroll surface independently of the table caption. Set a table `minWidth` when horizontal scrolling is needed. The table keeps its native display and semantics.
+
+Links and buttons in cells remain ordinary [Link](/docs/link/) and [Button](/docs/button/) components in the page tab order. The application owns action results, announcements and focus after content changes. Sorting, filtering, row selection, pagination and virtualization belong to the application; Table adds no grid keyboard engine.
+
+## Customize
+
+Native attributes, `className`, typed `style` and refs reach each named host. `Table` refs point to `HTMLTableElement`; container refs point to `HTMLElement`. Caption, section, row, header and cell parts retain their native elements.
+
+`components.table` in `defineTheme` supports `background`, `color`, `headerBackground`, `headerColor`, `captionColor`, `borderColor`, `borderWidth`, `radius`, `paddingInline`, `paddingBlock` and `fontSize`. Radius styles the optional container; padding styles captions and cells. Use matching `--rad-table-*` properties for local overrides.
