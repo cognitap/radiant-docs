@@ -994,3 +994,90 @@ test('Menubar keeps one keyboard entry, switches menus, shares nested commands a
     }
   })
 })
+
+test('Drawer keeps keyboard snap sizes, non-modal scrolling and controlled native dismissal', async () => {
+  await withSite(async (baseURL, browser) => {
+    const page = await browser.newPage(),
+      errors = track(page)
+    try {
+      await capture(page, 'drawer-tasks', async () => {
+        await page.goto(`${baseURL}/docs/drawer/`)
+        await page.waitForFunction(
+          () => !document.querySelector<HTMLButtonElement>('.demo-heading button')?.disabled
+        )
+        const settings = page.getByRole('region', { name: 'Edit project settings', exact: true })
+        await settings.getByRole('button', { name: 'Project settings', exact: true }).click()
+        const dialog = settings.getByRole('dialog', { name: 'Project settings', exact: true })
+        await dialog.getByRole('button', { name: 'Resize project settings', exact: true }).focus()
+        await page.keyboard.press('Home')
+        await page.waitForFunction(
+          () =>
+            document
+              .querySelector('[data-slot~="drawer-handle"]')
+              ?.getAttribute('aria-describedby') &&
+            document.querySelector('dialog[open]')?.textContent?.includes('50%')
+        )
+        await page.keyboard.press('End')
+        await dialog.getByRole('textbox', { name: 'Project name', exact: true }).fill('North star')
+        await dialog.getByRole('button', { name: 'Save settings', exact: true }).click()
+        assert.match(await dialog.getByRole('status').innerText(), /Saved North star/)
+        await dialog.getByRole('button', { name: 'Close settings', exact: true }).click()
+        assert.equal(
+          await settings
+            .getByRole('button', { name: 'Project settings', exact: true })
+            .evaluate(node => node === document.activeElement),
+          true
+        )
+        const outline = page.getByRole('region', { name: 'Read a report outline', exact: true })
+        await outline.getByRole('button', { name: 'Report outline', exact: true }).click()
+        const outlineDialog = outline.getByRole('dialog', { name: 'Report outline', exact: true })
+        assert.equal(await outlineDialog.evaluate(node => node.matches(':modal')), false)
+        await outline
+          .getByRole('textbox', { name: 'Report notes', exact: true })
+          .fill('Check references')
+        await outlineDialog
+          .getByRole('button', { name: 'Resize report outline', exact: true })
+          .focus()
+        await page.keyboard.press('Home')
+        const viewport = outlineDialog.locator(':scope > [data-slot="drawer-viewport"]')
+        assert.equal(await viewport.evaluate(node => node.scrollHeight > node.clientHeight), true)
+        await outlineDialog.getByRole('button', { name: 'Outline display', exact: true }).click()
+        const display = outline.getByRole('dialog', { name: 'Outline display', exact: true })
+        await page.waitForFunction(
+          node => {
+            if (!node) return false
+            const box = node.getBoundingClientRect()
+            return box.left >= -2 && box.right <= innerWidth + 2
+          },
+          await display.locator(':scope > [data-slot="drawer-viewport"]').elementHandle(),
+          { timeout: 4000 }
+        )
+        const childBounds = await display
+          .locator(':scope > [data-slot="drawer-viewport"]')
+          .boundingBox()
+        assert.ok(childBounds)
+        assert.ok(
+          childBounds.x >= -2 && childBounds.x + childBounds.width <= page.viewportSize()!.width + 2
+        )
+        await display
+          .getByRole('checkbox', { name: 'Compact section spacing', exact: true })
+          .check()
+        await display.getByRole('button', { name: 'Back to outline', exact: true }).click()
+        assert.equal(await outlineDialog.isVisible(), true)
+        await outlineDialog.getByRole('button', { name: 'Close outline', exact: true }).click()
+        const order = page.getByRole('region', { name: 'Review an order', exact: true })
+        await order.getByRole('button', { name: 'Review order', exact: true }).click()
+        const review = order.getByRole('dialog', { name: 'Review order', exact: true })
+        await review.getByRole('button', { name: 'Leave review', exact: true }).click()
+        assert.equal(await review.isVisible(), true)
+        assert.match(await review.getByRole('status').innerText(), /Confirm that you are ready/)
+        await review.getByRole('checkbox', { name: 'I am ready to leave', exact: true }).check()
+        await review.getByRole('button', { name: 'Leave review', exact: true }).click()
+        assert.equal(await review.isVisible(), false)
+        assert.deepEqual(errors, [])
+      })
+    } finally {
+      await page.close()
+    }
+  })
+})
