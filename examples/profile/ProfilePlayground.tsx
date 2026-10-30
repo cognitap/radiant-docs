@@ -2,8 +2,6 @@
 
 import { useState } from 'react'
 import dynamic from 'next/dynamic'
-import { type ThemeMode } from '@cognitap/radiant'
-import { themes, radiant } from '@cognitap/radiant/examples'
 import { DemoControls, DemoPreview } from '@/components/demo/DemoFrame'
 import type { FormOwner, FormPlacement } from './ProfileRecipe'
 
@@ -20,8 +18,6 @@ export function ProfilePlayground({
   const [placement, setPlacement] = useState<FormPlacement>(
     defaultPlacement ?? (compare ? 'card' : 'standalone')
   )
-  const [themeId, setThemeId] = useState(radiant.id)
-  const [mode, setMode] = useState<ThemeMode>('light')
 
   return (
     <div className="recipe-playground">
@@ -55,36 +51,6 @@ export function ProfilePlayground({
               <option value="dialog">Dialog</option>
             </select>
           </label>
-          <label>
-            Theme
-            <select
-              value={themeId}
-              onChange={event => setThemeId(event.target.value)}
-            >
-              {themes.map(theme => (
-                <option
-                  key={theme.id}
-                  value={theme.id}
-                >
-                  {theme.name}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label>
-            Mode
-            <select
-              value={mode}
-              onChange={event => {
-                const value = event.target.value
-                if (value === 'light' || value === 'dark' || value === 'system') setMode(value)
-              }}
-            >
-              <option value="light">Light</option>
-              <option value="dark">Dark</option>
-              <option value="system">System</option>
-            </select>
-          </label>
         </div>
       </DemoControls>
       <DemoPreview label="Profile recipe preview">
@@ -92,8 +58,6 @@ export function ProfilePlayground({
           key={`${owner}:${placement}`}
           owner={owner}
           placement={placement}
-          theme={themes.find(theme => theme.id === themeId) ?? radiant}
-          mode={mode}
         />
       </DemoPreview>
     </div>
