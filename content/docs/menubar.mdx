@@ -1,0 +1,86 @@
+---
+title: Menubar
+description: Application command menus with one keyboard entry.
+---
+
+import { MenubarDemo, MenubarBoardDemo, MenubarReportDemo } from '../../components/MenubarDemo'
+
+<MenubarDemo />
+
+## Usage
+
+Use Menubar for an application's persistent command menus. Use [Menu](/docs/menu/) for one command list or [Toolbar](/docs/toolbar/) for directly available actions.
+
+```tsx
+<Menubar aria-label="Document commands">
+  <MenubarMenu value="file">
+    <MenubarTrigger>File</MenubarTrigger>
+    <MenubarPortal>
+      <MenubarContent>
+        <MenubarItem onSelect={save}>Save</MenubarItem>
+      </MenubarContent>
+    </MenubarPortal>
+  </MenubarMenu>
+</Menubar>
+```
+
+## Examples
+
+### Organize a planning board
+
+<MenubarBoardDemo />
+
+### Submit report commands
+
+<MenubarReportDemo />
+
+## State
+
+Root `value` identifies the open MenubarMenu, or `null` closes every root menu. Give menus distinct string values. Choose `value` or `defaultValue`, never both; ownership stays fixed per mount. `onValueChange` requests updates and controlled owners may refuse. Prop synchronization emits no callback. Root menus share that owner; submenus retain [Menu's independent owners](/docs/menu/#state).
+
+`useMenubar()` returns `value`, `setValue`, `controlled` and `loop`, or `null` outside the bar.
+
+## Accessibility
+
+The named native div has `role="menubar"`. Titles are real Button/Menu triggers with owned menu-item semantics. The bar has one Tab entry; popups keep Menu's naming, item navigation and native form behavior. Disabled and pending titles remain focusable but cannot open.
+
+| Key                                             | Behavior                                                               |
+| ----------------------------------------------- | ---------------------------------------------------------------------- |
+| Tab / Shift+Tab                                 | Enter the bar once; leave the complete open menu tree                  |
+| Left / Right                                    | Move among closed titles; switch open menus; reverse in RTL            |
+| Home / End on a title                           | Reach the first / last title, opening it when a menu is already open   |
+| Down / Up on a title                            | Open at the first / last item                                          |
+| Enter / Space                                   | Open a title or activate the focused command                           |
+| Up / Down, Home / End, printable text in a menu | [Menu item navigation](/docs/menu/#accessibility)                      |
+| Forward / backward in a submenu                 | Enter / leave the child; a forward leaf advances to the next root menu |
+| Escape                                          | Close the nearest popup and restore its opener                         |
+
+Hover switches titles once a menu is open. Outside interaction dismisses without stealing focus. Consumer cancellation and checkable-item behavior follow [Menu](/docs/menu/#accessibility).
+
+## Motion
+
+Optional `MotionProvider` supplies Button press and Menu entry feedback. Reduced motion and local off win; focus and dismissal stay immediate.
+
+## Styling
+
+Root props/ref target its div. All other hosted parts retain [Menu's native hosts and identities](/docs/menu/#styling), adding `menubar-*`; Content exposes Menu state and placement attributes. Caller classes/styles win.
+
+Use `components.menubar` or `--rad-menubar-*` for gap, padding, radius and background. Popup and item appearance inherit Menu overrides.
+
+## API
+
+| Part                                 | Props                                                                                                                                                    | Defaults                                       |
+| ------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- |
+| Menubar                              | Required aria-label or aria-labelledby; value/defaultValue: string or null; onValueChange; loop; native div attributes/events/ref; className; ThemeStyle | null; no callback; loop true                   |
+| MenubarMenu                          | Required value: string; children                                                                                                                         | No host; bar owns open state                   |
+| MenubarTrigger                       | MenuTrigger/Button props except pressed and owned menu semantics; render; button ref                                                                     | ghost; neutral; Button sizing/motion defaults  |
+| MenubarContent                       | MenuContent props: side, align, sideOffset, collisionPadding, motion; native div props/ref                                                               | bottom; start; 8; 8; inherit                   |
+| MenubarPortal                        | children                                                                                                                                                 | None; no host                                  |
+| MenubarItem                          | MenuItem props, native button props/ref, textValue, onSelect, closeOnSelect                                                                              | closeOnSelect true                             |
+| MenubarGroup / Label / Separator     | Corresponding Menu part props/ref                                                                                                                        | Menu defaults                                  |
+| MenubarCheckboxItem                  | checked/defaultChecked; onCheckedChange; indeterminate; parts.indicator; Item props                                                                      | false; no callback; false; closeOnSelect false |
+| MenubarRadioGroup / RadioItem        | value/defaultValue and onValueChange / required string value; Menu props                                                                                 | null / group-owned; closeOnSelect false        |
+| MenubarSub / SubTrigger / SubContent | Corresponding Menu part props                                                                                                                            | false / Menu defaults / logical end, offset 4  |
+| useMenubar()                         | MenubarState or null                                                                                                                                     | null outside owner                             |
+
+Offsets and padding are finite nonnegative pixels. Every part exports its `Menubar…Props` type, alongside `MenubarState` and `MenubarRenderProps`. Root/content/group/label refs use `Ref<HTMLDivElement>`; action refs use `Ref<HTMLButtonElement>`; separator refs use `Ref<HTMLHRElement>`.

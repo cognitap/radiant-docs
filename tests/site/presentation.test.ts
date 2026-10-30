@@ -922,3 +922,75 @@ test('Menu docs demonstrate checkable state and nested destination commands', as
     }
   })
 })
+
+test('Menubar keeps one keyboard entry, switches menus, shares nested commands and preserves controlled native forms', async () => {
+  await withSite(async (baseURL, browser) => {
+    const page = await browser.newPage(),
+      errors = track(page)
+    try {
+      await capture(page, 'menubar-commands', async () => {
+        await page.goto(`${baseURL}/docs/menubar/`)
+        await page.waitForFunction(
+          () => !document.querySelector<HTMLButtonElement>('.demo-heading button')?.disabled
+        )
+        const demo = page.getByRole('region', { name: 'Edit a document', exact: true }),
+          bar = demo.getByRole('menubar', { name: 'Document commands', exact: true }),
+          file = bar.getByRole('menuitem', { name: 'File', exact: true })
+        await file.focus()
+        await page.keyboard.press('ArrowDown')
+        await page.keyboard.press('ArrowRight')
+        assert.equal(
+          await demo
+            .getByRole('menuitem', { name: 'Undo save', exact: true })
+            .evaluate(node => node === document.activeElement),
+          true
+        )
+        await page.keyboard.press('ArrowRight')
+        await page.keyboard.press('Space')
+        assert.equal(
+          await demo
+            .getByRole('menuitemcheckbox', { name: 'Word count', exact: true })
+            .getAttribute('aria-checked'),
+          'false'
+        )
+        await page.keyboard.press('Escape')
+        await page.keyboard.press('Tab')
+        assert.equal(
+          await demo
+            .getByRole('button', { name: 'Continue editing', exact: true })
+            .evaluate(node => node === document.activeElement),
+          true
+        )
+        const board = page.getByRole('region', { name: 'Organize a planning board', exact: true })
+        await board.getByRole('menuitem', { name: 'File', exact: true }).click()
+        await board.getByRole('menuitem', { name: 'Move board', exact: true }).click()
+        await board.getByRole('menuitem', { name: 'Team spaces', exact: true }).click()
+        await board.getByRole('menuitem', { name: 'Design team', exact: true }).click()
+        assert.match(await board.locator('output[aria-live="polite"]').innerText(), /Design team/)
+        const report = page.getByRole('region', { name: 'Submit report commands', exact: true })
+        await report.getByRole('checkbox', { name: 'Keep File menu open', exact: true }).check()
+        const exportItem = report.getByRole('menuitem', { name: 'Export report', exact: true })
+        await exportItem.focus()
+        await page.keyboard.press('ArrowRight')
+        assert.equal(await exportItem.evaluate(node => node === document.activeElement), true)
+        await report.getByRole('checkbox', { name: 'Review before export', exact: true }).check()
+        await exportItem.click()
+        assert.match(
+          await report.locator('output[aria-live="polite"]').innerText(),
+          /Review the report/
+        )
+        await report.getByRole('checkbox', { name: 'Keep File menu open', exact: true }).uncheck()
+        await report.getByRole('checkbox', { name: 'Review before export', exact: true }).uncheck()
+        await report.getByRole('menuitem', { name: 'File', exact: true }).click()
+        await exportItem.click()
+        assert.match(
+          await report.locator('output[aria-live="polite"]').innerText(),
+          /Export requested for Quarterly review/
+        )
+        assert.deepEqual(errors, [])
+      })
+    } finally {
+      await page.close()
+    }
+  })
+})
