@@ -1,0 +1,53 @@
+---
+title: Avatar
+description: Images and fallback text with a deliberate accessible name.
+---
+
+import { AvatarDemo } from '../../components/AvatarDemo'
+
+<AvatarDemo />
+
+## Choose the alternative deliberately
+
+`alt` is required. Use a meaningful name for a standalone image, such as a
+person's full name. Use `alt=""` when the avatar is decorative or adjacent text
+already identifies the person. Whitespace-only alternatives throw.
+
+Avatar exposes one named graphic throughout loading, success and failure.
+Its image and visual fallback never add duplicate names. Empty alt hides the
+whole graphic from assistive technology. Do not repeat the same identity in
+both a named avatar and adjacent text.
+
+`fallback` is short plain text, usually application-supplied initials. It defaults
+to `?`; it is not inferred from a name. Fallback text is visual only: `alt`
+still supplies the accessible meaning. Interactive fallback content is rejected.
+
+## Image lifecycle
+
+Native image load/error events choose the image or fallback. Requests completed
+before hydration are reconciled from native completion and image dimensions.
+Server and no-JavaScript content retain the meaningful fallback; successful
+images appear after hydration. The fixed box stays the same size as sources change.
+
+Applications own image URLs, permission/privacy decisions, alternative text and
+fallback content. Pass `src`, `srcSet`, `sizes`, `loading`, `decoding`, `crossOrigin`
+and `referrerPolicy` as needed. Applications revoke their own object URLs.
+Avatar adds no timers, focus handling, live announcements or animation engine.
+
+## Customize
+
+`controlSize` is `small`, `medium` (default) or `large`. Native span attributes,
+`className`, `style` and an `HTMLSpanElement` ref reach the stable root. It retains
+the `avatar` slot. Root role, naming and decoration stay owned by Avatar.
+`AvatarProps` is exported.
+
+The `image` and `fallback` parts accept `className` and `style`; their slots are
+`avatar-image` and `avatar-fallback`. Image `data-state` is `loading`, `loaded`
+or `error`. Visible fallback state is `loading`, `error` or `fallback` when no
+source exists; successful images remove the fallback.
+
+Use `components.avatar` or `--rad-avatar-*` variables for `size`, `sizeSmall`,
+`sizeLarge`, `radius`, `background`, `color`, `borderColor`, `borderWidth` and
+`fontSize`. Preserve bounds, image visibility and useful fallback contrast when
+restyling. Forced colors retain a system-color frame and fallback text.
+[Themes](/docs/foundations/theming/) apply normally.
