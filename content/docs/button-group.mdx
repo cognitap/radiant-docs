@@ -1,0 +1,81 @@
+---
+title: ButtonGroup
+description: Join related native Buttons while preserving their own tab stops.
+---
+
+import {
+  ButtonGroupDemo,
+  ButtonGroupPublishDemo,
+  ButtonGroupWeeksDemo
+} from '../../components/ButtonGroupDemo'
+
+<ButtonGroupDemo />
+
+## Usage
+
+Use ButtonGroup for actions that belong together visually. Use [Toolbar](/docs/toolbar/) for arrow-key navigation and one tab entry, or [ToggleGroup](/docs/toggle-group/) for a selection among pressed buttons.
+
+```tsx
+<ButtonGroup aria-label="Project actions">
+  <Button
+    variant="outline"
+    type="submit"
+  >
+    Save
+  </Button>
+  <Button
+    variant="outline"
+    type="reset"
+  >
+    Restore
+  </Button>
+</ButtonGroup>
+```
+
+## Examples
+
+### Publish a report
+
+<ButtonGroupPublishDemo />
+
+### Browse review weeks
+
+<ButtonGroupWeeksDemo />
+
+## State
+
+ButtonGroup owns no state. Each Button retains its native action, disabled or pending state and optional pressed owner. Put submit and reset Buttons in a form or associate them with an external form normally. Native reset affects form controls; it does not change group orientation or application state.
+
+Applications own action results, submission and persistence. A split action uses a real [Menu](/docs/menu/), whose state and keyboard behavior remain independent of the group. Portal markers do not change the first or last Button's outer corners.
+
+## Accessibility
+
+The root is a native div with `role="group"`. An accessible name is optional; use `aria-label` or `aria-labelledby` when it clarifies the relationship. The group name does not replace individual Button names. Name icon-only actions explicitly.
+
+| Key              | Behavior                               |
+| ---------------- | -------------------------------------- |
+| Tab / Shift+Tab  | Visit each enabled or pending Button   |
+| Enter / Space    | Activate the focused Button            |
+| Arrow keys       | Native behavior; no group roving focus |
+| MenuTrigger keys | Follow Menu's keyboard contract        |
+
+Disabled Buttons leave the tab order. Pending Buttons retain focus and their names while blocking activation. Keep the group meaningful when actions become unavailable.
+
+## Motion
+
+The group has no animation. Buttons retain their own [motion](/docs/button/) and reduced-motion behavior; set Button motion off when needed. Orientation changes use ordinary layout and existing Button corner transitions.
+
+## Styling
+
+Root native props, className, ThemeStyle and ref reach the actual div. `data-slot="button-group"` identifies it; `data-orientation` is horizontal or vertical. Layout follows inherited direction and can change live.
+
+Direct native button hosts share borders and keep only outer corners. Use real Buttons, including composed MenuTrigger or TooltipTrigger Buttons. Wrappers remain untouched. Keep child control sizes and variants consistent; style individual actions through Button.
+
+`components.buttonGroup.radius` or `--rad-button-group-radius` sets outer corners, falling back to Button's radius. Button border-width tokens determine overlap. Preserve focus outlines, operable hit targets and visible state cues.
+
+## API
+
+| Part             | Props                                                                                                                                      | Defaults                                    |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------- |
+| ButtonGroup      | Native div props/events/ref except role and aria-orientation; orientation: horizontal/vertical; children: ReactNode; className; ThemeStyle | horizontal; role group; no name or tabIndex |
+| ButtonGroupProps | Exported root prop type; ref: HTMLDivElement                                                                                               | No state or selection API                   |
