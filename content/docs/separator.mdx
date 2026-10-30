@@ -1,0 +1,39 @@
+---
+title: Separator
+description: Meaningful or decorative static divisions.
+---
+
+import { SeparatorDemo } from '../../components/SeparatorDemo'
+
+<SeparatorDemo />
+
+## Meaningful or decorative
+
+Separator renders a native `hr`. By default it exposes a static thematic break
+between content sections. Set `decorative` when only a visual division is needed;
+the element is then hidden from assistive technology.
+
+`orientation` is `horizontal` by default or `vertical`. Meaningful separators
+expose the matching `aria-orientation`. Vertical lines stretch in a sized flex
+row, or can receive a height through `style` or `className`.
+
+Separator is never a focusable or draggable splitter. It has no interaction,
+resizing state, timers or motion. Keep section headings and navigation names
+meaningful independently of the line.
+
+## Customize
+
+Native attributes, `className`, `style` and an `HTMLHRElement` ref reach the `hr`.
+The `separator` slot is always retained. Role, focusability, orientation and
+decorative treatment stay owned by the component. No children are supported.
+`SeparatorProps` is exported.
+
+Use `components.separator` or `--rad-separator-*` variables for `color`,
+`thickness`, `style` and `spacing`. Thickness defaults to one pixel, style to
+solid, color to the shared border color, and spacing to zero. Spacing applies
+on the block axis for horizontal lines and the inline axis for vertical lines.
+Caller classes and styles can replace appearance on the same host.
+
+Forced colors retain a system-color border. Preserve a visible boundary and
+the appropriate semantics when replacing styles. No provider is required;
+[themes](/docs/foundations/theming/) apply normally.
