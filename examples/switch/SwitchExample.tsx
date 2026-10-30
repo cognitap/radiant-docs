@@ -1,92 +1,76 @@
 'use client'
-
 import { useState } from 'react'
-import {
-  Button,
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-  Field,
-  Switch
-} from '@cognitap/radiant'
+import { Field, Switch, type ControlSize } from '@cognitap/radiant'
+import '@cognitap/radiant/styles.css'
 
-import { useHydrated } from '../profile/useHydrated'
-
-export function SwitchSettingsExample() {
-  const ready = useHydrated()
+export function FocusSettings({ controlSize }: { controlSize?: ControlSize }) {
   const [quiet, setQuiet] = useState(false)
-  const [feedback, setFeedback] = useState('No changes saved')
+  const [previews, setPreviews] = useState(true)
   return (
-    <Card style={{ maxWidth: '36rem', minWidth: 0 }}>
-      <CardHeader>
-        <CardTitle>Make room for focus</CardTitle>
-        <CardDescription>Choose how your workspace gets your attention.</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form
-          aria-label="Workspace preferences"
-          style={{ display: 'grid', gap: '1.5rem', minWidth: 0 }}
-          onReset={() => {
-            setQuiet(false)
-            setFeedback('Preferences reset')
-          }}
-          onSubmit={event => {
-            event.preventDefault()
-            const values = new FormData(event.currentTarget)
-            setFeedback(
-              `Saved locally: do not disturb ${values.has('quiet') ? 'on' : 'off'}; desktop notifications ${values.has('desktop') ? 'on' : 'off'}.`
-            )
-          }}
-        >
-          <Field
-            label="Do not disturb"
-            description="Silence workspace notifications while you focus."
-            style={{ gridTemplateColumns: 'minmax(0, 1fr) auto', alignItems: 'center' }}
-            parts={{ description: { style: { gridColumn: '1 / -1' } } }}
-          >
-            <Switch
-              name="quiet"
-              value="enabled"
-              checked={quiet}
-              onChange={event => setQuiet(event.target.checked)}
-            />
-          </Field>
-          <Field
-            label="Desktop notifications"
-            description="Show a notification when someone mentions you."
-            style={{ gridTemplateColumns: 'minmax(0, 1fr) auto', alignItems: 'center' }}
-            parts={{ description: { style: { gridColumn: '1 / -1' } } }}
-          >
-            <Switch
-              name="desktop"
-              value="enabled"
-              defaultChecked
-            />
-          </Field>
-          <output>
-            {quiet ? 'Your workspace is quiet.' : 'Workspace notifications are active.'}
-          </output>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '.75rem' }}>
-            <Button
-              type="submit"
-              disabled={!ready}
-            >
-              Save preferences
-            </Button>
-            <Button
-              type="reset"
-              disabled={!ready}
-              variant="outline"
-              tone="neutral"
-            >
-              Reset preferences
-            </Button>
-          </div>
-          <output style={{ overflowWrap: 'anywhere' }}>{feedback}</output>
-        </form>
-      </CardContent>
-    </Card>
+    <section
+      aria-label="Focus settings"
+      style={{ display: 'grid', gap: '1.5rem', maxWidth: '28rem', minWidth: 0 }}
+    >
+      <Field
+        label="Do not disturb"
+        description="Silence workspace notifications while you focus."
+        style={{ gridTemplateColumns: 'minmax(0, 1fr) auto', alignItems: 'center' }}
+        parts={{ description: { style: { gridColumn: '1 / -1' } } }}
+      >
+        <Switch
+          checked={quiet}
+          onChange={event => setQuiet(event.target.checked)}
+          controlSize={controlSize}
+        />
+      </Field>
+      <Field
+        label="Message previews"
+        description="Show the first line of each new message."
+        style={{ gridTemplateColumns: 'minmax(0, 1fr) auto', alignItems: 'center' }}
+        parts={{ description: { style: { gridColumn: '1 / -1' } } }}
+      >
+        <Switch
+          checked={previews}
+          onChange={event => setPreviews(event.target.checked)}
+          controlSize={controlSize}
+        />
+      </Field>
+      <output>
+        {quiet
+          ? 'Notifications are paused.'
+          : `Notifications are on, ${previews ? 'with' : 'without'} previews.`}
+      </output>
+    </section>
+  )
+}
+
+const topics = [
+  { name: 'mentions', label: 'Mentions and replies' },
+  { name: 'digest', label: 'Weekly digest' },
+  { name: 'product', label: 'Product news' }
+]
+
+export function EmailTopics({ controlSize }: { controlSize?: ControlSize }) {
+  const [on, setOn] = useState<Record<string, boolean>>({ mentions: true })
+  const chosen = topics.filter(topic => on[topic.name]).map(topic => topic.label)
+  return (
+    <div style={{ display: 'grid', gap: '1rem', maxWidth: '24rem', minWidth: 0 }}>
+      <Field
+        layout="group"
+        label="Email me about"
+        description="Changes apply right away."
+      >
+        {topics.map(topic => (
+          <Switch
+            key={topic.name}
+            label={topic.label}
+            checked={!!on[topic.name]}
+            onChange={event => setOn({ ...on, [topic.name]: event.target.checked })}
+            controlSize={controlSize}
+          />
+        ))}
+      </Field>
+      <output>{chosen.length ? `Emailing you about: ${chosen.join(', ')}.` : 'No emails.'}</output>
+    </div>
   )
 }

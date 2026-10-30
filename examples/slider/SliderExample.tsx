@@ -1,91 +1,157 @@
 'use client'
-
 import { useState } from 'react'
-import {
-  Button,
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-  Field,
-  Slider
-} from '@cognitap/radiant'
-
+import { Button, Field, Slider, type SliderProps } from '@cognitap/radiant'
 import { useHydrated } from '../profile/useHydrated'
-
-export function SliderSettingsExample() {
-  const ready = useHydrated()
-  const [volume, setVolume] = useState(50)
-  const [feedback, setFeedback] = useState('No changes saved')
+export type SliderTaskOptions = Pick<SliderProps, 'controlSize'> & { dir?: 'ltr' | 'rtl' }
+const panelStyle = {
+  display: 'grid',
+  gap: '1.25rem',
+  width: '100%',
+  maxWidth: '28rem',
+  minWidth: 0
+} as const
+export function SetListeningPreferences({ dir, ...props }: SliderTaskOptions) {
+  const ready = useHydrated(),
+    [volume, setVolume] = useState(50),
+    [message, setMessage] = useState('No changes saved.')
   return (
-    <Card style={{ maxWidth: '36rem', minWidth: 0 }}>
-      <CardHeader>
-        <CardTitle>Find your balance</CardTitle>
-        <CardDescription>Make your workspace sound right for you.</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form
-          aria-label="Listening preferences"
-          style={{ display: 'grid', gap: '1.5rem', minWidth: 0 }}
-          onSubmit={event => {
-            event.preventDefault()
-            const data = new FormData(event.currentTarget)
-            setFeedback(
-              `Saved locally: volume ${data.get('volume')}%; chime ${data.get('chime')}%.`
-            )
-          }}
-          onReset={() => {
-            setVolume(50)
-            setFeedback('Preferences reset')
-          }}
+    <form
+      aria-label="Listening preferences"
+      dir={dir}
+      style={panelStyle}
+      onSubmit={event => {
+        event.preventDefault()
+        const data = new FormData(event.currentTarget)
+        setMessage(`Saved volume ${data.get('volume')}% and chime ${data.get('chime')}%.`)
+      }}
+      onReset={() => {
+        setVolume(50)
+        setMessage('Preferences reset.')
+      }}
+    >
+      <Field
+        label="Workspace volume"
+        description={`${volume}%`}
+      >
+        <Slider
+          {...props}
+          name="volume"
+          value={volume}
+          step={5}
+          aria-valuetext={`${volume} percent`}
+          onChange={event => setVolume(event.target.valueAsNumber)}
+        />
+      </Field>
+      <Field
+        label="Notification chime"
+        description="How loudly new notifications arrive."
+      >
+        <Slider
+          {...props}
+          name="chime"
+          defaultValue={30}
+          step={5}
+        />
+      </Field>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '.5rem' }}>
+        <Button
+          type="submit"
+          disabled={!ready}
         >
-          <Field
-            label="Workspace volume"
-            description="Set the volume for workspace audio."
-          >
-            <Slider
-              name="volume"
-              value={volume}
-              min={0}
-              max={100}
-              step={5}
-              aria-valuetext={`${volume} percent`}
-              onChange={event => setVolume(event.target.valueAsNumber)}
-            />
-            <span aria-hidden="true">{volume}%</span>
-          </Field>
-          <Field
-            label="Notification chime"
-            description="Choose how loudly new notifications arrive."
-          >
-            <Slider
-              name="chime"
-              defaultValue={30}
-              min={0}
-              max={100}
-              step={5}
-            />
-          </Field>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '.75rem' }}>
-            <Button
-              type="submit"
-              disabled={!ready}
-            >
-              Save preferences
-            </Button>
-            <Button
-              type="reset"
-              disabled={!ready}
-              variant="outline"
-              tone="neutral"
-            >
-              Reset preferences
-            </Button>
-          </div>
-          <output style={{ overflowWrap: 'anywhere' }}>{feedback}</output>
-        </form>
-      </CardContent>
-    </Card>
+          Save preferences
+        </Button>
+        <Button
+          type="reset"
+          variant="outline"
+          tone="neutral"
+          disabled={!ready}
+        >
+          Reset preferences
+        </Button>
+      </div>
+      <output aria-live="polite">{message}</output>
+    </form>
+  )
+}
+export function ShowTheCurrentValue({ dir, ...props }: SliderTaskOptions) {
+  const [brightness, setBrightness] = useState(70)
+  return (
+    <div
+      dir={dir}
+      style={panelStyle}
+    >
+      <Field label="Screen brightness">
+        <Slider
+          {...props}
+          value={brightness}
+          step={10}
+          aria-valuetext={`${brightness} percent`}
+          onChange={event => setBrightness(event.target.valueAsNumber)}
+        />
+      </Field>
+      <p style={{ margin: 0 }}>Brightness: {brightness}%</p>
+      <Button
+        variant="outline"
+        tone="neutral"
+        style={{ justifySelf: 'start' }}
+        onClick={() => setBrightness(70)}
+      >
+        Restore default
+      </Button>
+    </div>
+  )
+}
+const speeds = [0.5, 1, 1.5, 2]
+export function LabelSteppedMarks({ dir, ...props }: SliderTaskOptions) {
+  const [speed, setSpeed] = useState(1)
+  return (
+    <div
+      dir={dir}
+      style={panelStyle}
+    >
+      <Field
+        label="Playback speed"
+        description="Quarter steps from half to double speed."
+      >
+        <Slider
+          {...props}
+          name="speed"
+          min={0.5}
+          max={2}
+          step={0.25}
+          value={speed}
+          aria-valuetext={`${speed}× speed`}
+          onChange={event => setSpeed(event.target.valueAsNumber)}
+        />
+        <div
+          aria-hidden="true"
+          style={{ display: 'flex', justifyContent: 'space-between' }}
+        >
+          {speeds.map(mark => (
+            <span key={mark}>{mark}×</span>
+          ))}
+        </div>
+      </Field>
+    </div>
+  )
+}
+
+import { MotionProvider } from '@cognitap/radiant/motion/react'
+import '@cognitap/radiant/styles.css'
+export type SliderTask = 'preferences' | 'value' | 'steps'
+export function SliderExample({
+  task = 'preferences',
+  ...props
+}: SliderTaskOptions & { task?: SliderTask }) {
+  return (
+    <MotionProvider>
+      {task === 'value' ? (
+        <ShowTheCurrentValue {...props} />
+      ) : task === 'steps' ? (
+        <LabelSteppedMarks {...props} />
+      ) : (
+        <SetListeningPreferences {...props} />
+      )}
+    </MotionProvider>
   )
 }

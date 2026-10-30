@@ -1,86 +1,197 @@
 ---
 title: Select
-description: Choose one value through a themed picker with native form integration.
+description: Pick one value from a themed listbox that submits, validates and resets like a native select.
 ---
 
-import { SelectDemo } from '../../components/SelectDemo'
+import {
+  SelectDemo,
+  SelectCitiesDemo,
+  SelectControlledDemo,
+  SelectDialogDemo,
+  SelectStatesDemo
+} from '../../components/SelectDemo'
 
 <SelectDemo />
 
-## Choose one value
+## Usage
+
+Use Select to pick one value from a styled list. A hidden native `<select>` handles form data, validation, reset and autofill. Choose something else when:
+
+- [NativeSelect](/docs/native-select/): you want the browser's own picker.
+- [Combobox](/docs/combobox/): people type to filter a long or searchable list.
+- [RadioGroup](/docs/radio-group/): two to five options should stay visible.
 
 ```tsx
-const workspaces = [
-  { value: 'personal', label: 'Personal' },
-  { value: 'studio', label: 'Studio' },
-  { value: 'archive', label: 'Archive', disabled: true },
-]
-
-<Field label="Workspace" description="Where new ideas land." required>
-  <Select items={workspaces} name="workspace" defaultValue="studio" />
+<Field label="Workspace">
+  <Select
+    name="workspace"
+    defaultValue="studio"
+    items={[
+      { value: 'personal', label: 'Personal' },
+      { value: 'studio', label: 'Studio' }
+    ]}
+  />
 </Field>
 ```
 
-The visible control is a button and custom listbox. A visually hidden native
-select handles form submission and constraint validation. [Field](/docs/field/)
-connects the visible label, description, error, disabled and required states.
+Without children, Select renders a trigger and an item for every entry in `items`. Compose the parts below to change either.
 
-Each item has a distinct string `value` and a `label`. Rich labels also need
-plain `textValue` for keyboard matching and native options. Keep this registry
-stable during an interaction. Use [Combobox](/docs/combobox/) for searchable or asynchronous results.
+## Examples
 
-## Own state once
+### Approve each change
 
-Use `defaultValue` for uncontrolled selection. Native form reset restores it
-without firing `onValueChange`. Use `value` and `onValueChange` for controlled
-selection; the owner may decline a request. Controlled form reset restores the
-application's values. `null` shows the placeholder; `''` is an option value and
-fails native required validation. Do not combine owners or switch them while mounted.
+<SelectControlledDemo />
 
-`open`, `defaultOpen` and `onOpenChange` follow the same ownership rules.
-`name`, `form` and `autoComplete` reach the native select. Disabled controls
-contribute no form value. Programmatic prop updates do not emit form change.
+### Jump through a grouped list
 
-## Compose the picker
+<SelectCitiesDemo />
 
-```tsx
-<Select items={workspaces}>
-  <SelectTrigger>
-    <SelectValue placeholder="Choose a workspace" />
-    <SelectIcon />
-  </SelectTrigger>
-  <SelectPortal>
-    <SelectContent position="popper">
-      <SelectViewport>
-        {workspaces.map(item => (
-          <SelectItem
-            key={item.value}
-            value={item.value}
-          />
-        ))}
-      </SelectViewport>
-    </SelectContent>
-  </SelectPortal>
-</Select>
-```
+### Pick inside a dialog
 
-Content aligns the selected item with the trigger by default. `position="popper"`
-places it beside the trigger with viewport collision handling. The portal stays
-in the local theme and modal ancestry while the top layer escapes clipping.
-SelectGroup labels related items; SelectItemText and SelectItemIndicator customize
-their content. Root state has no host; refs and native props target each named part.
+<SelectDialogDemo />
 
-Enter, Space or arrows open the picker. Arrows, Home, End and typing move option
-focus while selection stays unchanged. Enter or Space commits. Escape dismisses
-and restores trigger focus; Tab stays within the open picker. Closed-trigger
-typing selects directly. Disabled options are skipped.
+### Lock or flag a choice
 
-## Motion and appearance
+<SelectStatesDemo />
 
-MotionProvider adds spring press feedback and popup opacity. SelectContent
-accepts `motion="off"`; theme off and reduced motion settle immediately. Closing
-never waits for animation. Follow the shared [motion guide](/docs/foundations/motion/).
+## State
 
-Use `controlSize`, shared theme roles, `components.select` overrides and each
-part's `className` or `style`. Preserve focus cues, selected/disabled distinctions,
-listbox semantics and functional positioning when customizing.
+Use `defaultValue`, or `value` with `onValueChange`, not both; mixing them throws. `null` shows the placeholder, and `''` is a real value when an item has it. `open`, `defaultOpen` and `onOpenChange` follow the same rule.
+
+The native select submits the value under `name`, or `''` when empty. Form reset restores `defaultValue` without calling `onValueChange`. A controlled Select keeps its value, so reset your state in `onReset`. An invalid submit focuses the trigger.
+
+`disabled` blocks the control and leaves its value out of form data. `readOnly` keeps the trigger focusable and the value submitted, but nothing opens or changes and `required` is not checked. Field's `disabled`, `required` and `error` apply too. Pass `aria-invalid` to Select to mark it invalid outside Field.
+
+## Accessibility
+
+The trigger is a `button` with `role="combobox"`, `aria-expanded`, `aria-required`, `aria-invalid` and `aria-readonly`. Name it with Field or with `aria-label` on SelectTrigger. The popup is a `listbox` of `option` items; SelectGroup is a labelled `group`. Give rich labels a plain `textValue` for typeahead.
+
+| Key                           | Behavior                                         |
+| ----------------------------- | ------------------------------------------------ |
+| Enter, Space, Arrow Down / Up | On the trigger, open and focus the selected item |
+| Typing on the trigger         | Select the next match without opening            |
+| Arrow Down / Up               | Move to the next or previous enabled item        |
+| Home / End                    | Move to the first or last enabled item           |
+| Typing in the list            | Focus the next matching item                     |
+| Enter, Space                  | Select the item, close and refocus the trigger   |
+| Escape                        | Close and refocus the trigger                    |
+| Tab                           | Blocked while open                               |
+
+## Motion
+
+Inside [MotionProvider](/docs/foundations/motion/), the popup fades in; closing is immediate. Set `motion="off"` on SelectContent to turn it off. Reduced motion shows it at full opacity.
+
+## Styling
+
+Every part except SelectPortal takes `className`, `style` and `ref`.
+
+| Part                | Attributes                                                                                                              |
+| ------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| SelectTrigger       | `data-slot="button select-trigger"`, `data-state="open \| closed"`, `data-placeholder`, `data-invalid`, `aria-readonly` |
+| SelectValue         | `data-slot="select-value"`                                                                                              |
+| SelectIcon          | `data-slot="select-icon"`                                                                                               |
+| SelectContent       | `data-slot="select-content"`, `data-state`, `data-motion`, `data-position`                                              |
+| SelectViewport      | `data-slot="select-viewport"`; the scroll container                                                                     |
+| SelectItem          | `data-slot="select-item"`, `data-value`, `data-disabled`, `data-selected`; `:focus` for focus                           |
+| SelectItemText      | `data-slot="select-item-text"`                                                                                          |
+| SelectItemIndicator | `data-slot="select-item-indicator"`; `invisible` when not selected                                                      |
+| SelectGroup         | `data-slot="select-group"`; its heading is `select-label`                                                               |
+
+Theme with `--rad-select-*` tokens, such as `--rad-select-height`, `--rad-select-radius` and `--rad-select-item-background`.
+
+## API
+
+### Select
+
+| Prop                       | Type                                     | Default                |
+| -------------------------- | ---------------------------------------- | ---------------------- |
+| items                      | `readonly SelectOption[]`; unique values | Required               |
+| value / defaultValue       | string / null                            | None / null; one owner |
+| onValueChange              | `(value: string \| null) => void`        | None                   |
+| open / defaultOpen         | boolean                                  | None / false           |
+| onOpenChange               | `(open: boolean) => void`                | None                   |
+| name / form / autoComplete | string; reach the native select          | None                   |
+| disabled / required        | boolean                                  | Field's, else false    |
+| readOnly                   | boolean                                  | false                  |
+| aria-invalid               | Native; forwarded to the trigger         | Field's                |
+| controlSize                | small / medium / large                   | medium                 |
+| children                   | ReactNode                                | Trigger and items      |
+
+### SelectTrigger
+
+| Prop        | Type                                                                                      | Default           |
+| ----------- | ----------------------------------------------------------------------------------------- | ----------------- |
+| render      | `(props: SelectRenderProps) => ReactElement`                                              | None              |
+| children    | ReactNode                                                                                 | SelectValue, icon |
+| Other props | Button props except variant, tone, type, pending, controlSize, disabled and pressed props | Native            |
+
+### SelectValue
+
+| Prop        | Type      | Default              |
+| ----------- | --------- | -------------------- |
+| placeholder | ReactNode | `'Select an option'` |
+| children    | ReactNode | Selected label       |
+
+### SelectIcon
+
+| Prop        | Type       | Default |
+| ----------- | ---------- | ------- |
+| children    | ReactNode  | Chevron |
+| Other props | span props | Native  |
+
+### SelectPortal
+
+| Prop     | Type      | Default |
+| -------- | --------- | ------- |
+| children | ReactNode | None    |
+
+Renders into the trigger's parent; the popup uses the top layer.
+
+### SelectContent
+
+| Prop             | Type                     | Default      |
+| ---------------- | ------------------------ | ------------ |
+| position         | item-aligned / popper    | item-aligned |
+| sideOffset       | number; popper gap       | 4            |
+| collisionPadding | number                   | 8            |
+| motion           | inherit / off            | inherit      |
+| Other props      | div props except popover | Native       |
+
+### SelectViewport
+
+| Prop        | Type      | Default |
+| ----------- | --------- | ------- |
+| Other props | div props | Native  |
+
+### SelectItem
+
+| Prop        | Type                          | Default            |
+| ----------- | ----------------------------- | ------------------ |
+| value       | string; must exist in `items` | Required           |
+| children    | ReactNode                     | Text and indicator |
+| Other props | div props                     | Native             |
+
+### SelectItemText
+
+| Prop        | Type       | Default    |
+| ----------- | ---------- | ---------- |
+| children    | ReactNode  | Item label |
+| Other props | span props | Native     |
+
+### SelectItemIndicator
+
+| Prop        | Type       | Default |
+| ----------- | ---------- | ------- |
+| children    | ReactNode  | `✓`     |
+| Other props | span props | Native  |
+
+### SelectGroup
+
+| Prop        | Type                     | Default  |
+| ----------- | ------------------------ | -------- |
+| label       | ReactNode; group heading | Required |
+| Other props | div props                | Native   |
+
+`useSelect()` returns `{ value, open, disabled, setValue, setOpen }` inside Select, else `null`.
+
+Exports `SelectProps`, `SelectOption`, `SelectState`, `SelectTriggerProps`, `SelectRenderProps`, `SelectValueProps`, `SelectIconProps`, `SelectContentProps`, `SelectViewportProps`, `SelectItemProps`, `SelectItemTextProps` and `SelectGroupProps`.

@@ -220,3 +220,33 @@ export function SelectDialogExample() {
     </Dialog>
   )
 }
+
+export function SelectStatesExample() {
+  const [workspace, setWorkspace] = useState<string | null>(null)
+  return (
+    <div className="grid w-80 max-w-full gap-4">
+      <Field
+        label="Billing workspace"
+        description="Set by your organization."
+      >
+        <Select
+          items={workspaceOptions}
+          name="billing"
+          defaultValue="team"
+          readOnly
+        />
+      </Field>
+      <Field
+        label="Backup workspace"
+        error={workspace === null ? 'Choose a backup workspace.' : undefined}
+        required
+      >
+        <Select
+          items={workspaceOptions}
+          value={workspace}
+          onValueChange={setWorkspace}
+        />
+      </Field>
+    </div>
+  )
+}

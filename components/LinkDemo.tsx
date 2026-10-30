@@ -6,7 +6,7 @@ import { MotionLinkPlayground } from '@/examples/link/MotionLinkPlayground'
 export function LinkDemo() {
   return (
     <Demo
-      title="Interactive Link"
+      title="Read the installation guide"
       files={['link/LinkExample.tsx', 'link/link-example.css']}
     >
       <LinkPlayground />
@@ -14,10 +14,21 @@ export function LinkDemo() {
   )
 }
 
+export function LinkProseDemo() {
+  return (
+    <Demo
+      title="Link inside text"
+      files={['link/LinkExample.tsx', 'link/link-example.css']}
+    >
+      <LinkPlayground task="prose" />
+    </Demo>
+  )
+}
+
 export function RouterLinkDemo() {
   return (
     <Demo
-      title="Router link and ref"
+      title="Navigate with a router"
       files={['link/RouterLinkExample.tsx', 'link/link-example.css', 'profile/useHydrated.ts']}
     >
       <RouterLinkPlayground />
@@ -28,7 +39,7 @@ export function RouterLinkDemo() {
 export function MotionLinkDemo() {
   return (
     <Demo
-      title="Link and Button motion"
+      title="Style a link as a button"
       files={['link/MotionLinkExample.tsx', 'link/link-example.css', 'profile/useHydrated.ts']}
     >
       <MotionLinkPlayground />

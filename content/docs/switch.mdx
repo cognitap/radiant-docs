@@ -1,50 +1,17 @@
 ---
 title: Switch
-description: Native on/off settings with Field relationships and shared control sizes.
+description: Turn a setting on or off and apply it right away.
 ---
 
-import { SwitchDemo } from '../../components/SwitchDemo'
+import { SwitchDemo, SwitchGroupDemo, SwitchFormDemo } from '../../components/SwitchDemo'
 
 <SwitchDemo />
 
-## Label a setting
+## Usage
 
-Use Switch for an on/off setting. Use [Checkbox](/docs/checkbox/) for checklist
-choices or mixed selection. Keep the label stable when the state changes.
-
-```tsx
-import { Field, Switch } from '@cognitap/radiant'
-
-export function Notifications() {
-  return (
-    <Field
-      label="Desktop notifications"
-      description="Show a notification when someone mentions you."
-    >
-      <Switch
-        name="desktop"
-        value="enabled"
-        defaultChecked
-      />
-    </Field>
-  )
-}
-```
-
-Switch renders a native `input type="checkbox"` with `role="switch"`. Its thumb
-is decorative. [Field](/docs/field/) supplies the control ID, accessible label,
-description, error and required/disabled states. Omit Switch's convenience
-`label` inside Field. Outside Field, supply `label` or a native label with
-matching `htmlFor` and `id`.
-
-## Choose a state owner
-
-`defaultChecked` sets browser-owned initial state. For controlled state, pass
-`checked` and update it from `onChange`:
+Use Switch for a setting that takes effect as soon as it changes. Use [Checkbox](/docs/checkbox/) for a choice that is submitted with a form, a checklist, consent or a select-all parent. Use [RadioGroup](/docs/radio-group/) for one choice out of several, and [ToggleGroup](/docs/toggle-group/) or a pressed [Button](/docs/button/) for a toolbar toggle.
 
 ```tsx
-const [quiet, setQuiet] = useState(false)
-
 <Switch
   label="Do not disturb"
   checked={quiet}
@@ -52,37 +19,68 @@ const [quiet, setQuiet] = useState(false)
 />
 ```
 
-Choose one owner for the entire mount. Do not combine `checked` and
-`defaultChecked` or switch ownership. `event.target.checked` is the boolean
-state; `value` is the submitted string.
+## Examples
 
-Click and Space use native activation. Pointer movement can preview the thumb
-position; release commits the nearer endpoint. Cancellation preserves the
-current state. A controlled owner still decides whether to accept a change.
+### Group related settings
 
-## Submit and reset
+<SwitchGroupDemo />
 
-A named, checked switch contributes its `value` to `new FormData(form)`;
-omitting `value` uses `on`. Unchecked and disabled switches contribute no entry.
-Native `required` validation remains available. Field's required and disabled
-states cannot be undone by its child.
+### Save settings with a form
 
-Native reset restores an uncontrolled default. Reset controlled state in the
-form's `onReset`. Switch has no mixed state or read-only mode.
+<SwitchFormDemo />
 
-## Size and customize
+## State
 
-`controlSize` selects `small`, `medium` (default) or `large`, sharing metrics
-with Checkbox. Root `className`, typed `style`, native attributes/events and
-`ref` target the `HTMLInputElement`. `SwitchProps` is exported.
+Use `defaultChecked` for an uncontrolled switch, or `checked` with `onChange` and read `event.target.checked`. There is no `onCheckedChange`. Choose one owner per mount; passing both, or switching owner, throws.
 
-| Part              | Target                     |
-| ----------------- | -------------------------- |
-| `parts.wrapper`   | Label or unlabeled wrapper |
-| `parts.label`     | Convenience label text     |
-| `parts.indicator` | Decorative thumb           |
+A switch that is on submits `name=value`, with `value` defaulting to `on`. A switch that is off or disabled submits nothing. Reset restores `defaultChecked` without firing `onChange`; a controlled switch keeps its current `checked`, so reset your state in `onReset`. `required` uses native validation and `form` links an outside form.
 
-Use shared tokens or independent `components.switch` overrides. See
-[theming](/docs/foundations/theming/). Preserve focus, checked and disabled cues.
-The input exposes `data-slot="switch"`, `data-control-size` and presence-based
-`data-invalid`. `data-dragging` describes provisional pointer feedback only.
+Switch has no mixed state and does not accept `readOnly`; use `disabled`, or show the value as text.
+
+## Accessibility
+
+Switch renders a native `input type="checkbox"` with `role="switch"`, so the browser reports on and off. Name it with `label`, a [Field](/docs/field/) label, `aria-label` or `aria-labelledby`. With `label`, clicking the text toggles. Inside Field it takes Field's id, disabled, required, invalid state and description; your `aria-describedby` is appended. The thumb is hidden from assistive technology.
+
+| Key             | Behavior                                 |
+| --------------- | ---------------------------------------- |
+| Tab / Shift+Tab | Move focus to or from the switch         |
+| Space           | Toggle                                   |
+| Escape          | During a drag, cancel and keep the state |
+
+Click or tap toggles. Dragging the thumb past the midpoint and releasing toggles once, through the same native click, so `onChange` fires once. A mostly vertical drag cancels so the page can scroll. Calling `preventDefault` on the pointer or click events stops the toggle.
+
+## Motion
+
+Switch has no animation; the thumb jumps between ends when it toggles. During a drag the thumb follows the pointer and the input carries `data-dragging`. Escape or a vertical move returns it. Nothing needs turning off for reduced motion. Under `dir="rtl"` the on position is on the left.
+
+## Styling
+
+`className`, `style`, `ref` and native props target the input, which draws the track. It carries `data-slot="switch"`, `data-control-size`, `data-invalid` when invalid and `data-dragging` during a drag. Use `:checked` and `:disabled` for those states. Set `--rad-switch-*` variables in `style` or the theme's `components.switch`, such as `width`, `height`, `checkedBackground` and `thumb`. Keep the focus ring visible. See [theming](/docs/foundations/theming/).
+
+| Part              | Element                                     | `data-slot`        |
+| ----------------- | ------------------------------------------- | ------------------ |
+| `parts.wrapper`   | The `<label>` row with `label`, else a span | `switch-wrapper`   |
+| `parts.label`     | Label text                                  | `switch-label`     |
+| `parts.indicator` | Decorative thumb                            | `switch-indicator` |
+
+## API
+
+| Switch prop         | Type                                                                     | Default   |
+| ------------------- | ------------------------------------------------------------------------ | --------- |
+| checked             | boolean; pair with onChange                                              | None      |
+| defaultChecked      | boolean; uncontrolled start and reset value                              | false     |
+| onChange            | `ChangeEventHandler<HTMLInputElement>`                                   | None      |
+| label               | ReactNode; omit when Field supplies it                                   | None      |
+| controlSize         | small / medium / large                                                   | medium    |
+| name / value        | string; submitted when on                                                | None / on |
+| form                | string; form id                                                          | None      |
+| required / disabled | boolean; disabled is not submitted                                       | false     |
+| aria-invalid        | boolean / 'true' / 'false' / 'grammar' / 'spelling'                      | None      |
+| aria-describedby    | string; appended to Field's ids                                          | None      |
+| id                  | string; Field's id wins inside Field                                     | None      |
+| className / style   | string / ThemeStyle; target the input                                    | None      |
+| parts               | wrapper / label / indicator PartStyle                                    | None      |
+| ref                 | `Ref<HTMLInputElement>`                                                  | None      |
+| Native attributes   | Input attributes and events except type, role, aria-checked and readOnly | Native    |
+
+Exports `Switch` and `SwitchProps`.

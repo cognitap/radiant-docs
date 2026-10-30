@@ -1,94 +1,140 @@
 ---
 title: Tabs
-description: Related panels with deliberate activation, keyboard navigation and retained state.
+description: Show one of several related panels at a time, with a tab list to switch between them.
 ---
 
-import { TabsDemo } from '../../components/TabsDemo'
+import {
+  TabsAccountDemo,
+  TabsDemo,
+  TabsReportsDemo,
+  TabsStagesDemo
+} from '../../components/TabsDemo'
 
 <TabsDemo />
 
-## Connect related panels
+## Usage
 
-Give each trigger and its content the same distinct string `value` within one
-Tabs owner. Label the tab list; Tabs supplies the tab/panel IDs and ARIA
-relationships. Set an initial selection with `defaultValue` or `value`.
+Give each TabsTrigger and its TabsContent the same string `value`, and name the list. Use [Accordion](/docs/accordion/) for sections people read in sequence or open together, [ToggleGroup](/docs/toggle-group/) or [RadioGroup](/docs/radio-group/) to pick a value rather than switch panels, and [NavLink](/docs/nav-link/) for items that go to other pages.
 
 ```tsx
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@cognitap/radiant'
-
-export function ProjectSections() {
-  return (
-    <Tabs defaultValue="overview">
-      <TabsList aria-label="Project sections">
-        <TabsTrigger value="overview">Overview</TabsTrigger>
-        <TabsTrigger value="activity">Activity</TabsTrigger>
-      </TabsList>
-      <TabsContent value="overview">Project details</TabsContent>
-      <TabsContent value="activity">Recent changes</TabsContent>
-    </Tabs>
-  )
-}
-```
-
-## Choose activation and ownership
-
-Automatic activation is the default: focusing a tab selects its panel. Use
-`activationMode="manual"` for panels that load on demand; arrows move focus,
-then click, Enter or Space selects.
-
-For controlled selection, pass a string `value` and `onValueChange`:
-
-```tsx
-const [section, setSection] = useState('overview')
-
-<Tabs value={section} onValueChange={setSection}>
-  {/* list, triggers and matching content */}
+<Tabs defaultValue="overview">
+  <TabsList aria-label="Project sections">
+    <TabsTrigger value="overview">Overview</TabsTrigger>
+    <TabsTrigger value="activity">Activity</TabsTrigger>
+  </TabsList>
+  <TabsContent value="overview">Project details</TabsContent>
+  <TabsContent value="activity">Recent changes</TabsContent>
 </Tabs>
 ```
 
-Keep one owner for the entire mount. Do not combine `value` and `defaultValue`
-or switch ownership. Keep the selected value matched to an available tab.
-`useTabs()` returns the current state and `setValue` request, or `null` outside
-Tabs. A controlled owner can refuse requests.
+## Examples
 
-## Navigate
+### Load reports on demand
 
-Tab enters the selected tab and leaves the list for panel content. Arrows move
-through enabled, visible tabs in DOM order; Home/End move to the ends. Horizontal
-navigation follows RTL direction and leaves Up/Down available for scrolling.
-`orientation="vertical"` uses Up/Down. Set `loop={false}` to stop at the ends.
+With `activationMode="manual"`, arrow keys only move focus. Click, Enter or Space selects, so a panel that loads data runs once per choice.
 
-Disable individual triggers or the whole Tabs owner. Panels default to
-`tabIndex={0}`; choose `-1` when Tab should go directly to a focusable child.
+<TabsReportsDemo />
 
-## Keep panel state
+### Put the list beside the panels
 
-Inactive panel hosts remain hidden and inert. Their children unmount by default.
-Set `keepMounted` on a TabsContent to preserve its local state.
+<TabsAccountDemo />
 
-Mounted hidden form controls still submit and validate; the application owns
-validation across panels. Tab selection is not form data. Native form reset
-restores controls without changing the selected tab.
+### Scroll a long tab list
 
-## Customize
+A horizontal list scrolls when its tabs overflow.
 
-`controlSize` selects shared `small`, `medium` or `large` metrics. Use independent
-`components.tabs` overrides or typed local variables:
+<TabsStagesDemo />
+
+## State
+
+Use `defaultValue`, or `value` with `onValueChange`. One is required, and passing both throws. Values are strings, and Tabs always has a selected tab. `onValueChange` fires only for user requests; a controlled owner can refuse one by keeping `value`. Do not switch owners after mount.
 
 ```tsx
-<Tabs
-  defaultValue="overview"
-  style={{
-    '--rad-tabs-list-radius': '999px',
-    '--rad-tabs-trigger-radius': '999px',
-    '--rad-tabs-content-padding': '1.5rem'
-  }}
->
-  {/* list, triggers and content */}
-</Tabs>
+const [section, setSection] = useState('general')
+
+<Tabs value={section} onValueChange={setSection}>…</Tabs>
 ```
 
-Root/list/content props and refs reach their `div`; trigger props/ref reach a
-native button. Trigger `render` follows the [Button contract](/docs/button/).
-Keep selected, focus and disabled cues visible. See
-[theming](/docs/foundations/theming/).
+Hidden panels unmount their children. Set `keepMounted` on a panel to keep its state and let its fields submit while hidden, as the workspace form does. Tabs submits no value itself, and form reset leaves the selected tab unchanged.
+
+`useTabs()` returns the current `TabsState` inside Tabs and `null` outside.
+
+## Accessibility
+
+TabsList has `role="tablist"` and needs `aria-label` or `aria-labelledby`. Each trigger is a native `button` with `role="tab"`, named by its text. Panels have `role="tabpanel"` and are labelled by their tab. Tabs generates the IDs, and they match between server and client.
+
+| Key                      | Behavior                                                            |
+| ------------------------ | ------------------------------------------------------------------- |
+| Tab                      | Enters the list on the selected tab; the next Tab goes to the panel |
+| Arrow Right / Arrow Left | Next / previous enabled tab when horizontal; reversed in RTL        |
+| Arrow Down / Arrow Up    | Next / previous enabled tab when vertical                           |
+| Home / End               | First / last enabled tab                                            |
+| Enter / Space            | Selects the focused tab; needed with manual activation              |
+
+Arrows wrap unless `loop={false}`. In automatic mode, moving focus selects the tab. Disabled tabs are skipped. Panels take `tabIndex={0}`; use `-1` when the panel starts with a focusable control.
+
+## Motion
+
+Nothing animates. Triggers render Button with motion off, and panels switch instantly.
+
+## Styling
+
+Every part takes `className` and `style`, which accepts `--rad-tabs-*` variables. `components.tabs` holds theme keys; `triggerActiveBackground`, `triggerActiveColor` and `triggerActiveBorder` style the selected tab.
+
+| Part        | `data-slot`           | Data attributes                                                                         |
+| ----------- | --------------------- | --------------------------------------------------------------------------------------- |
+| Tabs        | `tabs`                | `data-orientation`, `data-control-size`, `data-disabled`                                |
+| TabsList    | `tabs-list`           | `data-orientation`                                                                      |
+| TabsTrigger | `button tabs-trigger` | `data-selected`, `data-disabled`, `data-value`, `data-orientation`, `data-control-size` |
+| TabsContent | `tabs-content`        | `data-value`, `data-orientation`                                                        |
+
+The selected trigger has `data-selected`. Target the visible panel with `[role=tabpanel]:not([hidden])`.
+
+## API
+
+### Tabs
+
+| Prop              | Type                                              | Default    |
+| ----------------- | ------------------------------------------------- | ---------- |
+| value             | string; controlled selection                      | None       |
+| defaultValue      | string; uncontrolled initial selection            | None       |
+| onValueChange     | (value: string) => void                           | None       |
+| orientation       | horizontal / vertical                             | horizontal |
+| activationMode    | automatic / manual                                | automatic  |
+| loop              | boolean; arrows wrap at the ends                  | true       |
+| disabled          | boolean; disables every tab                       | false      |
+| controlSize       | small / medium / large                            | medium     |
+| className / style | string / ThemeStyle                               | None       |
+| Other props       | Native div props except defaultValue and onChange | Native     |
+
+### TabsList
+
+| Prop                         | Type                                                        | Default  |
+| ---------------------------- | ----------------------------------------------------------- | -------- |
+| aria-label / aria-labelledby | string; accessible name                                     | Required |
+| className / style            | string / ThemeStyle                                         | None     |
+| Other props                  | Native div props except role, aria-orientation and tabIndex | Native   |
+
+### TabsTrigger
+
+| Prop              | Type                                                                        | Default       |
+| ----------------- | --------------------------------------------------------------------------- | ------------- |
+| value             | string; matches a TabsContent                                               | Required      |
+| disabled          | boolean                                                                     | false         |
+| controlSize       | small / medium / large                                                      | From Tabs     |
+| render            | (props: TabsRenderProps) => ReactElement                                    | Native button |
+| className / style | string / ThemeStyle                                                         | None          |
+| ref               | `Ref<HTMLButtonElement>`                                                    | None          |
+| Other props       | [Button](/docs/button/) props except selection, ARIA and presentation props | Native        |
+
+### TabsContent
+
+| Prop              | Type                                                           | Default  |
+| ----------------- | -------------------------------------------------------------- | -------- |
+| value             | string; the tab this panel belongs to                          | Required |
+| keepMounted       | boolean; keep children mounted while hidden                    | false    |
+| tabIndex          | number                                                         | 0        |
+| className / style | string / ThemeStyle                                            | None     |
+| Other props       | Native div props except id, role, hidden, inert and ARIA links | Native   |
+
+Exports: `Tabs`, `TabsList`, `TabsTrigger`, `TabsContent`, `useTabs`, `TabsProps`, `TabsListProps`, `TabsTriggerProps`, `TabsContentProps`, `TabsRenderProps`, `TabsState`.
