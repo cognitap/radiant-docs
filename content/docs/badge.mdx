@@ -1,0 +1,50 @@
+---
+title: Badge
+description: Compact passive text for categories and statuses.
+---
+
+import { BadgeDemo } from '../../components/BadgeDemo'
+
+<BadgeDemo />
+
+## Keep the meaning in text
+
+Badge presents compact status or category text in a passive `span`. Include
+words such as “Approved” or “Needs attention”; color alone cannot communicate
+the meaning. Give counts useful context, such as “3 unread”, rather than an
+unexplained number.
+
+`tone` accepts `accent`, `neutral` (default), `warning` and `danger`. It chooses
+the shared palette, not announcement urgency or application state.
+
+Informative badges expose their text normally. Set `decorative` only when
+adjacent accessible text already conveys the same information. That hides the
+entire badge from assistive technology; do not hide unique status information.
+There is no separate accessible-label prop to replace the visible meaning.
+
+## Presentation and actions
+
+Badge adds no live region, focus handling or keyboard interaction. Applications
+own status changes and important announcements through [Alert](/docs/alert/).
+Avoid repeatedly announcing unchanged category text.
+
+Use [Button](/docs/button/) or [Link](/docs/link/) for actions. A badge can appear
+inside an otherwise clearly named control, but never put controls inside Badge
+or turn it into a keyboard target. Keep the control's name meaningful when a
+badge is decorative.
+
+## Customize
+
+Native span attributes, `className`, `style` and an `HTMLSpanElement` ref reach
+the host. It retains the `badge` slot and exposes `data-tone`. Role, decorative
+treatment, naming and focusability stay owned by the component.
+`BadgeProps` and `BadgeTone` are exported.
+
+Use `components.badge` or `--rad-badge-*` variables for `radius`, `background`,
+`color`, `borderColor`, `borderWidth`, `borderStyle`, `paddingInline`,
+`paddingBlock` and `fontSize`. Shared typography supplies label weight and
+rhythm. Long text wraps within the available width.
+
+No motion is added. Forced colors retain readable system text and a border.
+Preserve meaningful text, contrast and bounds when replacing styles.
+[Themes](/docs/foundations/theming/) apply without a provider.
