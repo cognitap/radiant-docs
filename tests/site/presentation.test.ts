@@ -1147,3 +1147,76 @@ test('Array fields submit committed values and retain controlled removals', asyn
     }
   })
 })
+
+test('OTP docs keep one native value through paste, verification and refused recovery edits', async () => {
+  await withSite(async (baseURL, browser) => {
+    const page = await browser.newPage(),
+      errors = track(page)
+    try {
+      await capture(page, 'otp-field-tasks', async () => {
+        await page.goto(`${baseURL}/docs/otp-field/`)
+        await page.waitForFunction(
+          () => !document.querySelector<HTMLButtonElement>('.demo-heading button')?.disabled
+        )
+        const email = page.getByRole('region', { name: 'Verify an email code', exact: true }),
+          input = email.getByRole('textbox', { name: 'Email verification code', exact: true })
+        await input.focus()
+        await input.evaluate(node => {
+          const data = new DataTransfer()
+          data.setData('text', 'Code: 123 456')
+          node.dispatchEvent(
+            new ClipboardEvent('paste', { bubbles: true, cancelable: true, clipboardData: data })
+          )
+        })
+        await input.evaluate(node => {
+          if (!(node instanceof HTMLInputElement)) throw new Error('Code must use a native input')
+          node.setSelectionRange(1, 5)
+        })
+        await page.keyboard.press('ArrowRight')
+        assert.equal(
+          await input.evaluate(node =>
+            node instanceof HTMLInputElement ? node.selectionStart : null
+          ),
+          5
+        )
+        await email.getByRole('button', { name: 'Verify email', exact: true }).click()
+        assert.match(
+          await email.getByRole('status').last().innerText(),
+          /Email verified with code 123456/
+        )
+        assert.equal(await email.locator('input[name="emailCode"]').count(), 1)
+        await email.getByRole('button', { name: 'Start again', exact: true }).click()
+        assert.equal(await input.inputValue(), '')
+        const access = page.getByRole('region', {
+          name: 'Approve temporary workspace access',
+          exact: true
+        })
+        await access
+          .getByRole('textbox', { name: 'Temporary approval code', exact: true })
+          .fill('AB12CD34')
+        await access.getByRole('button', { name: 'Approve access', exact: true }).click()
+        assert.match(await access.getByRole('status').last().innerText(), /approved using AB12CD34/)
+        const recovery = page.getByRole('region', {
+            name: 'Review an account recovery code',
+            exact: true
+          }),
+          code = recovery.getByRole('textbox', { name: 'Recovery code', exact: true })
+        await code.fill('987654')
+        assert.equal(await code.inputValue(), '12')
+        assert.match(await recovery.getByRole('status').last().innerText(), /prefix is protected/)
+        await recovery
+          .getByRole('checkbox', { name: 'Keep the account prefix', exact: true })
+          .uncheck()
+        await code.fill('987654')
+        await recovery.getByRole('button', { name: 'Continue recovery', exact: true }).click()
+        assert.match(
+          await recovery.getByRole('status').last().innerText(),
+          /Recovery continued with 987654/
+        )
+        assert.deepEqual(errors, [])
+      })
+    } finally {
+      await page.close()
+    }
+  })
+})
