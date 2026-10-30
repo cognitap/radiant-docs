@@ -5,6 +5,7 @@ import {
   useContext,
   useEffect,
   useId,
+  useMemo,
   useRef,
   useState,
   type ReactNode
@@ -110,6 +111,18 @@ function usePreviewTheme() {
   const state = useContext(PreviewThemeContext)
   if (!state) throw new Error('DemoControls and DemoPreview need a DemoFrame.')
   return state
+}
+
+/**
+ * The stage theme, with spatial motion forced off when `off`. For examples that demonstrate
+ * their motion toggle: wrap the example in a `ThemeScope` that takes the returned theme.
+ */
+export function usePreviewMotionTheme(off: boolean): Theme {
+  const { theme } = usePreviewTheme()
+  return useMemo(
+    () => ({ ...theme, motion: { ...theme.motion, mode: off ? 'off' : theme.motion.mode } }),
+    [theme, off]
+  )
 }
 
 /** Lives inside the reset boundary, so a reset also restores the theme and mode. */
