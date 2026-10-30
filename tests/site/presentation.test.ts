@@ -1781,3 +1781,110 @@ test('Autocomplete docs submit off-list text, control recipient reset and retain
     }
   })
 })
+
+test('Command docs register scoped shortcuts, update project records, focus real navigation and keep async lookup explicit', async () => {
+  await withSite(async (baseURL, browser) => {
+    const page = await browser.newPage(),
+      errors = track(page)
+    try {
+      await capture(page, 'command-tasks', async () => {
+        await page.goto(baseURL + '/docs/command/')
+        await page.waitForFunction(
+          () => !document.querySelector<HTMLButtonElement>('.demo-heading button')?.disabled
+        )
+        const projects = page.getByRole('region', { name: 'Manage study projects', exact: true })
+        const trigger = projects.getByRole('button', { name: 'Project commands', exact: true })
+        await trigger.focus()
+        await trigger.press('Control+k')
+        const modal = projects.getByRole('dialog', { name: 'Project commands', exact: true })
+        await modal.waitFor()
+        const query = modal.getByRole('combobox', { name: 'Search commands', exact: true })
+        assert.equal(await query.evaluate(node => node === node.ownerDocument.activeElement), true)
+        await query.fill('Create')
+        await query.press('ArrowDown')
+        await query.press('Enter')
+        await modal.waitFor({ state: 'hidden' })
+        assert.match(
+          await projects
+            .getByRole('region', { name: 'Project command application', exact: true })
+            .locator('output')
+            .innerText(),
+          /Study project 2 created/
+        )
+        await trigger.focus()
+        await trigger.press('Control+n')
+        assert.match(
+          await projects
+            .getByRole('region', { name: 'Project command application', exact: true })
+            .locator('output')
+            .innerText(),
+          /Study project 3 created/
+        )
+        await trigger.click()
+        await query.fill('archive')
+        await query.press('ArrowDown')
+        await query.press('Enter')
+        assert.match(
+          await projects
+            .getByRole('region', { name: 'Project command application', exact: true })
+            .locator('output')
+            .innerText(),
+          /Study project 3 archived/
+        )
+        const navigation = page.getByRole('region', { name: 'Navigate workspace', exact: true })
+        await navigation.getByRole('button', { name: 'Navigate workspace', exact: true }).click()
+        const search = navigation.getByRole('combobox', { name: 'Search commands', exact: true })
+        await search.fill('settings')
+        await search.press('ArrowDown')
+        await search.press('Enter')
+        const heading = navigation.getByRole('heading', { name: 'Workspace settings', exact: true })
+        await heading.waitFor()
+        assert.equal(
+          await heading.evaluate(node => node === node.ownerDocument.activeElement),
+          true
+        )
+        const lookup = page.getByRole('region', { name: 'Find study report', exact: true })
+        await lookup.getByRole('button', { name: 'Find study report', exact: true }).click()
+        const remote = lookup.getByRole('combobox', { name: 'Search commands', exact: true })
+        await remote.fill('reader')
+        await lookup
+          .getByRole('option', { name: 'Open reader study report', exact: true })
+          .waitFor()
+        assert.equal(
+          await lookup
+            .getByText('No report is open. Search results do not open themselves.', { exact: true })
+            .count(),
+          1
+        )
+        await lookup.getByRole('button', { name: 'Disconnect search', exact: true }).click()
+        await lookup.getByText('Report search is disconnected.', { exact: true }).waitFor()
+        assert.equal(await remote.inputValue(), 'reader')
+        await lookup.getByRole('button', { name: 'Reconnect search', exact: true }).click()
+        await lookup
+          .getByRole('option', { name: 'Open reader study report', exact: true })
+          .waitFor()
+        await remote.focus()
+        await remote.press('ArrowDown')
+        await remote.press('Enter')
+        await lookup.getByText('Completed sessions: 24.', { exact: true }).waitFor()
+        await lookup.getByRole('combobox', { name: 'Direction', exact: true }).selectOption('rtl')
+        await page.setViewportSize({ width: 320, height: 800 })
+        await lookup.getByRole('button', { name: 'Find study report', exact: true }).click()
+        const box = lookup.getByRole('dialog', { name: 'Find study report', exact: true })
+        assert.equal(await remote.evaluate(node => getComputedStyle(node).direction), 'rtl')
+        assert.equal(
+          await box.evaluate(node => {
+            const rect = node.getBoundingClientRect()
+            return rect.left >= 0 && rect.right <= innerWidth
+          }),
+          true
+        )
+        await remote.press('Escape')
+        await box.waitFor({ state: 'hidden' })
+        assert.deepEqual(errors, [])
+      })
+    } finally {
+      await page.close()
+    }
+  })
+})

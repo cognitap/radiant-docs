@@ -1,0 +1,60 @@
+---
+title: Command
+description: Search and run actions in a native Dialog with grouped Combobox results.
+---
+
+import { CommandDemo, CommandNavigationDemo, CommandLookupDemo } from '../../components/CommandDemo'
+
+## Usage
+
+<CommandDemo />
+
+Command combines a native Dialog with the Combobox listbox. It runs actions rather than selecting a form value. Applications own actions, navigation, fetching and shortcut registration. Modal behavior is the default; `modal={false}` uses native non-modal behavior.
+
+## Examples
+
+The project application creates, duplicates and archives local records. Its scoped Ctrl/⌘K and Ctrl/⌘N handlers match the displayed Kbd hints. Core Command installs no global shortcut.
+
+<CommandNavigationDemo />
+
+This application moves focus to the destination heading after an accepted navigation action.
+
+<CommandLookupDemo />
+
+The report application cancels stale requests and supports disconnection and recovery. Results never run themselves. Pass `filter={null}` for application-filtered results, or provide a custom filter. Default filtering matches readable labels.
+
+## State
+
+query/defaultQuery and open/defaultOpen are independent owners. Choose one owner per axis. Controlled callbacks request changes; the owner may decline. Prop synchronization is silent. Query persists across dismissal; clear it explicitly when your application needs that behavior.
+
+onAction receives the activated value, then Command requests close. The query never becomes a command ID or a submitted form value.
+
+## Accessibility
+
+Provide CommandTitle and CommandDescription. Place CommandInput before footer actions so native opening focuses search. Its default name is “Search commands”; override it with aria-label or aria-labelledby.
+
+Arrow keys highlight enabled results while focus remains on search. Enter runs the highlighted action; Tab reaches footer controls. Escape follows native Dialog cancellation, including closeOnEscape and onCancel. Short windows retain visible results and native scrolling.
+
+Check names, focus, dismissal and action feedback with your application's assistive technologies.
+
+## Motion
+
+CommandContent inherits Dialog motion through MotionProvider. Set `motion="off"` to opt out. Native closing and focus never wait for an exit animation.
+
+## Styling
+
+className/style/ref reach each named host. CommandContent is a native dialog; input is a native input; list and items are divs. Trigger and close compose Button and support CommandRenderProps.
+
+Dialog, Combobox and Kbd themes style the actual composed parts. command.resultsMaxHeight bounds results. controlSize sizes search and rows. Direction inherits; Kbd combinations keep readable key order.
+
+## API
+
+| Part or prop                                       | Purpose                                                                          |
+| -------------------------------------------------- | -------------------------------------------------------------------------------- |
+| Command                                            | Query and Dialog owners                                                          |
+| items                                              | Distinct values, readable label/textValue, optional group, shortcut and disabled |
+| onAction                                           | Explicit action callback                                                         |
+| loading / loadingText / emptyText / errorText      | Search status                                                                    |
+| CommandTrigger / CommandClose                      | Native Button actions                                                            |
+| CommandContent / CommandTitle / CommandDescription | Connected native modal structure                                                 |
+| CommandInput / CommandList / CommandItem           | Actual Combobox search and results                                               |
