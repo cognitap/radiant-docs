@@ -1,12 +1,12 @@
 import { Demo } from './demo/Demo'
-import { SpinnerExample } from '@/examples/spinner/SpinnerExample'
+import { SpinnerPlayground } from '@/examples/spinner/SpinnerPlayground'
 export function SpinnerDemo() {
   return (
     <Demo
       title="Account loading"
       files={['spinner/SpinnerExample.tsx']}
     >
-      <SpinnerExample />
+      <SpinnerPlayground />
     </Demo>
   )
 }
