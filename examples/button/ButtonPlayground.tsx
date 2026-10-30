@@ -2,9 +2,8 @@
 
 import { useState } from 'react'
 import dynamic from 'next/dynamic'
-import { type ButtonVariant, type Tone, type ControlSize, type ThemeMode } from '@cognitap/radiant'
-import { radiant } from '@cognitap/radiant/examples'
-import { PreviewThemeControls, SelectControl } from '@/components/demo/ActionControls'
+import { type ButtonVariant, type Tone, type ControlSize } from '@cognitap/radiant'
+import { SelectControl } from '@/components/demo/ActionControls'
 import { DemoControls, DemoPreview } from '@/components/demo/DemoFrame'
 
 const ButtonExample = dynamic(() => import('./ButtonExample').then(module => module.ButtonExample))
@@ -15,8 +14,6 @@ export function ButtonPlayground({ defaultDisabled = false }: { defaultDisabled?
   const [variant, setVariant] = useState<ButtonVariant>('solid')
   const [tone, setTone] = useState<Tone>('accent')
   const [controlSize, setControlSize] = useState<ControlSize>('medium')
-  const [theme, setTheme] = useState(radiant)
-  const [mode, setMode] = useState<ThemeMode>('light')
 
   return (
     <>
@@ -39,12 +36,6 @@ export function ButtonPlayground({ defaultDisabled = false }: { defaultDisabled?
             value={controlSize}
             options={['small', 'medium', 'large']}
             onChange={setControlSize}
-          />
-          <PreviewThemeControls
-            theme={theme}
-            mode={mode}
-            onThemeChange={setTheme}
-            onModeChange={setMode}
           />
         </div>
         <div className="action-toggles">
@@ -73,8 +64,6 @@ export function ButtonPlayground({ defaultDisabled = false }: { defaultDisabled?
           variant={variant}
           tone={tone}
           controlSize={controlSize}
-          theme={theme}
-          mode={mode}
         />
       </DemoPreview>
     </>

@@ -1,8 +1,18 @@
 'use client'
 
-import { Fragment, useEffect, useId, useRef, useState, type ReactNode } from 'react'
-import { Button } from '@cognitap/radiant'
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useId,
+  useRef,
+  useState,
+  type ReactNode
+} from 'react'
+import { Button, ThemeScope, type Theme, type ThemeMode } from '@cognitap/radiant'
+import { radiant, themes } from '@cognitap/radiant/examples'
 import { useHydrated } from '@/examples/profile/useHydrated'
+import { SelectControl } from './ActionControls'
 
 /** `html` is the highlighted `code`, rendered on the server. */
 export type DemoSource = { name: string; code: string; html: string }
@@ -35,20 +45,27 @@ export function DemoFrame({
       <div className="demo-heading">
         <h2 id={titleId}>{title}</h2>
         {reset && (
-          <Button
-            disabled={!ready}
-            onClick={() => setRevision(value => value + 1)}
-          >
-            Reset preview
-          </Button>
+          <>
+            <output className="demo-feedback">
+              <span key={revision}>{revision > 0 ? 'Preview reset.' : ''}</span>
+            </output>
+            <Button
+              variant="ghost"
+              tone="neutral"
+              controlSize="small"
+              className="demo-reset"
+              aria-label="Reset preview"
+              title="Reset preview"
+              disabled={!ready}
+              onClick={() => setRevision(value => value + 1)}
+            >
+              <ResetIcon />
+            </Button>
+          </>
         )}
       </div>
-      <Fragment key={revision}>{children}</Fragment>
-      {reset && (
-        <output className="demo-feedback">
-          <span key={revision}>{revision > 0 ? 'Preview reset.' : ''}</span>
-        </output>
-      )}
+      <PreviewTheme key={revision}>{children}</PreviewTheme>
+
       {typeof sources === 'string' ? (
         <RemoteSources url={sources} />
       ) : (
@@ -58,6 +75,51 @@ export function DemoFrame({
         </details>
       )}
     </section>
+  )
+}
+
+function ResetIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 16 16"
+      width="16"
+      height="16"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M2.5 8a5.5 5.5 0 1 0 1.6-3.9" />
+      <path d="M2.5 2.5v3h3" />
+    </svg>
+  )
+}
+
+type PreviewThemeState = {
+  theme: Theme
+  mode: ThemeMode | undefined
+  setTheme: (theme: Theme) => void
+  setMode: (mode: ThemeMode | undefined) => void
+}
+
+const PreviewThemeContext = createContext<PreviewThemeState | null>(null)
+
+function usePreviewTheme() {
+  const state = useContext(PreviewThemeContext)
+  if (!state) throw new Error('DemoControls and DemoPreview need a DemoFrame.')
+  return state
+}
+
+/** Lives inside the reset boundary, so a reset also restores the theme and mode. */
+function PreviewTheme({ children }: { children: ReactNode }) {
+  const [theme, setTheme] = useState(radiant)
+  const [mode, setMode] = useState<ThemeMode | undefined>()
+  return (
+    <PreviewThemeContext.Provider value={{ theme, mode, setTheme, setMode }}>
+      {children}
+    </PreviewThemeContext.Provider>
   )
 }
 
@@ -173,12 +235,12 @@ function SourceFile({ source }: { source: DemoSource }) {
   )
 }
 
-/** Keep controls inside the frame's reset boundary, alongside the preview. */
+/** Example-specific controls and actions; the frame adds the theme and mode pickers. */
 export function DemoControls({
   children,
   label = 'Controls'
 }: {
-  children: ReactNode
+  children?: ReactNode
   label?: string
 }) {
   const ready = useHydrated()
@@ -189,11 +251,37 @@ export function DemoControls({
     >
       <legend>{label}</legend>
       {children}
+      <FrameThemeControls />
     </fieldset>
   )
 }
 
-/** Compose a published Radiant theme/mode provider here when the example needs one. */
+const modes = { Site: undefined, Light: 'light', Dark: 'dark' } as const
+const modeLabels = Object.keys(modes) as (keyof typeof modes)[]
+
+function FrameThemeControls() {
+  const { theme, mode, setTheme, setMode } = usePreviewTheme()
+  const modeLabel = modeLabels.find(label => modes[label] === mode) ?? 'Site'
+  return (
+    <div className="demo-theme-controls">
+      <SelectControl
+        label="Theme"
+        value={theme.id}
+        options={themes.map(preset => preset.id)}
+        optionLabels={Object.fromEntries(themes.map(preset => [preset.id, preset.name]))}
+        onChange={id => setTheme(themes.find(preset => preset.id === id) ?? radiant)}
+      />
+      <SelectControl
+        label="Mode"
+        value={modeLabel}
+        options={modeLabels}
+        onChange={label => setMode(modes[label])}
+      />
+    </div>
+  )
+}
+
+/** The stage paints the selected theme edge to edge; examples inherit it. */
 export function DemoPreview({
   children,
   label = 'Live preview'
@@ -201,12 +289,19 @@ export function DemoPreview({
   children: ReactNode
   label?: string
 }) {
+  const { theme, mode } = usePreviewTheme()
   return (
     <section
       className="demo-canvas"
       aria-label={label}
     >
-      {children}
+      <ThemeScope
+        theme={theme}
+        mode={mode}
+        className="demo-stage"
+      >
+        {children}
+      </ThemeScope>
     </section>
   )
 }

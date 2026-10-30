@@ -8,11 +8,13 @@ export function SelectControl<Value extends string>({
   label,
   value,
   options,
+  optionLabels,
   onChange
 }: {
   label: string
   value: Value
   options: readonly Value[]
+  optionLabels?: Partial<Record<Value, string>>
   onChange: (value: Value) => void
 }) {
   return (
@@ -30,7 +32,7 @@ export function SelectControl<Value extends string>({
             key={option}
             value={option}
           >
-            {option}
+            {optionLabels?.[option] ?? option}
           </option>
         ))}
       </select>

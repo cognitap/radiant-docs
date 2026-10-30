@@ -1,58 +1,35 @@
 'use client'
 import { useState } from 'react'
-import {
-  Alert,
-  AlertTitle,
-  AlertDescription,
-  Button,
-  ThemeScope,
-  type ThemeMode
-} from '@cognitap/radiant'
-import { radiant } from '@cognitap/radiant/examples'
+import { Alert, AlertTitle, AlertDescription, Button } from '@cognitap/radiant'
 import { DemoControls, DemoPreview } from '@/components/demo/DemoFrame'
-import { PreviewThemeControls } from '@/components/demo/ActionControls'
 import '@cognitap/radiant/styles.css'
 export function AlertExample() {
-  const [theme, setTheme] = useState(radiant)
-  const [mode, setMode] = useState<ThemeMode>('light')
   const [result, setResult] = useState<'saved' | 'error' | null>(null)
   const [urgent, setUrgent] = useState(false)
   return (
     <>
       <DemoControls>
-        <PreviewThemeControls
-          theme={theme}
-          mode={mode}
-          onThemeChange={setTheme}
-          onModeChange={setMode}
-        />
+        <button
+          type="button"
+          onClick={() => setResult('error')}
+        >
+          Simulate connection error
+        </button>
+        <button
+          type="button"
+          onClick={() => setUrgent(true)}
+        >
+          Simulate urgent interruption
+        </button>
       </DemoControls>
       <DemoPreview>
-        <ThemeScope
-          theme={theme}
-          mode={mode}
-          style={{ display: 'grid', gap: '1rem', padding: '1rem', maxWidth: '34rem' }}
-        >
+        <div style={{ display: 'grid', gap: '1rem', width: '100%', maxWidth: '34rem' }}>
           <Alert>
             <AlertTitle level={3}>Private draft</AlertTitle>
             <AlertDescription>Only you can see this draft until you publish it.</AlertDescription>
           </Alert>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '.5rem' }}>
             <Button onClick={() => setResult('saved')}>Save draft</Button>
-            <Button
-              variant="outline"
-              tone="neutral"
-              onClick={() => setResult('error')}
-            >
-              Simulate connection error
-            </Button>
-            <Button
-              variant="outline"
-              tone="warning"
-              onClick={() => setUrgent(true)}
-            >
-              Simulate urgent interruption
-            </Button>
           </div>
           <Alert
             announce="polite"
@@ -88,7 +65,7 @@ export function AlertExample() {
               </>
             )}
           </Alert>
-        </ThemeScope>
+        </div>
       </DemoPreview>
     </>
   )

@@ -1,8 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Button, ThemeScope, type ButtonProps, type Theme, type ThemeMode } from '@cognitap/radiant'
-import { radiant } from '@cognitap/radiant/examples'
+import { Button, type ButtonProps } from '@cognitap/radiant'
 import '@cognitap/radiant/styles.css'
 import './button-example.css'
 import { useHydrated } from '../profile/useHydrated'
@@ -12,22 +11,13 @@ export function ButtonExample({
   pending = false,
   variant = 'solid',
   tone = 'accent',
-  controlSize = 'medium',
-  theme = radiant,
-  mode = 'light'
-}: Pick<ButtonProps, 'disabled' | 'pending' | 'variant' | 'tone' | 'controlSize'> & {
-  theme?: Theme
-  mode?: ThemeMode
-}) {
+  controlSize = 'medium'
+}: Pick<ButtonProps, 'disabled' | 'pending' | 'variant' | 'tone' | 'controlSize'>) {
   const [count, setCount] = useState(0)
   const ready = useHydrated()
 
   return (
-    <ThemeScope
-      theme={theme}
-      mode={mode}
-      className="button-example"
-    >
+    <div className="button-example">
       <Button
         disabled={disabled || !ready}
         pending={pending}
@@ -50,6 +40,6 @@ export function ButtonExample({
           ? 'Ready when you are.'
           : `Activated ${count} ${count === 1 ? 'time' : 'times'}.`}
       </output>
-    </ThemeScope>
+    </div>
   )
 }

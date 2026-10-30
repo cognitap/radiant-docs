@@ -1,24 +1,14 @@
 'use client'
 import { useState } from 'react'
-import { Separator, ThemeScope, type ThemeMode } from '@cognitap/radiant'
-import { radiant } from '@cognitap/radiant/examples'
+import { Separator } from '@cognitap/radiant'
 import { DemoControls, DemoPreview } from '@/components/demo/DemoFrame'
-import { PreviewThemeControls } from '@/components/demo/ActionControls'
 import '@cognitap/radiant/styles.css'
 export function SeparatorExample() {
-  const [theme, setTheme] = useState(radiant)
-  const [mode, setMode] = useState<ThemeMode>('light')
   const [decorative, setDecorative] = useState(false)
   const [orientation, setOrientation] = useState<'horizontal' | 'vertical'>('horizontal')
   return (
     <>
       <DemoControls>
-        <PreviewThemeControls
-          theme={theme}
-          mode={mode}
-          onThemeChange={setTheme}
-          onModeChange={setMode}
-        />
         <label>
           <input
             type="checkbox"
@@ -41,9 +31,7 @@ export function SeparatorExample() {
         </label>
       </DemoControls>
       <DemoPreview>
-        <ThemeScope
-          theme={theme}
-          mode={mode}
+        <div
           style={{
             display: 'flex',
             flexDirection: orientation === 'vertical' ? 'row' : 'column',
@@ -67,7 +55,7 @@ export function SeparatorExample() {
             <h3>Notification preferences</h3>
             <p>Choose which updates you receive.</p>
           </section>
-        </ThemeScope>
+        </div>
       </DemoPreview>
     </>
   )
