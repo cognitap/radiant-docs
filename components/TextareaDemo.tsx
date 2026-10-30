@@ -1,16 +1,37 @@
 import { Demo } from './demo/Demo'
-import { TextareaDraftExample } from '@/examples/textarea/TextareaExample'
-
+import { TextareaPlayground } from '@/examples/textarea/TextareaPlayground'
+const files = [
+  'textarea/TextareaExample.tsx',
+  'textarea/textarea-example.css',
+  'profile/useHydrated.ts'
+]
 export function TextareaDemo() {
   return (
     <Demo
-      title="Introduce your workspace"
-      files={['textarea/TextareaExample.tsx', 'profile/useHydrated.ts']}
+      title="Describe a project"
+      files={files}
     >
-      <TextareaDraftExample />
-      <noscript className="demo-feedback">
-        Enable JavaScript to save this demo. Its source is available below.
-      </noscript>
+      <TextareaPlayground />
+    </Demo>
+  )
+}
+export function TextareaIntroductionDemo() {
+  return (
+    <Demo
+      title="Introduce your workspace"
+      files={files}
+    >
+      <TextareaPlayground task="introduce" />
+    </Demo>
+  )
+}
+export function TextareaReplyDemo() {
+  return (
+    <Demo
+      title="Grow a reply with its content"
+      files={files}
+    >
+      <TextareaPlayground task="reply" />
     </Demo>
   )
 }

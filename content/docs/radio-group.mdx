@@ -1,156 +1,126 @@
 ---
 title: RadioGroup
-description: One native choice, with clear labels, shared Field metadata and immediate keyboard selection.
+description: Pick exactly one value from a short, visible list of native radios.
 ---
 
-import { ControlDemo } from '../../components/ControlDemo'
-import { ProfileFormDemo } from '../../components/ProfileFormDemo'
-import { RadioPlanDemo, RadioIndicatorDemo } from '../../components/RadioDemo'
+import {
+  RadioDemo,
+  RadioDeliveryDemo,
+  RadioFilterDemo,
+  RadioSurveyDemo
+} from '../../components/RadioDemo'
 
-<RadioPlanDemo />
+<RadioDemo />
 
-## Choose one value
+## Usage
 
-RadioGroup is a [Field](/docs/field/) fieldset and legend. Each Radio is a
-native input. Give groups stable, unique names, for example from `useId()`,
-and options distinct string values.
+Use RadioGroup to choose one of a few visible options. It renders a [Field](/docs/field/) fieldset with the label as its legend; each Radio is a native input. Use [Select](/docs/select/) for long lists, [ToggleGroup](/docs/toggle-group/) for toolbar-style choices, [CheckboxGroup](/docs/checkbox-group/) for several values and [Switch](/docs/switch/) for one setting.
 
 ```tsx
 <RadioGroup
-  label="Plan"
-  name="workspace-plan"
-  defaultValue="pro"
-  required
+  label="Delivery speed"
+  name="delivery"
+  defaultValue="standard"
 >
   <Radio
-    label="Personal"
-    value=""
+    value="standard"
+    label="Standard"
   />
   <Radio
-    label="Pro"
-    value="pro"
-  />
-  <Radio
-    label="Studio"
-    value="studio"
-    disabled
+    value="express"
+    label="Express"
   />
 </RadioGroup>
 ```
 
-Tab enters the group; arrows select enabled options, and Space selects the
-focused option. Disabled options are skipped. Only the selected, enabled
-option contributes to FormData. A disabled group contributes nothing.
+## Examples
 
-<ControlDemo kind="radio" />
+### Submit a delivery speed
 
-## Own selection once
+<RadioDeliveryDemo />
 
-Use `defaultValue` for browser-owned selection; native reset restores its
-initial value. Use `value` for controlled selection. `null` clears it; `''`
-is a real option value. Do not switch ownership or combine both props.
+### Filter tasks by status
 
-```tsx
-const [plan, setPlan] = useState<string | null>(null)
+<RadioFilterDemo />
 
-<form onReset={() => setPlan(null)}>
-  <RadioGroup label="Plan" name="account-plan" value={plan} onValueChange={setPlan}>
-    <Radio label="Personal" value="" />
-    <Radio label="Pro" value="pro" />
-  </RadioGroup>
-  <Button type="reset">Reset</Button>
-</form>
-```
+### Require an answer
 
-Write state from `onValueChange` or native `onChange`, not both. Controlled
-reset must restore application values and validation metadata. The group
-owns option names and selection; omit conflicting `name`, `checked` and
-`defaultChecked` on nested Radio.
+<RadioSurveyDemo />
 
-Standalone Radio uses `name`, `checked`/`defaultChecked` and native `onChange`:
+## State
 
-```tsx
-<Radio
-  name="standalone"
-  value="daily"
-  label="Daily digest"
-  defaultChecked
-/>
-```
+Use `defaultValue` for browser-owned selection, or `value` with `onValueChange`, not both. `null` means nothing is selected, and `''` is a real option value. People cannot clear a group; set `value` to `null` to clear it.
 
-## Style options
+The group's `onChange` receives the native change event from the radio that was selected. Write state from `onValueChange` or from `onChange`, not both.
 
-Group styling/ref reach the fieldset. Radio styling/native props/ref reach its
-input. Every option needs an accessible name; keep native focus visible.
+`name` is optional. Without it, the group generates one, so arrow keys, `required` and submission still work. Pass `name` when a form reads the value; the generated key is unpredictable. One entry is submitted for the selected radio, and nothing when no radio is selected or the group is disabled.
 
-| Part                                      | Target / identity                       |
-| ----------------------------------------- | --------------------------------------- |
-| Group label, description, error, required | Field parts; root `field radio-group`   |
-| Group `options`                           | Option container; `radio-group-options` |
-| Radio `wrapper`                           | Label/span; `radio-wrapper`             |
-| Radio `label`                             | Label text; `radio-label`               |
-| Radio `indicator`                         | Decorative dot; `radio-indicator`       |
+Form reset returns an uncontrolled group to `defaultValue`. A controlled group keeps its value, so reset your state in the form's `onReset`.
 
-```tsx
-<RadioGroup
-  label="Plan"
-  name="styled-plan"
-  disabled
-  error="Plans are temporarily locked."
-  parts={{ options: { style: { display: 'flex', flexWrap: 'wrap', gap: '1rem' } } }}
->
-  <Radio
-    label="Pro"
-    value="pro"
-    parts={{ label: { style: { fontWeight: 700 } } }}
-  />
-</RadioGroup>
-```
+Inside a group, Radio throws if given its own `name`, `checked` or `defaultChecked`. A standalone Radio takes `name`, `checked` or `defaultChecked`, and native `onChange`. Radio has no `readOnly`, because native radios ignore it. Use `disabled`, or a controlled group that ignores changes.
 
-Parts accept className/style. Required means one selected option; group
-required/disabled state is additive. Group errors style the disks and belong
-to the fieldset, without assigning invalid/required ARIA to every option.
-Keep input `appearance-none` and the dot decorative.
+## Accessibility
 
-## Selection feedback
+`label` becomes the required `legend`. `description` and `error` are linked to the group. Every Radio needs a name: `label`, `aria-label` or `aria-labelledby`. `error` marks the group invalid.
 
-The copyable local `RadioFeedback` adapter uses public
-[motion hooks](/docs/foundations/motion/) on the dot. Its `selected` prop drives decoration;
-RadioGroup owns selection. Root input styles pass through. Custom indicator
-class/style takes ownership and opts out of that feedback.
+| Key                      | Behavior                                                          |
+| ------------------------ | ----------------------------------------------------------------- |
+| Tab                      | Moves into the group, to the selected radio or else the first one |
+| Tab / Shift+Tab in group | Moves out of the group                                            |
+| Arrow Down / Arrow Right | Selects the next enabled radio, wrapping                          |
+| Arrow Up / Arrow Left    | Selects the previous enabled radio, wrapping                      |
+| Space                    | Selects the focused radio                                         |
 
-<RadioIndicatorDemo />
+## Motion
 
-## Public props
+The dot changes instantly. The plan example springs it with the public `useSpring` hook in a local `RadioFeedback` adapter, which follows reduced motion and theme `motion.mode: 'off'`.
 
-`RadioGroupProps` and `RadioProps` are exported.
+## Styling
 
-| RadioGroup prop          | Purpose / default                                                         |
-| ------------------------ | ------------------------------------------------------------------------- |
-| `name`, `label`          | Required shared native name and group legend                              |
-| `value` / `defaultValue` | Controlled selection or initial browser-owned selection; string or `null` |
-| `onValueChange`          | Receives the newly selected string                                        |
-| `onChange`               | Native change observation                                                 |
-| `description`, `error`   | Field help/error content and relationships                                |
-| `required`, `disabled`   | Group state; defaults to `false`                                          |
-| `requiredIndicator`      | Field's decorative indicator; defaults to `*`                             |
-| `controlSize`            | Inherited by options; `small`, `medium` (default), `large`                |
-| `parts`                  | Field parts plus `options` styling                                        |
-| Other native props       | Fieldset attributes, events, `form`, root styling and ref                 |
+The group's className, style, ref and native props reach the `fieldset` (`data-slot="field radio-group"`, `data-control-size`, `data-invalid`). `parts.options` styles the options grid (`radio-group-options`); set `display: flex` for a row. `parts.label`, `parts.description`, `parts.error` and `parts.required` style the Field parts.
 
-| Radio prop                           | Purpose / default                                                             |
-| ------------------------------------ | ----------------------------------------------------------------------------- |
-| `value`                              | Required option string                                                        |
-| `label`                              | Convenience label; otherwise provide an accessible name                       |
-| `disabled`, `required`               | Native option state; group state also applies                                 |
-| `controlSize`                        | Option override; otherwise group size or `medium`                             |
-| `checked` / `defaultChecked`, `name` | Standalone ownership; group owns these when nested                            |
-| `parts`                              | Wrapper, label and indicator styling                                          |
-| Other native props                   | Input attributes/events, styling and `HTMLInputElement` ref; type stays radio |
+A Radio's className, style, ref and native props reach the `input` (`data-slot="radio"`, `data-control-size`). `parts.wrapper` styles the label row (`radio-wrapper`), `parts.label` the text (`radio-label`) and `parts.indicator` the decorative dot (`radio-indicator`).
 
-## Complete form
+Theme the control with `--rad-radio-*` tokens, such as `--rad-radio-group-gap`, `--rad-radio-size` and `--rad-radio-mark`.
 
-The [profile recipe](/docs/recipes/profile-form/) adds optional TanStack Form
-and controlled reset. Preserve each source file's folder when copying examples.
+## API
 
-<ProfileFormDemo compare />
+### RadioGroup
+
+| Prop              | Type                                             | Default   |
+| ----------------- | ------------------------------------------------ | --------- |
+| label             | ReactNode; the legend                            | Required  |
+| name              | string; native name and form data key            | Generated |
+| value             | string / null; controlled selection              | None      |
+| defaultValue      | string / null; uncontrolled initial selection    | null      |
+| onValueChange     | (value: string) => void                          | None      |
+| onChange          | `(event: ChangeEvent<HTMLInputElement>) => void` | None      |
+| description       | ReactNode; linked help text                      | None      |
+| error             | ReactNode; marks the group invalid               | None      |
+| required          | boolean; marks every radio required              | false     |
+| requiredIndicator | ReactNode; replaces the required marker          | `*`       |
+| disabled          | boolean; disables every radio                    | false     |
+| form              | string; associates the fieldset with a form      | None      |
+| controlSize       | small / medium / large; shared by every Radio    | medium    |
+| parts             | label / description / error / required / options | None      |
+| className / style | string / ThemeStyle                              | None      |
+| ref               | `Ref<HTMLFieldSetElement>`                       | None      |
+| Other props       | Native fieldset props                            | Native    |
+
+### Radio
+
+| Prop                     | Type                                                | Default              |
+| ------------------------ | --------------------------------------------------- | -------------------- |
+| value                    | string; submitted value, `''` allowed               | Required             |
+| label                    | ReactNode; otherwise name the input with aria-label | None                 |
+| checked / defaultChecked | boolean; standalone only                            | false                |
+| onChange                 | `(event: ChangeEvent<HTMLInputElement>) => void`    | None                 |
+| name                     | string; standalone only                             | None                 |
+| disabled / required      | boolean                                             | false                |
+| controlSize              | small / medium / large                              | Group's, else medium |
+| parts                    | wrapper / label / indicator                         | None                 |
+| className / style        | string / ThemeStyle                                 | None                 |
+| ref                      | `Ref<HTMLInputElement>`                             | None                 |
+| Other props              | Native input props except type and readOnly         | Native               |
+
+Exports: `RadioGroup`, `Radio`, `RadioGroupProps`, `RadioProps`.

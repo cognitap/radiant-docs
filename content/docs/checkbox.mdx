@@ -1,14 +1,19 @@
 ---
 title: Checkbox
-description: Native selection, mixed states and clear form values.
+description: Let people turn an independent option on or off, or tick items in a checklist.
 ---
 
-import { ControlDemo } from '../../components/ControlDemo'
-import { CheckboxPermissionsDemo, CheckboxIndicatorDemo } from '../../components/CheckboxDemo'
+import {
+  CheckboxDemo,
+  CheckboxPermissionsDemo,
+  CheckboxConsentDemo
+} from '../../components/CheckboxDemo'
 
-<CheckboxPermissionsDemo />
+<CheckboxDemo />
 
-## Label a choice
+## Usage
+
+Use Checkbox for an independent yes/no choice or one option in a checklist. Use [CheckboxGroup](/docs/checkbox-group/) for a list with select-all and a `string[]` value, [Switch](/docs/switch/) for a setting that applies immediately, and [RadioGroup](/docs/radio-group/) for one choice out of several.
 
 ```tsx
 <Checkbox
@@ -19,99 +24,66 @@ import { CheckboxPermissionsDemo, CheckboxIndicatorDemo } from '../../components
 />
 ```
 
-Checkbox renders a native `input type="checkbox"`. Its decorative SVGs are
-hidden from assistive technology. A convenience `label` makes the wrapper a
-clickable label. For one [Field](/docs/field/)-wrapped checkbox, omit that prop
-and let Field supply the accessible name:
+## Examples
 
-```tsx
-<Field
-  label="Accept the terms"
-  required
-  error={error}
->
-  <Checkbox
-    name="terms"
-    value="accepted"
-  />
-</Field>
-```
+### Select all permissions
 
-Keep the actual input focusable and its focus ring visible.
+<CheckboxPermissionsDemo />
 
-## Selection and submission
+### Require consent
 
-`checked` is boolean selection. `value` is the payload submitted under `name`.
-Unchecked and disabled checkboxes contribute no entry to FormData; omitting
-`value` uses the native payload `on`. Disabled blocks activation.
+<CheckboxConsentDemo />
 
-Choose `defaultChecked` or `checked` with `onChange` for the entire mount.
-Read `event.target.checked` for selection, `event.target.value` for data.
+## State
 
-```tsx
-const [enabled, setEnabled] = useState(false)
-<Checkbox label="Enable exports" checked={enabled}
-  onChange={event => setEnabled(event.target.checked)} />
-```
+Use `defaultChecked` for an uncontrolled checkbox, or `checked` with `onChange` and read `event.target.checked`. Choose one owner per mount; passing both, or switching owner, throws.
 
-Native reset restores an uncontrolled default. Reset controlled values and
-validation in your form's `onReset`.
+`indeterminate` shows a mixed mark for a select-all parent. It is separate from `checked`, never submitted, and the browser clears it when the user toggles, so derive it from the children, as the permissions example does.
 
-<ControlDemo kind="checkbox" />
+A checked box submits `name=value`, with `value` defaulting to `on`. An unchecked or disabled box submits nothing. Read several with `FormData.getAll(name)`. Reset restores `defaultChecked`; a controlled checkbox keeps its current `checked`, so reset your state in `onReset`. `required` uses native validation and `form` links an outside form.
 
-## Mixed selection
+Checkbox does not accept `readOnly`; use `disabled`, or show the value as text.
 
-Derive `indeterminate` from your selected children. It sets the native DOM
-property after mount; it is not a third checked value or submitted payload.
-Recompute it after reset. Server HTML cannot express that property.
+## Accessibility
 
-A select-all parent needs no `name`. Read named children with
-`new FormData(form)` and `getAll('permissions')`. Exclude disabled choices from
-select-all calculations.
+Checkbox renders a native `input type="checkbox"`. The browser reports `aria-checked="mixed"` while it is indeterminate. Name it with `label`, a [Field](/docs/field/) label, `aria-label` or `aria-labelledby`. Inside Field it takes Field's id, disabled, required, invalid state and description. The check and dash icons are hidden from assistive technology.
 
-A Field group renders a fieldset/legend. Give every option its own label.
-Required on a group does not require every checkbox: the form owns rules such
-as “choose at least one”. Field supplies inherited disabled/error relationships.
+| Key             | Behavior                      |
+| --------------- | ----------------------------- |
+| Tab / Shift+Tab | Move focus to or from the box |
+| Space           | Toggle checked                |
 
-<ControlDemo kind="selection" />
+## Motion
 
-## Indicator motion
+Checkbox has no animation; the mark swaps instantly. The permissions example's `CheckboxFeedback` adapter springs `parts.indicator` with `useSpring`. Theme motion `mode: 'off'` and reduced motion settle it. See [motion setup](/docs/foundations/motion/).
 
-The first example's local `CheckboxFeedback` adapter uses public `useSpring`
-and `parts.indicator` to animate the decorative mark. Selection and form data
-update immediately. Theme motion off, live reduced motion and disabled changes
-settle feedback. Indicator class/style customization takes ownership and opts
-out of this example's spring. Root input styles pass through unchanged.
+## Styling
 
-Copy the source adapter; Checkbox itself needs no motion prop. See
-[motion setup](/docs/foundations/motion/).
+`className`, `style`, `ref` and native props target the input. It carries `data-slot="checkbox"`, `data-control-size`, and `data-invalid` when invalid. Set `--rad-checkbox-*` variables in `style` or a theme. Keep the focus ring visible.
 
-<CheckboxIndicatorDemo />
+| Part              | Element                                     | `data-slot`          |
+| ----------------- | ------------------------------------------- | -------------------- |
+| `parts.wrapper`   | The `<label>` row with `label`, else a span | `checkbox-wrapper`   |
+| `parts.label`     | Label text                                  | `checkbox-label`     |
+| `parts.indicator` | Check and dash icons                        | `checkbox-indicator` |
 
-## Props and styling
+## API
 
-Root `className`, typed `style`, native props and `ref` target the
-`HTMLInputElement`. Keep `appearance-none` to avoid duplicate native glyphs.
-`CheckboxProps` is exported.
+| Checkbox prop       | Type                                          | Default   |
+| ------------------- | --------------------------------------------- | --------- |
+| checked             | boolean; pair with onChange                   | None      |
+| defaultChecked      | boolean; uncontrolled start and reset value   | false     |
+| onChange            | `ChangeEventHandler<HTMLInputElement>`        | None      |
+| indeterminate       | boolean; mixed mark, not submitted            | false     |
+| label               | ReactNode; omit when Field supplies it        | None      |
+| controlSize         | small / medium / large                        | medium    |
+| name / value        | string; submitted when checked                | None / on |
+| form                | string; form id                               | None      |
+| required / disabled | boolean; disabled is not submitted            | false     |
+| aria-invalid        | boolean / 'true' / 'false'; sets data-invalid | None      |
+| className / style   | string / ThemeStyle                           | None      |
+| parts               | wrapper / label / indicator PartStyle         | None      |
+| ref                 | `Ref<HTMLInputElement>`                       | None      |
+| Native attributes   | Input attributes and events; type is fixed    | Native    |
 
-| Prop                         | Purpose / default                                               |
-| ---------------------------- | --------------------------------------------------------------- |
-| `checked` / `defaultChecked` | Controlled boolean or browser-owned initial selection           |
-| `indeterminate`              | Mixed presentation; default `false`                             |
-| `label`                      | Optional convenience label; otherwise supply an accessible name |
-| `onChange`, `onBlur`         | Native events                                                   |
-| `name`, `value`, `form`      | Native data name, payload and form association                  |
-| `required`, `disabled`       | Native state, also inherited from Field                         |
-| `controlSize`                | `small`, `medium` (default), `large`                            |
-| `parts`                      | Wrapper, label and indicator class/style hooks                  |
-| `className`, `style`, `ref`  | Actual input customization / ref                                |
-| Other native props           | Input attributes/events except fixed `type`                     |
-
-| Hook              | Target / `data-slot`                                  |
-| ----------------- | ----------------------------------------------------- |
-| Root              | Input; `checkbox`, `data-control-size`, invalid state |
-| `parts.wrapper`   | Label or unlabeled span; `checkbox-wrapper`           |
-| `parts.label`     | Convenience text; `checkbox-label`                    |
-| `parts.indicator` | Decorative SVGs; `checkbox-indicator`                 |
-
-Copy examples with their shown paths; they need only React and Radiant.
+Exports `Checkbox` and `CheckboxProps`.

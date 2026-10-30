@@ -1,89 +1,102 @@
 ---
 title: Textarea
-description: Native multiline editing with shared control sizes and Field relationships.
+description: Collect multi-line free text, such as descriptions, notes and messages.
 ---
 
-import { TextareaDemo } from '../../components/TextareaDemo'
+import {
+  TextareaDemo,
+  TextareaIntroductionDemo,
+  TextareaReplyDemo
+} from '../../components/TextareaDemo'
 
 <TextareaDemo />
 
-## Start with a label
+## Usage
+
+Use Textarea for free text that spans lines. Use [Input](/docs/input/) for one line, [PasswordInput](/docs/password-input/) for passwords, [InputGroup](/docs/input-group/) to attach a button or icon, and [TagsInput](/docs/tags-input/) for discrete values. Rich text needs an editor library.
 
 ```tsx
-import { Field, Textarea } from '@cognitap/radiant'
-
-export function Introduction() {
-  return (
-    <Field
-      label="Introduction"
-      description="Shown to your team."
-      required
-    >
-      <Textarea
-        name="introduction"
-        defaultValue="A place for new ideas."
-        rows={4}
-      />
-    </Field>
-  )
-}
-```
-
-Textarea renders one native `textarea`. [Field](/docs/field/) connects its label,
-control ID, description, error and required/disabled states. Outside Field, use
-a native label with matching `htmlFor` and `id`. A placeholder is not a label.
-
-## Choose a value owner
-
-`defaultValue` sets initial browser-owned text. Native form reset restores it.
-For controlled text, pass `value` and update it from `onChange`:
-
-```tsx
-const [notes, setNotes] = useState('')
-
-<Field label="Notes">
-  <Textarea value={notes} onChange={event => setNotes(event.target.value)} />
+<Field label="Description">
+  <Textarea
+    name="description"
+    rows={4}
+  />
 </Field>
 ```
 
-Keep raw text while editing; line breaks, selection, composition and native
-keyboard shortcuts stay with the browser. Initialize controlled text with `''`,
-not `null`. Do not combine value owners or switch ownership during a mount.
-Set initial content through `defaultValue`, rather than children.
+## Examples
 
-## Validate and submit
+### Introduce your workspace
 
-Pass validation text to Field's `error`. Native `required`, `minLength` and
-`maxLength` remain available. Use a ref to focus an invalid textarea; validation,
-touched state and persistence belong to your application.
+<TextareaIntroductionDemo />
 
-Named values participate in `new FormData(form)`. Read-only text remains
-focusable and submits; disabled controls are omitted. Field's required and
-disabled state cannot be undone by its child. A controlled form resets its own
-values and validation metadata in `onReset`.
+### Grow a reply with its content
 
-## Size and customize
+<TextareaReplyDemo />
 
-`rows` defaults to three. `cols` remains a native width hint; the default CSS
-fills the available width. `controlSize` chooses `small`, `medium` or `large`
-metrics shared with [Input](/docs/input/).
+Add `field-sizing: content` (Tailwind `field-sizing-content`) and a maximum height through `className`. Browsers without `field-sizing` keep the `rows` height.
 
-Vertical resizing is enabled by default. Change it with `resize-none`, `resize`
-or native `style`. Constrain height when long content should scroll:
+## State
 
-```tsx
-<Textarea
-  aria-label="Notes"
-  rows={6}
-  className="max-h-48 resize-none"
-  style={{ '--rad-textarea-radius': '1rem' }}
-/>
-```
+Choose one value owner per mount: `value` with `onChange`, or `defaultValue`. Passing both, switching owners or passing `null` throws a TypeError. Use `''` for an empty value, and remount with a new `key` to change owners.
 
-`className`, typed `style`, native attributes/events and `ref` target the
-`HTMLTextAreaElement`. Keep its focus ring visible. Use shared tokens or
-`components.textarea` overrides; Input-only overrides do not affect Textarea.
-See [theming](/docs/foundations/theming/).
+The value submits natively under `name`, line breaks included, and `form` associates a textarea outside its form. Reset restores `defaultValue`; controlled owners reset their own state in `onReset`.
 
-`TextareaProps` is exported. Identity is `data-slot="textarea"`, with
-`data-control-size` and presence-based `data-invalid` alongside `aria-invalid`.
+`disabled` blocks editing and focus and leaves the value out of form data. `readOnly` keeps the value focusable and submitted but not editable. Field's `required` and `disabled` apply to its control, and the control cannot undo them.
+
+`required`, `minLength` and `maxLength` use native constraint validation. Your application owns the error text and passes it to Field's `error`.
+
+## Accessibility
+
+Every control needs an accessible name. Wrap it in [Field](/docs/field/) for a label, description and error, or pass `aria-label` or `aria-labelledby`. A placeholder is not a name. The native textarea keeps its implicit multi-line textbox role.
+
+Field joins its description and error IDs before the caller's `aria-describedby`. Set `aria-invalid`, or pass `error` to Field, to mark the value invalid.
+
+| Key                    | Behavior                                       |
+| ---------------------- | ---------------------------------------------- |
+| Tab / Shift+Tab        | Move focus in and out; no tab is inserted      |
+| Typing, arrows         | Native editing, selection and IME              |
+| Enter                  | Insert a line break; the form is not submitted |
+| Ctrl/Cmd+A, C, X, V, Z | Select all, copy, cut, paste, undo             |
+
+## Motion
+
+Textarea has no transitions or animations.
+
+## Styling
+
+`className`, `style` and `ref` reach the native textarea. Caller classes merge after the defaults, so `resize-none` or padding classes win. `rows` sets the height, vertical drag resizing is on, and long content scrolls. The minimum height is one control height, so `rows={1}` matches Input.
+
+`data-slot` contains `textarea`; inside InputGroup it adds `input-group-textarea`, so select `[data-slot~="textarea"]`. `data-control-size` names the size, and an empty `data-invalid` marks invalid values. Style `:disabled`, `:read-only`, `:focus-visible` and `::placeholder` natively. Forced colors use `CanvasText`, and `GrayText` when disabled.
+
+Each `--rad-textarea-*` variable has a camelCase `components.textarea` key, such as `paddingBlock`, and falls back to the shared control token, not to Input's.
+
+| Group  | Variables                                                        |
+| ------ | ---------------------------------------------------------------- |
+| Box    | min-height, padding, padding-block, radius, corner-shape, shadow |
+| Text   | font-family, font-size, font-weight, color, placeholder          |
+| Border | border-width, border-style, border-color, invalid-border         |
+| Fill   | background, disabled-background                                  |
+| Focus  | focus-color, focus-width, focus-offset, focus-style              |
+
+## API
+
+| Textarea prop                | Type                                           | Default         |
+| ---------------------------- | ---------------------------------------------- | --------------- |
+| value / defaultValue         | string / number / readonly string[]; one owner | None            |
+| onChange                     | `ChangeEventHandler<HTMLTextAreaElement>`      | None            |
+| controlSize                  | small / medium / large                         | medium          |
+| rows                         | number                                         | 3               |
+| cols                         | number; width hint, CSS fills the container    | None            |
+| name / form                  | string                                         | None            |
+| required / disabled          | boolean; Field can also set them               | false           |
+| readOnly                     | boolean                                        | false           |
+| aria-invalid                 | boolean / true / false / grammar / spelling    | None            |
+| maxLength / minLength        | number                                         | None            |
+| wrap                         | soft / hard / off                              | soft            |
+| className / style            | string / ThemeStyle                            | None            |
+| ref                          | `Ref<HTMLTextAreaElement>`                     | None            |
+| children                     | Not accepted; use defaultValue                 | None            |
+| Native attributes and events | Includes placeholder, autoComplete, spellCheck | Native defaults |
+
+Exports: `Textarea`, `TextareaProps`.
