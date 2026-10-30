@@ -1,8 +1,7 @@
 'use client'
 
 import { useId, useRef, useState } from 'react'
-import { Button, Field, Input, ThemeScope } from '@cognitap/radiant'
-import { radiant } from '@cognitap/radiant/examples'
+import { Button, Field, Input } from '@cognitap/radiant'
 import type { ControlExampleProps } from './control-types'
 import { useHydrated } from '../profile/useHydrated'
 import '@cognitap/radiant/styles.css'
@@ -12,8 +11,6 @@ export function FieldExample({
   disabled = false,
   required = true,
   controlSize = 'medium',
-  theme = radiant,
-  mode = 'light',
   native = false
 }: ControlExampleProps & { native?: boolean }) {
   const id = useId()
@@ -23,11 +20,7 @@ export function FieldExample({
   const [feedback, setFeedback] = useState('Nothing has been saved.')
 
   return (
-    <ThemeScope
-      theme={theme}
-      mode={mode}
-      className="control-example"
-    >
+    <div className="control-example">
       <form
         className="control-form"
         aria-label="Project name example"
@@ -96,6 +89,6 @@ export function FieldExample({
         </div>
         <output className="control-result">{feedback}</output>
       </form>
-    </ThemeScope>
+    </div>
   )
 }

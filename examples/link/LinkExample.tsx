@@ -1,7 +1,6 @@
 'use client'
 
-import { Link, ThemeScope, type LinkProps, type Theme, type ThemeMode } from '@cognitap/radiant'
-import { radiant } from '@cognitap/radiant/examples'
+import { Link, type LinkProps } from '@cognitap/radiant'
 import '@cognitap/radiant/styles.css'
 import './link-example.css'
 
@@ -9,19 +8,10 @@ export function LinkExample({
   variant = 'inline',
   tone = 'accent',
   controlSize = 'medium',
-  external = false,
-  theme = radiant,
-  mode = 'light'
-}: Pick<LinkProps, 'variant' | 'tone' | 'controlSize' | 'external'> & {
-  theme?: Theme
-  mode?: ThemeMode
-}) {
+  external = false
+}: Pick<LinkProps, 'variant' | 'tone' | 'controlSize' | 'external'> & {}) {
   return (
-    <ThemeScope
-      theme={theme}
-      mode={mode}
-      className="link-example"
-    >
+    <div className="link-example">
       <Link
         href="/docs/getting-started/"
         variant={variant}
@@ -32,6 +22,6 @@ export function LinkExample({
         Read the installation guide{external ? ' (opens in a new tab)' : ''}
       </Link>
       <p>This is a real destination. Use your browser’s Back action to return.</p>
-    </ThemeScope>
+    </div>
   )
 }

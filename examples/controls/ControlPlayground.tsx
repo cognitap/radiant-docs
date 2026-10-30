@@ -2,10 +2,9 @@
 
 import { useState } from 'react'
 import dynamic from 'next/dynamic'
-import { type ControlSize, type ThemeMode } from '@cognitap/radiant'
-import { radiant } from '@cognitap/radiant/examples'
+import { type ControlSize } from '@cognitap/radiant'
 import { DemoControls, DemoPreview } from '@/components/demo/DemoFrame'
-import { PreviewThemeControls, SelectControl } from '@/components/demo/ActionControls'
+import { SelectControl } from '@/components/demo/ActionControls'
 
 const FieldExample = dynamic(() => import('./FieldExample').then(module => module.FieldExample))
 const InputExample = dynamic(() => import('./InputExample').then(module => module.InputExample))
@@ -25,12 +24,10 @@ export function ControlPlayground({ kind }: { kind: ControlKind }) {
   const [disabled, setDisabled] = useState(false)
   const [required, setRequired] = useState(kind !== 'checkbox')
   const [controlSize, setControlSize] = useState<ControlSize>('medium')
-  const [theme, setTheme] = useState(radiant)
-  const [mode, setMode] = useState<ThemeMode>('light')
   const [native, setNative] = useState(false)
   const [readOnly, setReadOnly] = useState(false)
   const [initiallyEmpty, setInitiallyEmpty] = useState(false)
-  const options = { disabled, required, controlSize, theme, mode }
+  const options = { disabled, required, controlSize }
   return (
     <>
       <DemoControls>
@@ -43,12 +40,6 @@ export function ControlPlayground({ kind }: { kind: ControlKind }) {
               onChange={setControlSize}
             />
           )}
-          <PreviewThemeControls
-            theme={theme}
-            mode={mode}
-            onThemeChange={setTheme}
-            onModeChange={setMode}
-          />
         </div>
         <div className="action-toggles">
           <label>

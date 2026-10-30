@@ -1,8 +1,7 @@
 'use client'
 
 import { useRef, useState } from 'react'
-import { Button, Field, Input, ThemeScope } from '@cognitap/radiant'
-import { radiant } from '@cognitap/radiant/examples'
+import { Button, Field, Input } from '@cognitap/radiant'
 import type { ControlExampleProps } from './control-types'
 import { useHydrated } from '../profile/useHydrated'
 import '@cognitap/radiant/styles.css'
@@ -12,8 +11,6 @@ export function InputExample({
   disabled = false,
   required = true,
   controlSize = 'medium',
-  theme = radiant,
-  mode = 'light',
   readOnly = false
 }: ControlExampleProps & { readOnly?: boolean }) {
   const inputRef = useRef<HTMLInputElement>(null)
@@ -22,11 +19,7 @@ export function InputExample({
   const [feedback, setFeedback] = useState('Edit the email, then save it locally.')
 
   return (
-    <ThemeScope
-      theme={theme}
-      mode={mode}
-      className="control-example"
-    >
+    <div className="control-example">
       <form
         className="control-form"
         aria-label="Email input example"
@@ -93,6 +86,6 @@ export function InputExample({
         </div>
         <output className="control-result">{feedback}</output>
       </form>
-    </ThemeScope>
+    </div>
   )
 }

@@ -1,32 +1,19 @@
 'use client'
 
 import { useRef, useState } from 'react'
-import { Button, ThemeScope, type Theme, type ThemeMode } from '@cognitap/radiant'
-import { radiant } from '@cognitap/radiant/examples'
+import { Button } from '@cognitap/radiant'
 import '@cognitap/radiant/styles.css'
 import './button-example.css'
 import { useHydrated } from '../profile/useHydrated'
 
-export function ButtonComposition({
-  pending = false,
-  theme = radiant,
-  mode = 'light'
-}: {
-  pending?: boolean
-  theme?: Theme
-  mode?: ThemeMode
-}) {
+export function ButtonComposition({ pending = false }: { pending?: boolean }) {
   const actionRef = useRef<HTMLButtonElement>(null)
   const ready = useHydrated()
   const [feedback, setFeedback] = useState('Focus the action with the arrow, then activate it.')
   const [reviews, setReviews] = useState(0)
 
   return (
-    <ThemeScope
-      theme={theme}
-      mode={mode}
-      className="button-example"
-    >
+    <div className="button-example">
       <Button
         ref={actionRef}
         disabled={!ready}
@@ -72,6 +59,6 @@ export function ButtonComposition({
       <output>
         {feedback} Reviews: {reviews}.
       </output>
-    </ThemeScope>
+    </div>
   )
 }

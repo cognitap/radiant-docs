@@ -1,7 +1,7 @@
 'use client'
 
 import '@cognitap/radiant/styles.css'
-import { useEffect, useId, useMemo, useRef, useState, useSyncExternalStore } from 'react'
+import { useEffect, useId, useRef, useState, useSyncExternalStore, useMemo } from 'react'
 import {
   Button,
   Card,
@@ -16,8 +16,7 @@ import {
   useField,
   type RadioProps,
   type ControlSize,
-  type Theme,
-  type ThemeMode
+  type Theme
 } from '@cognitap/radiant'
 import { radiant } from '@cognitap/radiant/examples'
 import { MotionProvider, useReducedMotion, useSpring } from '@cognitap/radiant/motion/react'
@@ -109,13 +108,11 @@ const plans = [
 ]
 
 export function RadioPlanExample({
-  theme = radiant,
-  mode = 'light',
-  controlSize = 'medium'
+  controlSize = 'medium',
+  theme = radiant
 }: {
-  theme?: Theme
-  mode?: ThemeMode
   controlSize?: ControlSize
+  theme?: Theme
 }) {
   const [off, setOff] = useState(false)
   const selected = useMemo<Theme>(
@@ -125,7 +122,6 @@ export function RadioPlanExample({
   return (
     <ThemeScope
       theme={selected}
-      mode={mode}
       style={{
         maxWidth: '42rem',
         minWidth: 0,

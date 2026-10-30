@@ -12,12 +12,8 @@ import {
   DialogContent,
   DialogDescription,
   DialogTitle,
-  DialogTrigger,
-  ThemeScope,
-  type Theme,
-  type ThemeMode
+  DialogTrigger
 } from '@cognitap/radiant'
-import { radiant } from '@cognitap/radiant/examples'
 import { NativeProfileForm } from './NativeProfileForm'
 import { TanStackProfileForm } from './TanStackProfileForm'
 import type { Profile } from './profile'
@@ -29,14 +25,10 @@ export type FormPlacement = 'standalone' | 'card' | 'dialog'
 
 export function ProfileRecipe({
   owner = 'native',
-  placement = 'standalone',
-  theme = radiant,
-  mode = 'light'
+  placement = 'standalone'
 }: {
   owner?: FormOwner
   placement?: FormPlacement
-  theme?: Theme
-  mode?: ThemeMode
 }) {
   const [saved, setSaved] = useState<Profile | null>(null)
   const [open, setOpen] = useState(false)
@@ -53,11 +45,7 @@ export function ProfileRecipe({
   )
 
   return (
-    <ThemeScope
-      theme={theme}
-      mode={mode}
-      className="profile-recipe"
-    >
+    <div className="profile-recipe">
       <div className="profile-recipe-inner">
         {placement === 'standalone' ? (
           form
@@ -97,6 +85,6 @@ export function ProfileRecipe({
           )}
         </output>
       </div>
-    </ThemeScope>
+    </div>
   )
 }

@@ -1,8 +1,7 @@
 'use client'
 
 import { useId, useRef, useState } from 'react'
-import { Button, Radio, RadioGroup, ThemeScope } from '@cognitap/radiant'
-import { radiant } from '@cognitap/radiant/examples'
+import { Button, Radio, RadioGroup } from '@cognitap/radiant'
 import type { ControlExampleProps } from './control-types'
 import { useHydrated } from '../profile/useHydrated'
 import '@cognitap/radiant/styles.css'
@@ -12,8 +11,6 @@ export function RadioGroupExample({
   disabled = false,
   required = true,
   controlSize = 'medium',
-  theme = radiant,
-  mode = 'light',
   initiallyEmpty = false
 }: ControlExampleProps & { initiallyEmpty?: boolean }) {
   const id = useId()
@@ -24,11 +21,7 @@ export function RadioGroupExample({
   const [feedback, setFeedback] = useState('Save to inspect the selected radio value.')
 
   return (
-    <ThemeScope
-      theme={theme}
-      mode={mode}
-      className="control-example"
-    >
+    <div className="control-example">
       <form
         className="control-form"
         aria-label="Contact preference example"
@@ -94,6 +87,6 @@ export function RadioGroupExample({
         </div>
         <output className="control-result">{feedback}</output>
       </form>
-    </ThemeScope>
+    </div>
   )
 }

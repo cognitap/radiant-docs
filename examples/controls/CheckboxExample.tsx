@@ -1,8 +1,7 @@
 'use client'
 
 import { useRef, useState } from 'react'
-import { Button, Checkbox, Field, ThemeScope } from '@cognitap/radiant'
-import { radiant } from '@cognitap/radiant/examples'
+import { Button, Checkbox, Field } from '@cognitap/radiant'
 import type { ControlExampleProps } from './control-types'
 import { useHydrated } from '../profile/useHydrated'
 import '@cognitap/radiant/styles.css'
@@ -11,9 +10,7 @@ import './control-example.css'
 export function CheckboxExample({
   disabled = false,
   required = false,
-  controlSize = 'medium',
-  theme = radiant,
-  mode = 'light'
+  controlSize = 'medium'
 }: ControlExampleProps) {
   const checkboxRef = useRef<HTMLInputElement>(null)
   const ready = useHydrated()
@@ -21,11 +18,7 @@ export function CheckboxExample({
   const [feedback, setFeedback] = useState('Save to inspect the submitted value.')
 
   return (
-    <ThemeScope
-      theme={theme}
-      mode={mode}
-      className="control-example"
-    >
+    <div className="control-example">
       <form
         className="control-form"
         aria-label="Checkbox value example"
@@ -81,6 +74,6 @@ export function CheckboxExample({
         </div>
         <output className="control-result">{feedback}</output>
       </form>
-    </ThemeScope>
+    </div>
   )
 }

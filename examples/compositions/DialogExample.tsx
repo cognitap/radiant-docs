@@ -8,18 +8,14 @@ import {
   DialogContent,
   DialogDescription,
   DialogTitle,
-  DialogTrigger,
-  ThemeScope
+  DialogTrigger
 } from '@cognitap/radiant'
-import { radiant } from '@cognitap/radiant/examples'
 import type { CompositionOptions } from './composition-types'
 import { useHydrated } from '../profile/useHydrated'
 import '@cognitap/radiant/styles.css'
 import './composition-example.css'
 
 export function DialogExample({
-  theme = radiant,
-  mode = 'light',
   compact = false,
   controlled = false,
   modal = true,
@@ -37,11 +33,7 @@ export function DialogExample({
   const ready = useHydrated()
   const owner = controlled ? { open, onOpenChange: setOpen } : { defaultOpen: false }
   return (
-    <ThemeScope
-      theme={theme}
-      mode={mode}
-      className="composition-example"
-    >
+    <div className="composition-example">
       <div className="composition-stack">
         <Dialog
           {...owner}
@@ -94,6 +86,6 @@ export function DialogExample({
           {reviewed ? 'Review recorded locally.' : 'No review recorded.'}
         </output>
       </div>
-    </ThemeScope>
+    </div>
   )
 }

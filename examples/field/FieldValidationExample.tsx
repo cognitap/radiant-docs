@@ -1,6 +1,6 @@
 'use client'
 
-import { useId, useMemo, useRef, useState, useSyncExternalStore } from 'react'
+import { useId, useRef, useState, useSyncExternalStore, useMemo } from 'react'
 import {
   Button,
   Card,
@@ -13,9 +13,8 @@ import {
   Input,
   ThemeScope,
   type ControlSize,
-  type Theme,
-  type ThemeMode,
-  type ThemeStyle
+  type ThemeStyle,
+  type Theme
 } from '@cognitap/radiant'
 import { radiant } from '@cognitap/radiant/examples'
 import { MotionProvider, useReducedMotion, useSpringLayout } from '@cognitap/radiant/motion/react'
@@ -39,29 +38,20 @@ const nativeStyle: ThemeStyle = {
 }
 
 export function FieldValidationExample({
-  theme = radiant,
-  mode = 'light',
-  controlSize = 'medium'
+  controlSize = 'medium',
+  theme = radiant
 }: {
-  theme?: Theme
-  mode?: ThemeMode
   controlSize?: ControlSize
+  theme?: Theme
 }) {
   const [off, setOff] = useState(false)
   const motionTheme = useMemo<Theme>(
-    () => ({
-      ...theme,
-      motion: {
-        ...theme.motion,
-        mode: off ? 'off' : theme.motion.mode
-      }
-    }),
+    () => ({ ...theme, motion: { ...theme.motion, mode: off ? 'off' : theme.motion.mode } }),
     [theme, off]
   )
   return (
     <ThemeScope
       theme={motionTheme}
-      mode={mode}
       style={{ maxWidth: '40rem' }}
     >
       <MotionProvider>
