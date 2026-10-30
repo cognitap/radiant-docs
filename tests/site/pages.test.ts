@@ -98,7 +98,7 @@ async function resetFrame(frame: Locator, page: Page) {
   const box = canvas.getByRole('checkbox').first()
   let value: string | undefined
   let checked: boolean | undefined
-  if ((await field.count()) > 0 && (await field.isVisible()) && (await field.isEnabled())) {
+  if ((await field.count()) > 0 && (await field.isVisible()) && (await field.isEditable())) {
     value = await field.inputValue()
     await field.fill(`${value} x`)
   } else if ((await box.count()) > 0 && (await box.isVisible()) && (await box.isEnabled())) {
