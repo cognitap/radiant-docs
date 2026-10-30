@@ -1,0 +1,49 @@
+---
+title: Breadcrumb
+description: Ordered location navigation with native links and current-page semantics.
+---
+
+import { BreadcrumbDemo } from '../../components/BreadcrumbDemo'
+
+<BreadcrumbDemo />
+
+## Describe the hierarchy
+
+Breadcrumb renders a native `nav` named “Breadcrumb” by default. Set `aria-label`
+or `aria-labelledby` to distinguish multiple navigation landmarks. Empty explicit
+labels are rejected. Put `BreadcrumbItem` elements inside `BreadcrumbList`, a
+native ordered list. Applications own the actual destinations and hierarchy.
+
+`BreadcrumbLink` composes [Link](/docs/link/) and requires `href`. Native navigation,
+external targets, download attributes, events and anchor refs stay available.
+No router or special keyboard model is added. Use its `render(resolvedProps)`
+contract for a router adapter, forwarding all resolved attributes, children and
+ref to one compatible anchor. `BreadcrumbLinkRenderProps` is exported.
+
+## Mark the current page
+
+Use one `BreadcrumbPage` span for a non-link current page, or set `current` on
+one BreadcrumbLink when the current destination should remain a link. Both
+expose `aria-current="page"`. Keep exactly one current item in each hierarchy;
+applications determine it from their route.
+
+`BreadcrumbSeparator` is decorative and hidden from assistive technology. Place
+it inside an item between destinations, not directly under the ordered list.
+Its default text is `/`; replacement content must stay noninteractive.
+
+## Customize
+
+Root and part native attributes, `className`, `style` and refs reach their hosts:
+`nav`, `ol`, `li`, anchor, current-page span and separator span. Slots are
+`breadcrumb`, `breadcrumb-list`, `breadcrumb-item`, `link breadcrumb-link`,
+`breadcrumb-page` and `breadcrumb-separator`. Base Link identity is retained.
+Public prop types are exported for every part.
+
+Use `components.breadcrumb` or `--rad-breadcrumb-*` variables for `gap`,
+`fontSize`, `color`, `linkColor`, `linkHoverColor`, `currentColor` and
+`separatorColor`. Lists wrap and long titles break within available space;
+do not hide meaningful ancestors solely to fit a narrow layout.
+
+Keep native link focus and hover cues visible when restyling. Link's reduced-motion
+and forced-color treatment remains available. [Themes](/docs/foundations/theming/)
+apply normally.
