@@ -845,3 +845,80 @@ test('HoverCard opens supplementary real-link previews and preserves keyboard, c
     }
   })
 })
+
+test('ContextMenu exposes visible alternatives and supports pointer, keyboard and nested checked commands', async () => {
+  await withSite(async (baseURL, browser) => {
+    const page = await browser.newPage(),
+      errors = track(page)
+    try {
+      await capture(page, 'context-menu-commands', async () => {
+        await page.goto(`${baseURL}/docs/context-menu/`)
+        await page.waitForFunction(
+          () => !document.querySelector<HTMLButtonElement>('.demo-heading button')?.disabled
+        )
+        const demo = page.getByRole('region', { name: 'Manage a project file', exact: true }),
+          target = demo.getByRole('group', { name: 'Project file', exact: true })
+        await target.click({ button: 'right', position: { x: 30, y: 30 } })
+        const menu = demo.getByRole('menu', { name: 'Project file', exact: true })
+        await menu.waitFor({ state: 'visible' })
+        await menu.getByRole('menuitem', { name: 'Duplicate', exact: true }).click()
+        assert.match(
+          await demo.locator('output[aria-live="polite"]').innerText(),
+          /Copy of Project brief created/
+        )
+        await demo.getByRole('button', { name: 'Rename file', exact: true }).click()
+        assert.match(await target.innerText(), /Project brief revised/)
+        await target.focus()
+        await page.keyboard.press('Shift+F10')
+        await menu.waitFor({ state: 'visible' })
+        await page.keyboard.press('Escape')
+        assert.equal(await target.evaluate(node => node === document.activeElement), true)
+        const canvas = page.getByRole('region', {
+            name: 'Configure a planning canvas',
+            exact: true
+          }),
+          canvasTarget = canvas.getByRole('group', { name: 'Planning canvas', exact: true })
+        await canvasTarget.click({ button: 'right', position: { x: 20, y: 20 } })
+        await canvas.getByRole('menuitemcheckbox', { name: 'Grid lines', exact: true }).click()
+        assert.equal(
+          await canvas.getByRole('checkbox', { name: 'Show grid lines', exact: true }).isChecked(),
+          false
+        )
+        await canvas.getByRole('menuitem', { name: 'Move to', exact: true }).click()
+        await canvas.getByRole('menuitem', { name: 'Design team', exact: true }).click()
+        assert.match(await canvas.locator('output[aria-live="polite"]').innerText(), /Design team/)
+        assert.deepEqual(errors, [])
+      })
+    } finally {
+      await page.close()
+    }
+  })
+})
+
+test('Menu docs demonstrate checkable state and nested destination commands', async () => {
+  await withSite(async (baseURL, browser) => {
+    const page = await browser.newPage(),
+      errors = track(page)
+    try {
+      await capture(page, 'menu-nested-commands', async () => {
+        await page.goto(`${baseURL}/docs/menu/`)
+        await page.waitForFunction(
+          () => !document.querySelector<HTMLButtonElement>('.demo-heading button')?.disabled
+        )
+        const demo = page.getByRole('region', { name: 'Export a report', exact: true })
+        await demo.getByRole('button', { name: 'Export report', exact: true }).click()
+        await demo.getByRole('menuitemradio', { name: 'CSV', exact: true }).click()
+        await demo.getByRole('menuitem', { name: 'Save to', exact: true }).click()
+        await demo.getByRole('menuitem', { name: 'Shared drives', exact: true }).click()
+        await demo.getByRole('menuitem', { name: 'Design team', exact: true }).click()
+        assert.match(
+          await demo.locator('output[aria-live="polite"]').innerText(),
+          /CSV.*Design team/i
+        )
+        assert.deepEqual(errors, [])
+      })
+    } finally {
+      await page.close()
+    }
+  })
+})

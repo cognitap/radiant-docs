@@ -1,60 +1,90 @@
 ---
 title: Menu
-description: Command menus with deliberate keyboard navigation and dismissal.
+description: Command menus with checkable choices and nested actions.
 ---
 
-import { MenuDemo } from '../../components/MenuDemo'
+import { MenuDemo, MenuCanvasDemo, MenuExportDemo, MenuFormDemo } from '../../components/MenuDemo'
 
 <MenuDemo />
 
-## Offer commands
+## Usage
 
-Menu supplies a single-level command menu. Use [Link](/docs/link/) for
-navigation and [Select](/docs/select/) for choosing a form value. Submenus,
-menubars, checkbox/radio items and context-menu triggers are outside this API.
-Keep Content limited to MenuItems; do not nest unrelated interactive controls.
+Use Menu for commands. Use [Select](/docs/select/) for a form value, [Link](/docs/link/) for navigation, or [ContextMenu](/docs/context-menu/) for contextual invocation. Keep menu contents to command parts.
 
-Trigger composes [Button](/docs/button/), owns its ID and sets
-`aria-haspopup="menu"`, `aria-expanded` and `aria-controls`. Content is a
-`div` with `role="menu"`, named by the trigger. Give the trigger a meaningful
-accessible name.
+```tsx
+<Menu>
+  <MenuTrigger>File actions</MenuTrigger>
+  <MenuPortal>
+    <MenuContent>
+      <MenuItem onSelect={duplicate}>Duplicate</MenuItem>
+    </MenuContent>
+  </MenuPortal>
+</Menu>
+```
 
-Items are Button hosts with protected `role="menuitem"`. `disabled` maps to
-`aria-disabled`: commands remain discoverable through arrows but cannot
-activate. `pending` retains Button's busy presentation and activation guard.
-Native form props, refs and `render` remain available. Forward all resolved
-props to one button.
+## Examples
 
-## Navigate and activate
+### Configure a canvas
 
-Enter, Space or Down on Trigger opens and focuses the first item; Up opens
-the last. Within Content, Up/Down wrap, Home/End jump, and printable characters
-search labels. Repeating a character cycles matches. Supply `textValue` for
-rich labels; matching resets after 700 ms. Disabled items remain focusable.
+<MenuCanvasDemo />
 
-Enter, Space or click runs `onClick`, then `onSelect`, then requests close.
-`preventDefault()` cancels subsequent work and dismissal. Guards run before
-consumer handlers. Native form submission remains the button's default action.
+### Export a report
 
-Escape dismisses the top overlay and returns focus to Trigger. Tab and
-Shift+Tab close and continue from Trigger through the surrounding page.
-Outside pointer/focus dismissal preserves the new target. Focus is never trapped.
+<MenuExportDemo />
 
-Choose controlled `open`/`onOpenChange` or initial `defaultOpen`. Owners may
-refuse requests. `useMenu()` returns state or `null` outside Menu. All part
-prop types, `MenuState` and `MenuRenderProps` are exported.
+### Submit report actions
 
-## Position and customize
+<MenuFormDemo />
 
-Content and Portal compose [Popover](/docs/popover/): local theme/modal
-ancestry, collision-aware positioning, nested dismissal, cleanup and optional
-popup motion travel together. Root and Portal add no wrapper.
+## State
 
-Use Content's `className`, `style` and div ref or `components.menu` overrides:
-`width`, `padding`, `radius`, surface colors/borders/shadow, `itemPadding`,
-`itemRadius`, `itemFocusBackground` and `itemFocusColor`. Local variables use
-`--rad-menu-*`. Preserve closed hiding, scrolling and visible focus.
+Choose `open` or `defaultOpen`, never both. Checkbox items likewise use `checked` or `defaultChecked`; radio groups use `value` or `defaultValue`. Ownership stays fixed per mount. Change callbacks request updates; controlled owners may refuse. Prop synchronization emits no callback. `useMenu()` returns state or `null` outside an owner.
 
-Composed parts retain Button/Popover identities and add `menu-trigger`,
-`menu-content` and `menu-item`. Content retains Popover's state, placement and
-motion attributes. Reduced-motion and forced-colors preferences remain supported.
+## Accessibility
+
+Trigger is a real Button. Content is a named, non-modal menu. Groups take native accessible naming; connect MenuLabel with an explicit ID and `aria-labelledby`. Disabled items remain arrow-focusable but cannot activate; pending blocks activation before callbacks.
+
+| Key                             | Behavior                                         |
+| ------------------------------- | ------------------------------------------------ |
+| Enter / Space / Down on trigger | Open at first item                               |
+| Up on trigger                   | Open at last item                                |
+| Up / Down, Home / End           | Move within the current menu                     |
+| Printable characters            | Search labels; repeated letters cycle            |
+| Enter / Space                   | Activate focused command or checkable item       |
+| Forward / backward arrow        | Open / close a submenu; reversed in RTL          |
+| Escape                          | Close nearest surface and restore its opener     |
+| Tab / Shift+Tab                 | Close the tree and continue from its root opener |
+
+Activation runs `onClick`, `onSelect`, selection change, then optional close. `preventDefault()` cancels subsequent work and native defaults. Native form activation remains available. Checkable items stay open by default. Outside focus/pointer dismissal preserves its target. Submenu hover does not steal focus.
+
+## Motion
+
+Optional `MotionProvider` supplies Popover entry feedback. Reduced motion and local off win; dismissal is immediate.
+
+## Styling
+
+Root and Portal have no host. Trigger/items use Button; Content/groups/labels use div; Separator uses the real Separator. Native props, refs, caller classes/styles and compatible Button `render` reach those hosts. Identities retain Button/Popover/Separator slots and add `menu-*`.
+
+Use `components.menu` or `--rad-menu-*` for width, padding, radius, surface/border/shadow and item padding/radius/focus colors. Checkable/submenu `parts.indicator` accepts only class/style. Content exposes Popover state, effective placement and motion attributes.
+
+## API
+
+| Part                                | Props                                                                               | Defaults                            |
+| ----------------------------------- | ----------------------------------------------------------------------------------- | ----------------------------------- |
+| Menu, MenuSub                       | open / defaultOpen: boolean; onOpenChange; children                                 | false; no callback                  |
+| MenuTrigger                         | Button props except owned id/haspopup; render; button ref                           | Button defaults                     |
+| MenuContent                         | side; align; sideOffset; collisionPadding; motion; native div props/ref/class/style | bottom; start; 8; 8; inherit        |
+| MenuPortal                          | children                                                                            | None; no host                       |
+| MenuItem                            | Button props; textValue; closeOnSelect; onSelect                                    | Text content; true; no callback     |
+| MenuGroup                           | Native div props/ref/class/style and naming                                         | Native defaults                     |
+| MenuLabel                           | Native div props/ref/class/style; id                                                | Presentation; no tab stop           |
+| MenuSeparator                       | Separator props/ref                                                                 | Separator defaults                  |
+| MenuCheckboxItem                    | Item props; checked/defaultChecked; onCheckedChange; indeterminate; parts.indicator | false; no callback; false; no style |
+| MenuRadioGroup                      | Group props; value/defaultValue: string or null; onValueChange                      | null; no callback                   |
+| MenuRadioItem                       | Checkable item props; required value: string; parts.indicator                       | Group owns checked state            |
+| MenuSubTrigger                      | Item props; parts.indicator; owned submenu relationships                            | No close on activation              |
+| MenuSubContent                      | Content props                                                                       | Logical end; sideOffset 4           |
+| Checkbox / radio item closeOnSelect | boolean                                                                             | false                               |
+| useMenu()                           | open; setOpen(boolean); contentId                                                   | null outside owner                  |
+
+Offsets and padding are finite nonnegative pixels. `textValue` is required for reliable rich-label search; search resets after 700ms. Checkbox mixed state uses `aria-checked="mixed"`; activation requests true. Radio values are strings. Exports include every listed part's `Props` type, plus `MenuState` and `MenuRenderProps`. Native button refs are `Ref<HTMLButtonElement>`; div refs are `Ref<HTMLDivElement>`; Separator refs are `Ref<HTMLHRElement>`.
