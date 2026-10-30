@@ -1,0 +1,61 @@
+---
+title: Tag
+description: Remove a named value with a real Button inside a Badge.
+---
+
+import { TagDemo, TagRecipientsDemo } from '../../components/TagDemo'
+
+<TagDemo />
+
+## Usage
+
+Use Tag for a removable filter, recipient or label. Use [Badge](/docs/badge/) for a value without an action, or [TagsInput](/docs/tags-input/) when people also enter new values.
+
+```tsx
+<Tag
+  removeLabel="Remove research filter"
+  onRemove={() => remove('research')}
+>
+  Research
+</Tag>
+```
+
+## Examples
+
+### Review report recipients
+
+<TagRecipientsDemo />
+
+## State
+
+The application owns the list and decides whether removal succeeds. `onRemove` is an action request; retaining the value keeps its Tag visible. Update the list after acceptance. Give mapped Tags stable keys.
+
+`disabled` removes the removal Button from keyboard navigation. `pending` blocks activation while preserving focus and its accessible name. Neither state deletes content or changes the surrounding list. Tag has no selection or form value.
+
+## Accessibility
+
+`removeLabel` is required and names the actual Button. Describe the value being removed, including when the visible content is rich. Keep the label specific when several Tags are adjacent.
+
+| Key             | Behavior                      |
+| --------------- | ----------------------------- |
+| Tab / Shift+Tab | Reach enabled removal Buttons |
+| Enter / Space   | Request removal               |
+
+The application chooses where focus moves after deleting a standalone Tag. An editing field can return focus to its input; a filter list can move to an adjacent action. Announce a consequential result in a nearby status message when useful.
+
+## Motion
+
+The removal Button uses motion off. Tag does not animate insertion or deletion; list transition policy belongs to the application.
+
+## Styling
+
+Root native props, `className`, `style` and ref reach Badge's span. The root retains `badge tag` identities, while removal retains `button tag-remove`. Use `parts.remove` for the actual Button's classes and style.
+
+Appearance follows [Badge](/docs/badge/) and [Button](/docs/button/). `components.tag.gap` changes internal spacing. Preserve removal focus, contrast and an operable hit target.
+
+## API
+
+| Part     | Props                                                                                                                                                                               | Defaults                                                      |
+| -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
+| Tag      | Badge props except decorative; children: ReactNode; removeLabel: string; onRemove: MouseEvent handler; disabled?: boolean; pending?: boolean; parts.remove?: `{ className, style }` | neutral tone; disabled/pending false; type button; motion off |
+| TagProps | Exported root prop type; native span ref and ThemeStyle                                                                                                                             | Required children, removeLabel and onRemove                   |

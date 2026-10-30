@@ -1,88 +1,79 @@
 ---
 title: Combobox
-description: Search local options or asynchronous results and commit one value.
+description: Search options with independent query and committed selection.
 ---
 
 import { ComboboxDemo, AsyncComboboxDemo } from '../../components/ComboboxDemo'
 
 <ComboboxDemo />
 
-## Search and choose
+## Usage
+
+Use Combobox for one searchable choice. Use [MultiSelect](/docs/multi-select/) for several known choices, [Select](/docs/select/) without text search, or [TagsInput](/docs/tags-input/) for free text.
 
 ```tsx
-import { Combobox, Field } from '@cognitap/radiant'
-
-const cities = [
-  { value: 'budapest', label: 'Budapest' },
-  { value: 'oslo', label: 'Oslo' },
-]
-
-<Field label="Destination" required>
-  <Combobox items={cities} name="city" defaultValue="budapest" />
+<Field
+  label="Destination"
+  required
+>
+  <Combobox
+    items={cities}
+    name="city"
+    defaultValue="budapest"
+  />
 </Field>
 ```
 
-Items need distinct string values. Rich labels also need plain `textValue`.
-Local filtering matches text without case sensitivity; supply `filter(item, query)`
-for different matching.
+Items need distinct string keys; rich labels require plain `textValue`. Local filtering ignores case. Supply a custom filter or null for application-filtered results.
 
-[Field](/docs/field/) connects the input's label, description, error, disabled and
-required states. Search text never becomes a selection. A hidden native input
-submits the committed key through `name` and `form`. `null` clears selection;
-`''` is a valid key, including when required. Disabled controls submit nothing.
+## Examples
 
-## Own state once
-
-Selection, query and expansion each accept `value`, `query` or `open`, their
-`default*` counterpart, and `onValueChange`, `onQueryChange` or `onOpenChange`.
-Choose one owner per axis for the entire mount. Controlled owners may decline
-requests; prop updates do not notify or move focus.
-
-Native reset silently restores uncontrolled selection and query. Controlled
-values remain the application's responsibility. Commit and dismissal request an
-empty query. `useCombobox()` reads state and exposes requests, or returns `null`
-outside its owner.
-
-## Supply async results
+### Search asynchronous results
 
 <AsyncComboboxDemo />
 
-Pass `filter={null}` with application-filtered `items`. The application owns
-fetching, cancellation and response ordering. Supply `selectedItem` when the
-initial selected option is absent from results; chosen labels survive result
-replacement.
+## State
 
-`loading` and `error` hide options while a request is unavailable. They are
-separate from Field validation. `loadingText`, `emptyText` and `error` provide
-polite status content without announcing result counts on every keystroke.
+Selection, query and expansion independently choose controlled `value`, `query`, `open`, or their default counterparts. Callbacks request changes; owners may refuse. Ownership and multiple mode stay fixed per mount. Prop synchronization and no-op requests do not notify.
 
-## Navigate
+Single mode uses string or null. Multiple mode uses string arrays, toggles membership and retains the open popup. `selectedItem` or multiple `selectedItems` supplies absent labels. Chosen labels survive result replacement. Applications own fetching, cancellation and ordering; results never select themselves.
 
-Focus stays in the input. Arrows highlight enabled results; Enter or a click
-commits. Tab leaves the control; Tab, blur and Escape discard unfinished search.
-Escape while closed clears selection. Home/End and normal text editing retain
-native behavior. The default control has one trailing chevron; `ComboboxClear`
-is optional.
+Committed keys submit under `name`, repeatedly in multiple mode. Query never submits. An empty string is a valid required key. Disabled fields submit nothing; root readOnly protects the whole field and retains values. Native reset silently restores uncontrolled selection/query; controlled owners reset themselves.
 
-## Compose and customize
+`useCombobox()` reads scalar state. `useCombobox({multiple:true})` reads array state. Both expose value/query/open/disabled and setValue/setQuery/setOpen requests, returning null outside their matching mode.
 
-```tsx
-<Combobox items={cities}>
-  <ComboboxInput placeholder="Find a city" />
-  <ComboboxPortal>
-    <ComboboxContent motion="off" />
-  </ComboboxPortal>
-</Combobox>
-```
+## Accessibility
 
-The root and portal have no host. Input refs/props reach the native input;
-content, item and status refs/props reach divs. Trigger and clear parts follow
-[Button's render contract](/docs/button/), with independent adornment styling.
+[Field](/docs/field/) supplies naming and validation. Focus stays in the input with a highlighted listbox option. Loading/error hide unavailable options and supply polite status.
 
-Content uses the local top layer with viewport collision handling; adjust
-`sideOffset` and `collisionPadding`. Use `ComboboxItem` for custom options and
-`ComboboxStatus` for status presentation. Preserve owned ARIA and visible cues.
+| Key                              | Behavior                                           |
+| -------------------------------- | -------------------------------------------------- |
+| Up / Down                        | Open and highlight enabled results                 |
+| Enter                            | Commit or toggle highlighted value                 |
+| Tab / blur / Escape              | Discard search and dismiss                         |
+| Escape while closed              | Clear single selection; retain multiple selections |
+| Empty Backspace in multiple mode | Remove last value                                  |
+| Home / End                       | Native text editing                                |
 
-`controlSize` shares small, medium and large metrics. Use `components.combobox`
-and part styles for [theming](/docs/foundations/theming/).
-[MotionProvider](/docs/foundations/motion/) adds popup opacity; closing is immediate.
+## Motion
+
+[MotionProvider](/docs/foundations/motion/) adds popup opacity; off and reduced motion remove it. Closing remains immediate.
+
+## Styling
+
+Root/Portal have no host. Input props/ref reach input; Content/Item/Status/Tags reach divs. Trigger/Clear are real Buttons. Parts retain `combobox-*`; multiple mode adds `multi-select-*`. Use component Combobox tokens and preserve owned ARIA, placement and focus.
+
+## API
+
+| Part                    | Props                                                                                                                                                                                                                                                                                         | Defaults                                                                                                                                          |
+| ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Combobox                | items: readonly ComboboxOption[]; multiple; value/defaultValue; onValueChange; query/defaultQuery; onQueryChange; open/defaultOpen; onOpenChange; filter; selectedItem/selectedItems; loading; error; loadingText; emptyText; name; form; disabled; readOnly; required; controlSize; children | multiple false; null or []; query ''; closed; local filter; loading/disabled/readOnly/required false; medium; Loading results…; No results found. |
+| ComboboxInput           | Native text input props/ref, ThemeStyle; owned value/ARIA/type                                                                                                                                                                                                                                | Root metrics; no placeholder                                                                                                                      |
+| ComboboxTrigger / Clear | Button props/ref/render excluding owned activation/state                                                                                                                                                                                                                                      | Generated names/icons; type button; clear optional                                                                                                |
+| ComboboxPortal          | children                                                                                                                                                                                                                                                                                      | Local owner document portal                                                                                                                       |
+| ComboboxContent         | div props/ref, ThemeStyle; motion: inherit/off; sideOffset; collisionPadding                                                                                                                                                                                                                  | inherit; 4; 8; generated options/status                                                                                                           |
+| ComboboxItem            | div props/ref; required value; children; ThemeStyle                                                                                                                                                                                                                                           | Registry label                                                                                                                                    |
+| ComboboxStatus          | div props/ref, children, ThemeStyle                                                                                                                                                                                                                                                           | Root status                                                                                                                                       |
+| ComboboxTags            | div props/ref, ThemeStyle                                                                                                                                                                                                                                                                     | Generated selected Tags; multiple mode only                                                                                                       |
+
+Exports include `ComboboxProps`, `ComboboxMultipleProps`, `ComboboxState`, `ComboboxMultipleState`, `ComboboxOption` and each hosted part's Props type.

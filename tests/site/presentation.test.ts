@@ -1081,3 +1081,69 @@ test('Drawer keeps keyboard snap sizes, non-modal scrolling and controlled nativ
     }
   })
 })
+
+test('Array fields submit committed values and retain controlled removals', async () => {
+  await withSite(async (baseURL, browser) => {
+    const page = await browser.newPage(),
+      errors = track(page)
+    try {
+      await capture(page, 'array-fields', async () => {
+        await page.goto(`${baseURL}/docs/multi-select/`)
+        await page.waitForFunction(
+          () => !document.querySelector<HTMLButtonElement>('.demo-heading button')?.disabled
+        )
+        const reviewers = page.getByRole('region', {
+          name: 'Assign project reviewers',
+          exact: true
+        })
+        const input = reviewers.getByRole('combobox', { name: 'Project reviewers', exact: true })
+        await input.fill('Sam')
+        await reviewers.getByRole('option', { name: 'Sam Novak', exact: true }).waitFor()
+        await page.keyboard.press('ArrowDown')
+        await page.keyboard.press('Enter')
+        await reviewers.getByRole('button', { name: 'Save reviewers', exact: true }).click()
+        assert.match(await reviewers.getByRole('status').last().innerText(), /ana, sam/)
+        const lead = page.getByRole('region', { name: 'Keep the lead reviewer', exact: true })
+        await lead.getByRole('button', { name: 'Remove Ana Petrescu', exact: true }).click()
+        assert.equal(
+          await lead.getByRole('button', { name: 'Remove Ana Petrescu', exact: true }).count(),
+          1
+        )
+        await page.goto(`${baseURL}/docs/tags-input/`)
+        await page.waitForFunction(
+          () => !document.querySelector<HTMLButtonElement>('.demo-heading button')?.disabled
+        )
+        const topics = page.getByRole('region', { name: 'Label research notes', exact: true })
+        await topics
+          .getByRole('textbox', { name: 'Research topics', exact: true })
+          .fill('accessibility')
+        await page.keyboard.press('Enter')
+        await topics.getByRole('button', { name: 'Save topics', exact: true }).click()
+        assert.match(await topics.getByRole('status').last().innerText(), /research, accessibility/)
+        const guests = page.getByRole('region', { name: 'Invite workshop guests', exact: true })
+        await guests.getByRole('textbox', { name: 'Guest emails', exact: true }).fill('unfinished')
+        await page.keyboard.press('Enter')
+        assert.equal(
+          await guests
+            .getByRole('textbox', { name: 'Guest emails', exact: true })
+            .getAttribute('aria-invalid'),
+          'true'
+        )
+        assert.equal(
+          await guests.getByText('Enter a complete email address.', { exact: true }).isVisible(),
+          true
+        )
+        await page.goto(`${baseURL}/docs/tag/`)
+        await page.waitForFunction(
+          () => !document.querySelector<HTMLButtonElement>('.demo-heading button')?.disabled
+        )
+        const board = page.getByRole('region', { name: 'Filter the project board', exact: true })
+        await board.getByRole('button', { name: 'Remove Research filter', exact: true }).click()
+        assert.equal(await board.getByText('Component kit', { exact: true }).isVisible(), true)
+        assert.deepEqual(errors, [])
+      })
+    } finally {
+      await page.close()
+    }
+  })
+})
