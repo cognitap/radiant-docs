@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useId, useMemo, useRef, useState, useSyncExternalStore } from 'react'
+import { useEffect, useId, useRef, useState, useSyncExternalStore } from 'react'
 import {
   Button,
   Card,
@@ -14,11 +14,9 @@ import {
   Radio,
   RadioGroup,
   ThemeScope,
-  type ControlSize,
-  type Theme,
-  type ThemeMode
+  type ControlSize
 } from '@cognitap/radiant'
-import { radiant } from '@cognitap/radiant/examples'
+import { usePreviewMotionTheme } from '@/components/demo/DemoFrame'
 import {
   MotionProvider,
   useReducedMotion,
@@ -39,24 +37,12 @@ function emailError(input: HTMLInputElement) {
       : 'Use a valid email address, such as ada@example.com.'
 }
 
-export function InputProfileExample({
-  theme = radiant,
-  mode = 'light',
-  controlSize = 'medium'
-}: {
-  theme?: Theme
-  mode?: ThemeMode
-  controlSize?: ControlSize
-}) {
+export function InputProfileExample({ controlSize = 'medium' }: { controlSize?: ControlSize }) {
   const [off, setOff] = useState(false)
-  const selected = useMemo<Theme>(
-    () => ({ ...theme, motion: { ...theme.motion, mode: off ? 'off' : theme.motion.mode } }),
-    [theme, off]
-  )
+  const selected = usePreviewMotionTheme(off)
   return (
     <ThemeScope
       theme={selected}
-      mode={mode}
       style={{
         maxWidth: '42rem',
         minWidth: 0,
