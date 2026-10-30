@@ -1,0 +1,105 @@
+---
+title: InputGroup
+description: Place text, icons, actions and keyboard hints inside a native control boundary.
+---
+
+import {
+  InputGroupDemo,
+  InputGroupBudgetDemo,
+  InputGroupUpdateDemo
+} from '../../components/InputGroupDemo'
+
+<InputGroupDemo />
+
+## Usage
+
+Use InputGroup for content inside a control's boundary. Use plain [Input](/docs/input/) or [Textarea](/docs/textarea/) when no addon is needed, or [Field](/docs/field/) for labels, help and errors.
+
+```tsx
+<Field label="Project URL">
+  <InputGroup>
+    <InputGroupAddon aria-hidden>radiant.dev/</InputGroupAddon>
+    <InputGroupInput
+      name="slug"
+      defaultValue="reader"
+    />
+  </InputGroup>
+</Field>
+```
+
+## Examples
+
+### Set a project budget
+
+<InputGroupBudgetDemo />
+
+### Post a study update
+
+<InputGroupUpdateDemo />
+
+## State
+
+InputGroup owns no value. Put one direct InputGroupInput or InputGroupTextarea inside it. Both compose the real control and retain its controlled value or uncontrolled defaultValue, native events, form association, submission and reset. Applications own validation, formatting and persistence.
+
+Field supplies the control's ID, label, help, error, required and disabled relationships. Read-only controls remain focusable and submit normally; disabled controls retain native exclusion. Disable addon actions explicitly when the application requires it.
+
+## Accessibility
+
+The root and addons are passive native divs. Keep prefix addons before the control and suffix addons after it; DOM order also determines reading and tab order. Inherited direction positions them logically.
+
+Hide decorative icons, repeated units and redundant shortcut hints with `aria-hidden`. Name interactive addons independently. A pointer press on non-interactive addon content focuses the control; interactive descendants keep their own native behavior. Prevent default in onPointerDown to cancel that convenience.
+
+| Key             | Behavior                                                 |
+| --------------- | -------------------------------------------------------- |
+| Tab / Shift+Tab | Visit the control and enabled addon actions in DOM order |
+| Editing keys    | Native Input or Textarea behavior                        |
+| Enter / Space   | Follow the focused control or Button contract            |
+| Shown shortcut  | Application-owned; Kbd registers no binding              |
+
+## Motion
+
+The shared boundary has no animation. Addon Buttons retain their own motion and reduced-motion behavior.
+
+## Styling
+
+Root props, className, ThemeStyle and ref reach its div; each named part forwards them to its documented host. The group owns the shared border and focus-within outline. Native controls retain editing metrics; their inner borders, backgrounds and outlines are removed. Addon Buttons retain their own focus cues.
+
+`components.inputGroup` exposes background, color, borderColor, borderWidth, radius, gap, paddingInline, focusColor, focusWidth, focusOffset and invalidBorder through matching `--rad-input-group-*` variables. Boundary defaults use shared tokens. Native invalid and disabled controls determine boundary cues. Caller styles override defaults; preserve visible focus and operable targets.
+
+## API
+
+### InputGroup
+
+| Prop                        | Type / default                          |
+| --------------------------- | --------------------------------------- |
+| controlSize                 | small / medium / large; medium          |
+| Native props, children, ref | div; HTMLDivElement                     |
+| className / style           | string / ThemeStyle; actual div         |
+| data-slot                   | Additional tokens; input-group retained |
+
+### InputGroupInput
+
+| Prop        | Type / default                                 |
+| ----------- | ---------------------------------------------- |
+| Props / ref | InputProps / HTMLInputElement                  |
+| controlSize | Inherits InputGroup unless explicitly supplied |
+| data-slot   | input input-group-input                        |
+
+### InputGroupTextarea
+
+| Prop        | Type / default                                 |
+| ----------- | ---------------------------------------------- |
+| Props / ref | TextareaProps / HTMLTextAreaElement            |
+| controlSize | Inherits InputGroup unless explicitly supplied |
+| rows        | 3; native resizing retained                    |
+| data-slot   | textarea input-group-textarea                  |
+
+### InputGroupAddon
+
+| Prop                        | Type / default                                |
+| --------------------------- | --------------------------------------------- |
+| Native props, children, ref | div; HTMLDivElement                           |
+| className / style           | string / ThemeStyle; actual addon             |
+| data-slot                   | Additional tokens; input-group-addon retained |
+
+Exports InputGroupProps, InputGroupInputProps, InputGroupTextareaProps and InputGroupAddonProps. Parts require InputGroup.
