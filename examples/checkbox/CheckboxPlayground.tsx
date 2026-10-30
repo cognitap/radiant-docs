@@ -1,11 +1,10 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import dynamic from 'next/dynamic'
-import { ThemeScope, type ControlSize, type Theme, type ThemeMode } from '@cognitap/radiant'
-import { radiant } from '@cognitap/radiant/examples'
-import { PreviewThemeControls, SelectControl } from '@/components/demo/ActionControls'
-import { DemoControls, DemoPreview } from '@/components/demo/DemoFrame'
+import { ThemeScope, type ControlSize } from '@cognitap/radiant'
+import { SelectControl } from '@/components/demo/ActionControls'
+import { DemoControls, DemoPreview, usePreviewMotionTheme } from '@/components/demo/DemoFrame'
 
 const Permissions = dynamic(() =>
   import('./CheckboxExamples').then(module => module.CheckboxPermissionsExample)
@@ -15,24 +14,13 @@ const States = dynamic(() =>
 )
 
 export function CheckboxPlayground({ states = false }: { states?: boolean }) {
-  const [theme, setTheme] = useState(radiant)
-  const [mode, setMode] = useState<ThemeMode>('light')
   const [controlSize, setControlSize] = useState<ControlSize>('medium')
   const [off, setOff] = useState(false)
-  const selected = useMemo<Theme>(
-    () => ({ ...theme, motion: { ...theme.motion, mode: off ? 'off' : theme.motion.mode } }),
-    [theme, off]
-  )
+  const selected = usePreviewMotionTheme(off)
   return (
     <>
       <DemoControls>
         <div className="action-options">
-          <PreviewThemeControls
-            theme={theme}
-            mode={mode}
-            onThemeChange={setTheme}
-            onModeChange={setMode}
-          />
           <SelectControl
             label="Control size"
             value={controlSize}
@@ -55,17 +43,12 @@ export function CheckboxPlayground({ states = false }: { states?: boolean }) {
         {states ? (
           <ThemeScope
             theme={selected}
-            mode={mode}
             style={{ minWidth: 0, maxWidth: '100%' }}
           >
             <States controlSize={controlSize} />
           </ThemeScope>
         ) : (
-          <Permissions
-            theme={theme}
-            mode={mode}
-            controlSize={controlSize}
-          />
+          <Permissions controlSize={controlSize} />
         )}
       </DemoPreview>
     </>
