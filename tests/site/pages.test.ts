@@ -43,6 +43,8 @@ async function checkPage(baseURL: string, browser: Browser, route: string) {
         await openSources(frame)
         for (const listing of await sourceListings(frame)) {
           assert.equal(listing.text, await exampleSource(listing.file), listing.file)
+          const tab = frame.locator(`[role="tab"][title="${listing.file}"]`)
+          if ((await tab.count()) > 0) await tab.click()
           await frame.getByRole('button', { name: `Copy ${listing.file}`, exact: true }).click()
           await frame
             .locator('.demo-copy-feedback')
