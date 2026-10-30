@@ -26,9 +26,9 @@ const manifest = JSON.parse(readFileSync(new URL('../package.json', import.meta.
 const candidate = process.env.RADIANT_CANDIDATE ?? ''
 const specifier = manifest.dependencies['@cognitap/radiant']
 
-if (candidate ? !specifier.startsWith('file:') : specifier !== installed.version) {
+if (!candidate && specifier !== installed.version) {
   throw new Error(
-    'Normal builds require an exact Radiant version. Use preview:candidate for a tarball.'
+    'Normal builds require an exact Radiant version. Use preview:local or preview:candidate for an unreleased build.'
   )
 }
 

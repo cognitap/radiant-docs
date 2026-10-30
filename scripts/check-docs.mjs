@@ -2,7 +2,9 @@
 import { execFileSync } from 'node:child_process'
 import { existsSync, readFileSync, statSync } from 'node:fs'
 
-const { budget, budgets, banned, legacy } = JSON.parse(readFileSync('docs-policy.json', 'utf8'))
+const { budget, budgets, banned, legacy, componentPages } = JSON.parse(
+  readFileSync('docs-policy.json', 'utf8')
+)
 const glob = pattern =>
   new RegExp(
     `^${pattern
@@ -43,6 +45,39 @@ for (const file of files) {
 }
 for (const file of tracked()) {
   if (/\bDEV-\d+/.test(readFileSync(file, 'utf8'))) errors.push(`${file}: remove ticket IDs.`)
+}
+const templateProblem = text => {
+  if (!/^---\n[\s\S]*?^description: \S/m.test(text)) return 'needs a frontmatter description'
+  const headings = [...text.matchAll(/^## (.+)$/gm)].map(match => match[1])
+  const order = componentPages.headings.values()
+  if (!headings.every(heading => order.some(expected => expected === heading)))
+    return `headings must be ${componentPages.headings.join(', ')} in that order`
+  const missing = componentPages.required.filter(heading => !headings.includes(heading))
+  return missing.length ? `missing ${missing.map(heading => `## ${heading}`).join(', ')}` : ''
+}
+const { exempt, pending } = componentPages
+for (const file of files.filter(
+  file => /^content\/docs\/[^/]+\.mdx$/.test(file) && !exempt.includes(file)
+)) {
+  const problem = templateProblem(readFileSync(file, 'utf8'))
+  if (pending.includes(file)) {
+    if (!problem) errors.push(`${file}: follows the page template; remove it from pending.`)
+  } else if (problem) errors.push(`${file}: ${problem}.`)
+}
+for (const file of pending) {
+  if (!existsSync(file)) errors.push(`${file}: gone; remove it from pending in docs-policy.json.`)
+}
+// preview:candidate stages an uncommitted copy that installs the tarball through file:.
+for (const file of process.env.RADIANT_CANDIDATE
+  ? []
+  : ['package.json', 'pnpm-workspace.yaml', 'pnpm-lock.yaml']) {
+  const text = readFileSync(file, 'utf8')
+  if (
+    /@cognitap\/radiant['"]?(?:\s*:\s*['"]?|@)(?:link|file):|(?:specifier|version): (?:link|file):/.test(
+      text
+    )
+  )
+    errors.push(`${file}: depends on a local Radiant build; pin the published version.`)
 }
 for (const file of Object.keys(legacy)) {
   if (!existsSync(file)) errors.push(`${file}: gone; remove it from legacy in docs-policy.json.`)
