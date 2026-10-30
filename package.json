@@ -10,6 +10,7 @@
     "build": "NEXT_TELEMETRY_DISABLED=1 next build",
     "typecheck": "fumadocs-mdx && NEXT_TELEMETRY_DISABLED=1 next typegen && tsc --noEmit",
     "preview": "node scripts/serve-docs.mjs",
+    "preview:local": "node scripts/preview-local.mjs",
     "preview:candidate": "node scripts/preview-candidate.mjs",
     "test:deployment": "node scripts/test-deployment.mjs",
     "deploy:pages": "node scripts/deploy-pages.mjs",

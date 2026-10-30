@@ -59,6 +59,18 @@ content/docs/button.mdx
 
 ## Try an unreleased Radiant build
 
+To draft pages against a Radiant branch:
+
+```sh
+pnpm preview:local ../radiant   # builds that checkout, serves at localhost:3001
+```
+
+Pages reload as you edit them. Rerun the command to pick up Radiant changes.
+Stopping it puts the published package back. `pnpm docs:check` fails if a
+local Radiant reference reaches `package.json`, the workspace or the lockfile.
+
+To check a packed candidate as CI would:
+
 ```sh
 # In the radiant checkout
 pnpm build && pnpm pack --out /tmp/radiant.tgz
