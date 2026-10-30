@@ -1,0 +1,75 @@
+---
+title: Meter
+description: Show a measured level with native ranges and meaningful units.
+---
+
+import { MeterDemo, MeterRecorderDemo, MeterRoomDemo } from '../../components/MeterDemo'
+
+<MeterDemo />
+
+## Usage
+
+Use Meter for a measured level in a known range, such as storage, battery or temperature. Use [Progress](/docs/progress/) for task completion and [Slider](/docs/slider/) for a value the user changes.
+
+```tsx
+<label htmlFor="quota">Storage used</label>
+<Meter id="quota" value={7.2} max={10} low={6} high={8.5}
+  optimum={0} aria-valuetext="7.2 GB of 10 GB used" />
+<p>7.2 GB of 10 GB used. Warning band: 6–8.5 GB.</p>
+```
+
+## Examples
+
+### Choose a recorder
+
+<MeterRecorderDemo />
+
+### Choose a study room
+
+<MeterRoomDemo />
+
+## State
+
+The consumer supplies the measurement. Updates change the native meter immediately, without change callbacks, timers or live announcements. Meter contributes no form value.
+
+Values and bounds must be finite; min must be less than max, and value and optimum must stay inside the range. Thresholds must satisfy min ≤ low ≤ high ≤ max. Invalid combinations throw.
+
+With optimum below low, lower values are best; above high, higher values are best. An optimum inside the threshold band makes that band best. Boundary values follow the native meter rules. Tone supplements the visible measurement and explanation.
+
+## Accessibility
+
+Give the native meter an associated label, aria-label or aria-labelledby. Fallback text is not its accessible name. Show units and thresholds in nearby text; use aria-valuetext for meaningful spoken units.
+
+| Key             | Behavior                                           |
+| --------------- | -------------------------------------------------- |
+| Tab / Shift+Tab | Skip the passive meter; visit surrounding controls |
+| Arrow keys      | No adjustment; the consumer owns the measurement   |
+
+The browser supplies meter semantics and numeric bounds. Applications choose meaningful milestone announcements; avoid announcing every sample.
+
+## Motion
+
+Measurements change without authored animation. Forced colors use system track, fill and border colors. Example Buttons retain their own motion behavior.
+
+## Styling
+
+Native props, className, style and ref target the actual meter. The meter slot retains caller identity tokens. data-tone is accent, warning or danger.
+
+`components.meter` provides height, radius, borderWidth, borderStyle, borderColor, trackColor, indicatorColor, warningColor and dangerColor through `--rad-meter-*` variables. Native browser fill widths remain browser-owned. Preserve contrast and visible explanations when replacing colors.
+
+## API
+
+### Meter
+
+| Prop              | Type / default                                                                 |
+| ----------------- | ------------------------------------------------------------------------------ |
+| value             | Required number                                                                |
+| min / max         | number; 0 / 1                                                                  |
+| low / high        | number; min / max                                                              |
+| optimum           | number; range midpoint                                                         |
+| aria-valuetext    | string; value of max                                                           |
+| ref               | HTMLMeterElement                                                               |
+| className / style | string / ThemeStyle; actual meter                                              |
+| Other props       | Native meter props except children, defaultValue, role and numeric ARIA bounds |
+
+Exports MeterProps.
