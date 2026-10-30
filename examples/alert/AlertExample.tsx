@@ -1,19 +1,24 @@
 'use client'
 
+import { useState } from 'react'
 import { Alert, AlertTitle, AlertDescription, Button } from '@cognitap/radiant'
 import '@cognitap/radiant/styles.css'
 
 export type SaveResult = 'saved' | 'error' | null
 
+/** Owns the save result unless a parent passes `result` and `onResultChange`. */
 export function AlertExample({
-  result = null,
+  result: controlled,
   urgent = false,
-  onSaveDraft
+  onResultChange
 }: {
   result?: SaveResult
   urgent?: boolean
-  onSaveDraft?: () => void
+  onResultChange?: (result: SaveResult) => void
 }) {
+  const [own, setOwn] = useState<SaveResult>(null)
+  const result = controlled === undefined ? own : controlled
+  const setResult = onResultChange ?? setOwn
   return (
     <div style={{ display: 'grid', gap: '1rem', width: '100%', maxWidth: '34rem' }}>
       <Alert>
@@ -21,7 +26,7 @@ export function AlertExample({
         <AlertDescription>Only you can see this draft until you publish it.</AlertDescription>
       </Alert>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '.5rem' }}>
-        <Button onClick={onSaveDraft}>Save draft</Button>
+        <Button onClick={() => setResult('saved')}>Save draft</Button>
       </div>
       <Alert
         announce="polite"

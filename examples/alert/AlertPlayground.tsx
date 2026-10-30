@@ -28,7 +28,7 @@ export function AlertPlayground() {
         <AlertExample
           result={result}
           urgent={urgent}
-          onSaveDraft={() => setResult('saved')}
+          onResultChange={setResult}
         />
       </DemoPreview>
     </>
