@@ -568,13 +568,26 @@ test('ScrollArea keeps native scrolling, both-axis content, popup selection and 
         const activity = page.getByRole('region', { name: 'Scroll recent activity', exact: true })
         const viewport = activity.getByRole('group', { name: 'Recent activity', exact: true })
         await viewport.focus()
-        await page.keyboard.press('PageDown')
-        await page.waitForFunction(
-          () =>
-            document.querySelector<HTMLDivElement>(
-              '[data-slot~="scroll-area"][aria-label="Recent activity"]'
-            )!.scrollTop > 0
-        )
+        // Native keyboard scrolling is animated independently of React.
+        // Finish that action before testing a second scroll command.
+        await Promise.all([
+          viewport.evaluate(
+            node =>
+              new Promise<void>((resolve, reject) => {
+                const timer = setTimeout(() => {
+                  node.removeEventListener('scrollend', done)
+                  reject(new Error('Native PageDown did not finish scrolling.'))
+                }, 3000)
+                function done() {
+                  clearTimeout(timer)
+                  resolve()
+                }
+                node.addEventListener('scrollend', done, { once: true })
+              })
+          ),
+          page.keyboard.press('PageDown')
+        ])
+        assert.ok((await viewport.evaluate(node => node.scrollTop)) > 0)
         await activity.getByRole('button', { name: 'Back to top', exact: true }).click()
         assert.equal(await viewport.evaluate(node => node.scrollTop), 0)
         const table = page
