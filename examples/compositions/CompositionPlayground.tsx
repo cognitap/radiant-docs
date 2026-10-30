@@ -2,10 +2,8 @@
 
 import { useState } from 'react'
 import dynamic from 'next/dynamic'
-import { type ThemeMode } from '@cognitap/radiant'
-import { radiant } from '@cognitap/radiant/examples'
 import { DemoControls, DemoPreview } from '@/components/demo/DemoFrame'
-import { PreviewThemeControls, SelectControl } from '@/components/demo/ActionControls'
+import { SelectControl } from '@/components/demo/ActionControls'
 
 const DialogExample = dynamic(() => import('./DialogExample').then(module => module.DialogExample))
 const CollapsibleExample = dynamic(() =>
@@ -25,8 +23,6 @@ export function CompositionPlayground({
   kind: CompositionKind
   defaultControlled?: boolean
 }) {
-  const [theme, setTheme] = useState(radiant)
-  const [mode, setMode] = useState<ThemeMode>('light')
   const [compact, setCompact] = useState(false)
   const [ownership, setOwnership] = useState<'uncontrolled' | 'controlled'>(
     defaultControlled ? 'controlled' : 'uncontrolled'
@@ -37,17 +33,11 @@ export function CompositionPlayground({
   const [closeOnEscape, setCloseOnEscape] = useState(true)
   const [closeOnBackdrop, setCloseOnBackdrop] = useState(true)
   const controlled = ownership === 'controlled'
-  const options = { theme, mode, compact }
+  const options = { compact }
   return (
     <>
       <DemoControls>
         <div className="action-options">
-          <PreviewThemeControls
-            theme={theme}
-            mode={mode}
-            onThemeChange={setTheme}
-            onModeChange={setMode}
-          />
           {kind !== 'card' && (
             <SelectControl
               label="State owner"

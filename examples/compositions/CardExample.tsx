@@ -9,28 +9,18 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-  Link,
-  ThemeScope
+  Link
 } from '@cognitap/radiant'
-import { radiant } from '@cognitap/radiant/examples'
 import type { CompositionOptions } from './composition-types'
 import { useHydrated } from '../profile/useHydrated'
 import '@cognitap/radiant/styles.css'
 import './composition-example.css'
 
-export function CardExample({
-  theme = radiant,
-  mode = 'light',
-  compact = false
-}: CompositionOptions) {
+export function CardExample({ compact = false }: CompositionOptions) {
   const [bookmarked, setBookmarked] = useState(false)
   const ready = useHydrated()
   return (
-    <ThemeScope
-      theme={theme}
-      mode={mode}
-      className="composition-example"
-    >
+    <div className="composition-example">
       <div className="composition-stack">
         <Card style={compact ? { '--rad-card-padding': '1rem' } : undefined}>
           <CardHeader>
@@ -58,6 +48,6 @@ export function CardExample({
           {bookmarked ? 'Bookmarked locally.' : 'Not bookmarked.'}
         </output>
       </div>
-    </ThemeScope>
+    </div>
   )
 }

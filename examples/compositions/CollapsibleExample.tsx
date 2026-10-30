@@ -7,18 +7,14 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
   Field,
-  Input,
-  ThemeScope
+  Input
 } from '@cognitap/radiant'
-import { radiant } from '@cognitap/radiant/examples'
 import type { CompositionOptions } from './composition-types'
 import { useHydrated } from '../profile/useHydrated'
 import '@cognitap/radiant/styles.css'
 import './composition-example.css'
 
 export function CollapsibleExample({
-  theme = radiant,
-  mode = 'light',
   compact = false,
   controlled = false
 }: CompositionOptions & { controlled?: boolean }) {
@@ -31,9 +27,7 @@ export function CollapsibleExample({
   }
   const owner = controlled ? { open } : { defaultOpen: false }
   return (
-    <ThemeScope
-      theme={theme}
-      mode={mode}
+    <div
       className="composition-example"
       data-hydrated={ready}
     >
@@ -65,6 +59,6 @@ export function CollapsibleExample({
         )}
         <output className="composition-result">{feedback}</output>
       </div>
-    </ThemeScope>
+    </div>
   )
 }
