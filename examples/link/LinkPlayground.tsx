@@ -2,9 +2,8 @@
 
 import { useState } from 'react'
 import dynamic from 'next/dynamic'
-import { type LinkVariant, type Tone, type ControlSize, type ThemeMode } from '@cognitap/radiant'
-import { radiant } from '@cognitap/radiant/examples'
-import { PreviewThemeControls, SelectControl } from '@/components/demo/ActionControls'
+import { type LinkVariant, type Tone, type ControlSize } from '@cognitap/radiant'
+import { SelectControl } from '@/components/demo/ActionControls'
 import { DemoControls, DemoPreview } from '@/components/demo/DemoFrame'
 
 const LinkExample = dynamic(() => import('./LinkExample').then(module => module.LinkExample))
@@ -13,8 +12,6 @@ export function LinkPlayground() {
   const [variant, setVariant] = useState<LinkVariant>('inline')
   const [tone, setTone] = useState<Tone>('accent')
   const [controlSize, setControlSize] = useState<ControlSize>('medium')
-  const [theme, setTheme] = useState(radiant)
-  const [mode, setMode] = useState<ThemeMode>('light')
   const [external, setExternal] = useState(false)
 
   return (
@@ -39,12 +36,6 @@ export function LinkPlayground() {
             options={['small', 'medium', 'large']}
             onChange={setControlSize}
           />
-          <PreviewThemeControls
-            theme={theme}
-            mode={mode}
-            onThemeChange={setTheme}
-            onModeChange={setMode}
-          />
         </div>
         <label>
           <input
@@ -61,8 +52,6 @@ export function LinkPlayground() {
           tone={tone}
           controlSize={controlSize}
           external={external}
-          theme={theme}
-          mode={mode}
         />
       </DemoPreview>
     </>

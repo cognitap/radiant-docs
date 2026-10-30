@@ -2,9 +2,8 @@
 
 import { useState } from 'react'
 import dynamic from 'next/dynamic'
-import { type ButtonVariant, type Tone, type ControlSize, type ThemeMode } from '@cognitap/radiant'
-import { radiant } from '@cognitap/radiant/examples'
-import { PreviewThemeControls, SelectControl } from '@/components/demo/ActionControls'
+import { type ButtonVariant, type Tone, type ControlSize } from '@cognitap/radiant'
+import { SelectControl } from '@/components/demo/ActionControls'
 import { DemoControls, DemoPreview } from '@/components/demo/DemoFrame'
 
 const MotionLinkExample = dynamic(() =>
@@ -15,8 +14,6 @@ export function MotionLinkPlayground() {
   const [variant, setVariant] = useState<ButtonVariant>('solid')
   const [tone, setTone] = useState<Tone>('accent')
   const [controlSize, setControlSize] = useState<ControlSize>('large')
-  const [theme, setTheme] = useState(radiant)
-  const [mode, setMode] = useState<ThemeMode>('light')
   const [off, setOff] = useState(false)
   return (
     <>
@@ -40,12 +37,6 @@ export function MotionLinkPlayground() {
             options={['small', 'medium', 'large']}
             onChange={setControlSize}
           />
-          <PreviewThemeControls
-            theme={theme}
-            mode={mode}
-            onThemeChange={setTheme}
-            onModeChange={setMode}
-          />
         </div>
         <label>
           <input
@@ -61,8 +52,6 @@ export function MotionLinkPlayground() {
           variant={variant}
           tone={tone}
           controlSize={controlSize}
-          theme={theme}
-          mode={mode}
           motion={off ? 'off' : 'inherit'}
         />
       </DemoPreview>
