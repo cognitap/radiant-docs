@@ -1,0 +1,131 @@
+---
+title: Autocomplete
+description: Suggest completions while preserving any native text value.
+---
+
+import {
+  AutocompleteDemo,
+  AutocompleteInvitationDemo,
+  AutocompleteDatasetDemo
+} from '../../components/AutocompleteDemo'
+
+<AutocompleteDemo />
+
+## Usage
+
+Use Autocomplete when suggestions help but any text is allowed. Use [Combobox](/docs/combobox/) when users must choose a registered value, or [Input](/docs/input/) when suggestions are unnecessary.
+
+```tsx
+<Field label="City">
+  <Autocomplete
+    name="city"
+    items={[{ value: 'Budapest', label: 'Budapest' }]}
+    defaultValue="Another city"
+  />
+</Field>
+```
+
+A suggestion's value is the literal text inserted into the input. Its label may describe that text; rich labels provide textValue.
+
+## Examples
+
+### Prepare a participant invitation
+
+<AutocompleteInvitationDemo />
+
+### Find a study dataset
+
+<AutocompleteDatasetDemo />
+
+## State
+
+Choose value with onValueChange or defaultValue; text is a string and empty text is an empty string. There is no separate query owner. Controlled owners may refuse edits. Prop synchronization and unchanged completions emit no change request.
+
+Typing and accepted suggestions edit the same named native input. Native forms submit its text, including off-list values. Native reset silently restores uncontrolled defaults; controlled consumers reset their own values. Cancelled resets preserve text, including externally associated forms.
+
+open with onOpenChange or defaultOpen owns the popup independently. Loading, errors and arriving suggestions never replace text. Applications own requests, cancellation, response ordering and validation; filter=null accepts application-filtered results.
+
+## Accessibility
+
+[Field](/docs/field/) supplies labels, help, errors, disabled and required state. The native input retains DOM focus while aria-activedescendant identifies a highlighted suggestion. Highlighting alone does not accept it. Disabled suggestions cannot be chosen; application validation decides which typed values are allowed.
+
+| Key                             | Behavior                                                         |
+| ------------------------------- | ---------------------------------------------------------------- |
+| Tab / Shift+Tab                 | Follow native form order and dismiss suggestions                 |
+| Up / Down                       | Open and highlight enabled suggestions                           |
+| Enter                           | Accept the highlighted completion; otherwise allow native submit |
+| Escape                          | Dismiss without changing text                                    |
+| Editing shortcuts / composition | Preserve native input editing                                    |
+
+Trigger and clear Buttons stay outside Tab order; native editing provides keyboard clearing. Keep suggestion labels and status content noninteractive.
+
+## Motion
+
+The popup reuses Combobox motion, including reduced-motion handling. Set Content motion="off" to disable its presentation adapter. Opening, dismissal, text changes and focus remain immediate.
+
+## Styling
+
+The root owns state and has no DOM host. Input props, className, ThemeStyle and ref reach the actual input. Trigger and Clear use real Buttons; Content and Item use native divs. Their slots retain combobox identities and add autocomplete identities.
+
+Combobox theme tokens and caller styles customize these hosts.
+
+## API
+
+### Autocomplete
+
+| Prop                              | Type / default                                                                      |
+| --------------------------------- | ----------------------------------------------------------------------------------- |
+| items                             | readonly AutocompleteOption[]; distinct completion values                           |
+| value / defaultValue              | string; one owner; empty string                                                     |
+| onValueChange                     | (value: string) → void                                                              |
+| open / defaultOpen / onOpenChange | boolean owner and request callback; initially closed                                |
+| filter                            | (item, text) → boolean; matches value and readable label; null for supplied results |
+| loading / error                   | boolean / ReactNode; suggestion status                                              |
+| loadingText / emptyText           | Custom status strings                                                               |
+| name / form                       | Native input submission and association                                             |
+| disabled / readOnly / required    | Native booleans; Field adds disabled and required                                   |
+| controlSize                       | small / medium / large; medium                                                      |
+| children                          | Optional custom parts                                                               |
+
+### AutocompleteInput
+
+| Prop                    | Type / default                                                   |
+| ----------------------- | ---------------------------------------------------------------- |
+| Native props / events   | Input editing, autocomplete, pattern and labels                  |
+| className / style / ref | Native input / ThemeStyle / HTMLInputElement                     |
+| Owned props             | value, name, form, type, role, disabled, required and popup ARIA |
+
+### AutocompleteTrigger / AutocompleteClear
+
+| Prop                         | Type / default                   |
+| ---------------------------- | -------------------------------- |
+| Native Button props / render | Compatible native button adapter |
+| aria-label                   | Show suggestions / Clear text    |
+| ref                          | HTMLButtonElement                |
+
+Clear appears only for nonempty text.
+
+### AutocompletePortal
+
+Renders children beside the input's local host; no DOM wrapper.
+
+### AutocompleteContent
+
+| Prop                          | Type / default                          |
+| ----------------------------- | --------------------------------------- |
+| Native props / style / ref    | div props / ThemeStyle / HTMLDivElement |
+| sideOffset / collisionPadding | number; 4 / 8                           |
+| motion                        | inherit / off; inherit                  |
+| children                      | Registered Items; generated by default  |
+
+### AutocompleteItem
+
+| Prop                       | Type / default                          |
+| -------------------------- | --------------------------------------- |
+| value                      | Registered completion string            |
+| children                   | Optional rich label                     |
+| Native props / style / ref | div props / ThemeStyle / HTMLDivElement |
+
+### AutocompleteStatus
+
+Native div props and styles; children replace the polite status message. Exports each part's Props type and AutocompleteOption.
