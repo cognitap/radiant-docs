@@ -1,0 +1,98 @@
+---
+title: NativeSelect
+description: Style native option selection for simple forms and platform pickers.
+---
+
+import {
+  NativeSelectDemo,
+  NativeSelectGroupedDemo,
+  NativeSelectCohortsDemo
+} from '../../components/NativeSelectDemo'
+
+<NativeSelectDemo />
+
+## Usage
+
+Use NativeSelect for platform pickers and simple forms, including mobile. Use [Select](/docs/select/) for a custom popup, rich option content and listbox behavior managed by Radiant.
+
+```tsx
+<Field
+  label="Study phase"
+  required
+>
+  <NativeSelect
+    name="phase"
+    defaultValue=""
+  >
+    <option
+      value=""
+      disabled
+    >
+      Choose a phase
+    </option>
+    <option value="draft">Draft</option>
+    <option value="recruiting">Recruiting</option>
+  </NativeSelect>
+</Field>
+```
+
+## Examples
+
+### Browse grouped studies
+
+<NativeSelectGroupedDemo />
+
+### Filter participant cohorts
+
+<NativeSelectCohortsDemo />
+
+## State
+
+NativeSelect preserves native value/defaultValue and onChange. Choose one owner per mount. Single selection uses a scalar; multiple selection uses an array. Read selectedOptions in the native event to update a controlled array. Prop synchronization fires no callback.
+
+Without an explicit initial value, the browser chooses the initial option. Set defaultValue to an empty string to select a disabled placeholder option. Required placeholders fail native validation. A disabled selected option contributes no form value.
+
+Named multiple controls submit repeated values. Disabled controls, options and optgroups retain native exclusion. Native reset restores uncontrolled selections. Controlled forms reset their own values; the cohort example prevents native reset and restores its arrays explicitly.
+
+[Field](/docs/field/) supplies the label, help, error, required and disabled relationships. Applications own validation messages, data loading and persistence.
+
+## Accessibility
+
+Use Field, an associated label or aria-label for a name. Native option text supplies each choice's name; label optgroups and keep unavailable choices disabled.
+
+| Key                          | Behavior                                      |
+| ---------------------------- | --------------------------------------------- |
+| Tab / Shift+Tab              | Visit the native select once                  |
+| Arrow keys / typing          | Follow native option navigation and typeahead |
+| Enter / Space / Escape       | Follow the platform picker contract           |
+| Multiple-selection modifiers | Follow the browser and operating system       |
+
+Single pickers expose native combobox semantics. Multiple or size greater than one exposes a native listbox. There is no separate trigger, portal or roving-focus owner.
+
+## Motion
+
+NativeSelect adds no animation. Platform picker behavior belongs to the browser and operating system. Example Buttons retain their own motion behavior.
+
+## Styling
+
+Native props, className, ThemeStyle and ref reach the actual select. `data-slot="native-select"` retains caller identity tokens; data-control-size records its visual metrics. Native multiple and size attributes retain their meanings; list layouts use intrinsic height.
+
+Boundary, typography and focus defaults match Select through shared control tokens. Native picker appearance follows the platform. `components.nativeSelect` provides independent height, padding, fontFamily, fontSize, fontWeight, color, background, borderWidth, borderStyle, borderColor, radius, cornerShape, shadow, focusColor, focusWidth, focusOffset, invalidBorder and disabledBackground overrides through `--rad-native-select-*` variables.
+
+## API
+
+### NativeSelect
+
+| Prop                           | Type / default                                            |
+| ------------------------------ | --------------------------------------------------------- |
+| value / defaultValue           | Native string, number or readonly string array; one owner |
+| onChange                       | `ChangeEventHandler<HTMLSelectElement>`                   |
+| children                       | Native option and optgroup elements                       |
+| controlSize                    | small / medium / large; medium                            |
+| multiple / size                | Native boolean / visible row count; platform defaults     |
+| name, form, required, disabled | Native form attributes; Field metadata composes           |
+| ref                            | HTMLSelectElement                                         |
+| className / style              | string / ThemeStyle; actual select                        |
+| Other props                    | Native select props except role; browser owns its role    |
+
+Exports NativeSelectProps.

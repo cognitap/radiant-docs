@@ -1397,3 +1397,77 @@ test('InputGroup docs preserve addon focus, Kbd hints, native budget forms and T
     }
   })
 })
+
+test('NativeSelect docs preserve platform controls, grouped choices and native single and multiple forms', async () => {
+  await withSite(async (baseURL, browser) => {
+    const page = await browser.newPage(),
+      errors = track(page)
+    try {
+      await capture(page, 'native-select-tasks', async () => {
+        await page.goto(`${baseURL}/docs/native-select/`)
+        await page.waitForFunction(
+          () => !document.querySelector<HTMLButtonElement>('.demo-heading button')?.disabled
+        )
+        const phase = page.getByRole('region', { name: 'Save a study phase', exact: true }),
+          picker = phase.getByRole('combobox', { name: 'Study phase', exact: true })
+        assert.equal(await picker.evaluate(n => n.tagName), 'SELECT')
+        assert.equal(
+          await picker.evaluate(n => (n instanceof HTMLSelectElement ? n.checkValidity() : null)),
+          false
+        )
+        await picker.selectOption('analysis')
+        await phase.getByRole('button', { name: 'Save phase', exact: true }).click()
+        assert.match(
+          await phase.getByRole('status').last().innerText(),
+          /Study phase saved: analysis/
+        )
+        await phase.getByRole('button', { name: 'Restore phase', exact: true }).click()
+        assert.equal(await picker.inputValue(), '')
+        await phase.getByRole('checkbox', { name: 'Disabled', exact: true }).check()
+        assert.equal(await picker.isDisabled(), true)
+        await phase.getByRole('checkbox', { name: 'Disabled', exact: true }).uncheck()
+        const grouped = page.getByRole('region', { name: 'Browse grouped studies', exact: true })
+        assert.equal(await grouped.locator('optgroup[disabled] option').isDisabled(), true)
+        assert.equal(await grouped.locator('option[value="release"]').isDisabled(), true)
+        await grouped
+          .getByRole('combobox', { name: 'Open study', exact: true })
+          .selectOption('component')
+        assert.equal(
+          await grouped.getByRole('heading', { name: 'Component kit', exact: true }).count(),
+          1
+        )
+        assert.match(await grouped.innerText(), /8 participants/)
+        const cohorts = page.getByRole('region', {
+            name: 'Filter participant cohorts',
+            exact: true
+          }),
+          list = cohorts.getByRole('listbox', { name: 'Participant cohorts', exact: true })
+        await list.selectOption(['component', 'release'])
+        await cohorts.getByRole('button', { name: 'Apply cohorts', exact: true }).click()
+        assert.deepEqual(await cohorts.getByRole('listitem').allTextContents(), [
+          'Lea',
+          'Noah',
+          'Eva'
+        ])
+        await cohorts.getByRole('button', { name: 'Restore cohorts', exact: true }).click()
+        assert.deepEqual(await cohorts.getByRole('listitem').allTextContents(), ['Maya', 'Ivo'])
+        assert.deepEqual(
+          await list.evaluate(n =>
+            n instanceof HTMLSelectElement
+              ? Array.from(n.selectedOptions, option => option.value)
+              : []
+          ),
+          ['reader']
+        )
+        await page.setViewportSize({ width: 320, height: 900 })
+        assert.equal(
+          await list.evaluate(n => n.getBoundingClientRect().width <= window.innerWidth),
+          true
+        )
+        assert.deepEqual(errors, [])
+      })
+    } finally {
+      await page.close()
+    }
+  })
+})
