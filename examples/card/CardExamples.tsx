@@ -1,7 +1,7 @@
 'use client'
 
 import '@cognitap/radiant/styles.css'
-import { useId, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react'
+import { useId, useLayoutEffect, useRef, useState, useSyncExternalStore } from 'react'
 import {
   Button,
   Card,
@@ -14,11 +14,9 @@ import {
   Field,
   Input,
   Link,
-  ThemeScope,
-  type Theme,
-  type ThemeMode
+  ThemeScope
 } from '@cognitap/radiant'
-import { radiant } from '@cognitap/radiant/examples'
+import { usePreviewMotionTheme } from '@/components/demo/DemoFrame'
 import { MotionProvider, useReducedMotion, useSpringLayout } from '@cognitap/radiant/motion/react'
 
 const subscribe = () => () => {}
@@ -53,27 +51,12 @@ const projects = [
 type Project = (typeof projects)[number]
 const stack = { display: 'grid', gap: '1rem', minWidth: 0 } as const
 
-export function CardDashboardExample({
-  theme = radiant,
-  mode = 'light',
-  staticMotion = false
-}: {
-  theme?: Theme
-  mode?: ThemeMode
-  staticMotion?: boolean
-}) {
+export function CardDashboardExample({ staticMotion = false }: { staticMotion?: boolean }) {
   const [off, setOff] = useState(false)
-  const selected = useMemo<Theme>(
-    () => ({
-      ...theme,
-      motion: { ...theme.motion, mode: off || staticMotion ? 'off' : theme.motion.mode }
-    }),
-    [theme, off, staticMotion]
-  )
+  const selected = usePreviewMotionTheme(off || staticMotion)
   return (
     <ThemeScope
       theme={selected}
-      mode={mode}
       style={{
         maxWidth: '68rem',
         minWidth: 0,

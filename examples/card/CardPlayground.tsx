@@ -1,10 +1,6 @@
 'use client'
 
-import { useState } from 'react'
 import dynamic from 'next/dynamic'
-import { type ThemeMode } from '@cognitap/radiant'
-import { radiant } from '@cognitap/radiant/examples'
-import { PreviewThemeControls } from '@/components/demo/ActionControls'
 import { DemoControls, DemoPreview } from '@/components/demo/DemoFrame'
 
 const Dashboard = dynamic(() =>
@@ -12,26 +8,11 @@ const Dashboard = dynamic(() =>
 )
 
 export function CardPlayground({ states = false }: { states?: boolean }) {
-  const [theme, setTheme] = useState(radiant)
-  const [mode, setMode] = useState<ThemeMode>('light')
   return (
     <>
-      <DemoControls>
-        <div className="action-options">
-          <PreviewThemeControls
-            theme={theme}
-            mode={mode}
-            onThemeChange={setTheme}
-            onModeChange={setMode}
-          />
-        </div>
-      </DemoControls>
+      <DemoControls />
       <DemoPreview>
-        <Dashboard
-          theme={theme}
-          mode={mode}
-          staticMotion={states}
-        />
+        <Dashboard staticMotion={states} />
       </DemoPreview>
     </>
   )
