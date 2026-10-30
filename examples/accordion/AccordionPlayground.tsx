@@ -1,7 +1,7 @@
 'use client'
 
 import dynamic from 'next/dynamic'
-import { DemoControls, DemoPreview } from '@/components/demo/DemoFrame'
+import { DemoControls, DemoPreview, usePreviewTheme } from '@/components/demo/DemoFrame'
 
 const Profile = dynamic(() =>
   import('./AccordionExamples').then(module => module.AccordionGuideExample)
@@ -11,10 +11,11 @@ const Transition = dynamic(() =>
 )
 
 export function AccordionPlayground({ states = false }: { states?: boolean }) {
+  const { theme } = usePreviewTheme()
   return (
     <>
       <DemoControls />
-      <DemoPreview>{states ? <Transition /> : <Profile />}</DemoPreview>
+      <DemoPreview>{states ? <Transition theme={theme} /> : <Profile />}</DemoPreview>
     </>
   )
 }

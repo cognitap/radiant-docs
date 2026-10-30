@@ -4,13 +4,14 @@ import { useState } from 'react'
 import dynamic from 'next/dynamic'
 import { type ControlSize } from '@cognitap/radiant'
 import { SelectControl } from '@/components/demo/ActionControls'
-import { DemoControls, DemoPreview } from '@/components/demo/DemoFrame'
+import { DemoControls, DemoPreview, usePreviewTheme } from '@/components/demo/DemoFrame'
 
 const InputProfileExample = dynamic(() =>
   import('./InputProfileExample').then(module => module.InputProfileExample)
 )
 
 export function InputPlayground() {
+  const { theme } = usePreviewTheme()
   const [controlSize, setControlSize] = useState<ControlSize>('medium')
   return (
     <>
@@ -25,7 +26,10 @@ export function InputPlayground() {
         </div>
       </DemoControls>
       <DemoPreview>
-        <InputProfileExample controlSize={controlSize} />
+        <InputProfileExample
+          controlSize={controlSize}
+          theme={theme}
+        />
       </DemoPreview>
     </>
   )

@@ -107,7 +107,8 @@ type PreviewThemeState = {
 
 const PreviewThemeContext = createContext<PreviewThemeState | null>(null)
 
-function usePreviewTheme() {
+/** The frame's selected theme, for playgrounds that pass it to a copyable example. */
+export function usePreviewTheme() {
   const state = useContext(PreviewThemeContext)
   if (!state) throw new Error('DemoControls and DemoPreview need a DemoFrame.')
   return state
@@ -251,10 +252,13 @@ function SourceFile({ source }: { source: DemoSource }) {
 /** Example-specific controls and actions; the frame adds the theme and mode pickers. */
 export function DemoControls({
   children,
-  label = 'Controls'
+  label = 'Controls',
+  themePicker = true
 }: {
   children?: ReactNode
   label?: string
+  /** Hide the Theme picker when the example sets its own theme. */
+  themePicker?: boolean
 }) {
   const ready = useHydrated()
   return (
@@ -264,7 +268,7 @@ export function DemoControls({
     >
       <legend>{label}</legend>
       {children}
-      <FrameThemeControls />
+      <FrameThemeControls themePicker={themePicker} />
     </fieldset>
   )
 }
@@ -272,18 +276,20 @@ export function DemoControls({
 const modes = { Site: undefined, Light: 'light', Dark: 'dark' } as const
 const modeLabels = Object.keys(modes) as (keyof typeof modes)[]
 
-function FrameThemeControls() {
+function FrameThemeControls({ themePicker }: { themePicker: boolean }) {
   const { theme, mode, setTheme, setMode } = usePreviewTheme()
   const modeLabel = modeLabels.find(label => modes[label] === mode) ?? 'Site'
   return (
     <div className="demo-theme-controls">
-      <SelectControl
-        label="Theme"
-        value={theme.id}
-        options={themes.map(preset => preset.id)}
-        optionLabels={Object.fromEntries(themes.map(preset => [preset.id, preset.name]))}
-        onChange={id => setTheme(themes.find(preset => preset.id === id) ?? radiant)}
-      />
+      {themePicker && (
+        <SelectControl
+          label="Theme"
+          value={theme.id}
+          options={themes.map(preset => preset.id)}
+          optionLabels={Object.fromEntries(themes.map(preset => [preset.id, preset.name]))}
+          onChange={id => setTheme(themes.find(preset => preset.id === id) ?? radiant)}
+        />
+      )}
       <SelectControl
         label="Mode"
         value={modeLabel}

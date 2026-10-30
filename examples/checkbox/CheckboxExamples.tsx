@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useId, useRef, useState, useSyncExternalStore } from 'react'
+import { useEffect, useId, useRef, useState, useSyncExternalStore, useMemo } from 'react'
 import {
   Button,
   Card,
@@ -13,9 +13,10 @@ import {
   ThemeScope,
   useField,
   type CheckboxProps,
-  type ControlSize
+  type ControlSize,
+  type Theme
 } from '@cognitap/radiant'
-import { usePreviewMotionTheme } from '@/components/demo/DemoFrame'
+import { radiant } from '@cognitap/radiant/examples'
 import { MotionProvider, useReducedMotion, useSpring } from '@cognitap/radiant/motion/react'
 
 import '@cognitap/radiant/styles.css'
@@ -105,12 +106,17 @@ const permissions = [
 ]
 
 export function CheckboxPermissionsExample({
-  controlSize = 'medium'
+  controlSize = 'medium',
+  theme = radiant
 }: {
   controlSize?: ControlSize
+  theme?: Theme
 }) {
   const [off, setOff] = useState(false)
-  const selected = usePreviewMotionTheme(off)
+  const selected = useMemo<Theme>(
+    () => ({ ...theme, motion: { ...theme.motion, mode: off ? 'off' : theme.motion.mode } }),
+    [theme, off]
+  )
   return (
     <ThemeScope
       theme={selected}

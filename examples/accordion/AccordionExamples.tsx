@@ -1,7 +1,14 @@
 'use client'
 
 import '@cognitap/radiant/styles.css'
-import { useEffect, useRef, useState, useSyncExternalStore, type CSSProperties } from 'react'
+import {
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+  type CSSProperties,
+  useMemo
+} from 'react'
 import {
   Accordion,
   AccordionContent,
@@ -18,9 +25,10 @@ import {
   Input,
   Link,
   ThemeScope,
-  useAccordion
+  useAccordion,
+  type Theme
 } from '@cognitap/radiant'
-import { usePreviewMotionTheme } from '@/components/demo/DemoFrame'
+import { radiant } from '@cognitap/radiant/examples'
 import { MotionProvider, useReducedMotion } from '@cognitap/radiant/motion/react'
 
 const subscribe = () => () => {}
@@ -162,9 +170,12 @@ function GettingStarted() {
   )
 }
 
-export function AccordionSelectionExample() {
+export function AccordionSelectionExample({ theme = radiant }: { theme?: Theme }) {
   const [off, setOff] = useState(false)
-  const selected = usePreviewMotionTheme(off)
+  const selected = useMemo<Theme>(
+    () => ({ ...theme, motion: { ...theme.motion, mode: off ? 'off' : theme.motion.mode } }),
+    [theme, off]
+  )
   return (
     <ThemeScope
       theme={selected}

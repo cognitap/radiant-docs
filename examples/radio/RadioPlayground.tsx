@@ -4,12 +4,18 @@ import { useState } from 'react'
 import dynamic from 'next/dynamic'
 import { ThemeScope, type ControlSize } from '@cognitap/radiant'
 import { SelectControl } from '@/components/demo/ActionControls'
-import { DemoControls, DemoPreview, usePreviewMotionTheme } from '@/components/demo/DemoFrame'
+import {
+  DemoControls,
+  DemoPreview,
+  usePreviewMotionTheme,
+  usePreviewTheme
+} from '@/components/demo/DemoFrame'
 
 const Plan = dynamic(() => import('./RadioExamples').then(module => module.RadioPlanExample))
 const States = dynamic(() => import('./RadioExamples').then(module => module.RadioStatePlayground))
 
 export function RadioPlayground({ states = false }: { states?: boolean }) {
+  const { theme } = usePreviewTheme()
   const [controlSize, setControlSize] = useState<ControlSize>('medium')
   const [off, setOff] = useState(false)
   const selected = usePreviewMotionTheme(off)
@@ -44,7 +50,10 @@ export function RadioPlayground({ states = false }: { states?: boolean }) {
             <States controlSize={controlSize} />
           </ThemeScope>
         ) : (
-          <Plan controlSize={controlSize} />
+          <Plan
+            controlSize={controlSize}
+            theme={theme}
+          />
         )}
       </DemoPreview>
     </>

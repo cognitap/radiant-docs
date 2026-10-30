@@ -17,7 +17,7 @@ export function FoundationPlayground({ kind }: { kind: FoundationKind }) {
   return (
     <>
       {kind !== 'setup' && (
-        <DemoControls>
+        <DemoControls themePicker={kind !== 'authoring'}>
           {kind === 'authoring' && (
             <label>
               <input

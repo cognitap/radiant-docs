@@ -1,7 +1,7 @@
 'use client'
 
 import '@cognitap/radiant/styles.css'
-import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
+import { useEffect, useRef, useState, useSyncExternalStore, useMemo } from 'react'
 import {
   Button,
   Card,
@@ -18,9 +18,10 @@ import {
   DialogTrigger,
   Field,
   Input,
-  ThemeScope
+  ThemeScope,
+  type Theme
 } from '@cognitap/radiant'
-import { usePreviewMotionTheme } from '@/components/demo/DemoFrame'
+import { radiant } from '@cognitap/radiant/examples'
 import { MotionProvider, useReducedMotion } from '@cognitap/radiant/motion/react'
 
 const subscribe = () => () => {}
@@ -28,9 +29,12 @@ const clientSnapshot = () => true
 const serverSnapshot = () => false
 const initialProfile = { name: 'Ada Lovelace', email: 'ada@example.com' }
 
-export function DialogProfileExample() {
+export function DialogProfileExample({ theme = radiant }: { theme?: Theme }) {
   const [off, setOff] = useState(false)
-  const selected = usePreviewMotionTheme(off)
+  const selected = useMemo<Theme>(
+    () => ({ ...theme, motion: { ...theme.motion, mode: off ? 'off' : theme.motion.mode } }),
+    [theme, off]
+  )
   return (
     <ThemeScope
       theme={selected}
@@ -231,9 +235,12 @@ function ProfileEditor({ off }: { off: boolean }) {
   )
 }
 
-export function DialogTransitionExample() {
+export function DialogTransitionExample({ theme = radiant }: { theme?: Theme }) {
   const [off, setOff] = useState(false)
-  const selected = usePreviewMotionTheme(off)
+  const selected = useMemo<Theme>(
+    () => ({ ...theme, motion: { ...theme.motion, mode: off ? 'off' : theme.motion.mode } }),
+    [theme, off]
+  )
   return (
     <ThemeScope
       theme={selected}
