@@ -1,0 +1,84 @@
+---
+title: ScrollArea
+description: A native scroll viewport with themed bars for long or wide content.
+---
+
+import {
+  ScrollAreaDemo,
+  ScrollAreaTableDemo,
+  ScrollAreaSelectDemo,
+  ScrollAreaFilterDemo
+} from '../../components/ScrollAreaDemo'
+
+<ScrollAreaDemo />
+
+## Usage
+
+Use `ScrollArea` for themed scrolling in constrained content. Use [TableContainer](/docs/table/) for a table's native overflow.
+
+```tsx
+<ScrollArea
+  aria-label="Messages"
+  style={{ height: 160 }}
+>
+  {messages.map(message => (
+    <p key={message.id}>{message.text}</p>
+  ))}
+</ScrollArea>
+```
+
+## Examples
+
+### Explore wide records
+
+<ScrollAreaTableDemo />
+
+### Choose from a long list
+
+<ScrollAreaSelectDemo />
+
+### Filter activity
+
+<ScrollAreaFilterDemo />
+
+## State
+
+The browser owns scroll positions. Use the viewport ref's `scrollTo` for application actions; content changes clamp offsets natively. `onScroll` observes the native viewport. Prevent default in `onPointerDown` to cancel bar dragging.
+
+## Accessibility
+
+Supply `aria-label` or `aria-labelledby`. The viewport is a named group with `tabIndex=0`; decorative bars share its native keyboard scrolling. Inside Select, Combobox or Menu, set `tabIndex={-1}` to preserve the widget's focus owner. Focused content keeps bars visible.
+
+| Key                            | Behavior                                       |
+| ------------------------------ | ---------------------------------------------- |
+| Tab / Shift+Tab                | Reach the viewport and its interactive content |
+| Arrow keys                     | Native scrolling on the focused viewport       |
+| PageUp / PageDown / Home / End | Browser-native scroll navigation               |
+
+## Motion
+
+Thumbs follow native scroll positions directly. Wheel, touch and keyboard scrolling use browser behavior; dragging adds no easing.
+
+## Styling
+
+Root props, ref, classes and typed styles reach the native scroll div. Constrain its height, width or maximum size. `parts.content` styles content; `scrollbar` and `thumb` style their visual spans. Hit areas keep a separate gutter.
+
+Root identity is `scroll-area`; parts use `scroll-area-content`, `scroll-area-scrollbar` and `scroll-area-thumb`. Bars expose `data-axis`, `data-state="visible|hidden"`; thumbs expose `data-dragging`. Root exposes `data-orientation` and `data-visibility`.
+
+Theme hooks: `components.scrollArea.size`, `radius`, `thumbColor`, `trackColor`, or their `--rad-scroll-area-*` variables. Size changes the visible mark within its hit area.
+
+## API
+
+| ScrollArea prop                  | Type                                    | Default         |
+| -------------------------------- | --------------------------------------- | --------------- |
+| aria-label / aria-labelledby     | string                                  | One required    |
+| orientation                      | vertical / horizontal / both            | vertical        |
+| visibility                       | hover / scroll / always                 | hover           |
+| tabIndex                         | number                                  | 0               |
+| parts                            | content / scrollbar / thumb style hooks | None            |
+| children                         | ReactNode                               | None            |
+| className / style                | string / ThemeStyle                     | None            |
+| ref                              | `Ref<HTMLDivElement>`                   | None            |
+| Native div attributes and events | Includes dir and onScroll               | Native defaults |
+
+Exports: `ScrollArea`, `ScrollAreaProps`, `ScrollAreaOrientation`, `ScrollAreaVisibility`.
