@@ -1,20 +1,9 @@
 'use client'
 import { useId, useState } from 'react'
-import {
-  Progress,
-  Button,
-  Alert,
-  AlertDescription,
-  ThemeScope,
-  type ThemeMode
-} from '@cognitap/radiant'
-import { radiant } from '@cognitap/radiant/examples'
+import { Progress, Alert, AlertDescription } from '@cognitap/radiant'
 import { DemoControls, DemoPreview } from '@/components/demo/DemoFrame'
-import { PreviewThemeControls } from '@/components/demo/ActionControls'
 import '@cognitap/radiant/styles.css'
 export function ProgressExample() {
-  const [theme, setTheme] = useState(radiant)
-  const [mode, setMode] = useState<ThemeMode>('light')
   const [value, setValue] = useState(0)
   const [unknown, setUnknown] = useState(false)
   const id = useId()
@@ -22,12 +11,6 @@ export function ProgressExample() {
   return (
     <>
       <DemoControls>
-        <PreviewThemeControls
-          theme={theme}
-          mode={mode}
-          onThemeChange={setTheme}
-          onModeChange={setMode}
-        />
         <label>
           <input
             type="checkbox"
@@ -36,18 +19,30 @@ export function ProgressExample() {
           />{' '}
           Unknown remaining amount
         </label>
+        <button
+          type="button"
+          disabled={complete || unknown}
+          onClick={() => setValue(number => Math.min(100, number + 25))}
+        >
+          Advance export
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            setValue(0)
+            setUnknown(false)
+          }}
+        >
+          Reset export
+        </button>
       </DemoControls>
       <DemoPreview>
-        <ThemeScope
-          theme={theme}
-          mode={mode}
+        <div
           style={{
             display: 'grid',
             gap: '1rem',
-            padding: '1rem',
             width: '100%',
-            maxWidth: '32rem',
-            boxSizing: 'border-box'
+            maxWidth: '32rem'
           }}
         >
           <section
@@ -66,24 +61,6 @@ export function ProgressExample() {
                 : `${value} of 100 items prepared.`}
             </p>
           </section>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '.5rem' }}>
-            <Button
-              disabled={complete || unknown}
-              onClick={() => setValue(number => Math.min(100, number + 25))}
-            >
-              Advance export
-            </Button>
-            <Button
-              variant="outline"
-              tone="neutral"
-              onClick={() => {
-                setValue(0)
-                setUnknown(false)
-              }}
-            >
-              Reset export
-            </Button>
-          </div>
           <Alert
             announce="polite"
             tone="accent"
@@ -92,7 +69,7 @@ export function ProgressExample() {
           >
             {complete && <AlertDescription>Export complete.</AlertDescription>}
           </Alert>
-        </ThemeScope>
+        </div>
       </DemoPreview>
     </>
   )
