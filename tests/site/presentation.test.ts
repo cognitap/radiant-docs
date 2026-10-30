@@ -1690,3 +1690,94 @@ test('NavLink docs connect native destinations, disclosure ownership and router 
     }
   })
 })
+
+test('Autocomplete docs submit off-list text, control recipient reset and retain values through async catalog recovery', async () => {
+  await withSite(async (baseURL, browser) => {
+    const page = await browser.newPage(),
+      errors = track(page)
+    try {
+      await capture(page, 'autocomplete-tasks', async () => {
+        await page.goto(`${baseURL}/docs/autocomplete/`)
+        await page.waitForFunction(
+          () => !document.querySelector<HTMLButtonElement>('.demo-heading button')?.disabled
+        )
+        const topic = page.getByRole('region', { name: 'Plan a research topic', exact: true }),
+          field = topic.getByRole('combobox', { name: /^Study topic/ })
+        await field.fill('Custom research topic')
+        await field.press('Escape')
+        assert.equal(await field.inputValue(), 'Custom research topic')
+        await topic.getByRole('button', { name: 'Prepare study', exact: true }).click()
+        assert.match(
+          await topic.getByRole('status').last().innerText(),
+          /Study topic prepared: Custom research topic/
+        )
+        await topic.getByRole('button', { name: 'Restore initial topic', exact: true }).click()
+        await page.waitForFunction(
+          () =>
+            document.querySelector<HTMLInputElement>('input[name="topic"]')?.value ===
+            'Reading speed'
+        )
+        assert.equal(await field.inputValue(), 'Reading speed')
+        const invitation = page.getByRole('region', {
+            name: 'Prepare a participant invitation',
+            exact: true
+          }),
+          recipient = invitation.getByRole('combobox', { name: /^Recipient email/ })
+        await invitation.getByRole('button', { name: 'Clear text', exact: true }).click()
+        assert.equal(await recipient.inputValue(), '')
+        await recipient.fill('new-participant@example.com')
+        await recipient.press('Escape')
+        await invitation.getByRole('button', { name: 'Prepare invitation', exact: true }).click()
+        assert.match(
+          await invitation.getByRole('status').last().innerText(),
+          /Invitation prepared for new-participant@example.com/
+        )
+        await invitation.getByRole('button', { name: 'Restore recipient', exact: true }).click()
+        await page.waitForFunction(
+          () =>
+            document.querySelector<HTMLInputElement>('input[name="recipient"]')?.value ===
+            'maya@example.com'
+        )
+        assert.equal(await recipient.inputValue(), 'maya@example.com')
+        const dataset = page.getByRole('region', { name: 'Find a study dataset', exact: true }),
+          query = dataset.getByRole('combobox', { name: /^Dataset name/ })
+        await query.fill('Reader')
+        await dataset.getByRole('option', { name: 'Reader study', exact: true }).waitFor()
+        assert.equal(await query.inputValue(), 'Reader')
+        await query.press('ArrowDown')
+        await query.press('Enter')
+        assert.equal(await query.inputValue(), 'Reader study')
+        await dataset.getByRole('button', { name: 'Disconnect catalog', exact: true }).click()
+        await query.click()
+        await dataset
+          .getByText('The catalog is unavailable. You can still enter a dataset name.', {
+            exact: true
+          })
+          .waitFor()
+        assert.equal(await query.inputValue(), 'Reader study')
+        await query.fill('Unlisted survey')
+        await dataset.getByRole('button', { name: 'Prepare dataset request', exact: true }).click()
+        assert.match(
+          await dataset.getByRole('status').last().innerText(),
+          /Dataset request prepared: Unlisted survey/
+        )
+        await dataset.getByRole('button', { name: 'Reconnect catalog', exact: true }).click()
+        await dataset.getByRole('combobox', { name: 'Direction', exact: true }).selectOption('rtl')
+        assert.equal(await query.evaluate(n => getComputedStyle(n).direction), 'rtl')
+        await page.setViewportSize({ width: 320, height: 900 })
+        assert.equal(
+          await page.locator('[data-slot~="autocomplete-input"]').evaluateAll(nodes =>
+            nodes.every(node => {
+              const b = node.getBoundingClientRect()
+              return b.left >= 0 && b.right <= window.innerWidth
+            })
+          ),
+          true
+        )
+        assert.deepEqual(errors, [])
+      })
+    } finally {
+      await page.close()
+    }
+  })
+})
