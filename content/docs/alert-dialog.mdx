@@ -1,88 +1,144 @@
 ---
 title: AlertDialog
-description: An urgent modal decision with a safe cancel action.
+description: An urgent modal decision that waits until the user confirms or cancels.
 ---
 
-```tsx
 import {
-  AlertDialog,
-  AlertDialogTrigger,
-  AlertDialogContent,
-  AlertDialogTitle,
-  AlertDialogDescription,
-  AlertDialogCancel,
-  AlertDialogAction
-} from '@cognitap/radiant'
+  AlertDialogDemo,
+  AlertDialogDeleteDemo,
+  AlertDialogAsyncDemo,
+  AlertDialogControlledDemo
+} from '../../components/AlertDialogDemo'
 
-;<AlertDialog>
-  <AlertDialogTrigger>Delete project</AlertDialogTrigger>
+<AlertDialogDemo />
+
+## Usage
+
+Use AlertDialog when the user must confirm or cancel before continuing, such as discarding work or deleting data. Use [Dialog](/docs/dialog/) when the user isn't being asked to confirm or cancel, [Toast](/docs/toast/) or [Alert](/docs/alert/) for feedback that needs no decision, and [Popover](/docs/popover/) for a choice that shouldn't block the page.
+
+```tsx
+<AlertDialog>
+  <AlertDialogTrigger>Discard draft</AlertDialogTrigger>
   <AlertDialogContent>
-    <AlertDialogTitle>Delete this project?</AlertDialogTitle>
-    <AlertDialogDescription>
-      This permanently deletes its files for everyone.
-    </AlertDialogDescription>
+    <AlertDialogTitle>Discard unsaved changes?</AlertDialogTitle>
+    <AlertDialogDescription>Your latest edits will be lost.</AlertDialogDescription>
     <AlertDialogCancel
       variant="outline"
       tone="neutral"
     >
-      Keep project
+      Keep editing
     </AlertDialogCancel>
     <AlertDialogAction
       tone="danger"
-      onClick={deleteProject}
+      onClick={discard}
     >
-      Delete permanently
+      Discard changes
     </AlertDialogAction>
   </AlertDialogContent>
 </AlertDialog>
 ```
 
-Use AlertDialog when a message needs an immediate response. Use
-[Dialog](/docs/dialog/) for ordinary tasks.
+## Examples
 
-## Choose a deliberate response
+### Confirm a deletion
 
-Content is a native modal `dialog` with protected `role="alertdialog"` and
-`aria-modal="true"`. Title supplies its name; Description supplies the alert
-message. Keep one of each. An `aria-label` can replace the title relationship.
-Additional `aria-describedby` IDs join the description.
+<AlertDialogDeleteDemo />
 
-Cancel receives initial focus on every open, even after Action in DOM order.
-Set Cancel's `autoFocus={false}` when supplying another initial target. Keep
-the least destructive choice focused for irreversible work.
+### Wait for an async action
 
-Backdrop clicks leave it open. Escape cancels by default. Set
-`closeOnEscape={false}` or prevent Content's `onCancel` event to require an
-explicit response. Neither dismissal runs Action's handler.
+<AlertDialogAsyncDemo />
 
-Action and Cancel compose [Button](/docs/button/). Their caller handler runs
-before the close request; `preventDefault()` keeps the decision open. Disabled
-and pending actions block activation. Both default to `type="button"`.
+### Own the open state
 
-## Own the consequence
+<AlertDialogControlledDemo />
 
-Choose controlled `open`/`onOpenChange` or initial `defaultOpen`. The controlled
-owner may refuse requests. Async actions must prevent default immediately,
-manage pending/error state, then close explicitly after success. Disable
-Cancel and Escape during work when cancellation is unavailable.
+## State
 
-The browser restores focus to the opener. If deletion removes it, focus the
-next useful element after closing. Nested dialogs and unmount cleanup reuse
-[Dialog's lifecycle and motion](/docs/dialog/).
+Open state follows [Dialog](/docs/dialog/#state): controlled `open` with `onOpenChange`, or `defaultOpen`. A controlled owner may refuse a request.
 
-## Style and target parts
+AlertDialog is always modal. Backdrop clicks never close it; `modal` and `closeOnBackdrop` are type errors.
 
-AlertDialog adds no DOM host. Content, Title and Description target `dialog`,
-`h2` and `p`; actions target native buttons. All accept their host's styles
-and refs. Actions support `render`, forwarding resolved props/ref/children.
+Action and Cancel run `onClick`, then request close. Call `event.preventDefault()` to keep it open while async work runs. `pending` or `disabled` blocks both the handler and the request. Both are `type="button"` and never submit an ancestor form.
 
-Parts retain Dialog's `data-slot` tokens and add `alert-dialog`,
-`alert-dialog-title`, `alert-dialog-description`, `alert-dialog-trigger`,
-`alert-dialog-action` or `alert-dialog-cancel`. Match tokens with `~=`.
-Content exposes `data-state="open|closed"` and uses `components.dialog`
-overrides, `--rad-dialog-*` variables and optional MotionProvider feedback.
-Preserve bounded scrolling, visible focus and hidden closed content.
+`useAlertDialog()` returns Dialog state inside AlertDialog, or `null` elsewhere.
 
-Each part exports its `AlertDialog…Props` type. `AlertDialogRenderProps` and
-`AlertDialogState` are exported; `useAlertDialog()` returns state or `null`
-outside its family.
+## Accessibility
+
+Content is a native `dialog` with protected `role="alertdialog"` and `aria-modal="true"`. Title names it and Description is always in `aria-describedby`. Use one of each, or `aria-label` with a Description.
+
+Cancel takes focus on every open, even after Action in DOM order. Set `autoFocus={false}` on Cancel to focus something else. Focus returns to the opener; if it's gone, move focus yourself.
+
+| Key                      | Behavior                                                                     |
+| ------------------------ | ---------------------------------------------------------------------------- |
+| Enter / Space on Trigger | Opens; focus moves to Cancel                                                 |
+| Tab / Shift+Tab          | Moves between controls; the page behind is inert                             |
+| Enter / Space on Cancel  | Closes; focus returns to the opener                                          |
+| Enter / Space on Action  | Runs `onClick`, then closes unless prevented                                 |
+| Escape                   | Closes like Cancel, unless `closeOnEscape={false}` or `onCancel` prevents it |
+
+## Motion
+
+Inside a `MotionProvider`, Content springs open and Trigger, Action and Cancel compress on press. Native close never waits. Set `motion="off"` on Content or each button part. Reduced motion removes transitions.
+
+## Styling
+
+`className`, `style` and `ref` reach each host. Parts keep Dialog's `data-slot` tokens and add their own; match them with `~=`.
+
+| Part                   | Host     | data-slot                                                    |
+| ---------------------- | -------- | ------------------------------------------------------------ |
+| AlertDialog            | None     | None                                                         |
+| AlertDialogTrigger     | `button` | `button dialog-trigger alert-dialog-trigger`                 |
+| AlertDialogContent     | `dialog` | `dialog alert-dialog`; `data-state="open" \| "closed"`       |
+| AlertDialogTitle       | `h2`     | `dialog-title alert-dialog-title`                            |
+| AlertDialogDescription | `p`      | `dialog-description alert-dialog-description`                |
+| AlertDialogAction      | `button` | `button dialog-close alert-dialog-close alert-dialog-action` |
+| AlertDialogCancel      | `button` | `button dialog-close alert-dialog-close alert-dialog-cancel` |
+
+Content uses `--rad-dialog-*` variables, such as `--rad-dialog-width` and `--rad-dialog-backdrop`. Title and Description use `--rad-dialog-title-*` and `--rad-dialog-description-*`.
+
+## API
+
+### AlertDialog
+
+| Prop               | Type / default                       |
+| ------------------ | ------------------------------------ |
+| open / defaultOpen | boolean; one owner; initially closed |
+| onOpenChange       | (open: boolean) => void              |
+| closeOnEscape      | boolean; true                        |
+| children           | Trigger and Content                  |
+
+### AlertDialogTrigger, AlertDialogAction, AlertDialogCancel
+
+| Prop                 | Type / default                                     |
+| -------------------- | -------------------------------------------------- |
+| variant              | solid / soft / outline / ghost; solid              |
+| tone                 | accent / neutral / warning / danger; accent        |
+| controlSize          | small / medium / large; medium                     |
+| pending / disabled   | boolean; false; blocks the handler and request     |
+| iconOnly / fullWidth | boolean; false                                     |
+| motion               | inherit / off; inherit                             |
+| type                 | button / submit / reset; button                    |
+| onClick              | Runs first; `preventDefault()` cancels the request |
+| render               | (props: AlertDialogRenderProps) => ReactElement    |
+| autoFocus            | boolean; true on Cancel                            |
+| ref                  | HTMLButtonElement                                  |
+
+### AlertDialogContent
+
+| Prop        | Type / default                                        |
+| ----------- | ----------------------------------------------------- |
+| motion      | inherit / off; inherit                                |
+| onCancel    | Native Escape event; `preventDefault()` keeps it open |
+| onClose     | Native close event                                    |
+| aria-label  | string; names it without a Title                      |
+| ref         | HTMLDialogElement                                     |
+| Other props | Native dialog props except open, role and aria-modal  |
+
+### AlertDialogTitle, AlertDialogDescription
+
+| Prop        | Type / default                            |
+| ----------- | ----------------------------------------- |
+| ref         | HTMLHeadingElement / HTMLParagraphElement |
+| Other props | Native h2 / p props                       |
+
+All parts accept `className` and ThemeStyle. Exports each part's `AlertDialog…Props` type, `AlertDialogState`, `AlertDialogRenderProps` and `useAlertDialog`.
