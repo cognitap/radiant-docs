@@ -133,3 +133,58 @@ test('Avatar keeps one name through native image failure, fallback and recovery'
     }
   })
 })
+
+test('Breadcrumb keeps ordered hierarchy, decorative separators and one current page', async () => {
+  await withSite(async (baseURL, browser) => {
+    const page = await browser.newPage()
+    const errors = track(page)
+    try {
+      await capture(page, 'breadcrumb-location', async () => {
+        await page.goto(`${baseURL}/docs/breadcrumb/`)
+        const demo = page.getByRole('region', { name: 'Location hierarchy', exact: true })
+        await page.waitForFunction(
+          () => !document.querySelector<HTMLButtonElement>('.demo-heading button')?.disabled
+        )
+        const nav = demo.getByRole('navigation', { name: 'Documentation location', exact: true })
+        assert.equal(await nav.getByRole('list').count(), 1)
+        assert.equal(await nav.getByRole('listitem').count(), 2)
+        assert.equal(
+          await nav.getByRole('link', { name: 'Documentation', exact: true }).getAttribute('href'),
+          '/docs/installation/'
+        )
+        assert.equal(await nav.locator('[aria-current="page"]').count(), 1)
+        assert.equal(
+          await nav.locator('[data-slot~="breadcrumb-separator"]').getAttribute('aria-hidden'),
+          'true'
+        )
+        assert.equal(
+          await nav.locator('[aria-current="page"]').evaluate(node => node.tagName),
+          'SPAN'
+        )
+        await demo.getByRole('checkbox', { name: 'Link the current page', exact: true }).check()
+        assert.equal(
+          await nav
+            .getByRole('link', { name: 'Breadcrumb', exact: true })
+            .getAttribute('aria-current'),
+          'page'
+        )
+        assert.equal(
+          await nav
+            .getByRole('link', { name: 'Breadcrumb', exact: true })
+            .getAttribute('data-slot'),
+          'link breadcrumb-link'
+        )
+        await demo.getByRole('checkbox', { name: 'Use long current title', exact: true }).check()
+        assert.equal(await nav.evaluate(node => node.scrollWidth <= node.clientWidth), true)
+        await demo.getByRole('button', { name: 'Reset preview', exact: true }).click()
+        assert.equal(
+          await nav.locator('[aria-current="page"]').evaluate(node => node.tagName),
+          'SPAN'
+        )
+        assert.deepEqual(errors, [])
+      })
+    } finally {
+      await page.close()
+    }
+  })
+})
