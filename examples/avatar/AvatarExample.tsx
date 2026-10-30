@@ -1,9 +1,7 @@
 'use client'
 import { useState } from 'react'
-import { Avatar, ThemeScope, type ThemeMode } from '@cognitap/radiant'
-import { radiant } from '@cognitap/radiant/examples'
+import { Avatar } from '@cognitap/radiant'
 import { DemoControls, DemoPreview } from '@/components/demo/DemoFrame'
-import { PreviewThemeControls } from '@/components/demo/ActionControls'
 import '@cognitap/radiant/styles.css'
 const image =
   'data:image/svg+xml,' +
@@ -11,19 +9,11 @@ const image =
     '<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 80 80"><rect width="80" height="80" fill="#d9e9df"/><circle cx="40" cy="29" r="15" fill="#346353"/><path d="M12 80v-8a28 28 0 0 1 56 0v8" fill="#346353"/></svg>'
   )
 export function AvatarExample() {
-  const [theme, setTheme] = useState(radiant)
-  const [mode, setMode] = useState<ThemeMode>('light')
   const [source, setSource] = useState<'image' | 'missing' | 'fallback'>('image')
   const [adjacent, setAdjacent] = useState(true)
   return (
     <>
       <DemoControls>
-        <PreviewThemeControls
-          theme={theme}
-          mode={mode}
-          onThemeChange={setTheme}
-          onModeChange={setMode}
-        />
         <label>
           Image source{' '}
           <select
@@ -53,11 +43,7 @@ export function AvatarExample() {
         </label>
       </DemoControls>
       <DemoPreview>
-        <ThemeScope
-          theme={theme}
-          mode={mode}
-          style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1.5rem' }}
-        >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
           <Avatar
             alt={adjacent ? '' : 'Jordan Rivera'}
             fallback="JR"
@@ -70,7 +56,7 @@ export function AvatarExample() {
             }
           />
           {adjacent && <span>Jordan Rivera</span>}
-        </ThemeScope>
+        </div>
       </DemoPreview>
     </>
   )
