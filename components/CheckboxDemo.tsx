@@ -1,13 +1,24 @@
 import { Demo } from './demo/Demo'
 import { CheckboxPlayground } from '@/examples/checkbox/CheckboxPlayground'
 
+export function CheckboxDemo() {
+  return (
+    <Demo
+      title="Choose notification channels"
+      files={['checkbox/CheckboxExample.tsx']}
+    >
+      <CheckboxPlayground task="channels" />
+    </Demo>
+  )
+}
+
 export function CheckboxPermissionsDemo() {
   return (
     <Demo
-      title="A clear set of permissions"
-      files={['checkbox/CheckboxExamples.tsx']}
+      title="Select all permissions"
+      files={['checkbox/CheckboxPermissions.tsx']}
     >
-      <CheckboxPlayground />
+      <CheckboxPlayground task="permissions" />
       <noscript className="demo-feedback">
         Enable JavaScript to save this demo. Its source is available below.
       </noscript>
@@ -15,13 +26,13 @@ export function CheckboxPermissionsDemo() {
   )
 }
 
-export function CheckboxIndicatorDemo() {
+export function CheckboxConsentDemo() {
   return (
     <Demo
-      title="Checkbox indicator lab"
-      files={['checkbox/CheckboxExamples.tsx']}
+      title="Require consent"
+      files={['checkbox/CheckboxExample.tsx']}
     >
-      <CheckboxPlayground states />
+      <CheckboxPlayground task="consent" />
     </Demo>
   )
 }

@@ -5,12 +5,13 @@ import dynamic from 'next/dynamic'
 import { type ControlSize } from '@cognitap/radiant'
 import { SelectControl } from '@/components/demo/ActionControls'
 import { DemoControls, DemoPreview, usePreviewTheme } from '@/components/demo/DemoFrame'
+import { FieldExample, type FieldTask } from './FieldExample'
 
 const FieldValidationExample = dynamic(() =>
   import('./FieldValidationExample').then(module => module.FieldValidationExample)
 )
 
-export function FieldPlayground() {
+export function FieldPlayground({ task = 'workspace' }: { task?: FieldTask | 'workspace' }) {
   const { theme } = usePreviewTheme()
   const [controlSize, setControlSize] = useState<ControlSize>('medium')
   return (
@@ -26,10 +27,17 @@ export function FieldPlayground() {
         </div>
       </DemoControls>
       <DemoPreview>
-        <FieldValidationExample
-          controlSize={controlSize}
-          theme={theme}
-        />
+        {task === 'workspace' ? (
+          <FieldValidationExample
+            controlSize={controlSize}
+            theme={theme}
+          />
+        ) : (
+          <FieldExample
+            task={task}
+            controlSize={controlSize}
+          />
+        )}
       </DemoPreview>
     </>
   )

@@ -1,98 +1,94 @@
 ---
 title: Input
-description: Native editing, shared control sizes and clear Field relationships.
+description: Collect a single line of text in a native input with shared sizing and Field relationships.
 ---
 
-import { ControlDemo } from '../../components/ControlDemo'
-import { InputMotionDemo } from '../../components/InputDemo'
+import {
+  InputDemo,
+  InputProjectDemo,
+  InputSubmittedDemo,
+  InputSizesDemo
+} from '../../components/InputDemo'
 
-<InputMotionDemo />
+<InputDemo />
 
-## Start with a label
+## Usage
+
+Use Input for one line of text, such as a name, email, URL or number. Use [Textarea](/docs/textarea/) for multiple lines, [PasswordInput](/docs/password-input/) for passwords with a reveal action, and [InputGroup](/docs/input-group/) to add icons, buttons or prefixes.
 
 ```tsx
-<Field
-  label="Work email"
-  description="Used for team notifications"
-  required
->
+<Field label="Work email">
   <Input
     name="email"
     type="email"
     autoComplete="email"
-    defaultValue="ada@example.com"
   />
 </Field>
 ```
 
-Input renders one native `input`. [Field](/docs/field/) supplies its label,
-control ID, descriptions, error and required/disabled metadata. Outside Field,
-use a native label with `htmlFor` and `id`. A placeholder is not a label.
+For codes, tokens or suggestions, use [OTPField](/docs/otp-field/), [TagsInput](/docs/tags-input/) or [Combobox](/docs/combobox/). Choice types belong to Checkbox, RadioGroup and Switch.
 
-## Choose a value owner
+## Examples
 
-`defaultValue` sets the initial browser-owned value. Native form reset restores
-it. For React or a form library, pass `value` and update it from `onChange`:
+### Name a project
 
-```tsx
-const [name, setName] = useState('')
-<Field label="Display name">
-  <Input value={name} onChange={event => setName(event.target.value)} />
-</Field>
-```
+<InputProjectDemo />
 
-Initialize controlled text with `''`. Do not pass both value props or switch
-ownership during a mount; remount to change owners. A controlled form resets
-its application values and validation metadata in `onReset`.
+### Confirm what a form submits
 
-Keep the raw value while editing. Native keyboard shortcuts, selection,
-composition events, autofill and change/blur handlers reach the input directly.
-Validation and persistence belong to your application.
+<InputSubmittedDemo />
 
-## Validate and submit
+### Match nearby control sizes
 
-Use native `validity` or your own rules, pass `error` to Field, and focus the
-first invalid input through its ref. Add `noValidate` to the form to replace
-the browser's popup. Read named values with `new FormData(form)`.
+<InputSizesDemo />
 
-Read-only inputs stay focusable and submit their value, but skip native
-constraint validation. Disabled inputs cannot be edited or focused and are
-omitted from form data. Field's required/disabled state cannot be undone by its
-child. See [Field](/docs/field/) for relationship ownership.
+## State
 
-<ControlDemo kind="input" />
+Choose one value owner per mount: `value` with `onChange`, or `defaultValue`. Passing both, switching owners or passing `null` throws a TypeError. Use `''` for an empty value, and remount with a new `key` to change owners.
 
-## Motion and customization
+The value submits natively under `name`, and `form` associates an input outside its form. Reset restores `defaultValue`; controlled owners reset their own state in `onReset`.
 
-The profile example uses public hooks from `@cognitap/radiant/motion/react`:
-`useSpringStyle` animates a separate decorative focus cue; `useSpringLayout`
-moves dedicated wrappers around changing validation content. Native focus and
-input state remain immediate. Theme off and live system reduced motion snap
-presentation to its target. See [motion setup](/docs/foundations/motion/).
+`disabled` blocks editing and focus and leaves the value out of form data. `readOnly` keeps the value focusable and submitted but not editable. Field's `required` and `disabled` apply to its control, and the control cannot undo them.
 
-`className`, typed `style`, native props and `ref` target the actual
-`HTMLInputElement`. Keep its focus ring visible. Override local tokens, for
-example `style={{ '--rad-input-radius': '999px' }}`.
-There is no wrapper, `parts` or Input motion prop.
+## Accessibility
 
-## Public props
+Every control needs an accessible name. Wrap it in [Field](/docs/field/) for a label, description and error, or pass `aria-label` or `aria-labelledby`. A placeholder is not a name. The native input keeps the implicit role for its `type`, such as textbox or searchbox.
 
-`InputProps` is exported. Identity is `data-slot="input"`, with
-`data-control-size` and presence-based `data-invalid` alongside `aria-invalid`.
+Field joins its description and error IDs before the caller's `aria-describedby`. Set `aria-invalid`, or pass `error` to Field, to mark the value invalid.
 
-| Prop                                           | Purpose / default                                                  |
-| ---------------------------------------------- | ------------------------------------------------------------------ |
-| `type`                                         | Native type; default `text`. Use Checkbox / RadioGroup for choices |
-| `value` / `defaultValue`                       | Controlled value or initial browser-owned value                    |
-| `onChange`, `onBlur`, `onCompositionStart/End` | Native handlers                                                    |
-| `controlSize`                                  | `small`, `medium` (default), `large`                               |
-| `size`                                         | Numeric character-width hint; CSS may constrain actual width       |
-| `name`, `form`                                 | Native submission name / form association                          |
-| `required`, `disabled`, `readOnly`             | Native state; Field can add required/disabled                      |
-| `id`, `aria-*`                                 | Field owns its control ID and appends descriptions                 |
-| `autoComplete`, `inputMode`, constraints       | Native editing hints and validation                                |
-| `className`, `style`, `ref`                    | Actual input customization / ref                                   |
-| Other native props                             | Remaining input attributes and events                              |
+| Key             | Behavior                           |
+| --------------- | ---------------------------------- |
+| Tab / Shift+Tab | Move focus in and out              |
+| Typing, arrows  | Native editing, selection and IME  |
+| Enter           | Submit the enclosing form natively |
 
-Value ownership guards apply to text-like types; file and choice inputs keep
-native value behavior. Copy source files using their shown paths.
+## Motion
+
+Input does not animate. Focus and invalid styles change immediately. Animate surrounding content with the hooks in [motion setup](/docs/foundations/motion/).
+
+## Styling
+
+Input renders one native `<input>`, so `className`, `style` and `ref` all target it. It carries `data-slot="input"`, `data-control-size` and `data-invalid` when invalid. Hosted inputs in InputGroup, PasswordInput, OTPField and TagsInput add their own slot tokens.
+
+Override `--rad-input-*` variables in `style`, for example `{ '--rad-input-radius': '999px' }`. Variables cover height, padding, font, color, background, border, radius, corner shape, shadow, placeholder, focus, invalid border and disabled background.
+
+## API
+
+### Input
+
+| Prop                 | Type                                   | Default             |
+| -------------------- | -------------------------------------- | ------------------- |
+| value / defaultValue | string / number / readonly string[]    | None; one owner     |
+| onChange             | `ChangeEventHandler<HTMLInputElement>` | None                |
+| type                 | Native input type                      | text                |
+| controlSize          | small / medium / large                 | medium              |
+| size                 | number; native width in characters     | None                |
+| name / form          | string                                 | None                |
+| required / disabled  | boolean                                | Field's, else false |
+| readOnly             | boolean                                | false               |
+| aria-invalid         | Native; mirrored as `data-invalid`     | Field's             |
+| className / style    | string / ThemeStyle                    | None                |
+| ref                  | `Ref<HTMLInputElement>`                | None                |
+| Other props          | Native input attributes and events     | Native defaults     |
+
+Exports `Input` and `InputProps`.

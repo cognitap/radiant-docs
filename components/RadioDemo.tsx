@@ -1,27 +1,42 @@
 import { Demo } from './demo/Demo'
 import { RadioPlayground } from '@/examples/radio/RadioPlayground'
-
-export function RadioPlanDemo() {
+export function RadioDemo() {
   return (
     <Demo
-      title="A plan for your next chapter"
-      files={['radio/RadioExamples.tsx']}
+      title="Choose a workspace plan"
+      files={['radio/RadioExample.tsx']}
     >
-      <RadioPlayground />
-      <noscript className="demo-feedback">
-        Enable JavaScript to save this demo. Its source is available below.
-      </noscript>
+      <RadioPlayground task="plan" />
     </Demo>
   )
 }
-
-export function RadioIndicatorDemo() {
+export function RadioDeliveryDemo() {
   return (
     <Demo
-      title="Radio selection lab"
-      files={['radio/RadioExamples.tsx']}
+      title="Submit a delivery speed"
+      files={['radio/RadioExample.tsx']}
     >
-      <RadioPlayground states />
+      <RadioPlayground task="delivery" />
+    </Demo>
+  )
+}
+export function RadioFilterDemo() {
+  return (
+    <Demo
+      title="Filter tasks by status"
+      files={['radio/RadioExample.tsx']}
+    >
+      <RadioPlayground task="filter" />
+    </Demo>
+  )
+}
+export function RadioSurveyDemo() {
+  return (
+    <Demo
+      title="Require an answer"
+      files={['radio/RadioExample.tsx']}
+    >
+      <RadioPlayground task="survey" />
     </Demo>
   )
 }

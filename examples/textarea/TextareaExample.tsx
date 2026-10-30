@@ -1,101 +1,145 @@
 'use client'
 
 import { useRef, useState } from 'react'
-import {
-  Button,
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-  Field,
-  Textarea
-} from '@cognitap/radiant'
-
+import { Button, Field, Textarea, type TextareaProps } from '@cognitap/radiant'
+import '@cognitap/radiant/styles.css'
 import { useHydrated } from '../profile/useHydrated'
+import './textarea-example.css'
 
-const initialMessage =
+export type TextareaTaskOptions = Pick<TextareaProps, 'controlSize' | 'disabled' | 'readOnly'> & {
+  invalid?: boolean
+}
+
+export function DescribeProject({ invalid, ...props }: TextareaTaskOptions) {
+  return (
+    <div className="textarea-example">
+      <Field
+        label="Project description"
+        description="A few lines about what you are making."
+        error={invalid ? 'Add a description.' : undefined}
+        required
+      >
+        <Textarea
+          {...props}
+          name="description"
+          defaultValue={'A shared notebook for field research.\nStarts with interview notes.'}
+        />
+      </Field>
+    </div>
+  )
+}
+
+const initialIntroduction =
   'A quiet place to turn an idea into something useful.\nStart with a small sketch.'
 
-export function TextareaDraftExample() {
+export function IntroduceWorkspace({ controlSize }: TextareaTaskOptions) {
   const ready = useHydrated()
-  const [message, setMessage] = useState(initialMessage)
+  const [introduction, setIntroduction] = useState(initialIntroduction)
   const [touched, setTouched] = useState(false)
   const [feedback, setFeedback] = useState('No changes saved')
-  const messageRef = useRef<HTMLTextAreaElement>(null)
-  const error = message.trim() ? undefined : 'Write a short introduction.'
+  const introductionRef = useRef<HTMLTextAreaElement>(null)
+  const error = introduction.trim() ? undefined : 'Write a short introduction.'
   return (
-    <Card style={{ maxWidth: '40rem', minWidth: 0 }}>
-      <CardHeader>
-        <CardTitle>Introduce your workspace</CardTitle>
-        <CardDescription>Give your team a little context before they begin.</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form
-          aria-label="Workspace introduction"
-          noValidate
-          style={{ display: 'grid', gap: '1.5rem', minWidth: 0 }}
-          onSubmit={event => {
-            event.preventDefault()
-            setTouched(true)
-            if (error) {
-              messageRef.current?.focus()
-              return
-            }
-            const data = new FormData(event.currentTarget)
-            setFeedback(`Saved locally: ${data.get('introduction')} · ${data.get('notes')}`)
-          }}
-          onReset={() => {
-            setMessage(initialMessage)
-            setTouched(false)
-            setFeedback('Draft reset')
-          }}
+    <form
+      aria-label="Workspace introduction"
+      className="textarea-example"
+      noValidate
+      onSubmit={event => {
+        event.preventDefault()
+        setTouched(true)
+        if (error) {
+          introductionRef.current?.focus()
+          return
+        }
+        const data = new FormData(event.currentTarget)
+        setFeedback(`Saved: ${data.get('introduction')} · ${data.get('notes')}`)
+      }}
+      onReset={() => {
+        setIntroduction(initialIntroduction)
+        setTouched(false)
+        setFeedback('Draft reset')
+      }}
+    >
+      <Field
+        label="Introduction"
+        required
+        description={`${introduction.length}/300 characters.`}
+        error={touched ? error : undefined}
+      >
+        <Textarea
+          ref={introductionRef}
+          name="introduction"
+          controlSize={controlSize}
+          value={introduction}
+          rows={4}
+          maxLength={300}
+          onChange={event => setIntroduction(event.target.value)}
+        />
+      </Field>
+      <Field
+        label="Private notes"
+        description="Uncontrolled. Reset restores its default value."
+      >
+        <Textarea
+          name="notes"
+          controlSize={controlSize}
+          defaultValue="Share a first draft on Friday."
+          rows={2}
+        />
+      </Field>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '.75rem' }}>
+        <Button
+          type="submit"
+          controlSize={controlSize}
+          disabled={!ready}
         >
-          <Field
-            label="Introduction"
-            required
-            description={`${message.length}/300 characters. Line breaks are preserved.`}
-            error={touched ? error : undefined}
-          >
-            <Textarea
-              ref={messageRef}
-              name="introduction"
-              value={message}
-              rows={4}
-              maxLength={300}
-              onChange={event => setMessage(event.target.value)}
-            />
-          </Field>
-          <Field
-            label="Private notes"
-            description="Optional. This browser-owned field resets with the form."
-          >
-            <Textarea
-              name="notes"
-              defaultValue="Share a first draft on Friday."
-              rows={2}
-              placeholder="Anything else to remember?"
-            />
-          </Field>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '.75rem' }}>
-            <Button
-              type="submit"
-              disabled={!ready}
-            >
-              Save introduction
-            </Button>
-            <Button
-              type="reset"
-              disabled={!ready}
-              variant="outline"
-              tone="neutral"
-            >
-              Reset draft
-            </Button>
-          </div>
-          <output style={{ whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}>{feedback}</output>
-        </form>
-      </CardContent>
-    </Card>
+          Save introduction
+        </Button>
+        <Button
+          type="reset"
+          controlSize={controlSize}
+          disabled={!ready}
+          variant="outline"
+          tone="neutral"
+        >
+          Reset draft
+        </Button>
+      </div>
+      <output style={{ whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}>{feedback}</output>
+    </form>
+  )
+}
+
+export function WriteReply({ controlSize }: TextareaTaskOptions) {
+  return (
+    <div className="textarea-example">
+      <Field
+        label="Reply"
+        description="Grows with each line, then scrolls past ten lines."
+      >
+        <Textarea
+          name="reply"
+          controlSize={controlSize}
+          rows={1}
+          placeholder="Write a reply…"
+          className="textarea-auto-grow"
+        />
+      </Field>
+    </div>
+  )
+}
+
+export type TextareaTask = 'describe' | 'introduce' | 'reply'
+
+export function TextareaExample({
+  task = 'describe',
+  ...options
+}: TextareaTaskOptions & { task?: TextareaTask }) {
+  return task === 'introduce' ? (
+    <IntroduceWorkspace {...options} />
+  ) : task === 'reply' ? (
+    <WriteReply {...options} />
+  ) : (
+    <DescribeProject {...options} />
   )
 }

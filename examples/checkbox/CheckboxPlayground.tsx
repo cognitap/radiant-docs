@@ -2,27 +2,20 @@
 
 import { useState } from 'react'
 import dynamic from 'next/dynamic'
-import { ThemeScope, type ControlSize } from '@cognitap/radiant'
+import type { ControlSize } from '@cognitap/radiant'
 import { SelectControl } from '@/components/demo/ActionControls'
-import {
-  DemoControls,
-  DemoPreview,
-  usePreviewMotionTheme,
-  usePreviewTheme
-} from '@/components/demo/DemoFrame'
+import { DemoControls, DemoPreview, usePreviewTheme } from '@/components/demo/DemoFrame'
+import { ChooseNotificationChannels, RequireConsent } from './CheckboxExample'
 
 const Permissions = dynamic(() =>
-  import('./CheckboxExamples').then(module => module.CheckboxPermissionsExample)
-)
-const States = dynamic(() =>
-  import('./CheckboxExamples').then(module => module.CheckboxStatePlayground)
+  import('./CheckboxPermissions').then(module => module.CheckboxPermissionsExample)
 )
 
-export function CheckboxPlayground({ states = false }: { states?: boolean }) {
+export type CheckboxTask = 'channels' | 'permissions' | 'consent'
+
+export function CheckboxPlayground({ task = 'channels' }: { task?: CheckboxTask }) {
   const { theme } = usePreviewTheme()
   const [controlSize, setControlSize] = useState<ControlSize>('medium')
-  const [off, setOff] = useState(false)
-  const selected = usePreviewMotionTheme(off)
   return (
     <>
       <DemoControls>
@@ -34,30 +27,17 @@ export function CheckboxPlayground({ states = false }: { states?: boolean }) {
             onChange={setControlSize}
           />
         </div>
-        {states && (
-          <label>
-            <input
-              type="checkbox"
-              checked={off}
-              onChange={event => setOff(event.target.checked)}
-            />{' '}
-            Turn off spatial motion
-          </label>
-        )}
       </DemoControls>
       <DemoPreview>
-        {states ? (
-          <ThemeScope
-            theme={selected}
-            style={{ minWidth: 0, maxWidth: '100%' }}
-          >
-            <States controlSize={controlSize} />
-          </ThemeScope>
-        ) : (
+        {task === 'permissions' ? (
           <Permissions
             controlSize={controlSize}
             theme={theme}
           />
+        ) : task === 'consent' ? (
+          <RequireConsent controlSize={controlSize} />
+        ) : (
+          <ChooseNotificationChannels controlSize={controlSize} />
         )}
       </DemoPreview>
     </>

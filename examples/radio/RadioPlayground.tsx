@@ -1,24 +1,13 @@
 'use client'
-
 import { useState } from 'react'
-import dynamic from 'next/dynamic'
 import { ThemeScope, type ControlSize } from '@cognitap/radiant'
 import { SelectControl } from '@/components/demo/ActionControls'
-import {
-  DemoControls,
-  DemoPreview,
-  usePreviewMotionTheme,
-  usePreviewTheme
-} from '@/components/demo/DemoFrame'
-
-const Plan = dynamic(() => import('./RadioExamples').then(module => module.RadioPlanExample))
-const States = dynamic(() => import('./RadioExamples').then(module => module.RadioStatePlayground))
-
-export function RadioPlayground({ states = false }: { states?: boolean }) {
-  const { theme } = usePreviewTheme()
-  const [controlSize, setControlSize] = useState<ControlSize>('medium')
-  const [off, setOff] = useState(false)
-  const selected = usePreviewMotionTheme(off)
+import { DemoControls, DemoPreview, usePreviewMotionTheme } from '@/components/demo/DemoFrame'
+import { RadioExample, type RadioTask } from './RadioExample'
+export function RadioPlayground({ task = 'plan' }: { task?: RadioTask }) {
+  const [controlSize, setControlSize] = useState<ControlSize>('medium'),
+    [off, setOff] = useState(false),
+    theme = usePreviewMotionTheme(off)
   return (
     <>
       <DemoControls>
@@ -30,31 +19,29 @@ export function RadioPlayground({ states = false }: { states?: boolean }) {
             onChange={setControlSize}
           />
         </div>
-        {states && (
-          <label>
-            <input
-              type="checkbox"
-              checked={off}
-              onChange={event => setOff(event.target.checked)}
-            />{' '}
-            Turn off spatial motion
-          </label>
+        {task === 'plan' && (
+          <div className="action-toggles">
+            <label>
+              <input
+                type="checkbox"
+                checked={off}
+                onChange={event => setOff(event.target.checked)}
+              />
+              Motion off
+            </label>
+          </div>
         )}
       </DemoControls>
       <DemoPreview>
-        {states ? (
-          <ThemeScope
-            theme={selected}
-            style={{ minWidth: 0, maxWidth: '100%' }}
-          >
-            <States controlSize={controlSize} />
-          </ThemeScope>
-        ) : (
-          <Plan
+        <ThemeScope
+          theme={theme}
+          style={{ minWidth: 0, maxWidth: '100%' }}
+        >
+          <RadioExample
+            task={task}
             controlSize={controlSize}
-            theme={theme}
           />
-        )}
+        </ThemeScope>
       </DemoPreview>
     </>
   )

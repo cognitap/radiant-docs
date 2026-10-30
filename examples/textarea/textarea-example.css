@@ -1,0 +1,13 @@
+.textarea-example {
+  display: grid;
+  gap: 1.5rem;
+  width: 100%;
+  max-width: 32rem;
+  min-width: 0;
+}
+
+.textarea-auto-grow {
+  field-sizing: content;
+  resize: none;
+  max-height: calc(10lh + 1rem);
+}
