@@ -1,0 +1,73 @@
+---
+title: TagsInput
+description: Commit free text values with native editing and named removal actions.
+---
+
+import {
+  TagsInputDemo,
+  TagsInputGuestsDemo,
+  TagsInputProtectedDemo
+} from '../../components/TagsInputDemo'
+
+<TagsInputDemo />
+
+## Usage
+
+Use TagsInput for free text labels or recipients. Use [MultiSelect](/docs/multi-select/) when values must come from known options, or [Input](/docs/input/) for one string.
+
+```tsx
+<Field
+  label="Topics"
+  required
+>
+  <TagsInput
+    name="topics"
+    defaultValue={['research']}
+    maxCount={4}
+  />
+</Field>
+```
+
+## Examples
+
+### Invite workshop guests
+
+<TagsInputGuestsDemo />
+
+### Protect release labels
+
+<TagsInputProtectedDemo />
+
+## State
+
+Choose `value` with `onValueChange` or `defaultValue`; ownership stays fixed per mount. Values are distinct, trimmed, nonempty strings. Controlled owners may refuse requests without losing unfinished text. Prop synchronization and no-op requests do not notify.
+
+Draft text stays separate from committed tags. Enter, configured separators and pasted line breaks split text. Duplicates are ignored; rejected or excess tokens remain editable. `validate` accepts a trimmed value with true, or rejects with false or a message. `maxCount` limits accepted values.
+
+Only committed values submit as repeated fields under `name`; read them with `FormData.getAll`. Draft text never submits. Native reset silently restores uncontrolled values and clears the draft. Controlled values reset through their owner. Disabled fields submit nothing; read-only fields retain their submitted values. Required checks the committed array.
+
+## Accessibility
+
+[Field](/docs/field/) connects naming, help and errors. The native input keeps ordinary editing and composition behavior. Removal uses real named [Tags](/docs/tag/). Rejected input exposes an invalid state and polite feedback.
+
+| Key                        | Behavior                             |
+| -------------------------- | ------------------------------------ |
+| Enter                      | Commit draft outside IME composition |
+| Separator                  | Commit completed tokens              |
+| Backspace with empty draft | Request removal of last tag          |
+| Tab / Shift+Tab            | Native input and removal navigation  |
+| Enter / Space on removal   | Request removal                      |
+
+## Styling
+
+Root props, styles and ref reach the native Input. `parts.wrapper`, `tag`, `remove` and `message` style their actual hosts. Identities retain Input, Badge and Button tokens and add `tags-input-*`. `components.tagsInput.gap` changes spacing. Preserve visible focus, validation and editable text.
+
+## API
+
+| Part            | Props                                                                                                                                                                                                    | Defaults                           |
+| --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------- |
+| TagsInput       | Input native props except value/defaultValue/type/children; value/defaultValue: string[]; onValueChange(values); separators: readonly string[]; validate(value): boolean/string; maxCount: number; parts | []; comma; no validator or maximum |
+| Inherited Input | name, form, required, disabled, readOnly, controlSize, native events/ref, className, ThemeStyle                                                                                                          | medium; booleans false             |
+| TagsInputProps  | Exported root type; parts use `{ className, style }`                                                                                                                                                     | No part overrides                  |
+
+Separators must be single characters; line breaks also split pasted text. `maxCount` must be a nonnegative integer. Native `onChange` observes draft edits; `onValueChange` requests committed arrays.

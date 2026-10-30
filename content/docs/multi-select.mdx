@@ -1,0 +1,77 @@
+---
+title: MultiSelect
+description: Search options and commit several values with removable selections.
+---
+
+import {
+  MultiSelectDemo,
+  MultiSelectBoardDemo,
+  MultiSelectLeadDemo
+} from '../../components/MultiSelectDemo'
+
+<MultiSelectDemo />
+
+## Usage
+
+Use MultiSelect for several known options. Use [Combobox](/docs/combobox/) for one searchable choice or [TagsInput](/docs/tags-input/) for free text values.
+
+```tsx
+<Field label="Reviewers">
+  <MultiSelect
+    items={people}
+    name="reviewers"
+    defaultValue={['ana']}
+  />
+</Field>
+```
+
+## Examples
+
+### Filter the release board
+
+<MultiSelectBoardDemo />
+
+### Keep the lead reviewer
+
+<MultiSelectLeadDemo />
+
+## State
+
+MultiSelect is [Combobox's multiple mode](/docs/combobox/). Selection uses `string[]`, with `[]` empty. Selection, query and expansion have independent, fixed owners; controlled applications may refuse requests. Accepted selection toggles membership, clears search and keeps the popup open. Results never select themselves.
+
+Pass `filter={null}` for application-filtered results. Own fetching, cancellation and response ordering. `selectedItems` supplies labels for initial values missing from results; chosen labels survive replacement. Loading and error hide unavailable options and announce status.
+
+Values submit as repeated fields under `name`; use `FormData.getAll`. Search text never submits. Native reset silently restores uncontrolled selection and query; controlled values reset through their owner. Disabled fields submit nothing. Root `readOnly` protects the entire field while retaining form values. Required means at least one selected key, including an empty string key.
+
+`useMultiSelect()` exposes array value, query, open, disabled and setValue/setQuery/setOpen requests, or null outside multiple mode.
+
+## Accessibility
+
+Focus stays on the native input; the listbox announces multiple selection. Selected Tags contain named removal Buttons. [Field](/docs/field/) supplies label, help and validation.
+
+| Key                         | Behavior                                     |
+| --------------------------- | -------------------------------------------- |
+| Arrow Down / Up             | Open and highlight enabled options           |
+| Enter                       | Toggle highlighted option                    |
+| Backspace with empty search | Remove last selection                        |
+| Escape                      | Dismiss unfinished search; retain selections |
+| Tab / Shift+Tab             | Native field/action navigation               |
+
+## Motion
+
+Optional [MotionProvider](/docs/foundations/motion/) adds popup opacity. Closing and focus remain immediate. Content motion off and reduced motion remove animation.
+
+## Styling
+
+Root and Portal render no host. Parts retain Combobox hosts and add `multi-select-*`; Tags composes real Tag. Input styles/ref reach its native input. `components.multiSelect.gap` controls selection spacing. Other appearance follows Combobox tokens.
+
+## API
+
+| Part                                                       | Props                                                                                   | Defaults                               |
+| ---------------------------------------------------------- | --------------------------------------------------------------------------------------- | -------------------------------------- |
+| MultiSelect                                                | Combobox multiple props except multiple; items; array value/defaultValue; selectedItems | []; remaining defaults in Combobox API |
+| Input / Trigger / Clear / Portal / Content / Item / Status | Prefixed MultiSelect parts; corresponding Combobox props and native refs                | Corresponding Combobox defaults        |
+| MultiSelectTags                                            | div props/ref, className, ThemeStyle                                                    | Generated selected Tags                |
+| useMultiSelect()                                           | MultiSelectState or null                                                                | null outside multiple owner            |
+
+Exports include `MultiSelectProps`, `MultiSelectState`, `MultiSelectOption`, `MultiSelectRenderProps` and each part's Props type. Composed parts also work inside a multiple Combobox.
