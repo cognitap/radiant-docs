@@ -1,7 +1,7 @@
 'use client'
 
 import '@cognitap/radiant/styles.css'
-import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react'
+import { useEffect, useRef, useState, useSyncExternalStore, type CSSProperties } from 'react'
 import {
   Accordion,
   AccordionContent,
@@ -18,11 +18,9 @@ import {
   Input,
   Link,
   ThemeScope,
-  useAccordion,
-  type Theme,
-  type ThemeMode
+  useAccordion
 } from '@cognitap/radiant'
-import { radiant } from '@cognitap/radiant/examples'
+import { usePreviewMotionTheme } from '@/components/demo/DemoFrame'
 import { MotionProvider, useReducedMotion } from '@cognitap/radiant/motion/react'
 
 const subscribe = () => () => {}
@@ -30,25 +28,24 @@ const clientSnapshot = () => true
 const serverSnapshot = () => false
 const stack = { display: 'grid', gap: '1rem', minWidth: 0 } as const
 const actions = { display: 'flex', flexWrap: 'wrap', gap: '.5rem' } as const
-type Options = { theme?: Theme; mode?: ThemeMode }
 
-export function AccordionGuideExample({ theme = radiant, mode = 'light' }: Options) {
+export function AccordionGuideExample() {
   return (
-    <ThemeScope
-      theme={theme}
-      mode={mode}
-      style={{
-        maxWidth: '44rem',
-        minWidth: 0,
-        padding: '.5rem',
-        '--rad-card-padding': 'clamp(.75rem, 3vw, 1.5rem)',
-        '--rad-collapsible-padding': 'clamp(.75rem, 3vw, 1.5rem)'
-      }}
+    <div
+      style={
+        {
+          maxWidth: '44rem',
+          minWidth: 0,
+          padding: '.5rem',
+          '--rad-card-padding': 'clamp(.75rem, 3vw, 1.5rem)',
+          '--rad-collapsible-padding': 'clamp(.75rem, 3vw, 1.5rem)'
+        } as CSSProperties
+      }
     >
       <MotionProvider>
         <GettingStarted />
       </MotionProvider>
-    </ThemeScope>
+    </div>
   )
 }
 
@@ -165,16 +162,12 @@ function GettingStarted() {
   )
 }
 
-export function AccordionSelectionExample({ theme = radiant, mode = 'light' }: Options) {
+export function AccordionSelectionExample() {
   const [off, setOff] = useState(false)
-  const selected = useMemo<Theme>(
-    () => ({ ...theme, motion: { ...theme.motion, mode: off ? 'off' : theme.motion.mode } }),
-    [theme, off]
-  )
+  const selected = usePreviewMotionTheme(off)
   return (
     <ThemeScope
       theme={selected}
-      mode={mode}
       style={{
         maxWidth: '44rem',
         minWidth: 0,
