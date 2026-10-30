@@ -1,0 +1,79 @@
+---
+title: OTPField
+description: One native code input with visual character slots.
+---
+
+import {
+  OTPFieldDemo,
+  OTPFieldAccessDemo,
+  OTPFieldRecoveryDemo
+} from '../../components/OTPFieldDemo'
+
+<OTPFieldDemo />
+
+## Usage
+
+Use OTPField for a fixed-length one-time code. Use [Input](/docs/input/) for passwords, arbitrary text or codes without character slots. Verify submitted codes on your server.
+
+```tsx
+<Field
+  label="Verification code"
+  required
+>
+  <OTPField
+    name="code"
+    length={6}
+  />
+</Field>
+```
+
+## Examples
+
+### Approve temporary workspace access
+
+<OTPFieldAccessDemo />
+
+### Review an account recovery code
+
+<OTPFieldRecoveryDemo />
+
+## State
+
+Choose `value` with native `onChange`, or `defaultValue`. Ownership stays fixed per mount. Controlled applications may refuse edits; accepted props drive both native input and visible slots. Prop synchronization never emits change.
+
+Length and mode stay fixed per mount; remount with a new key to change them. Supplied values must fit the slots. Owners should supply valid ASCII code strings. User edits filter unsupported characters; numeric mode accepts digits and alphanumeric mode preserves letter case. Composition text remains editable until completion.
+
+One native field submits one string under `name`, including external `form` association. Required checks emptiness; pattern validation checks complete length and characters. Disabled fields submit nothing; read-only fields retain values. Native reset silently restores uncontrolled input and slots; controlled owners reset their own value.
+
+## Accessibility
+
+[Field](/docs/field/) connects the single input's label, help and errors. Slots are decorative and never enter the focus order. The active slot follows the native caret. Native `autocomplete="one-time-code"` supplies the SMS autofill hint; pasting fills the same input.
+
+| Key                       | Behavior                                |
+| ------------------------- | --------------------------------------- |
+| Tab / Shift+Tab           | Enter or leave the single input         |
+| Character entry           | Advance the caret                       |
+| Backspace                 | Delete before the caret and move back   |
+| Left / Right              | Move between slots, following direction |
+| Shift+arrows / Select all | Native text selection                   |
+| Paste                     | Filter and insert code at the selection |
+| Enter                     | Native form submission when valid       |
+
+## Motion
+
+OTPField has no animation. Focus and editing feedback update immediately.
+
+## Styling
+
+Root native props, className, ThemeStyle and ref reach Input. `parts.wrapper` and `parts.slot` style the visible layout and decorative spans. Preserve the editing host's geometry and visible focus/invalid cues.
+
+Slots share Input's presentation tokens. `components.otpField.gap` sets spacing; `slotSize` sets slot width. Height follows Input metrics. Identities are `input otp-field`, `otp-field-wrapper` and `otp-field-slot`; active slots expose `data-active`.
+
+## API
+
+| Part               | Props                                                                                                                  | Defaults                                             |
+| ------------------ | ---------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
+| OTPField           | value/defaultValue: string; length: integer 1–32; mode: numeric/alphanumeric; parts.wrapper/slot: className/ThemeStyle | ''; 6; numeric; no part override                     |
+| Inherited Input    | name, form, required, disabled, readOnly, controlSize, native events/ref, className, ThemeStyle                        | medium; booleans false; spellCheck false             |
+| Owned native hints | type, inputMode, autoComplete, pattern, maxLength                                                                      | text; mode-derived; one-time-code; full code; length |
+| Types              | OTPFieldProps; OTPFieldMode                                                                                            | Exported from the package root                       |
