@@ -1,12 +1,12 @@
 import { Demo } from './demo/Demo'
-import { TableExample } from '@/examples/table/TableExample'
+import { TablePlayground } from '@/examples/table/TablePlayground'
 export function TableDemo() {
   return (
     <Demo
       title="Team directory"
       files={['table/TableExample.tsx']}
     >
-      <TableExample />
+      <TablePlayground />
     </Demo>
   )
 }
