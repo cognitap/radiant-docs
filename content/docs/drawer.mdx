@@ -1,0 +1,83 @@
+---
+title: Drawer
+description: Native edge dialogs with draggable snap sizes.
+---
+
+import { DrawerDemo, DrawerOutlineDemo, DrawerOrderDemo } from '../../components/DrawerDemo'
+
+<DrawerDemo />
+
+## Usage
+
+Use Drawer for a task beside the current page. Use [Dialog](/docs/dialog/) for a centered decision or [Popover](/docs/popover/) for a small anchored surface.
+
+```tsx
+<Drawer>
+  <DrawerTrigger>Settings</DrawerTrigger>
+  <DrawerContent side="end">
+    <DrawerHandle aria-label="Resize settings" />
+    <DrawerTitle>Project settings</DrawerTitle>
+    <DrawerDescription>Change your preferences.</DrawerDescription>
+    <DrawerClose>Done</DrawerClose>
+  </DrawerContent>
+</Drawer>
+```
+
+## Examples
+
+### Read a report outline
+
+<DrawerOutlineDemo />
+
+### Review an order
+
+<DrawerOrderDemo />
+
+## State
+
+Open state follows [Dialog](/docs/dialog/#state). Independently choose `snapPoint` or `defaultSnapPoint`; `onSnapPointChange` requests a visible fraction. Controlled owners may refuse either request. Prop synchronization and no-op requests do not notify. Ownership stays fixed per mount.
+
+Snap points normalize to sorted unique fractions in `(0, 1]`. The accepted point must belong to the set; update them together or remount. Dragging to zero requests dismissal and preserves the last accepted size for reopening. Form reset does not reset either owner.
+
+`useDrawer()` returns Dialog state plus `snapPoint`, `snapPoints`, `setSnapPoint` and `snapControlled`, or `null` outside Drawer.
+
+## Accessibility
+
+Content is a real native dialog. Naming, focus, modality, backdrop hit testing and cancellable native events follow [Dialog](/docs/dialog/#accessibility). Non-modal content leaves the page active. Keep a visible Close action.
+
+The named Button handle announces the accepted percentage. Drag only starts on that handle; the content viewport scrolls normally.
+
+| Key on the handle     | Behavior                                        |
+| --------------------- | ----------------------------------------------- |
+| Enter / Space         | Cycle nonzero snap points                       |
+| Arrow toward the page | Increase size                                   |
+| Arrow toward the edge | Decrease size; dismiss below the smallest point |
+| Home / End            | Smallest / largest nonzero point                |
+| Escape during a drag  | Cancel the gesture                              |
+| Escape otherwise      | Native modal dismissal, unless cancelled        |
+| Tab / Shift+Tab       | Native dialog focus navigation                  |
+
+Logical start/end follow live computed direction. Disabled, pending and cancelled handle events cannot resize.
+
+## Motion
+
+Optional `MotionProvider` animates entry and snap settlement with springs. Reduced motion, theme off and Content `motion="off"` remove the slide. Direct dragging stays functional; native focus and dismissal never wait for animation.
+
+## Styling
+
+Content props, styles and ref reach the actual dialog. `parts.viewport` styles its internal native scrolling div; it keeps all content reachable at smaller sizes. Other parts retain Dialog/Button identities and add `drawer-*`.
+
+Set `components.drawer.size` or `--rad-drawer-size` for maximum extent; the baseline is `24rem`, capped by the viewport. Surface appearance inherits Dialog tokens. Caller styles win; preserve placement, clipping, scrolling and focus cues.
+
+## API
+
+| Part                            | Props                                                                                                                                                                               | Defaults                                                                         |
+| ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| Drawer                          | Dialog props: open/defaultOpen, onOpenChange, modal, closeOnBackdrop, closeOnEscape, children; snapPoint/defaultSnapPoint: number; snapPoints: readonly number[]; onSnapPointChange | closed; modal/backdrop/Escape true; points [0.5, 1]; largest point; no callbacks |
+| DrawerTrigger / DrawerClose     | Dialog action/Button props, native button events/ref, render                                                                                                                        | type button; Button defaults                                                     |
+| DrawerContent                   | DialogContent native props/ref; side: top/right/bottom/left/start/end; motion: inherit/off; className; ThemeStyle; parts.viewport: className/ThemeStyle                             | end; inherit; no part override                                                   |
+| DrawerTitle / DrawerDescription | DialogTitle/Description native props/ref, className, ThemeStyle                                                                                                                     | h2 / p; native naming relationships                                              |
+| DrawerHandle                    | Required aria-label; Button props/events/ref/render except children, pressed state, type and motion; className; ThemeStyle                                                          | ghost; neutral; medium; type button; motion off; generated grip                  |
+| useDrawer()                     | DrawerState or null                                                                                                                                                                 | null outside owner                                                               |
+
+Every part exports its `Drawer…Props` type. Also exported: `DrawerSide`, `DrawerState` and `DrawerRenderProps`. Hosted refs use their native element types; state owners render no host.
