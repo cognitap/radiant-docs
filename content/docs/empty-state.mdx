@@ -1,0 +1,67 @@
+---
+title: EmptyState
+description: Present first-use, empty-search and recovery content with real application actions.
+---
+
+import {
+  EmptyStateDemo,
+  EmptyStateSearchDemo,
+  EmptyStateRecoveryDemo
+} from '../../components/EmptyStateDemo'
+
+## Usage
+
+<EmptyStateDemo />
+
+EmptyState presents missing content with a heading, description, optional decorative icon and actions. The application decides when it appears and what each action does.
+
+## Examples
+
+Use first-use content inside a native Table cell spanning the columns. Creating a project replaces the placeholder with a real row and focuses its action.
+
+<EmptyStateSearchDemo />
+
+A Combobox can render EmptyState through emptyText. Its status sits outside the listbox. Keep recovery buttons outside the floating popup so they remain reachable after Tab dismisses results.
+
+<EmptyStateRecoveryDemo />
+
+Command accepts recovery content through errorText. The example preserves the query, returns focus to search when retrying, cancels stale work and waits for explicit result activation. Expansive recovery content can let CommandList grow and rely on native Dialog scrolling.
+
+## State
+
+variant selects first-use, no-results or error presentation. It does not fetch data, clear a search or retry a request. tone selects color independently and defaults to neutral.
+
+Applications own records, query state, loading, errors and recovery. New content does not automatically move focus or announce itself.
+
+## Accessibility
+
+Choose EmptyStateTitle's level to fit the surrounding outline. It renders an actual h1–h6; the default is h2. EmptyStateIcon is decorative and hidden from assistive technology.
+
+Use Button for actions and Link for navigation. Focus an appropriate destination when an action removes the focused placeholder.
+
+The root adds no live role. Existing Combobox and Command statuses already announce their content. Put any other live feedback in an application-owned status and avoid duplicate announcements.
+
+## Motion
+
+EmptyState adds no animation. Composed actions retain their own motion and reduced-motion behavior.
+
+## Styling
+
+className/style/ref reach the actual named host. Themes expose padding, gap, radius, boundary, color, icon, title, description and action-spacing slots under emptyState. Shared UI typography supplies the baseline.
+
+| Part                           | Host                  |
+| ------------------------------ | --------------------- |
+| EmptyState / EmptyStateActions | div                   |
+| EmptyStateIcon                 | span                  |
+| EmptyStateTitle                | Chosen native heading |
+| EmptyStateDescription          | p                     |
+
+## API
+
+| Prop or part                        | Contract                            |
+| ----------------------------------- | ----------------------------------- |
+| variant                             | first-use, no-results, error        |
+| tone                                | neutral, accent, warning, danger    |
+| EmptyStateTitle level               | 1–6; defaults to 2                  |
+| EmptyStateActions                   | Native actions supplied as children |
+| Native props, ref, className, style | Forwarded to the documented host    |
