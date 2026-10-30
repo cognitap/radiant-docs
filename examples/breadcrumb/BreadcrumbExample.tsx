@@ -6,17 +6,11 @@ import {
   BreadcrumbItem,
   BreadcrumbLink,
   BreadcrumbPage,
-  BreadcrumbSeparator,
-  ThemeScope,
-  type ThemeMode
+  BreadcrumbSeparator
 } from '@cognitap/radiant'
-import { radiant } from '@cognitap/radiant/examples'
 import { DemoControls, DemoPreview } from '@/components/demo/DemoFrame'
-import { PreviewThemeControls } from '@/components/demo/ActionControls'
 import '@cognitap/radiant/styles.css'
 export function BreadcrumbExample() {
-  const [theme, setTheme] = useState(radiant)
-  const [mode, setMode] = useState<ThemeMode>('light')
   const [currentLink, setCurrentLink] = useState(false)
   const [long, setLong] = useState(false)
   const title = long
@@ -25,12 +19,6 @@ export function BreadcrumbExample() {
   return (
     <>
       <DemoControls>
-        <PreviewThemeControls
-          theme={theme}
-          mode={mode}
-          onThemeChange={setTheme}
-          onModeChange={setMode}
-        />
         <label>
           <input
             type="checkbox"
@@ -49,11 +37,7 @@ export function BreadcrumbExample() {
         </label>
       </DemoControls>
       <DemoPreview>
-        <ThemeScope
-          theme={theme}
-          mode={mode}
-          style={{ width: '28rem', maxWidth: '100%', boxSizing: 'border-box', padding: '1.5rem' }}
-        >
+        <div style={{ width: '28rem', maxWidth: '100%', boxSizing: 'border-box' }}>
           <Breadcrumb aria-label="Documentation location">
             <BreadcrumbList>
               <BreadcrumbItem>
@@ -74,7 +58,7 @@ export function BreadcrumbExample() {
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
-        </ThemeScope>
+        </div>
       </DemoPreview>
     </>
   )
