@@ -1,7 +1,7 @@
 'use client'
 
 import '@cognitap/radiant/styles.css'
-import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react'
+import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
 import {
   Button,
   Card,
@@ -18,11 +18,9 @@ import {
   DialogTrigger,
   Field,
   Input,
-  ThemeScope,
-  type Theme,
-  type ThemeMode
+  ThemeScope
 } from '@cognitap/radiant'
-import { radiant } from '@cognitap/radiant/examples'
+import { usePreviewMotionTheme } from '@/components/demo/DemoFrame'
 import { MotionProvider, useReducedMotion } from '@cognitap/radiant/motion/react'
 
 const subscribe = () => () => {}
@@ -30,22 +28,12 @@ const clientSnapshot = () => true
 const serverSnapshot = () => false
 const initialProfile = { name: 'Ada Lovelace', email: 'ada@example.com' }
 
-export function DialogProfileExample({
-  theme = radiant,
-  mode = 'light'
-}: {
-  theme?: Theme
-  mode?: ThemeMode
-}) {
+export function DialogProfileExample() {
   const [off, setOff] = useState(false)
-  const selected = useMemo<Theme>(
-    () => ({ ...theme, motion: { ...theme.motion, mode: off ? 'off' : theme.motion.mode } }),
-    [theme, off]
-  )
+  const selected = usePreviewMotionTheme(off)
   return (
     <ThemeScope
       theme={selected}
-      mode={mode}
       style={{ maxWidth: '40rem', minWidth: 0, padding: '.5rem', boxSizing: 'border-box' }}
     >
       <MotionProvider>
@@ -243,22 +231,12 @@ function ProfileEditor({ off }: { off: boolean }) {
   )
 }
 
-export function DialogTransitionExample({
-  theme = radiant,
-  mode = 'light'
-}: {
-  theme?: Theme
-  mode?: ThemeMode
-}) {
+export function DialogTransitionExample() {
   const [off, setOff] = useState(false)
-  const selected = useMemo<Theme>(
-    () => ({ ...theme, motion: { ...theme.motion, mode: off ? 'off' : theme.motion.mode } }),
-    [theme, off]
-  )
+  const selected = usePreviewMotionTheme(off)
   return (
     <ThemeScope
       theme={selected}
-      mode={mode}
       style={{ maxWidth: '40rem', minWidth: 0, padding: '.5rem', boxSizing: 'border-box' }}
     >
       <MotionProvider>
