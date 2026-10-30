@@ -1,8 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Button, Checkbox, Field, ThemeScope } from '@cognitap/radiant'
-import { radiant } from '@cognitap/radiant/examples'
+import { Button, Checkbox, Field } from '@cognitap/radiant'
 import type { ControlExampleProps } from './control-types'
 import { useHydrated } from '../profile/useHydrated'
 import '@cognitap/radiant/styles.css'
@@ -10,9 +9,7 @@ import './control-example.css'
 
 export function CheckboxSelectionExample({
   disabled = false,
-  controlSize = 'medium',
-  theme = radiant,
-  mode = 'light'
+  controlSize = 'medium'
 }: ControlExampleProps) {
   const [email, setEmail] = useState(true)
   const [inApp, setInApp] = useState(false)
@@ -21,11 +18,7 @@ export function CheckboxSelectionExample({
   )
   const ready = useHydrated()
   return (
-    <ThemeScope
-      theme={theme}
-      mode={mode}
-      className="control-example"
-    >
+    <div className="control-example">
       <form
         className="control-form"
         aria-label="Channel selection example"
@@ -92,6 +85,6 @@ export function CheckboxSelectionExample({
         </div>
         <output className="control-result">{feedback}</output>
       </form>
-    </ThemeScope>
+    </div>
   )
 }

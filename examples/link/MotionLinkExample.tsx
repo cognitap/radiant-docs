@@ -10,12 +10,8 @@ import {
   CardContent,
   CardFooter,
   Link,
-  ThemeScope,
-  type ButtonProps,
-  type Theme,
-  type ThemeMode
+  type ButtonProps
 } from '@cognitap/radiant'
-import { radiant } from '@cognitap/radiant/examples'
 import { MotionProvider, MotionLink } from '@cognitap/radiant/motion/react'
 import '@cognitap/radiant/styles.css'
 import './link-example.css'
@@ -25,21 +21,12 @@ export function MotionLinkExample({
   variant = 'solid',
   tone = 'accent',
   controlSize = 'large',
-  motion = 'inherit',
-  theme = radiant,
-  mode = 'light'
-}: Pick<ButtonProps, 'variant' | 'tone' | 'controlSize' | 'motion'> & {
-  theme?: Theme
-  mode?: ThemeMode
-}) {
+  motion = 'inherit'
+}: Pick<ButtonProps, 'variant' | 'tone' | 'controlSize' | 'motion'> & {}) {
   const [saved, setSaved] = useState(false)
   const ready = useHydrated()
   return (
-    <ThemeScope
-      theme={theme}
-      mode={mode}
-      className="link-motion-example"
-    >
+    <div className="link-motion-example">
       <MotionProvider>
         <Card>
           <CardHeader>
@@ -82,6 +69,6 @@ export function MotionLinkExample({
           </CardFooter>
         </Card>
       </MotionProvider>
-    </ThemeScope>
+    </div>
   )
 }

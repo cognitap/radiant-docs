@@ -2,29 +2,21 @@
 
 import { useState } from 'react'
 import dynamic from 'next/dynamic'
-import { type ControlSize, type ThemeMode } from '@cognitap/radiant'
-import { radiant } from '@cognitap/radiant/examples'
-import { PreviewThemeControls, SelectControl } from '@/components/demo/ActionControls'
-import { DemoControls, DemoPreview } from '@/components/demo/DemoFrame'
+import { type ControlSize } from '@cognitap/radiant'
+import { SelectControl } from '@/components/demo/ActionControls'
+import { DemoControls, DemoPreview, usePreviewTheme } from '@/components/demo/DemoFrame'
 
 const FieldValidationExample = dynamic(() =>
   import('./FieldValidationExample').then(module => module.FieldValidationExample)
 )
 
 export function FieldPlayground() {
-  const [theme, setTheme] = useState(radiant)
-  const [mode, setMode] = useState<ThemeMode>('light')
+  const { theme } = usePreviewTheme()
   const [controlSize, setControlSize] = useState<ControlSize>('medium')
   return (
     <>
       <DemoControls>
         <div className="action-options">
-          <PreviewThemeControls
-            theme={theme}
-            mode={mode}
-            onThemeChange={setTheme}
-            onModeChange={setMode}
-          />
           <SelectControl
             label="Control size"
             value={controlSize}
@@ -35,9 +27,8 @@ export function FieldPlayground() {
       </DemoControls>
       <DemoPreview>
         <FieldValidationExample
-          theme={theme}
-          mode={mode}
           controlSize={controlSize}
+          theme={theme}
         />
       </DemoPreview>
     </>

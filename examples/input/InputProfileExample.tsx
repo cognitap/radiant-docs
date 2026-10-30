@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useId, useMemo, useRef, useState, useSyncExternalStore } from 'react'
+import { useEffect, useId, useRef, useState, useSyncExternalStore, useMemo } from 'react'
 import {
   Button,
   Card,
@@ -15,8 +15,7 @@ import {
   RadioGroup,
   ThemeScope,
   type ControlSize,
-  type Theme,
-  type ThemeMode
+  type Theme
 } from '@cognitap/radiant'
 import { radiant } from '@cognitap/radiant/examples'
 import {
@@ -40,13 +39,11 @@ function emailError(input: HTMLInputElement) {
 }
 
 export function InputProfileExample({
-  theme = radiant,
-  mode = 'light',
-  controlSize = 'medium'
+  controlSize = 'medium',
+  theme = radiant
 }: {
-  theme?: Theme
-  mode?: ThemeMode
   controlSize?: ControlSize
+  theme?: Theme
 }) {
   const [off, setOff] = useState(false)
   const selected = useMemo<Theme>(
@@ -56,7 +53,6 @@ export function InputProfileExample({
   return (
     <ThemeScope
       theme={selected}
-      mode={mode}
       style={{
         maxWidth: '42rem',
         minWidth: 0,

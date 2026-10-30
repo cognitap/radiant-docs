@@ -1,9 +1,7 @@
 'use client'
 import { useState } from 'react'
-import { Badge, ThemeScope, type ThemeMode } from '@cognitap/radiant'
-import { radiant } from '@cognitap/radiant/examples'
+import { Badge } from '@cognitap/radiant'
 import { DemoControls, DemoPreview } from '@/components/demo/DemoFrame'
-import { PreviewThemeControls } from '@/components/demo/ActionControls'
 import '@cognitap/radiant/styles.css'
 const states = {
   draft: { label: 'Draft', tone: 'neutral' },
@@ -12,20 +10,12 @@ const states = {
   blocked: { label: 'Blocked', tone: 'danger' }
 } as const
 export function BadgeExample() {
-  const [theme, setTheme] = useState(radiant)
-  const [mode, setMode] = useState<ThemeMode>('light')
   const [status, setStatus] = useState<keyof typeof states>('draft')
   const [decorative, setDecorative] = useState(false)
   const selection = states[status]
   return (
     <>
       <DemoControls>
-        <PreviewThemeControls
-          theme={theme}
-          mode={mode}
-          onThemeChange={setTheme}
-          onModeChange={setMode}
-        />
         <label>
           Release status{' '}
           <select
@@ -57,11 +47,7 @@ export function BadgeExample() {
         </label>
       </DemoControls>
       <DemoPreview>
-        <ThemeScope
-          theme={theme}
-          mode={mode}
-          style={{ padding: '1.5rem', maxWidth: '100%' }}
-        >
+        <div style={{ maxWidth: '100%' }}>
           <p>
             Release status: {decorative && <span>{selection.label} </span>}
             <Badge
@@ -71,7 +57,7 @@ export function BadgeExample() {
               {selection.label}
             </Badge>
           </p>
-        </ThemeScope>
+        </div>
       </DemoPreview>
     </>
   )

@@ -1,32 +1,15 @@
 'use client'
 import { useState } from 'react'
-import {
-  Skeleton,
-  Button,
-  Alert,
-  AlertDescription,
-  ThemeScope,
-  type ThemeMode
-} from '@cognitap/radiant'
-import { radiant } from '@cognitap/radiant/examples'
+import { Skeleton, Alert, AlertDescription } from '@cognitap/radiant'
 import { DemoControls, DemoPreview } from '@/components/demo/DemoFrame'
-import { PreviewThemeControls } from '@/components/demo/ActionControls'
 import '@cognitap/radiant/styles.css'
 export function SkeletonExample() {
-  const [theme, setTheme] = useState(radiant)
-  const [mode, setMode] = useState<ThemeMode>('light')
   const [loaded, setLoaded] = useState(false)
   const [motionOff, setMotionOff] = useState(false)
   const motion = motionOff ? 'off' : 'inherit'
   return (
     <>
       <DemoControls>
-        <PreviewThemeControls
-          theme={theme}
-          mode={mode}
-          onThemeChange={setTheme}
-          onModeChange={setMode}
-        />
         <label>
           <input
             type="checkbox"
@@ -35,11 +18,15 @@ export function SkeletonExample() {
           />{' '}
           Disable placeholder motion
         </label>
+        <button
+          type="button"
+          onClick={() => setLoaded(value => !value)}
+        >
+          {loaded ? 'Reload account' : 'Simulate account loaded'}
+        </button>
       </DemoControls>
       <DemoPreview>
-        <ThemeScope
-          theme={theme}
-          mode={mode}
+        <div
           style={{
             display: 'grid',
             gap: '1rem',
@@ -78,16 +65,13 @@ export function SkeletonExample() {
               </>
             )}
           </section>
-          <Button onClick={() => setLoaded(value => !value)}>
-            {loaded ? 'Reload account' : 'Simulate account loaded'}
-          </Button>
           <Alert
             announce="polite"
             aria-label="Account loading status"
           >
             <AlertDescription>{loaded ? 'Account loaded.' : 'Loading account…'}</AlertDescription>
           </Alert>
-        </ThemeScope>
+        </div>
       </DemoPreview>
     </>
   )

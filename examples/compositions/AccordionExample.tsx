@@ -7,17 +7,13 @@ import {
   AccordionItem,
   AccordionTrigger,
   Button,
-  Link,
-  ThemeScope
+  Link
 } from '@cognitap/radiant'
-import { radiant } from '@cognitap/radiant/examples'
 import type { CompositionOptions } from './composition-types'
 import '@cognitap/radiant/styles.css'
 import './composition-example.css'
 
 export function AccordionExample({
-  theme = radiant,
-  mode = 'light',
   compact = false,
   multiple = false,
   controlled = false,
@@ -53,11 +49,7 @@ export function AccordionExample({
   )
   const style = compact ? { '--rad-collapsible-padding': '1rem' } : undefined
   return (
-    <ThemeScope
-      theme={theme}
-      mode={mode}
-      className="composition-example"
-    >
+    <div className="composition-example">
       <div className="composition-stack">
         {multiple ? (
           <Accordion
@@ -99,6 +91,6 @@ export function AccordionExample({
           {multiple ? multipleValue.join(', ') || '(none)' : (singleValue ?? '(none)')}.
         </output>
       </div>
-    </ThemeScope>
+    </div>
   )
 }

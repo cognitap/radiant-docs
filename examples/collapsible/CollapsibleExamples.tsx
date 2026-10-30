@@ -1,7 +1,7 @@
 'use client'
 
 import '@cognitap/radiant/styles.css'
-import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react'
+import { useEffect, useRef, useState, useSyncExternalStore, useMemo } from 'react'
 import {
   Button,
   Card,
@@ -17,8 +17,7 @@ import {
   Input,
   ThemeScope,
   useCollapsible,
-  type Theme,
-  type ThemeMode
+  type Theme
 } from '@cognitap/radiant'
 import { radiant } from '@cognitap/radiant/examples'
 import { MotionProvider, useReducedMotion } from '@cognitap/radiant/motion/react'
@@ -28,13 +27,7 @@ const clientSnapshot = () => true
 const serverSnapshot = () => false
 const topics = ['Product updates', 'Release notes', 'Team activity']
 
-export function CollapsibleSettingsExample({
-  theme = radiant,
-  mode = 'light'
-}: {
-  theme?: Theme
-  mode?: ThemeMode
-}) {
+export function CollapsibleSettingsExample({ theme = radiant }: { theme?: Theme }) {
   const [off, setOff] = useState(false)
   const selected = useMemo<Theme>(
     () => ({ ...theme, motion: { ...theme.motion, mode: off ? 'off' : theme.motion.mode } }),
@@ -43,7 +36,6 @@ export function CollapsibleSettingsExample({
   return (
     <ThemeScope
       theme={selected}
-      mode={mode}
       style={{ maxWidth: '42rem', minWidth: 0, boxSizing: 'border-box', padding: '.5rem' }}
     >
       <MotionProvider>
@@ -221,13 +213,7 @@ function DeliverySettings({ off }: { off: boolean }) {
   )
 }
 
-export function CollapsibleHeightExample({
-  theme = radiant,
-  mode = 'light'
-}: {
-  theme?: Theme
-  mode?: ThemeMode
-}) {
+export function CollapsibleHeightExample({ theme = radiant }: { theme?: Theme }) {
   const [off, setOff] = useState(false)
   const selected = useMemo<Theme>(
     () => ({ ...theme, motion: { ...theme.motion, mode: off ? 'off' : theme.motion.mode } }),
@@ -236,7 +222,6 @@ export function CollapsibleHeightExample({
   return (
     <ThemeScope
       theme={selected}
-      mode={mode}
       style={{ maxWidth: '42rem', minWidth: 0, boxSizing: 'border-box', padding: '.5rem' }}
     >
       <MotionProvider>

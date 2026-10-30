@@ -2,33 +2,20 @@
 
 import { useRef, useState } from 'react'
 import NextLink from 'next/link'
-import { Button, Link, ThemeScope, type Theme, type ThemeMode } from '@cognitap/radiant'
-import { radiant } from '@cognitap/radiant/examples'
+import { Button, Link } from '@cognitap/radiant'
 import '@cognitap/radiant/styles.css'
 import './link-example.css'
 import { useHydrated } from '../profile/useHydrated'
 
 const destination = '/docs/foundations/'
 
-export function RouterLinkExample({
-  newTab = false,
-  theme = radiant,
-  mode = 'light'
-}: {
-  newTab?: boolean
-  theme?: Theme
-  mode?: ThemeMode
-}) {
+export function RouterLinkExample({ newTab = false }: { newTab?: boolean }) {
   const anchorRef = useRef<HTMLAnchorElement>(null)
   const ready = useHydrated()
   const [feedback, setFeedback] = useState('Focus the link, then use Enter to navigate.')
 
   return (
-    <ThemeScope
-      theme={theme}
-      mode={mode}
-      className="link-example"
-    >
+    <div className="link-example">
       <Link
         ref={anchorRef}
         href={destination}
@@ -52,6 +39,6 @@ export function RouterLinkExample({
         Focus router link
       </Button>
       <output>{feedback}</output>
-    </ThemeScope>
+    </div>
   )
 }

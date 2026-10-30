@@ -8,18 +8,12 @@ import {
   ToastTitle,
   ToastDescription,
   ToastAction,
-  ToastClose,
-  ThemeScope,
-  type ThemeMode
+  ToastClose
 } from '@cognitap/radiant'
-import { radiant } from '@cognitap/radiant/examples'
 import { DemoControls, DemoPreview } from '@/components/demo/DemoFrame'
-import { PreviewThemeControls } from '@/components/demo/ActionControls'
 import '@cognitap/radiant/styles.css'
 type Notice = { id: number; kind: 'save' | 'archive' }
 export function ToastExample() {
-  const [theme, setTheme] = useState(radiant)
-  const [mode, setMode] = useState<ThemeMode>('light')
   const [timed, setTimed] = useState(false)
   const [saved, setSaved] = useState(false)
   const [archived, setArchived] = useState(false)
@@ -34,12 +28,6 @@ export function ToastExample() {
   return (
     <>
       <DemoControls>
-        <PreviewThemeControls
-          theme={theme}
-          mode={mode}
-          onThemeChange={setTheme}
-          onModeChange={setMode}
-        />
         <label>
           <input
             type="checkbox"
@@ -50,11 +38,7 @@ export function ToastExample() {
         </label>
       </DemoControls>
       <DemoPreview>
-        <ThemeScope
-          theme={theme}
-          mode={mode}
-          style={{ padding: '1rem', maxWidth: '34rem', width: '100%', boxSizing: 'border-box' }}
-        >
+        <div style={{ maxWidth: '34rem', width: '100%' }}>
           <ToastProvider duration={timed ? 6000 : 0}>
             <p>
               Notifications stay until dismissed unless you enable the optional timeout. Press F8 to
@@ -130,7 +114,7 @@ export function ToastExample() {
               ))}
             </ToastViewport>
           </ToastProvider>
-        </ThemeScope>
+        </div>
       </DemoPreview>
     </>
   )

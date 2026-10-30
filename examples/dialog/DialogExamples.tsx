@@ -1,7 +1,7 @@
 'use client'
 
 import '@cognitap/radiant/styles.css'
-import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react'
+import { useEffect, useRef, useState, useSyncExternalStore, useMemo } from 'react'
 import {
   Button,
   Card,
@@ -19,8 +19,7 @@ import {
   Field,
   Input,
   ThemeScope,
-  type Theme,
-  type ThemeMode
+  type Theme
 } from '@cognitap/radiant'
 import { radiant } from '@cognitap/radiant/examples'
 import { MotionProvider, useReducedMotion } from '@cognitap/radiant/motion/react'
@@ -30,13 +29,7 @@ const clientSnapshot = () => true
 const serverSnapshot = () => false
 const initialProfile = { name: 'Ada Lovelace', email: 'ada@example.com' }
 
-export function DialogProfileExample({
-  theme = radiant,
-  mode = 'light'
-}: {
-  theme?: Theme
-  mode?: ThemeMode
-}) {
+export function DialogProfileExample({ theme = radiant }: { theme?: Theme }) {
   const [off, setOff] = useState(false)
   const selected = useMemo<Theme>(
     () => ({ ...theme, motion: { ...theme.motion, mode: off ? 'off' : theme.motion.mode } }),
@@ -45,7 +38,6 @@ export function DialogProfileExample({
   return (
     <ThemeScope
       theme={selected}
-      mode={mode}
       style={{ maxWidth: '40rem', minWidth: 0, padding: '.5rem', boxSizing: 'border-box' }}
     >
       <MotionProvider>
@@ -243,13 +235,7 @@ function ProfileEditor({ off }: { off: boolean }) {
   )
 }
 
-export function DialogTransitionExample({
-  theme = radiant,
-  mode = 'light'
-}: {
-  theme?: Theme
-  mode?: ThemeMode
-}) {
+export function DialogTransitionExample({ theme = radiant }: { theme?: Theme }) {
   const [off, setOff] = useState(false)
   const selected = useMemo<Theme>(
     () => ({ ...theme, motion: { ...theme.motion, mode: off ? 'off' : theme.motion.mode } }),
@@ -258,7 +244,6 @@ export function DialogTransitionExample({
   return (
     <ThemeScope
       theme={selected}
-      mode={mode}
       style={{ maxWidth: '40rem', minWidth: 0, padding: '.5rem', boxSizing: 'border-box' }}
     >
       <MotionProvider>
