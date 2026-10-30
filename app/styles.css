@@ -378,11 +378,14 @@ body {
   min-height: 2rem;
 }
 
-.demo-controls :is(.action-options, .action-toggles, .demo-theme-controls) {
+.demo-controls :is(.action-options, .action-toggles) {
   display: contents;
 }
 
-.demo-controls .demo-theme-controls > :first-child {
+.demo-theme-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.25rem;
   margin-inline-start: auto;
 }
 
