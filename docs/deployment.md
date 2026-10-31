@@ -47,8 +47,11 @@ pnpm install --frozen-lockfile
 pnpm test:deployment https://<deployment>.pages.dev
 ```
 
-It waits until the deployment answers, then runs the site tests over HTTPS.
-`/deployment.json` must match this checkout.
+It waits until the deployment answers, then runs the navigation test over
+HTTPS: sidebar and mobile links, search, the 404 page and `/deployment.json`,
+which must match this checkout. The other site tests already passed against the
+same export in CI. To run all of them against a deployment, use
+`DOCS_URL=https://<deployment>.pages.dev pnpm test:site`.
 
 ## Roll back
 

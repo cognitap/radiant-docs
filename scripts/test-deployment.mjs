@@ -8,7 +8,7 @@ const { values, positionals } = parseArgs({
 const target = values.url ?? positionals[0]
 if (!target) throw new Error('Usage: pnpm test:deployment https://<deployment>')
 
-const child = spawn(process.execPath, ['--test', 'tests/site'], {
+const child = spawn(process.execPath, ['--test', 'tests/site/navigation.test.ts'], {
   stdio: 'inherit',
   env: { ...process.env, DOCS_URL: target }
 })
