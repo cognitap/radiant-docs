@@ -22,7 +22,7 @@
     "docs:check": "node scripts/check-docs.mjs"
   },
   "dependencies": {
-    "@cognitap/radiant": "0.0.71",
+    "@cognitap/radiant": "0.0.72",
     "@tanstack/react-form": "1.33.5",
     "fumadocs-core": "16.17.8",
     "fumadocs-mdx": "15.4.10",
