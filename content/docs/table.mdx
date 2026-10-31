@@ -1,17 +1,22 @@
 ---
 title: Table
-description: Native tables with captions, headers and ordinary interactive cells.
+description: Show records in rows and columns with native table semantics, a caption and real headers.
 ---
 
-import { TableDemo } from '../../components/TableDemo'
+import {
+  TableDemo,
+  TableEmptyDemo,
+  TableTotalsDemo,
+  TableWideDemo
+} from '../../components/TableDemo'
 
 <TableDemo />
 
 ## Usage
 
-`Table` renders a native `table`. Put `TableCaption` first to name its content, then compose `TableHead`, `TableBody` and optional `TableFoot` with `TableRow` children. Use tables for tabular data.
+Use Table for records that people compare across rows and columns. Each part renders its native element, and links and buttons in cells are ordinary [Link](/docs/link/) and [Button](/docs/button/) controls.
 
-`TableHeader` is a `th` with `scope="col"` by default. Set `scope="row"` for a row heading. `TableCell` is a `td`. Native `id`, `headers`, `colSpan` and `rowSpan` support more complex relationships; applications must supply accurate associations and meaningful header text.
+Use CSS grid or [Card](/docs/card/) for layout without row and column relationships, and [ScrollArea](/docs/scroll-area/) for a scroll surface that is not a table. Sorting, row selection and arrow-key cell navigation belong to a future DataTable; Table adds no grid behavior.
 
 ```tsx
 <Table>
@@ -24,21 +29,109 @@ import { TableDemo } from '../../components/TableDemo'
   </TableHead>
   <TableBody>
     <TableRow>
-      <TableHeader scope="row">Jordan</TableHeader>
+      <TableHeader scope="row">Jordan Rivera</TableHeader>
       <TableCell>Designer</TableCell>
     </TableRow>
   </TableBody>
 </Table>
 ```
 
-## Overflow and actions
+## Examples
 
-Text wraps by default. For wide content, wrap the table in `TableContainer`, which provides a focusable native `section` scroll region. Supply exactly one nonempty `aria-label` or `aria-labelledby` for that region; it names the scroll surface independently of the table caption. Set a table `minWidth` when horizontal scrolling is needed. The table keeps its native display and semantics.
+### Total a budget
 
-Links and buttons in cells remain ordinary [Link](/docs/link/) and [Button](/docs/button/) components in the page tab order. The application owns action results, announcements and focus after content changes. Sorting, filtering, row selection, pagination and virtualization belong to the application; Table adds no grid keyboard engine.
+End-align numeric headers and cells, use tabular numerals, and put the total in `TableFoot` with a row header.
 
-## Customize
+<TableTotalsDemo />
 
-Native attributes, `className`, typed `style` and refs reach each named host. `Table` refs point to `HTMLTableElement`; container refs point to `HTMLElement`. Caption, section, row, header and cell parts retain their native elements.
+### Scroll a wide report
 
-`components.table` in `defineTheme` supports `background`, `color`, `headerBackground`, `headerColor`, `captionColor`, `borderColor`, `borderWidth`, `radius`, `paddingInline`, `paddingBlock` and `fontSize`. Radius styles the optional container; padding styles captions and cells. Use matching `--rad-table-*` properties for local overrides.
+Wrap a wide table in `TableContainer`. Pointing `aria-labelledby` at the caption id names the region without repeating text.
+
+<TableWideDemo />
+
+### Show an empty table
+
+Keep the headers and put the message in one `TableCell` whose `colSpan` equals the column count. For a full-page placeholder with actions, use [EmptyState](/docs/empty-state/).
+
+<TableEmptyDemo />
+
+## Accessibility
+
+Native table semantics stay intact: no part accepts `role`. `TableCaption` is the table's accessible name, so give every table one; hide it visually with a utility class if the design needs that.
+
+`TableHeader` renders `th` with `scope="col"` by default. Pass `scope="row"` for the first cell of a body or footer row. For complex headers, give `TableHeader` an `id` and list those ids in `TableCell`'s `headers`.
+
+`TableContainer` renders a focusable `section`, a region landmark, so it needs a name. Pass `aria-label`, `aria-labelledby` or both; it throws a `TypeError` when both are missing or blank.
+
+| Key                                | Where                    | Action                                                    |
+| ---------------------------------- | ------------------------ | --------------------------------------------------------- |
+| Tab / Shift+Tab                    | Page                     | Visit TableContainer, then links and buttons in DOM order |
+| Arrow keys, Page Up/Down, Home/End | Focused TableContainer   | Scroll the container                                      |
+| Enter / Space                      | Link or button in a cell | Native activation                                         |
+
+## Styling
+
+Each part sets `data-slot` on its host: `table`, `table-caption`, `table-head`, `table-body`, `table-foot`, `table-row`, `table-header`, `table-cell` and `table-container`. A caller's `data-slot` is appended. `className` merges with the caller winning, and `ref` reaches the native element.
+
+Cells align to the start and wrap long words; the caption sits on top. `components.table` in `defineTheme` sets background, color, headerBackground, headerColor, captionColor, borderColor, borderWidth, radius, paddingInline, paddingBlock and fontSize. Override one table with `--rad-table-*` properties on its `style`.
+
+## API
+
+Every part also takes its host's native props except `role`, plus `className`, `style` (ThemeStyle), `data-slot` and `ref`.
+
+### Table
+
+| Prop     | Type      | Default |
+| -------- | --------- | ------- |
+| children | ReactNode | None    |
+| Host     | `table`   |         |
+
+### TableCaption
+
+| Prop     | Type                        | Default |
+| -------- | --------------------------- | ------- |
+| children | ReactNode; the table's name | None    |
+| Host     | `caption`                   |         |
+
+### TableHead, TableBody, TableFoot
+
+| Prop     | Type                                      | Default |
+| -------- | ----------------------------------------- | ------- |
+| children | TableRow elements                         | None    |
+| Host     | `thead` / `tbody` / `tfoot` (bold labels) |         |
+
+### TableRow
+
+| Prop     | Type                      | Default |
+| -------- | ------------------------- | ------- |
+| children | TableHeader and TableCell | None    |
+| Host     | `tr`                      |         |
+
+### TableHeader
+
+| Prop              | Type                              | Default |
+| ----------------- | --------------------------------- | ------- |
+| scope             | col / row / colgroup / rowgroup   | col     |
+| id                | string; target for cell `headers` | None    |
+| colSpan / rowSpan | number                            | 1       |
+| Host              | `th`                              |         |
+
+### TableCell
+
+| Prop              | Type                               | Default |
+| ----------------- | ---------------------------------- | ------- |
+| colSpan / rowSpan | number                             | 1       |
+| headers           | string; space-separated header ids | None    |
+| Host              | `td`                               |         |
+
+### TableContainer
+
+| Prop            | Type                                     | Default |
+| --------------- | ---------------------------------------- | ------- |
+| aria-label      | string; this or aria-labelledby required | None    |
+| aria-labelledby | string; id of the naming element         | None    |
+| tabIndex        | Not a prop; always 0                     | 0       |
+| Host            | `section`                                |         |
+
+Exports `TableProps`, `TableCaptionProps`, `TableHeadProps`, `TableBodyProps`, `TableFootProps`, `TableRowProps`, `TableHeaderProps`, `TableCellProps` and `TableContainerProps`.

@@ -1,17 +1,19 @@
 ---
 title: Pagination
-description: Native page links and application-owned page actions.
+description: Move between pages of a result set with page links or page buttons.
 ---
 
-import { PaginationDemo } from '../../components/PaginationDemo'
+import {
+  PaginationDemo,
+  PaginationLinksDemo,
+  PaginationBoundariesDemo
+} from '../../components/PaginationDemo'
 
 <PaginationDemo />
 
 ## Usage
 
-`Pagination` is a named `nav`. Put `PaginationItem` list items inside `PaginationList` and give each page a meaningful label, such as “Page 2”. Set `current` on exactly one page. It supplies `aria-current="page"`; it does not select or fetch anything.
-
-For URL navigation, use `PaginationLink`, `PaginationPrevious` and `PaginationNext` with real `href` values. Native modified clicks, downloads and browser history remain available. At an unavailable boundary, render `PaginationUnavailable` text instead of a link. `PaginationEllipsis` is decorative; include it inside an item.
+Use Pagination when results are split into numbered pages a reader can return to. Use [Breadcrumb](/docs/breadcrumb/) for a place in a hierarchy, [Tabs](/docs/tabs/) for switching panels in place and [NavLink](/docs/nav-link/) for site navigation. For a feed read top to bottom, load more on scroll or with a "Load more" [Button](/docs/button/) instead.
 
 ```tsx
 <Pagination aria-label="Search result pages">
@@ -21,7 +23,7 @@ For URL navigation, use `PaginationLink`, `PaginationPrevious` and `PaginationNe
     </PaginationItem>
     <PaginationItem>
       <PaginationLink
-        href="/results?page=1"
+        href="?page=1"
         current
         aria-label="Page 1"
       >
@@ -29,18 +31,118 @@ For URL navigation, use `PaginationLink`, `PaginationPrevious` and `PaginationNe
       </PaginationLink>
     </PaginationItem>
     <PaginationItem>
-      <PaginationNext href="/results?page=2" />
+      <PaginationNext href="?page=2" />
     </PaginationItem>
   </PaginationList>
 </Pagination>
 ```
 
-For local actions, `PaginationButton` composes [Button](/docs/button/), including native `disabled`, pending guards and `render`. The example owns its records, current page, status announcement and focus when a boundary action becomes disabled. Applications own routing, page counts, loading, cancellation, content focus and scroll restoration.
+Pages are `medium` by default, like Button and Link. Set `controlSize="small"` for a compact pager.
 
-## Customize
+## Examples
 
-Actions accept `variant`, `tone` and `controlSize`; current pages default to solid accent, other pages to ghost neutral, in small size. `render` on links forwards resolved props, children and ref to one anchor, including router anchors.
+### Link to server-rendered pages
 
-Root props and refs reach the native `nav`; list, item, link, button and text props reach their respective hosts. `aria-label` defaults to “Pagination”; use distinct names for multiple pagers or `aria-labelledby` for a visible heading.
+<PaginationLinksDemo />
 
-Use `className`, typed `style`, or `components.pagination` in `defineTheme` to set `gap`, `radius` and `itemMinWidth`. Button and Link retain their base identities alongside pagination identities.
+Each page is a real URL, so the server renders it and modified clicks, history and sharing work natively. `render` forwards resolved props to a router anchor.
+
+### Show the first and last pages
+
+<PaginationBoundariesDemo />
+
+At an end, render `PaginationUnavailable` in place of Previous or Next. `PaginationEllipsis` marks skipped pages.
+
+## State
+
+Pagination keeps no state and submits nothing. Set `current` on exactly one link or button. The application owns page counts, routing, fetching and focus after content changes. With `PaginationButton`, disable Previous and Next at the ends and move focus to the reached page, as the record demo above does.
+
+## Accessibility
+
+Pagination is a `nav` landmark named "Pagination". Give each pager on a page a distinct `aria-label`, or `aria-labelledby` for a visible heading. A blank name throws. Pages sit in an ordered list. The current page gets `aria-current="page"`. Label number-only pages, such as "Page 2".
+
+`PaginationUnavailable` renders text with `aria-disabled="true"` and no focus stop, since a link cannot be disabled. Disabled `PaginationButton` boundaries use native `disabled`. The ellipsis is hidden from assistive technology.
+
+| Key                     | Behavior                                              |
+| ----------------------- | ----------------------------------------------------- |
+| Tab / Shift+Tab         | Move between links and enabled buttons                |
+| Enter on a link         | Follow the URL                                        |
+| Enter / Space on button | Run `onClick`; disabled and pending buttons ignore it |
+
+## Motion
+
+Links and buttons use Button's press motion. It stops under reduced motion and with `motion="off"` inside a `MotionProvider`. Forced colors keep the current page visible.
+
+## Styling
+
+| Part                      | `data-slot`                                    |
+| ------------------------- | ---------------------------------------------- |
+| Pagination                | `pagination`                                   |
+| PaginationList / Item     | `pagination-list` / `pagination-item`          |
+| PaginationLink            | `link pagination-link`                         |
+| PaginationPrevious / Next | adds `pagination-previous` / `pagination-next` |
+| PaginationButton          | `button pagination-button`                     |
+| PaginationUnavailable     | `pagination-unavailable`                       |
+| PaginationEllipsis        | `pagination-ellipsis`                          |
+
+Links and buttons also set `data-variant`, `data-tone` and `data-control-size`. `className` and `style` reach each part's host.
+
+| Variable                          | Default                        |
+| --------------------------------- | ------------------------------ |
+| `--rad-pagination-gap`            | 0.25rem                        |
+| `--rad-pagination-radius`         | `--rad-control-radius`, 0.5rem |
+| `--rad-pagination-item-min-width` | 2rem                           |
+
+Theme keys are `components.pagination.gap`, `radius` and `itemMinWidth`.
+
+## API
+
+### Pagination
+
+| Prop            | Type / default                    |
+| --------------- | --------------------------------- |
+| aria-label      | string; "Pagination"              |
+| aria-labelledby | string; replaces the default name |
+| Other props     | Native `nav` props                |
+
+`PaginationList` (`ol`) and `PaginationItem` (`li`) take native props.
+
+### PaginationLink
+
+| Prop        | Type / default                               |
+| ----------- | -------------------------------------------- |
+| href        | Required string                              |
+| current     | boolean; false; sets `aria-current="page"`   |
+| variant     | Link variant; solid when current, else ghost |
+| tone        | accent when current, else neutral            |
+| controlSize | small / medium / large; medium               |
+| external    | boolean; false                               |
+| render      | (props: PaginationLinkRenderProps) => anchor |
+
+### PaginationPrevious / PaginationNext
+
+| Prop        | Type / default                                                    |
+| ----------- | ----------------------------------------------------------------- |
+| children    | ReactNode; "Previous" / "Next"                                    |
+| rel         | string; `prev` / `next`, plus `noopener noreferrer` when external |
+| Other props | PaginationLink props except `current`                             |
+
+### PaginationButton
+
+| Prop               | Type / default                                |
+| ------------------ | --------------------------------------------- |
+| current            | boolean; false; sets `aria-current="page"`    |
+| variant / tone     | As PaginationLink                             |
+| controlSize        | small / medium / large; medium                |
+| disabled / pending | boolean; false                                |
+| type               | "button"                                      |
+| Other props        | Button props except `aria-current` and `role` |
+
+### PaginationUnavailable / PaginationEllipsis
+
+| Prop        | Type / default                                                            |
+| ----------- | ------------------------------------------------------------------------- |
+| children    | ReactNode; ellipsis defaults to "…"                                       |
+| Other props | Native `span` props except `aria-disabled` / `aria-hidden` and `tabIndex` |
+
+Every part strips `role`. Exports `PaginationProps`, `PaginationListProps`, `PaginationItemProps`, `PaginationLinkProps`, `PaginationLinkRenderProps`, `PaginationPreviousProps`, `PaginationNextProps`, `PaginationButtonProps`, `PaginationUnavailableProps` and `PaginationEllipsisProps`.

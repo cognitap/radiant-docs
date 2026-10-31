@@ -1,0 +1,20 @@
+.breadcrumb-example {
+  box-sizing: border-box;
+  width: 28rem;
+  max-width: 100%;
+  padding: 1.5rem;
+  display: grid;
+  justify-items: start;
+  gap: 1rem;
+}
+
+.breadcrumb-example output {
+  font:
+    0.8125rem/1.5 ui-sans-serif,
+    system-ui,
+    sans-serif;
+}
+
+.breadcrumb-narrow {
+  width: 18rem;
+}
