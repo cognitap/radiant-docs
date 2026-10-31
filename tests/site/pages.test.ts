@@ -48,7 +48,7 @@ async function checkPage(baseURL: string, browser: Browser, route: string) {
           assert.equal(listing.text, await exampleSource(listing.file), listing.file)
           await frame.getByRole('button', { name: `Copy ${listing.file}`, exact: true }).click()
           await frame
-            .locator('.demo-copy-feedback')
+            .locator('[data-slot~="code-block-status"]')
             .filter({ hasText: `Copied ${listing.file}.` })
             .waitFor()
           assert.equal(await page.evaluate(() => navigator.clipboard.readText()), listing.text)
@@ -63,12 +63,14 @@ async function checkPage(baseURL: string, browser: Browser, route: string) {
 }
 
 async function sourceListings(root: Page | Locator) {
-  return root.locator('pre[aria-label^="Source: "]').evaluateAll(nodes =>
-    nodes.map(node => ({
-      file: node.getAttribute('aria-label')!.slice('Source: '.length),
-      text: node.textContent ?? ''
-    }))
-  )
+  return root
+    .locator('[data-slot~="code-block-viewport"][aria-label^="Source: "]')
+    .evaluateAll(nodes =>
+      nodes.map(node => ({
+        file: node.getAttribute('aria-label')!.slice('Source: '.length),
+        text: node.querySelector('code')?.textContent ?? ''
+      }))
+    )
 }
 
 async function openSources(frame: Locator) {

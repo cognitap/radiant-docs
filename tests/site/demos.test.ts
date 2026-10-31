@@ -79,13 +79,13 @@ test('a blocked clipboard reports the failure and leaves the preview usable', as
         const demo = page.getByRole('region', { name: 'Save workspace', exact: true })
         await demo.locator('summary').click()
         const label = await demo
-          .locator('pre[aria-label^="Source: "]')
+          .locator('[data-slot~="code-block-viewport"][aria-label^="Source: "]')
           .first()
           .getAttribute('aria-label')
         const file = label?.slice('Source: '.length)
         await demo.getByRole('button', { name: `Copy ${file}`, exact: true }).click()
         await demo
-          .getByText('Copy failed. Select and copy the code below.', { exact: true })
+          .getByText('Could not copy code. Select the code and copy it manually.', { exact: true })
           .waitFor()
         await demo.getByRole('button', { name: 'Save changes' }).click()
         await demo.getByText('Saved “Orbit Studio”.', { exact: true }).waitFor()
