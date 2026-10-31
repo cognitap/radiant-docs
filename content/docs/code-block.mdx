@@ -1,0 +1,74 @@
+---
+title: CodeBlock
+description: Present inline and block code with optional highlighting, line numbers and accessible copy feedback.
+---
+
+import {
+  CodeBlockDemo,
+  CodeBlockConfigurationDemo,
+  CodeBlockExportDemo
+} from '../../components/CodeBlockDemo'
+
+## Usage
+
+<CodeBlockDemo />
+
+Use InlineCode for a term inside text. CodeBlock presents a raw code string with optional line numbers, highlighting and a copy action.
+
+Its viewport is an actual ScrollArea. Give it a name describing the source.
+
+## Examples
+
+Choose a package manager to copy the matching installation command.
+
+<CodeBlockConfigurationDemo />
+
+Generate a configuration from native form values. The consumer supplies highlighted React content; the core includes no highlighting engine. A server or client highlighter can supply those nodes. Preserve the source text and whitespace.
+
+<CodeBlockExportDemo />
+
+Filter real session records, inspect their CSV and copy the selected export. Long lines stay inside the keyboard-reachable viewport.
+
+## State
+
+The application owns code and language. There is no editable value or defaultCode.
+
+Copying starts only after explicit activation. The button keeps focus while one browser write is pending. Feedback reports success after completion and offers manual-copy guidance when writing is unavailable or refused.
+
+Replacing code clears feedback and never copies automatically. An outstanding write finishes before another can start; its old result does not announce against different source.
+
+## Accessibility
+
+CodeBlockContent renders pre and code. Line numbers are decorative and excluded from copying. Copy always uses the raw code string, including indentation and line endings.
+
+Tab reaches the viewport; native arrow and paging keys scroll it. Source direction defaults to left-to-right. Set the viewport's dir for right-to-left code independently of surrounding controls.
+
+The mounted output announces feedback politely and also displays it. Avoid adding a second live announcement around the same result.
+
+## Motion
+
+CodeBlock adds no animation. Its Button retains normal motion and reduced-motion behavior.
+
+## Styling
+
+className/style/ref reach each part's actual host. The inlineCode and codeBlock theme slots control typography, surfaces, boundaries, spacing, numbering and feedback. parts.status styles the automatic output.
+
+| Part                        | Host                |
+| --------------------------- | ------------------- |
+| InlineCode                  | code                |
+| CodeBlock / CodeBlockHeader | div                 |
+| CodeBlockViewport           | ScrollArea viewport |
+| CodeBlockContent            | pre containing code |
+| CodeBlockCopy               | Button              |
+
+## API
+
+| Prop or part                         | Contract                                           |
+| ------------------------------------ | -------------------------------------------------- |
+| code                                 | Required raw string                                |
+| language                             | Optional metadata; does not load an engine         |
+| lineNumbers                          | Decorative gutter; defaults to false               |
+| CodeBlockContent children            | Optional highlighted React content                 |
+| loadingText / copiedText / errorText | Copy feedback strings                              |
+| CodeBlockCopy                        | Button props and render; no toggle or submit state |
+| Native props, className, style, ref  | Forwarded to the documented host                   |
