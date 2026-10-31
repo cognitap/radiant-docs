@@ -18,7 +18,7 @@
     "format": "oxfmt",
     "format:check": "oxfmt --check",
     "test:site": "node --test tests/site/*.test.ts",
-    "check": "pnpm format:check && pnpm lint && pnpm docs:check && pnpm typecheck && node --test tests/workshop-*.test.ts tests/handoff-compiles.test.ts scripts/deployment.test.mjs && pnpm build && pnpm test:site",
+    "check": "pnpm format:check && pnpm lint && pnpm docs:check && pnpm typecheck && node --test tests/workshop-*.test.ts tests/handoff-compiles.test.ts tests/preset-fonts.test.ts scripts/deployment.test.mjs && pnpm build && pnpm test:site",
     "docs:check": "node scripts/check-docs.mjs"
   },
   "dependencies": {
