@@ -2193,3 +2193,84 @@ test('NumberField docs preserve keyboard steps, raw locale forms, clamping and c
     }
   })
 })
+
+test('Resizable docs preserve fractional drag collapse, keyboard layout changes and explicit controlled persistence', async () => {
+  await withSite(async (baseURL, browser) => {
+    const page = await browser.newPage(),
+      errors = track(page)
+    try {
+      await capture(page, 'resizable', async () => {
+        await page.goto(baseURL + '/docs/resizable/')
+        await page.waitForFunction(
+          () => !document.querySelector<HTMLButtonElement>('.demo-heading button')?.disabled
+        )
+        const files = page.getByRole('region', { name: 'Project file workspace', exact: true })
+        const handle = files.getByRole('separator', { name: 'Project files', exact: true })
+        await handle.focus()
+        await page.keyboard.press('ArrowRight')
+        assert.equal(await handle.getAttribute('aria-valuenow'), '33')
+        const box = await handle.boundingBox()
+        assert.ok(box)
+        await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
+        await page.mouse.down()
+        await page.mouse.move(box.x + box.width / 2 + 17.3, box.y + box.height / 2, { steps: 4 })
+        await page.mouse.up()
+        const after = Number(await handle.getAttribute('aria-valuenow'))
+        assert.ok(after > 33)
+        await files.getByRole('button', { name: 'Collapse files', exact: true }).click()
+        assert.equal(await handle.getAttribute('aria-valuenow'), '0')
+        await files.getByRole('button', { name: 'Restore files', exact: true }).click()
+        assert.equal(Number(await handle.getAttribute('aria-valuenow')), after)
+        await files.getByRole('button', { name: 'session.json', exact: true }).click()
+        await files.getByRole('heading', { name: 'session.json', exact: true }).waitFor()
+        const notes = page.getByRole('region', { name: 'Interview notes workspace', exact: true })
+        await notes
+          .getByRole('textbox', { name: 'Interview notes', exact: true })
+          .fill('The participant requested larger text.')
+        await notes.getByRole('button', { name: 'Prepare note snapshot', exact: true }).click()
+        assert.match(
+          await notes.getByRole('group', { name: 'Note snapshot JSON', exact: true }).innerText(),
+          /"wordCount": 5/
+        )
+        const saved = page.getByRole('region', { name: 'Saved research workspace', exact: true })
+        const navigation = saved.getByRole('separator', {
+          name: 'Workspace navigation',
+          exact: true
+        })
+        await navigation.focus()
+        await page.keyboard.press('Enter')
+        assert.equal(await navigation.getAttribute('aria-valuenow'), '20')
+        const feedback = saved.getByRole('status', {
+          name: 'Workspace layout feedback',
+          exact: true
+        })
+        assert.match(await feedback.innerText(), /Keep navigation visible/)
+        await saved.getByRole('button', { name: 'Widen navigation', exact: true }).click()
+        await saved.getByRole('button', { name: 'Save layout', exact: true }).click()
+        await saved.getByRole('button', { name: 'Reset layout', exact: true }).click()
+        assert.equal(await navigation.getAttribute('aria-valuenow'), '20')
+        await saved.getByRole('button', { name: 'Restore saved layout', exact: true }).click()
+        assert.equal(await navigation.getAttribute('aria-valuenow'), '25')
+        assert.match(await feedback.innerText(), /Saved workspace layout restored/)
+        const demo = page.getByRole('region', { name: 'Edit interview notes', exact: true })
+        await demo.getByRole('combobox', { name: 'Direction', exact: true }).selectOption('rtl')
+        await page.setViewportSize({ width: 320, height: 850 })
+        const noteHandle = notes.getByRole('separator', {
+          name: 'Interview note editor',
+          exact: true
+        })
+        const before = Number(await noteHandle.getAttribute('aria-valuenow'))
+        await noteHandle.focus()
+        await page.keyboard.press('ArrowDown')
+        assert.equal(Number(await noteHandle.getAttribute('aria-valuenow')), before + 1)
+        const width = await notes
+          .locator('[data-slot~="resizable"]')
+          .evaluate(node => node.getBoundingClientRect().width)
+        assert.ok(width <= 288)
+        assert.deepEqual(errors, [])
+      })
+    } finally {
+      await page.close()
+    }
+  })
+})

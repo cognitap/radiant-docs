@@ -1,0 +1,63 @@
+---
+title: Resizable
+description: Resize bounded panels with native separators, keyboard controls and application-owned persistence.
+---
+
+import {
+  ResizableDemo,
+  ResizableNotesDemo,
+  ResizableSavedDemo
+} from '../../components/ResizableDemo'
+
+## Usage
+
+<ResizableDemo />
+
+Configure panels with stable keys and initial percentage sizes totalling 100. Render panels and handles directly in registry order.
+
+## Examples
+
+<ResizableNotesDemo />
+
+<ResizableSavedDemo />
+
+## State
+
+Choose `value` with `onValueChange(value)` or `defaultValue`. Each handle transfers space between adjacent panels; the others retain their sizes. Both panels' bounds determine the handle's range.
+
+Controlled requests may be refused. Prop synchronization fires no callback. Pointer release or cancellation leaves the last accepted layout.
+
+A collapsible panel can reach zero below its minimum when its neighbor has room. Zero-sized panels keep their children mounted, hidden and inert.
+
+Applications own persistence and restored values. Form reset does not reset the layout.
+
+## Accessibility
+
+Name each handle after its leading panel. Handles expose that panel's ID, current size and reachable bounds.
+
+Arrow keys move the divider physically; horizontal movement respects direction. Shift+Arrow uses the larger step. Home/End reach bounds. Enter collapses or restores where feasible.
+
+Include buttons that resize without dragging, as shown in the examples. Native scroll areas keep overflowing content reachable. Collapsing a focused panel moves focus to an adjacent handle.
+
+## Motion
+
+Sizes update immediately without layout animation.
+
+## Styling
+
+Root and Panel use native divs; Handle composes Separator's native hr. `className`, `style`, native props and `ref` reach those hosts.
+
+Use `components.resizable` for handle size, colors and focus cues. Separator retains its line styling. Leave panel flex sizing intact and express constraints through `items`.
+
+## API
+
+| Part                | Contract                                                                                                                    |
+| ------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `Resizable`         | `items`, one initial layout owner, `onValueChange`, `orientation` and `disabled`.                                           |
+| `items`             | Each entry has `value`, optional `min`/`max` percentages and `collapsible`. Bounds default to `0`/`100`.                    |
+| `ResizablePanel`    | `value` identifies its registry entry.                                                                                      |
+| `ResizableHandle`   | `value` identifies the preceding panel; omit a handle after the last panel. Name it with `aria-label` or `aria-labelledby`. |
+| `step`, `largeStep` | Positive keyboard deltas; default `1` and ten steps.                                                                        |
+| `useResizable()`    | Returns `null` outside a group, otherwise the layout, `controlled`, `orientation`, `disabled` and bounded request methods.  |
+| Hook methods        | `setValue(array)`, `resize(panel, size)`, `resizeBy(panel, amount)` and `toggle(panel)`.                                    |
+| `getPanel(panel)`   | Returns its ID, size, reachable bounds and collapse/restore availability.                                                   |
