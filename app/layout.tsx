@@ -5,6 +5,7 @@ import NextLink from 'next/link'
 import { AppearanceControl, SiteTheme } from '@/components/docs/SiteTheme'
 import { Search } from '@/components/docs/Search'
 import { RadiantMark } from '@/components/docs/RadiantMark'
+import { presetFontsHref } from '@/lib/preset-fonts'
 import '@cognitap/radiant/styles.css'
 import './styles.css'
 
@@ -17,6 +18,21 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
+      <head>
+        <link
+          rel="preconnect"
+          href="https://fonts.googleapis.com"
+        />
+        <link
+          rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossOrigin=""
+        />
+        <link
+          rel="stylesheet"
+          href={presetFontsHref}
+        />
+      </head>
       <body>
         <SiteTheme>
           <div className="docs-shell">
