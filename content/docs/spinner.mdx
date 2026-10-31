@@ -1,52 +1,77 @@
 ---
 title: Spinner
-description: Compact decorative or named activity feedback.
+description: Show that work is in progress when its duration is unknown.
 ---
 
-import { SpinnerDemo } from '../../components/SpinnerDemo'
+import { SpinnerDemo, SpinnerReportDemo, SpinnerRefreshDemo } from '../../components/SpinnerDemo'
 
 <SpinnerDemo />
 
-## Choose one loading description
+## Usage
 
-Spinner is a visual activity indicator. Beside visible loading text, leave
-`label` unset: the SVG is decorative and hidden from assistive technology.
-[Button](/docs/button/)'s pending state uses this treatment while preserving
-the action's name and activation guard.
+Use Spinner for a short wait of unknown length. Use [Progress](/docs/progress/) when the amount of work is known, and [Skeleton](/docs/skeleton/) when the loading content's layout is known. For a running action, use [Button](/docs/button/)'s `pending`, which renders Spinner for you.
 
-For a standalone indicator, supply a meaningful nonempty `label`, such as
-`"Loading account"`. It becomes an image with that accessible name. Whitespace-only
-labels throw. Avoid repeating the same loading message through adjacent text,
-a named image and a live region.
+```tsx
+<section aria-busy={loading}>
+  {loading ? (
+    <>
+      <Spinner />
+      <span>Loading account…</span>
+    </>
+  ) : (
+    <AccountDetails />
+  )}
+</section>
+```
 
-Spinner adds no live region, focus movement, timers or fetching state. A named
-image can be discovered while reading; it does not automatically announce
-when inserted. When an announcement is useful, let the application own a
-concise status message through [Alert](/docs/alert/).
+## Examples
 
-## Own the loading lifecycle
+### Load a report preview
 
-Set `aria-busy` on the content region being updated. Remove Spinner and clear
-busy state when content is ready. Keep completion or failure announcements
-outside the busy region so they are not held back. Keep useful text, retry or
-cancellation actions available; a spinner alone cannot explain a stalled request.
+<SpinnerReportDemo />
 
-Use [Progress](/docs/progress/) when a measurable amount of work is known.
-Spinner does not expose a percentage or simulate progress.
+### Refresh results in place
 
-## Customize
+<SpinnerRefreshDemo />
 
-`controlSize` accepts `small`, `medium` (default) and `large`. Native SVG props,
-`className`, `style` and an `SVGSVGElement` ref reach the actual SVG. Spinner
-owns its view box, focusability and decorative/named semantics. It takes no
-children. `SpinnerProps` is exported.
+## State
 
-Use `components.spinner` or local `--rad-spinner-*` variables for `size`,
-`sizeSmall`, `sizeLarge`, `color`, `strokeWidth`, `duration` and `trackOpacity`.
-The `track` and `indicator` parts accept only `className` and `style`; root and
-part slots are `spinner`, `spinner-track` and `spinner-indicator`.
+Spinner has no state and contributes no form value. The application decides when work starts, sets `aria-busy` on the region that is changing, and removes the spinner when the work finishes.
 
-Reduced motion, `motion="off"` and the theme's motion-off setting stop rotation
-while keeping a visible static arc. No MotionProvider or animation engine is
-required. Forced colors use system text color. Preserve a visible indicator
-and useful loading description when restyling.
+## Accessibility
+
+Without `label`, Spinner is decorative: the SVG gets `aria-hidden="true"` and no role. Put visible loading text beside it. With `label`, it becomes `role="img"` named by that string. A blank label throws.
+
+Spinner is never a live region and never announces on its own. Announce completion or failure through a status message such as [Alert](/docs/alert/), outside the busy region. A pending Button renders a decorative spinner and sets `aria-busy` on itself, so its own text stays the only name; see [Button](/docs/button/).
+
+| Key             | Behavior                                |
+| --------------- | --------------------------------------- |
+| Tab / Shift+Tab | Skip the spinner; it is never focusable |
+
+## Motion
+
+The SVG rotates once per `--rad-spinner-duration`, `1s` by default. System reduced motion, `motion="off"` and a theme with motion off all stop the rotation and leave a static arc. `data-motion` is `off` for the prop or theme setting; it does not reflect system reduced motion.
+
+## Styling
+
+The root SVG has `data-slot="spinner"`, `data-control-size` and `data-motion`, and takes `className`, `style` and `ref`. `parts.track` and `parts.indicator` style the `spinner-track` circle and `spinner-indicator` arc. Forced colors draw both with `CanvasText`.
+
+`components.spinner` or local variables set `--rad-spinner-size` (with `-small` and `-large`), `-stroke-width`, `-color`, `-duration` and `-track-opacity`.
+
+## API
+
+### Spinner
+
+| Prop        | Type                                                                          | Default         |
+| ----------- | ----------------------------------------------------------------------------- | --------------- |
+| label       | string; names a standalone spinner                                            | None            |
+| controlSize | small / medium / large                                                        | medium          |
+| motion      | inherit / off                                                                 | inherit         |
+| parts       | `{ track?: PartStyle; indicator?: PartStyle }`                                | None            |
+| className   | string                                                                        | None            |
+| style       | ThemeStyle, including `--rad-spinner-*`                                       | None            |
+| data-slot   | Extra tokens after `spinner`                                                  | spinner         |
+| ref         | `Ref<SVGSVGElement>`                                                          | None            |
+| Other props | Native SVG props except role, ARIA naming, `tabIndex`, `viewBox` and children | Native defaults |
+
+Exports: `Spinner`, `SpinnerProps`.

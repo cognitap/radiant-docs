@@ -1,14 +1,20 @@
 ---
 title: Accordion
-description: Related native disclosures with one selection owner and natural-height motion.
+description: Show a stack of related sections where one, or several, can be open at a time.
 ---
 
-import { CompositionDemo } from '../../components/CompositionDemo'
-import { AccordionGuideDemo, AccordionSelectionDemo } from '../../components/AccordionDemo'
+import {
+  AccordionControlledDemo,
+  AccordionDemo,
+  AccordionDisabledDemo,
+  AccordionMultipleDemo
+} from '../../components/AccordionDemo'
 
-<AccordionGuideDemo />
+<AccordionDemo />
 
-## Group related answers
+## Usage
+
+Each item is a native `details` element, and the root decides which items are open. Give every item a stable, distinct string `value`. Use [Collapsible](/docs/collapsible/) for one independent section, [Tabs](/docs/tabs/) to switch between views where one is always shown, and [NavLinkGroup](/docs/nav-link/) for sidebar navigation.
 
 ```tsx
 <Accordion defaultValue="start">
@@ -23,107 +29,111 @@ import { AccordionGuideDemo, AccordionSelectionDemo } from '../../components/Acc
 </Accordion>
 ```
 
-Accordion owns selection. Items reuse [Collapsible](/docs/collapsible/): native
-`details`, a direct-child `summary`, and a normal-flow Content wrapper. Give
-each item a stable, distinct string value and React key; an empty string is valid.
-Single selection opens at most one item; activating it again closes all.
+## Examples
 
-Tab reaches enabled summaries and open content. Enter and Space toggle the
-focused summary; arrow keys have no special behavior. Trigger places a heading
-inside summary, defaulting to h3. Choose its `level` for your page outline, or
-`null` to supply your own heading. Keep links and buttons in Content.
+### Open several sections
 
-<CompositionDemo kind="accordion" />
+`type="multiple"` lets any number of items stay open.
 
-## Own selection once
+<AccordionMultipleDemo />
 
-```tsx
-const [value, setValue] = useState<string[]>(['start'])
+### Control the open section
 
-<Accordion type="multiple" value={value} onValueChange={setValue}>
-  {items}
-</Accordion>
-```
+<AccordionControlledDemo />
 
-Multiple selection uses `string[]`; single uses `string | null`. Clear with
-`[]` or `null`. Choose controlled `value` or initial `defaultValue`, never both.
-Remount with a new key to change type or ownership. Control the root, not each
-item's open state. `onValueChange` requests updates; an owner may decline.
-No-op requests and prop synchronization do not notify. Item `onToggle` remains
-a native observation.
+### Disable an item
 
-Root and item disabled states add up. Disabled summaries guard activation and
-leave the Tab sequence; application changes to controlled selection still work.
-Closing keeps fields mounted, retains their values and includes them in
-FormData. Native reset restores uncontrolled fields without resetting selection.
-Nested disclosures keep their own state.
+<AccordionDisabledDemo />
 
-## Add motion
+## State
+
+`type` sets the value shape and is fixed for the mount; remount with a new `key` to change it.
+
+| `type`               | Value            | Initial |
+| -------------------- | ---------------- | ------- |
+| `'single'` (default) | `string \| null` | `null`  |
+| `'multiple'`         | `string[]`       | `[]`    |
+
+A single accordion opens one item at a time, and activating the open item closes it, leaving `null`. A multiple value lists items in the order they opened.
+
+Use `defaultValue`, or `value` with `onValueChange`. Passing both, or switching owners after mount, throws. A controlled owner can refuse a request by keeping `value`.
 
 ```tsx
-import { MotionProvider } from '@cognitap/radiant/motion/react'
+const [open, setOpen] = useState<string | null>('arrival')
 
-;<MotionProvider>
-  <Accordion defaultValue="start">
-    <AccordionItem
-      value="start"
-      motion="inherit"
-    >
-      <AccordionTrigger>Details</AccordionTrigger>
-      <AccordionContent>{details}</AccordionContent>
-    </AccordionItem>
-  </Accordion>
-</MotionProvider>
+<Accordion value={open} onValueChange={setOpen}>…</Accordion>
 ```
 
-The shared disclosure engine springs natural height without scaling content.
-Rapid switches retarget moving items; dynamic content is measured as it grows.
-Item `motion="off"`, theme off and live reduced motion settle presentation;
-selection stays immediate. See [Collapsible](/docs/collapsible/#add-motion-and-dynamic-content)
-for measurement and browser fallback, and [motion setup](/docs/foundations/motion/).
-Native disclosures work before hydration. At hydration, items return to the root
-selection, including a local root's initial default. Earlier native toggles do
-not request selection changes. Coordination and disabled guards need JavaScript.
+Accordion submits nothing. Closed content stays mounted, so its fields keep their values and submit with the form. Form reset restores those fields and leaves the open items alone.
 
-<AccordionSelectionDemo />
+`useAccordion()` returns `{ type, value, disabled, setItemOpen(value, open) }`, or `null` outside an Accordion. When content closes its own item, move focus back to its trigger, as the guide above does.
 
-## Parts and customization
+## Accessibility
 
-| Component        | Native style/ref target | Identity tokens                       |
-| ---------------- | ----------------------- | ------------------------------------- |
-| Accordion        | div                     | accordion                             |
-| AccordionItem    | details                 | collapsible accordion-item            |
-| AccordionTrigger | summary                 | collapsible-trigger accordion-trigger |
-| AccordionContent | div                     | collapsible-content accordion-content |
+Each trigger is a native `summary`, which the browser exposes as an expandable button named by its text. It wraps its children in an `h3`; set `level` to fit your page outline, or `null` when you supply your own heading. Keep buttons and links in the content, not the trigger. Disabled triggers get `aria-disabled="true"` and leave the Tab order.
 
-Parts accept native props, className, typed theme style and DOM refs. Match
-additive identities with `[data-slot~="accordion-item"]`. Items expose
-`data-value`, `data-state` and optional `data-disabled`; root exposes `data-type`.
+| Key             | Behavior                                                      |
+| --------------- | ------------------------------------------------------------- |
+| Tab / Shift+Tab | Moves between triggers and into open content                  |
+| Enter / Space   | Toggles the focused item; in single mode, closes the open one |
 
-Set `--rad-accordion-gap` on the root for spacing; Collapsible tokens style its
-items. Preserve focus and hidden-content behavior. `useAccordion()` returns
-nearest owner state and `setItemOpen(value, open)`, or null outside one.
-When an action closes its own answer, return focus to its summary.
+Arrow keys, Home and End do nothing special.
 
-## Public props
+## Motion
 
-All part prop types, AccordionValue, AccordionState and AccordionHeadingLevel
-are exported.
+Content height animates through `::details-content`, with a spring under `MotionProvider`, and the chevron rotates 90 degrees. Open state changes immediately. Turn motion off per item with `motion="off"`, with a theme whose `motion.mode` is `'off'`, or through the system reduced-motion setting. `--rad-collapsible-duration` sets the duration.
 
-| Root prop            | Purpose / default                                    |
-| -------------------- | ---------------------------------------------------- |
-| type                 | single (default) or multiple; fixed per mount        |
-| value / defaultValue | Controlled or initial selection; initially null / [] |
-| onValueChange        | Matching string-or-null / string-array request       |
-| disabled             | Guard user selection; false                          |
-| Native div props     | Attributes, events, children, className, style, ref  |
+## Styling
 
-| Part prop                      | Purpose                                                       |
-| ------------------------------ | ------------------------------------------------------------- |
-| Item value                     | Required stable, distinct string                              |
-| Item disabled                  | Add to root disabled state                                    |
-| Item motion                    | inherit (default) or off                                      |
-| Item native props              | Details props except owned open/defaultOpen/onOpenChange/name |
-| Trigger level                  | Inner heading 1–6, default 3; null omits heading              |
-| Trigger / Content native props | Summary/div attributes, styles, refs                          |
-| data-slot                      | Additional identities on all hosts                            |
+`className`, `style` and `ref` target each part's host. A caller's `data-slot` is added to the built-in tokens, so select with `[data-slot~=accordion-item]`.
+
+| Part             | Host      | `data-slot`                             | Data attributes                             |
+| ---------------- | --------- | --------------------------------------- | ------------------------------------------- |
+| Accordion        | `div`     | `accordion`                             | `data-type`, `data-disabled`                |
+| AccordionItem    | `details` | `collapsible accordion-item`            | `data-state`, `data-disabled`, `data-value` |
+| AccordionTrigger | `summary` | `collapsible-trigger accordion-trigger` | `data-state`, `data-disabled`               |
+| AccordionContent | `div`     | `collapsible-content accordion-content` | `data-state`                                |
+
+`--rad-accordion-gap` spaces the items. Items take every `--rad-collapsible-*` token.
+
+## API
+
+### Accordion
+
+| Prop              | Type                                              | Default       |
+| ----------------- | ------------------------------------------------- | ------------- |
+| type              | `'single' \| 'multiple'`; fixed for the mount     | `'single'`    |
+| value             | `string \| null` or `string[]`; controlled        | None          |
+| defaultValue      | `string \| null` or `string[]`; uncontrolled      | `null` / `[]` |
+| onValueChange     | `(value) => void`, with the value shape of `type` | None          |
+| disabled          | boolean; blocks opening and closing every item    | false         |
+| className / style | string / ThemeStyle                               | None          |
+| Other props       | Native div props except defaultValue and onChange | Native        |
+
+### AccordionItem
+
+| Prop              | Type                                                         | Default   |
+| ----------------- | ------------------------------------------------------------ | --------- |
+| value             | string; stable and distinct within the accordion             | Required  |
+| disabled          | boolean; also set by the root                                | false     |
+| motion            | `'inherit' \| 'off'`                                         | `inherit` |
+| onToggle          | `(event: ToggleEvent<HTMLDetailsElement>) => void`; observes | None      |
+| className / style | string / ThemeStyle                                          | None      |
+| Other props       | Native details props except open and name                    | Native    |
+
+### AccordionTrigger
+
+| Prop              | Type                                       | Default |
+| ----------------- | ------------------------------------------ | ------- |
+| level             | `1`–`6` or `null`; heading around children | `3`     |
+| className / style | string / ThemeStyle                        | None    |
+| Other props       | Native summary props                       | Native  |
+
+### AccordionContent
+
+| Prop              | Type                | Default |
+| ----------------- | ------------------- | ------- |
+| className / style | string / ThemeStyle | None    |
+| Other props       | Native div props    | Native  |
+
+Exports: `Accordion`, `AccordionItem`, `AccordionTrigger`, `AccordionContent`, `useAccordion`, `AccordionProps`, `AccordionItemProps`, `AccordionTriggerProps`, `AccordionContentProps`, `AccordionHeadingLevel`, `AccordionValue`, `AccordionState`.
