@@ -29,12 +29,8 @@ export default async function DocsPage({ params }: { params: Promise<{ slug: str
   const Content = page.data.body
 
   return (
-    <>
-      <main
-        className="docs-page"
-        id="content"
-        tabIndex={-1}
-      >
+    <div className="docs-layout">
+      <div className="docs-page">
         <article>
           <p className="eyebrow">{sectionFor(slug).title}</p>
           <h1>{page.data.title}</h1>
@@ -43,8 +39,8 @@ export default async function DocsPage({ params }: { params: Promise<{ slug: str
             <Content components={mdxComponents} />
           </div>
         </article>
-      </main>
+      </div>
       <PageOutline toc={page.data.toc} />
-    </>
+    </div>
   )
 }

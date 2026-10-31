@@ -2,6 +2,7 @@
 
 import NextLink from 'next/link'
 import { usePathname } from 'next/navigation'
+import { NavLink } from '@cognitap/radiant'
 import type { NavigationGroup } from '@/lib/navigation'
 
 export function Navigation({
@@ -9,32 +10,35 @@ export function Navigation({
   onNavigate
 }: {
   groups: NavigationGroup[]
-  onNavigate?: () => void
+  onNavigate: () => void
 }) {
   const pathname = usePathname().replace(/\/$/, '')
-  return (
-    <nav
-      aria-label="Documentation"
+  return groups.map(group => (
+    <section
+      key={group.title}
       className="docs-navigation"
     >
-      {groups.map(group => (
-        <section key={group.title}>
-          <h2>{group.title}</h2>
-          <ul>
-            {group.pages.map(page => (
-              <li key={page.url}>
+      <h3>{group.title}</h3>
+      <ul>
+        {group.pages.map(page => (
+          <li key={page.url}>
+            <NavLink
+              href={page.url}
+              active={pathname === page.url.replace(/\/$/, '')}
+              controlSize="small"
+              render={props => (
                 <NextLink
+                  {...props}
                   href={page.url}
-                  aria-current={pathname === page.url.replace(/\/$/, '') ? 'page' : undefined}
-                  onClick={onNavigate}
-                >
-                  {page.title}
-                </NextLink>
-              </li>
-            ))}
-          </ul>
-        </section>
-      ))}
-    </nav>
-  )
+                />
+              )}
+              onClick={onNavigate}
+            >
+              {page.title}
+            </NavLink>
+          </li>
+        ))}
+      </ul>
+    </section>
+  ))
 }
