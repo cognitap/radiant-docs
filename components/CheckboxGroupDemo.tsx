@@ -30,3 +30,13 @@ export function CheckboxGroupSavingDemo() {
     </Demo>
   )
 }
+export function CheckboxGroupRequiredDemo() {
+  return (
+    <Demo
+      title="Require at least one channel"
+      files={['checkboxgroup/CheckboxGroupExample.tsx']}
+    >
+      <CheckboxGroupPlayground task="required" />
+    </Demo>
+  )
+}

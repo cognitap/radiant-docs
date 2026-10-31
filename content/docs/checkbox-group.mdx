@@ -1,29 +1,30 @@
 ---
 title: CheckboxGroup
-description: Related native checkboxes with shared feedback and mixed selection.
+description: Choose any number of related values from a labelled list of native checkboxes.
 ---
 
 import {
   CheckboxGroupDemo,
   CheckboxGroupAvailableDemo,
-  CheckboxGroupSavingDemo
+  CheckboxGroupSavingDemo,
+  CheckboxGroupRequiredDemo
 } from '../../components/CheckboxGroupDemo'
 
 <CheckboxGroupDemo />
 
 ## Usage
 
-Use `CheckboxGroup` for several related choices and [Checkbox](/docs/checkbox/) for one independent setting. Use [RadioGroup](/docs/radio-group/) when exactly one option is allowed.
+Use CheckboxGroup for several related choices whose value is the array of checked options. It renders a [Field](/docs/field/) fieldset with the label as its legend; each option is a native checkbox. Use [Checkbox](/docs/checkbox/) for one setting, [RadioGroup](/docs/radio-group/) for exactly one choice, [MultiSelect](/docs/multi-select/) for long or searchable lists and [Fieldset](/docs/fieldset/) for a custom layout without a shared value.
 
 ```tsx
 <CheckboxGroup
   label="Notifications"
   name="channels"
+  defaultValue={['email']}
   items={[
     { value: 'email', label: 'Email' },
     { value: 'sms', label: 'SMS' }
   ]}
-  defaultValue={['email']}
 />
 ```
 
@@ -33,47 +34,76 @@ Use `CheckboxGroup` for several related choices and [Checkbox](/docs/checkbox/) 
 
 <CheckboxGroupAvailableDemo />
 
-### Save preferences
+### Save notification preferences
 
 <CheckboxGroupSavingDemo />
 
+### Require at least one channel
+
+<CheckboxGroupRequiredDemo />
+
 ## State
 
-Choose `value` with `onValueChange`, or initial `defaultValue`. Values are unique strings; empty strings are valid. Controlled callbacks request changes and may be refused. Default changes after mounting do not replace choices.
+Use `defaultValue` for browser-owned selection, or `value` with `onValueChange`, not both. Both are `string[]`. Switching owners throws; remount with a `key`. Item values must be unique strings, and `''` is a real value. A controlled owner may refuse a change, and the checkboxes restore.
 
-Native forms submit repeated entries under `name`. Disabled options are excluded. Uncontrolled reset silently restores initial choices; controlled resets belong to your form. `required` blocks submission until an enabled option is checked. Applications own other validation and persistence.
+`name` has no default; without it nothing submits. Each checked, enabled option submits one `name=value` entry. Select all never submits.
+
+`required` blocks submission until an enabled option is checked, with the browser message “Please select at least one option.” A fully disabled group is valid.
+
+Form reset returns an uncontrolled group to `defaultValue`. A controlled group keeps its value, so reset your state in the form's `onReset`.
 
 ## Accessibility
 
-The visible `label` names Field’s native fieldset; every native checkbox has its own label. Help and errors describe the group. “Select all” reflects enabled options, announces mixed state and preserves disabled selections; it never submits a value. Disabling the group disables every option.
+`label` becomes the required `legend`. `description` and `error` are linked to the group, and `error` marks it invalid. Every option needs a `label`. Select all reports a mixed state, controls every option and leaves disabled selections unchanged.
 
-| Key             | Behavior                        |
-| --------------- | ------------------------------- |
-| Tab / Shift+Tab | Move between enabled checkboxes |
-| Space           | Toggle the focused checkbox     |
+| Key                 | Behavior                                           |
+| ------------------- | -------------------------------------------------- |
+| Tab / Shift+Tab     | Moves between enabled checkboxes, select all first |
+| Space               | Toggles the focused checkbox                       |
+| Space on select all | Checks or clears every enabled option              |
+
+## Motion
+
+Checks and the mixed state change instantly; CheckboxGroup adds no animation.
 
 ## Styling
 
-Root props and ref reach the fieldset. Root identities are `field checkbox-group`. `parts` styles label, description, error and options; item and parent configurations retain Checkbox's `parts`, `className`, `style` and input ref. Set `components.checkboxGroup.gap` or `--rad-checkbox-group-gap` for option spacing. Checkbox tokens style the controls.
+The group's className, style, ref and native props reach the `fieldset` (`data-slot="field checkbox-group"`, `data-control-size`, `data-disabled`, `data-invalid`, `data-required`). `parts.options` styles the options grid (`checkbox-group-options`). `parts.label`, `parts.description`, `parts.error` and `parts.required` style the Field parts.
+
+Options and select all render [Checkbox](/docs/checkbox/), so each configuration takes Checkbox's `parts`, className, style and ref. Set `components.checkboxGroup.gap` or `--rad-checkbox-group-gap` for option spacing.
 
 ## API
 
-| CheckboxGroup prop                           | Type                                              | Default         |
-| -------------------------------------------- | ------------------------------------------------- | --------------- |
-| label / items                                | ReactNode / readonly CheckboxGroupItem[]          | Required        |
-| value / defaultValue                         | string[]                                          | Uncontrolled [] |
-| onValueChange                                | (value: string[]) => void                         | None            |
-| selectAll                                    | CheckboxGroupSelectAll                            | None            |
-| controlSize                                  | small / medium / large                            | medium          |
-| description / error                          | ReactNode                                         | None            |
-| disabled                                     | boolean                                           | false           |
-| parts                                        | label / description / error / options style hooks | None            |
-| name / form                                  | string                                            | None            |
-| Native fieldset props, className, style, ref | Includes `Ref<HTMLFieldSetElement>`               | Native defaults |
+### CheckboxGroup
 
-| Configuration          | Properties                                                                                       |
-| ---------------------- | ------------------------------------------------------------------------------------------------ |
-| CheckboxGroupItem      | Required unique string value and label; native Checkbox presentation, disabled, id and input ref |
-| CheckboxGroupSelectAll | Required label; Checkbox presentation, disabled, id and input ref                                |
+| Prop              | Type                                             | Default  |
+| ----------------- | ------------------------------------------------ | -------- |
+| label             | ReactNode; the legend                            | Required |
+| items             | `readonly CheckboxGroupItem[]`                   | Required |
+| name              | string; form data key for every option           | None     |
+| value             | `string[]`; controlled checked values            | None     |
+| defaultValue      | `string[]`; uncontrolled initial values          | `[]`     |
+| onValueChange     | `(value: string[]) => void`                      | None     |
+| selectAll         | CheckboxGroupSelectAll; never submitted          | None     |
+| description       | ReactNode; linked help text                      | None     |
+| error             | ReactNode; marks the group invalid               | None     |
+| required          | boolean; one enabled option must be checked      | false    |
+| requiredIndicator | ReactNode; replaces the required marker          | `*`      |
+| disabled          | boolean; disables every option                   | false    |
+| form              | string; associates every option with a form      | None     |
+| controlSize       | small / medium / large; items may override       | medium   |
+| parts             | label / description / error / required / options | None     |
+| className / style | string / ThemeStyle                              | None     |
+| ref               | `Ref<HTMLFieldSetElement>`                       | None     |
+| Other props       | Native fieldset props except role                | Native   |
 
-Configuration cannot replace selection, change handling, submitted names, form ownership or native checkbox semantics. Exports: `CheckboxGroup`, `CheckboxGroupProps`, `CheckboxGroupItem`, `CheckboxGroupSelectAll`.
+### Option configuration
+
+| Type                   | Properties                                                                          |
+| ---------------------- | ----------------------------------------------------------------------------------- |
+| CheckboxGroupItem      | `value: string` and `label: ReactNode`; Checkbox presentation, disabled, id and ref |
+| CheckboxGroupSelectAll | `label: ReactNode`; Checkbox presentation, disabled, id and ref                     |
+
+Configurations cannot set checked state, `name`, `form`, `required` or `onChange`.
+
+Exports: `CheckboxGroup`, `CheckboxGroupProps`, `CheckboxGroupItem`, `CheckboxGroupSelectAll`.
