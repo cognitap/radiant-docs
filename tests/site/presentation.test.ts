@@ -2429,3 +2429,66 @@ test('AppShell preserves routing, responsive navigation, notes and saved layouts
     }
   })
 })
+
+test('Form coordinates native validation, custom rules, server recovery and optional TanStack values', async () => {
+  await withSite(async (baseURL, browser) => {
+    const page = await browser.newPage(),
+      errors = track(page)
+    try {
+      await capture(page, 'form', async () => {
+        await page.goto(baseURL + '/docs/form/')
+        await page.waitForFunction(
+          () => !document.querySelector<HTMLButtonElement>('.demo-heading button')?.disabled
+        )
+        const workspace = page.getByRole('region', {
+            name: 'Create a research workspace',
+            exact: true
+          }),
+          email = workspace.getByRole('textbox', { name: 'Owner email', exact: true }),
+          slug = workspace.getByRole('textbox', { name: 'Workspace address', exact: true })
+        await workspace.getByRole('button', { name: 'Create workspace', exact: true }).click()
+        await page.waitForFunction(() => document.activeElement?.getAttribute('name') === 'email')
+        assert.equal(await email.getAttribute('aria-invalid'), 'true')
+        await email.fill('owner@example.com')
+        await slug.fill('bad address')
+        await workspace.getByRole('button', { name: 'Create workspace', exact: true }).click()
+        await workspace
+          .getByText('Use at least three lowercase letters, numbers or hyphens.', { exact: true })
+          .waitFor()
+        await slug.fill('atlas-research')
+        await workspace.getByRole('button', { name: 'Create workspace', exact: true }).click()
+        await workspace
+          .getByRole('status')
+          .filter({ hasText: 'Created atlas-research for owner@example.com.' })
+          .waitFor()
+        const recovery = page.getByRole('region', {
+            name: 'Recover a collaborator invitation',
+            exact: true
+          }),
+          collaborator = recovery.getByRole('textbox', { name: 'Collaborator email', exact: true })
+        await collaborator.fill('taken@example.com')
+        await recovery.getByRole('button', { name: 'Send invitation', exact: true }).click()
+        await recovery
+          .getByText('The invitation was not sent. Check the email address.', { exact: true })
+          .waitFor()
+        assert.equal(await collaborator.getAttribute('aria-invalid'), 'true')
+        await collaborator.fill('new@example.com')
+        await recovery.getByRole('button', { name: 'Send invitation', exact: true }).click()
+        await recovery
+          .getByRole('status')
+          .filter({ hasText: 'Invitation sent to new@example.com.' })
+          .waitFor()
+        const profile = page.getByRole('region', { name: 'Edit a research profile', exact: true }),
+          profileEmail = profile.getByRole('textbox', { name: 'Email', exact: true })
+        await profileEmail.fill('changed@example.com')
+        await profile.getByRole('button', { name: 'Save profile', exact: true }).click()
+        await profile.getByRole('status').filter({ hasText: 'changed@example.com' }).waitFor()
+        await profile.getByRole('button', { name: 'Reset profile', exact: true }).click()
+        assert.equal(await profileEmail.inputValue(), 'researcher@example.com')
+        assert.deepEqual(errors, [])
+      })
+    } finally {
+      await page.close()
+    }
+  })
+})
