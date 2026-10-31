@@ -65,15 +65,17 @@ Props, ref, classes and typed styles target one native div. Toolbar owns `role="
 
 ## API
 
-| Toolbar prop                 | Type                                                             | Default         |
-| ---------------------------- | ---------------------------------------------------------------- | --------------- |
-| aria-label / aria-labelledby | string; a name is required                                       | None            |
-| orientation                  | horizontal / vertical                                            | horizontal      |
-| loop                         | boolean                                                          | true            |
-| children                     | ReactNode                                                        | None            |
-| className / style            | string / ThemeStyle                                              | None            |
-| data-slot                    | Additional identity tokens                                       | toolbar         |
-| ref                          | `Ref<HTMLDivElement>`                                            | None            |
-| Native attributes and events | Includes dir and onKeyDown; prevent default to cancel navigation | Native defaults |
+### Toolbar
 
-Exports: `Toolbar`, `ToolbarProps`, `ToolbarOrientation`.
+| Prop                         | Type                                                        | Default    |
+| ---------------------------- | ----------------------------------------------------------- | ---------- |
+| aria-label / aria-labelledby | string; accessible name                                     | Required   |
+| orientation                  | `Orientation`: horizontal / vertical                        | horizontal |
+| loop                         | boolean; arrows wrap at the ends                            | true       |
+| children                     | ReactNode                                                   | None       |
+| className / style            | string / ThemeStyle                                         | None       |
+| data-slot                    | Additional identity tokens                                  | toolbar    |
+| ref                          | `Ref<HTMLDivElement>`                                       | None       |
+| Other props                  | Native div props except role, aria-orientation and tabIndex | Native     |
+
+Prevent default in `onKeyDown` to cancel navigation. Exports: `Toolbar`, `ToolbarProps`. `orientation` uses the shared `Orientation` type.

@@ -61,41 +61,52 @@ Name the group with `aria-label` or `aria-labelledby`. Items are real pressed Bu
 
 ## Motion
 
-The single-selection `segmented` appearance adds an indicator. `MotionProvider` from `@cognitap/radiant/motion/react` enables its theme `follow` spring. Without it, geometry updates directly. Reduced motion and local off stop spatial feedback; selection remains immediate.
+The single-selection `segmented` variant adds an indicator. `MotionProvider` from `@cognitap/radiant/motion/react` enables its theme `follow` spring. Without it, geometry updates directly. Reduced motion and local off stop spatial feedback; selection remains immediate.
 
 ## Styling
 
 Root props, styles and ref reach the div; item props reach Button. Keep the root positioned for its indicator. `parts.indicator` styles the visual span without replacing geometry.
 
-Identities: `toggle-group`, `button toggle-group-item`, `toggle-group-indicator`. Items expose `data-value`, `data-state="on|off"`; root exposes type, appearance, orientation and disabled data attributes.
+Identities: `toggle-group`, `button toggle-group-item`, `toggle-group-indicator`. Items expose `data-value`, `data-disabled` and `data-selected` on pressed items only, beside `aria-pressed`. The root exposes `data-type`, `data-variant`, `data-orientation`, `data-control-size` and `data-disabled`.
 
 Theme hooks: `components.toggleGroup.gap`, `padding`, `radius`, `background`, `indicatorColor`, `indicatorRadius`, `indicatorShadow`, or `--rad-toggle-group-*` variables. Item presentation follows Button.
 
 ## API
 
-| ToggleGroup prop                 | Type                                       | Default         |
-| -------------------------------- | ------------------------------------------ | --------------- |
-| aria-label / aria-labelledby     | string                                     | One required    |
-| type                             | single / multiple                          | single          |
-| value / defaultValue             | string or null / string[]                  | null / []       |
-| onValueChange                    | (matching value) => void                   | None            |
-| appearance                       | buttons / segmented; multiple uses buttons | buttons         |
-| orientation                      | horizontal / vertical                      | horizontal      |
-| loop / disabled                  | boolean                                    | true / false    |
-| controlSize                      | small / medium / large                     | medium          |
-| motion                           | inherit / off; includes item presses       | inherit         |
-| parts                            | indicator visual style hook                | None            |
-| className / style / children     | string / ThemeStyle / ReactNode            | None            |
-| ref                              | `Ref<HTMLDivElement>`                      | None            |
-| Native div attributes and events | Includes dir, onFocus and onKeyDown        | Native defaults |
+### ToggleGroup
 
-| ToggleGroupItem prop | Type                                                 | Default           |
-| -------------------- | ---------------------------------------------------- | ----------------- |
-| value                | Distinct string                                      | Required          |
-| disabled             | boolean; adds to group disabled                      | false             |
-| controlSize          | Overrides group size                                 | Inherited         |
-| variant / tone       | Button presentation; segmented owns ghost treatment  | outline / neutral |
-| ref                  | `Ref<HTMLButtonElement>`                             | None              |
-| Other Button props   | Includes pending, render, classes, styles and events | Button defaults   |
+| Prop                         | Type                                           | Default    |
+| ---------------------------- | ---------------------------------------------- | ---------- |
+| aria-label / aria-labelledby | string; accessible name                        | Required   |
+| type                         | single / multiple; fixed per mount             | single     |
+| value                        | string or null (single) / string[] (multiple)  | None       |
+| defaultValue                 | string or null / string[]                      | null / []  |
+| onValueChange                | (value: ToggleGroupValue) => void              | None       |
+| variant                      | buttons / segmented; segmented requires single | buttons    |
+| orientation                  | `Orientation`: horizontal / vertical           | horizontal |
+| loop                         | boolean; arrows wrap at the ends               | true       |
+| disabled                     | boolean; disables every item                   | false      |
+| controlSize                  | small / medium / large                         | medium     |
+| motion                       | inherit / off; indicator and item presses      | inherit    |
+| parts                        | `{ indicator?: PartStyle }`                    | None       |
+| className / style            | string / ThemeStyle                            | None       |
+| ref                          | `Ref<HTMLDivElement>`                          | None       |
+| Other props                  | Native div props except role and tabIndex      | Native     |
 
-Exports: `ToggleGroup`, `ToggleGroupItem`, `useToggleGroup`, `ToggleGroupProps`, `ToggleGroupItemProps`, `ToggleGroupState`, `ToggleGroupValue`, `ToggleGroupOrientation`, `ToggleGroupAppearance`.
+### ToggleGroupItem
+
+| Prop              | Type                                                                        | Default         |
+| ----------------- | --------------------------------------------------------------------------- | --------------- |
+| value             | string; distinct within the group                                           | Required        |
+| disabled          | boolean; adds to the group's disabled                                       | false           |
+| controlSize       | small / medium / large                                                      | From group      |
+| variant           | Button variant; ghost under a segmented group                               | outline         |
+| tone              | accent / neutral / warning / danger                                         | neutral         |
+| render            | (props: ToggleGroupRenderProps) => ReactElement                             | Native button   |
+| className / style | string / ThemeStyle                                                         | None            |
+| ref               | `Ref<HTMLButtonElement>`                                                    | None            |
+| Other props       | [Button](/docs/button/) props except pressed state, type, role and tabIndex | Button defaults |
+
+The root `variant` picks the group treatment; the item `variant` is Button's.
+
+Exports: `ToggleGroup`, `ToggleGroupItem`, `useToggleGroup`, `ToggleGroupProps`, `ToggleGroupItemProps`, `ToggleGroupState`, `ToggleGroupValue`, `ToggleGroupVariant`, `ToggleGroupRenderProps`. `orientation` uses the shared `Orientation` type.

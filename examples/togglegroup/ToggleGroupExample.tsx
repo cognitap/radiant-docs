@@ -95,7 +95,7 @@ function Views(options: Options) {
       <ToggleGroup
         {...options}
         aria-label="Record view"
-        appearance="segmented"
+        variant="segmented"
         defaultValue="list"
         onValueChange={setView}
         parts={{ indicator: { style: { '--rad-toggle-group-indicator-radius': '999px' } } }}

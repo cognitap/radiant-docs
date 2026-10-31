@@ -1,6 +1,6 @@
 ---
 title: ContextMenu
-description: Contextual commands with visible alternatives.
+description: Open commands for a specific surface at the pointer, by long-press or from the keyboard.
 ---
 
 import {
@@ -13,7 +13,7 @@ import {
 
 ## Usage
 
-Use ContextMenu for contextual commands on content. **Provide the same actions through visible controls**: right-click and long-press must never be the only way to complete a task. Use [Menu](/docs/menu/) for a visible menu button.
+Use ContextMenu for commands that act on one surface, such as a file card or a canvas. Context menus are hidden, so **offer every command through a visible control too**. Use [Menu](/docs/menu/) when a visible button opens the commands.
 
 ```tsx
 <ContextMenu>
@@ -41,47 +41,86 @@ Use ContextMenu for contextual commands on content. **Provide the same actions t
 
 ## State
 
-Choose `open` or `defaultOpen`, never both. `onOpenChange` requests updates; controlled owners may refuse. Ownership stays fixed per mount. `useContextMenu()` returns open state, `setOpen` and the content ID, or `null` outside the family. Items, radio groups and submenus reuse [Menu's owners and cancellation rules](/docs/menu/#state).
+ContextMenu takes `open` or `defaultOpen` with `onOpenChange`. Pick one owner per mount; switching throws. A controlled owner may refuse a request. `useContextMenu()` returns `{ open, setOpen, contentId }`, or `null` outside a ContextMenu.
+
+Items are commands, not toggles: ContextMenuItem takes no `pressed` props. For a command that turns something on or off, use ContextMenuCheckboxItem. Checkbox items, radio groups, submenus and native form submission work as in [Menu](/docs/menu/#state).
 
 ## Accessibility
 
-Trigger is a named native div grouping content. Supply `aria-label` or `aria-labelledby`, plus instructions when contextual commands would be hard to discover. It is focusable by default and keeps native child interactions.
+The trigger is a focusable `div` with a group role. Name it with `aria-label` or `aria-labelledby`; that name also labels the menu. Add visible instructions when the commands would be hard to discover.
 
-| Input                            | Behavior                                                                                   |
-| -------------------------------- | ------------------------------------------------------------------------------------------ |
-| Right-click                      | Open at the pointer                                                                        |
-| Touch hold                       | Open after 500ms; movement beyond 10px, release or cancellation aborts the pending gesture |
-| Shift+F10 / Menu key             | Open below the focused descendant or target; inline start follows RTL                      |
-| Menu arrows, Home/End, typeahead | [Navigate Menu items and submenus](/docs/menu/#accessibility)                              |
-| Enter / Space                    | Activate the focused command                                                               |
-| Escape                           | Close nearest surface; restore its opener                                                  |
-| Tab / Shift+Tab                  | Close the tree and continue from the target                                                |
+| Input                       | Behavior                                                                   |
+| --------------------------- | -------------------------------------------------------------------------- |
+| Right-click                 | Open at the pointer; a second right-click moves the open menu there        |
+| Touch hold                  | Open after 500 ms; moving more than 10 px or releasing first cancels       |
+| Shift+F10 / ContextMenu key | Open at the focused trigger and focus the first item                       |
+| Keys inside the menu        | [Menu keyboard](/docs/menu/#accessibility): arrows, typeahead, Escape, Tab |
 
-Opening moves focus into the menu. Outside interaction dismisses without stealing focus. The local portal preserves theme and modal ancestry. Long-press leaves native panning available and suppresses its trailing click; a later action remains usable.
+The menu stays inside the viewport. Outside interaction closes it without moving focus.
 
 ## Motion
 
-Optional `MotionProvider` supplies Menu's entry feedback. Reduced motion and local off win; dismissal stays immediate.
+Inside [MotionProvider](/docs/foundations/motion/), the content fades and scales in. Set `motion="off"` on ContextMenuContent or ContextMenuSubContent to turn it off for that surface. Reduced motion is honored.
 
 ## Styling
 
-Native props, refs, classes and styles reach Trigger's div or the real Menu part. Slot identities retain `menu-*`, Button and Popover identities, adding `context-menu-*`. Trigger exposes open/closed `data-state`; Content retains Menu state and placement attributes.
+Props, refs, classes and styles reach each part's native element. Every part adds a `context-menu-*` slot to its `menu-*` slot, such as `context-menu-trigger` and `context-menu-item`. The trigger exposes `data-state="open"` or `"closed"`.
 
-Use `components.contextMenu.width` or `--rad-context-menu-width`; remaining styling inherits [Menu](/docs/menu/#styling).
+Set the width with `components.contextMenu.width` or `--rad-context-menu-width`, which falls back to `--rad-menu-width`. Other tokens follow [Menu](/docs/menu/#styling).
 
 ## API
 
-| Part                                     | Props                                                                                                | Defaults                                       |
-| ---------------------------------------- | ---------------------------------------------------------------------------------------------------- | ---------------------------------------------- |
-| ContextMenu                              | open / defaultOpen: boolean; onOpenChange; children                                                  | false; no callback                             |
-| ContextMenuTrigger                       | Required aria-label or aria-labelledby; native div props/events/ref; tabIndex; className; ThemeStyle | tabIndex 0; named group                        |
-| ContextMenuPortal                        | children                                                                                             | None; no host                                  |
-| ContextMenuContent                       | MenuContent props: side, align, sideOffset, collisionPadding, motion, native div props/ref           | bottom; start; 0; 8; inherit                   |
-| ContextMenuItem                          | MenuItem props: onSelect, textValue, closeOnSelect; Button props/ref                                 | closeOnSelect true                             |
-| ContextMenuGroup / Label / Separator     | Corresponding Menu part props/ref                                                                    | Menu defaults                                  |
-| ContextMenuCheckboxItem                  | checked/defaultChecked; onCheckedChange; indeterminate; indicator styling; Item props                | false; no callback; false; closeOnSelect false |
-| ContextMenuRadioGroup / RadioItem        | value/defaultValue and onValueChange / required string value; Menu props                             | null / group-owned; closeOnSelect false        |
-| ContextMenuSub / SubTrigger / SubContent | Corresponding Menu part props                                                                        | false / Menu defaults / logical end, offset 4  |
-| useContextMenu()                         | open; setOpen(boolean); contentId                                                                    | null outside family                            |
+### ContextMenu
 
-Offsets and padding are finite nonnegative pixels. Every part exports its `ContextMenu…Props` type; `ContextMenuState` is also exported. Trigger/content/group/label refs are `Ref<HTMLDivElement>`; action refs are `Ref<HTMLButtonElement>`; separator refs are `Ref<HTMLHRElement>`. Root, Sub and Portal have no host.
+| Prop         | Type                      | Default |
+| ------------ | ------------------------- | ------- |
+| open         | boolean; controlled       | None    |
+| defaultOpen  | boolean                   | false   |
+| onOpenChange | `(open: boolean) => void` | None    |
+| children     | ReactNode                 | None    |
+
+### ContextMenuTrigger
+
+| Prop                         | Type                                                                   | Default  |
+| ---------------------------- | ---------------------------------------------------------------------- | -------- |
+| aria-label / aria-labelledby | string; one is required                                                | Required |
+| tabIndex                     | number                                                                 | 0        |
+| style                        | ThemeStyle                                                             | None     |
+| ref                          | `Ref<HTMLDivElement>`                                                  | None     |
+| Other props                  | div props except id, role, aria-haspopup, aria-expanded, aria-controls | Native   |
+
+### ContextMenuPortal
+
+| Prop     | Type      | Default |
+| -------- | --------- | ------- |
+| children | ReactNode | None    |
+
+### ContextMenuContent
+
+| Prop             | Type                          | Default |
+| ---------------- | ----------------------------- | ------- |
+| side             | top / right / bottom / left   | bottom  |
+| align            | start / center / end          | start   |
+| sideOffset       | number; pixels from the point | 0       |
+| collisionPadding | number                        | 8       |
+| motion           | inherit / off                 | inherit |
+| Other props      | MenuContent props; `div` ref  | Native  |
+
+### Items, groups and submenus
+
+These parts take the same props and defaults as their [Menu parts](/docs/menu/#api).
+
+| Part                    | Same as                                          | Key defaults                        |
+| ----------------------- | ------------------------------------------------ | ----------------------------------- |
+| ContextMenuItem         | [MenuItem](/docs/menu/#menuitem)                 | closeOnSelect true; no toggle props |
+| ContextMenuCheckboxItem | [MenuCheckboxItem](/docs/menu/#menucheckboxitem) | checked false; closeOnSelect false  |
+| ContextMenuRadioGroup   | [MenuRadioGroup](/docs/menu/#menuradiogroup)     | value null                          |
+| ContextMenuRadioItem    | [MenuRadioItem](/docs/menu/#menuradioitem)       | value required; closeOnSelect false |
+| ContextMenuGroup        | [MenuGroup](/docs/menu/#menugroup)               | Native                              |
+| ContextMenuLabel        | [MenuLabel](/docs/menu/#menulabel)               | Native                              |
+| ContextMenuSeparator    | [MenuSeparator](/docs/menu/#menuseparator)       | Separator defaults                  |
+| ContextMenuSub          | [MenuSub](/docs/menu/#menusub)                   | defaultOpen false                   |
+| ContextMenuSubTrigger   | [MenuSubTrigger](/docs/menu/#menusubtrigger)     | No close on activation              |
+| ContextMenuSubContent   | [MenuSubContent](/docs/menu/#menusubcontent)     | Inline end; sideOffset 4            |
+
+Exports each part's `ContextMenu…Props` type, plus `ContextMenuState` and `ContextMenuRenderProps` for `render` adapters on items.
