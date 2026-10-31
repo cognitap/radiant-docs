@@ -1,4 +1,5 @@
 'use client'
+import { Checkbox } from '@cognitap/radiant'
 import { useState } from 'react'
 import type { PaginationLinkProps } from '@cognitap/radiant'
 import { SelectControl } from '@/components/demo/ActionControls'
@@ -32,14 +33,11 @@ export function PaginationPlayground({ task = 'records' }: { task?: PaginationTa
           )}
         </div>
         {task === 'records' && (
-          <label>
-            <input
-              type="checkbox"
-              checked={compact}
-              onChange={event => setCompact(event.target.checked)}
-            />{' '}
-            Compact spacing
-          </label>
+          <Checkbox
+            label="Compact spacing"
+            checked={compact}
+            onChange={event => setCompact(event.target.checked)}
+          />
         )}
       </DemoControls>
       <DemoPreview>

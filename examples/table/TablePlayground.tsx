@@ -1,4 +1,5 @@
 'use client'
+import { Checkbox } from '@cognitap/radiant'
 import { useState } from 'react'
 import { DemoControls, DemoPreview } from '@/components/demo/DemoFrame'
 import { TableExample } from './TableExample'
@@ -7,14 +8,11 @@ export function TablePlayground() {
   return (
     <>
       <DemoControls>
-        <label>
-          <input
-            type="checkbox"
-            checked={wide}
-            onChange={event => setWide(event.target.checked)}
-          />{' '}
-          Use wide columns
-        </label>
+        <Checkbox
+          label="Use wide columns"
+          checked={wide}
+          onChange={event => setWide(event.target.checked)}
+        />
       </DemoControls>
       <DemoPreview>
         <TableExample wide={wide} />

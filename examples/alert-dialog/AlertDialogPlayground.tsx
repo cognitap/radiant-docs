@@ -1,4 +1,5 @@
 'use client'
+import { Checkbox } from '@cognitap/radiant'
 import { useState } from 'react'
 import { DemoControls, DemoPreview } from '@/components/demo/DemoFrame'
 import { AlertDialogExample, type AlertDialogTask } from './AlertDialogExample'
@@ -9,22 +10,16 @@ export function AlertDialogPlayground({ task = 'discard' }: { task?: AlertDialog
     <>
       <DemoControls>
         <div className="action-toggles">
-          <label>
-            <input
-              type="checkbox"
-              checked={escape}
-              onChange={event => setEscape(event.target.checked)}
-            />
-            Escape dismissal
-          </label>
-          <label>
-            <input
-              type="checkbox"
-              checked={off}
-              onChange={event => setOff(event.target.checked)}
-            />
-            Motion off
-          </label>
+          <Checkbox
+            label="Escape dismissal"
+            checked={escape}
+            onChange={event => setEscape(event.target.checked)}
+          />
+          <Checkbox
+            label="Motion off"
+            checked={off}
+            onChange={event => setOff(event.target.checked)}
+          />
         </div>
       </DemoControls>
       <DemoPreview>

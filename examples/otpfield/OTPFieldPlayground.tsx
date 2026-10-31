@@ -1,4 +1,5 @@
 'use client'
+import { Checkbox } from '@cognitap/radiant'
 import { useState } from 'react'
 import { SelectControl } from '@/components/demo/ActionControls'
 import { DemoControls, DemoPreview } from '@/components/demo/DemoFrame'
@@ -45,30 +46,21 @@ export function OTPFieldPlayground({ task = 'email' }: { task?: OTPFieldTask }) 
           />
         </div>
         <div className="action-toggles">
-          <label>
-            <input
-              type="checkbox"
-              checked={disabled}
-              onChange={event => setDisabled(event.target.checked)}
-            />
-            Disabled
-          </label>
-          <label>
-            <input
-              type="checkbox"
-              checked={readOnly}
-              onChange={event => setReadOnly(event.target.checked)}
-            />
-            Read only
-          </label>
-          <label>
-            <input
-              type="checkbox"
-              checked={prefill}
-              onChange={event => setPrefill(event.target.checked)}
-            />
-            Initially filled
-          </label>
+          <Checkbox
+            label="Disabled"
+            checked={disabled}
+            onChange={event => setDisabled(event.target.checked)}
+          />
+          <Checkbox
+            label="Read only"
+            checked={readOnly}
+            onChange={event => setReadOnly(event.target.checked)}
+          />
+          <Checkbox
+            label="Initially filled"
+            checked={prefill}
+            onChange={event => setPrefill(event.target.checked)}
+          />
         </div>
       </DemoControls>
       <DemoPreview>

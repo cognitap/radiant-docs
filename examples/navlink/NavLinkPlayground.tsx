@@ -1,4 +1,5 @@
 'use client'
+import { Checkbox } from '@cognitap/radiant'
 import { useState } from 'react'
 import { SelectControl } from '@/components/demo/ActionControls'
 import { DemoControls, DemoPreview } from '@/components/demo/DemoFrame'
@@ -27,22 +28,16 @@ export function NavLinkPlayground({ task = 'workspace' }: { task?: NavLinkTask }
           />
         </div>
         <div className="action-toggles">
-          <label>
-            <input
-              type="checkbox"
-              checked={icons}
-              onChange={e => setIcons(e.target.checked)}
-            />
-            Icons
-          </label>
-          <label>
-            <input
-              type="checkbox"
-              checked={descriptions}
-              onChange={e => setDescriptions(e.target.checked)}
-            />
-            Descriptions
-          </label>
+          <Checkbox
+            label="Icons"
+            checked={icons}
+            onChange={e => setIcons(e.target.checked)}
+          />
+          <Checkbox
+            label="Descriptions"
+            checked={descriptions}
+            onChange={e => setDescriptions(e.target.checked)}
+          />
         </div>
       </DemoControls>
       <DemoPreview>

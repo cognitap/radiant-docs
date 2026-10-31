@@ -1,4 +1,5 @@
 'use client'
+import { Checkbox } from '@cognitap/radiant'
 import { useState } from 'react'
 import { SelectControl } from '@/components/demo/ActionControls'
 import { DemoControls, DemoPreview } from '@/components/demo/DemoFrame'
@@ -26,22 +27,16 @@ export function TagPlayground({ task }: { task?: TagTask }) {
           />
         </div>
         <div className="action-toggles">
-          <label>
-            <input
-              type="checkbox"
-              checked={disabled}
-              onChange={event => setDisabled(event.target.checked)}
-            />
-            Disabled
-          </label>
-          <label>
-            <input
-              type="checkbox"
-              checked={pending}
-              onChange={event => setPending(event.target.checked)}
-            />
-            Pending
-          </label>
+          <Checkbox
+            label="Disabled"
+            checked={disabled}
+            onChange={event => setDisabled(event.target.checked)}
+          />
+          <Checkbox
+            label="Pending"
+            checked={pending}
+            onChange={event => setPending(event.target.checked)}
+          />
         </div>
       </DemoControls>
       <DemoPreview>

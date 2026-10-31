@@ -1,4 +1,5 @@
 'use client'
+import { Button, Checkbox } from '@cognitap/radiant'
 import { useState } from 'react'
 import type { SpinnerProps } from '@cognitap/radiant'
 import { SelectControl } from '@/components/demo/ActionControls'
@@ -26,40 +27,36 @@ export function SpinnerPlayground({ task = 'account' }: { task?: SpinnerTask }) 
         </div>
         <div className="action-toggles">
           {task === 'account' && (
-            <label>
-              <input
-                type="checkbox"
-                checked={standalone}
-                onChange={event => setStandalone(event.target.checked)}
-              />
-              Standalone indicator
-            </label>
-          )}
-          <label>
-            <input
-              type="checkbox"
-              checked={motionOff}
-              onChange={event => setMotionOff(event.target.checked)}
+            <Checkbox
+              label="Standalone indicator"
+              checked={standalone}
+              onChange={event => setStandalone(event.target.checked)}
             />
-            Disable indicator motion
-          </label>
+          )}
+          <Checkbox
+            label="Disable indicator motion"
+            checked={motionOff}
+            onChange={event => setMotionOff(event.target.checked)}
+          />
         </div>
         {task === 'account' && (
           <div className="action-toggles">
-            <button
-              type="button"
+            <Button
+              variant="outline"
+              controlSize="small"
               disabled={loaded}
               onClick={() => setLoaded(true)}
             >
               Simulate account loaded
-            </button>
-            <button
-              type="button"
+            </Button>
+            <Button
+              variant="outline"
+              controlSize="small"
               disabled={!loaded}
               onClick={() => setLoaded(false)}
             >
               Reload account
-            </button>
+            </Button>
           </div>
         )}
       </DemoControls>

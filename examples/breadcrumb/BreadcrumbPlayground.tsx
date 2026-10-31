@@ -1,5 +1,6 @@
 'use client'
 
+import { Checkbox } from '@cognitap/radiant'
 import { useState } from 'react'
 import { DemoControls, DemoPreview } from '@/components/demo/DemoFrame'
 import { BreadcrumbExample } from './BreadcrumbExample'
@@ -29,22 +30,16 @@ export function BreadcrumbPlayground({ task = 'location' }: { task?: BreadcrumbT
   return (
     <>
       <DemoControls>
-        <label>
-          <input
-            type="checkbox"
-            checked={currentLink}
-            onChange={event => setCurrentLink(event.target.checked)}
-          />{' '}
-          Link the current page
-        </label>
-        <label>
-          <input
-            type="checkbox"
-            checked={long}
-            onChange={event => setLong(event.target.checked)}
-          />{' '}
-          Use long current title
-        </label>
+        <Checkbox
+          label="Link the current page"
+          checked={currentLink}
+          onChange={event => setCurrentLink(event.target.checked)}
+        />
+        <Checkbox
+          label="Use long current title"
+          checked={long}
+          onChange={event => setLong(event.target.checked)}
+        />
       </DemoControls>
       <DemoPreview>
         <BreadcrumbExample

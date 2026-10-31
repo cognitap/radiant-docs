@@ -1,4 +1,5 @@
 'use client'
+import { Checkbox, Field, NumberField } from '@cognitap/radiant'
 import { useState } from 'react'
 import { SelectControl } from '@/components/demo/ActionControls'
 import { DemoControls, DemoPreview } from '@/components/demo/DemoFrame'
@@ -37,42 +38,40 @@ export function PopoverPlayground({ task = 'delivery' }: { task?: PopoverTask })
             options={['ltr', 'rtl']}
             onChange={setDir}
           />
-          <label>
-            Side offset
-            <input
-              type="number"
-              min="0"
+          <Field
+            label="Side offset"
+            className="demo-control"
+          >
+            <NumberField
+              controlSize="small"
+              min={0}
               value={sideOffset}
-              onChange={event => setSideOffset(Math.max(0, Number(event.target.value)))}
+              onValueChange={value => setSideOffset(value ?? 0)}
             />
-          </label>
-          <label>
-            Collision padding
-            <input
-              type="number"
-              min="0"
+          </Field>
+          <Field
+            label="Collision padding"
+            className="demo-control"
+          >
+            <NumberField
+              controlSize="small"
+              min={0}
               value={collisionPadding}
-              onChange={event => setCollisionPadding(Math.max(0, Number(event.target.value)))}
+              onValueChange={value => setCollisionPadding(value ?? 0)}
             />
-          </label>
+          </Field>
         </div>
         <div className="action-toggles">
-          <label>
-            <input
-              type="checkbox"
-              checked={off}
-              onChange={event => setOff(event.target.checked)}
-            />
-            Motion off
-          </label>
-          <label>
-            <input
-              type="checkbox"
-              checked={initial}
-              onChange={event => setInitial(event.target.checked)}
-            />
-            Initially open
-          </label>
+          <Checkbox
+            label="Motion off"
+            checked={off}
+            onChange={event => setOff(event.target.checked)}
+          />
+          <Checkbox
+            label="Initially open"
+            checked={initial}
+            onChange={event => setInitial(event.target.checked)}
+          />
         </div>
       </DemoControls>
       <DemoPreview>

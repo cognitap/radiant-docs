@@ -10,7 +10,7 @@ import {
   useState,
   type ReactNode
 } from 'react'
-import { Button, ThemeScope, type Theme, type ThemeMode } from '@cognitap/radiant'
+import { Button, Fieldset, ThemeScope, type Theme, type ThemeMode } from '@cognitap/radiant'
 import { radiant, themes } from '@cognitap/radiant/examples'
 import { useHydrated } from '@/examples/profile/useHydrated'
 import { SelectControl } from './ActionControls'
@@ -262,14 +262,15 @@ export function DemoControls({
 }) {
   const ready = useHydrated()
   return (
-    <fieldset
+    <Fieldset
+      legend={label}
       className="demo-controls"
+      parts={{ legend: { className: 'demo-controls-legend' } }}
       disabled={!ready}
     >
-      <legend>{label}</legend>
       {children}
       <FrameThemeControls themePicker={themePicker} />
-    </fieldset>
+    </Fieldset>
   )
 }
 

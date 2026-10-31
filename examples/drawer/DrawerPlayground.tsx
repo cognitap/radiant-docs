@@ -1,4 +1,5 @@
 'use client'
+import { Checkbox } from '@cognitap/radiant'
 import { useState } from 'react'
 import { SelectControl } from '@/components/demo/ActionControls'
 import { DemoControls, DemoPreview } from '@/components/demo/DemoFrame'
@@ -41,62 +42,41 @@ export function DrawerPlayground({ task = 'settings' }: { task?: DrawerTask }) {
           />
         </div>
         <div className="action-toggles">
-          <label>
-            <input
-              type="checkbox"
-              checked={modal}
-              onChange={event => setModal(event.target.checked)}
-            />
-            Modal
-          </label>
-          <label>
-            <input
-              type="checkbox"
-              checked={backdrop}
-              onChange={event => setBackdrop(event.target.checked)}
-            />
-            Backdrop dismissal
-          </label>
-          <label>
-            <input
-              type="checkbox"
-              checked={escape}
-              onChange={event => setEscape(event.target.checked)}
-            />
-            Escape dismissal
-          </label>
-          <label>
-            <input
-              type="checkbox"
-              checked={off}
-              onChange={event => setOff(event.target.checked)}
-            />
-            Motion off
-          </label>
-          <label>
-            <input
-              type="checkbox"
-              checked={initial}
-              onChange={event => setInitial(event.target.checked)}
-            />
-            Initially open
-          </label>
-          <label>
-            <input
-              type="checkbox"
-              checked={disabled}
-              onChange={event => setDisabled(event.target.checked)}
-            />
-            Disabled actions
-          </label>
-          <label>
-            <input
-              type="checkbox"
-              checked={pending}
-              onChange={event => setPending(event.target.checked)}
-            />
-            Pending actions
-          </label>
+          <Checkbox
+            label="Modal"
+            checked={modal}
+            onChange={event => setModal(event.target.checked)}
+          />
+          <Checkbox
+            label="Backdrop dismissal"
+            checked={backdrop}
+            onChange={event => setBackdrop(event.target.checked)}
+          />
+          <Checkbox
+            label="Escape dismissal"
+            checked={escape}
+            onChange={event => setEscape(event.target.checked)}
+          />
+          <Checkbox
+            label="Motion off"
+            checked={off}
+            onChange={event => setOff(event.target.checked)}
+          />
+          <Checkbox
+            label="Initially open"
+            checked={initial}
+            onChange={event => setInitial(event.target.checked)}
+          />
+          <Checkbox
+            label="Disabled actions"
+            checked={disabled}
+            onChange={event => setDisabled(event.target.checked)}
+          />
+          <Checkbox
+            label="Pending actions"
+            checked={pending}
+            onChange={event => setPending(event.target.checked)}
+          />
         </div>
       </DemoControls>
       <DemoPreview>

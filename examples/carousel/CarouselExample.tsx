@@ -14,7 +14,8 @@ import {
   CarouselAutoPlay,
   Field,
   Textarea,
-  type CarouselProps
+  type CarouselProps,
+  Checkbox
 } from '@cognitap/radiant'
 export type CarouselTaskOptions = Pick<
   CarouselProps,
@@ -173,14 +174,11 @@ export function CompareResearchRounds(options: CarouselTaskOptions) {
       aria-label="Research comparison application"
     >
       <h2>Compare research rounds</h2>
-      <label className="flex gap-2">
-        <input
-          type="checkbox"
-          checked={locked}
-          onChange={event => setLocked(event.target.checked)}
-        />
-        Keep the selected study
-      </label>
+      <Checkbox
+        label="Keep the selected study"
+        checked={locked}
+        onChange={event => setLocked(event.target.checked)}
+      />
       <Carousel
         {...options}
         aria-label="Research comparison"

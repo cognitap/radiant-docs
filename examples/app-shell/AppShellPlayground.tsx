@@ -1,4 +1,5 @@
 'use client'
+import { Checkbox } from '@cognitap/radiant'
 import { useState } from 'react'
 import { SelectControl } from '@/components/demo/ActionControls'
 import { DemoControls, DemoPreview } from '@/components/demo/DemoFrame'
@@ -34,14 +35,11 @@ export function AppShellPlayground({ task }: { task: 'sessions' | 'notes' | 'sav
             onChange={setMotion}
           />
         </div>
-        <label>
-          <input
-            type="checkbox"
-            checked={narrow}
-            onChange={event => setNarrow(event.target.checked)}
-          />
-          Narrow application
-        </label>
+        <Checkbox
+          label="Narrow application"
+          checked={narrow}
+          onChange={event => setNarrow(event.target.checked)}
+        />
       </DemoControls>
       <DemoPreview>
         <Example

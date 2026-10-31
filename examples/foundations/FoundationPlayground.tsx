@@ -1,5 +1,6 @@
 'use client'
 
+import { Checkbox } from '@cognitap/radiant'
 import { useState } from 'react'
 import dynamic from 'next/dynamic'
 import { DemoControls, DemoPreview } from '@/components/demo/DemoFrame'
@@ -19,24 +20,18 @@ export function FoundationPlayground({ kind }: { kind: FoundationKind }) {
       {kind !== 'setup' && (
         <DemoControls themePicker={kind !== 'authoring'}>
           {kind === 'authoring' && (
-            <label>
-              <input
-                type="checkbox"
-                checked={buttonCorners}
-                onChange={event => setButtonCorners(event.target.checked)}
-              />
-              Button-only corners
-            </label>
+            <Checkbox
+              label="Button-only corners"
+              checked={buttonCorners}
+              onChange={event => setButtonCorners(event.target.checked)}
+            />
           )}
           {kind === 'scopes' && (
-            <label>
-              <input
-                type="checkbox"
-                checked={rounded}
-                onChange={event => setRounded(event.target.checked)}
-              />
-              Inline shared radius
-            </label>
+            <Checkbox
+              label="Inline shared radius"
+              checked={rounded}
+              onChange={event => setRounded(event.target.checked)}
+            />
           )}
         </DemoControls>
       )}

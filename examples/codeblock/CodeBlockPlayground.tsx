@@ -1,4 +1,5 @@
 'use client'
+import { Checkbox } from '@cognitap/radiant'
 import { useState } from 'react'
 import { SelectControl } from '@/components/demo/ActionControls'
 import { DemoControls, DemoPreview } from '@/components/demo/DemoFrame'
@@ -28,31 +29,22 @@ export function CodeBlockPlayground({ task = 'install' }: { task?: CodeBlockTask
           />
         </div>
         <div className="action-toggles">
-          <label>
-            <input
-              type="checkbox"
-              checked={numbers}
-              onChange={e => setNumbers(e.target.checked)}
-            />
-            Line numbers
-          </label>
-          <label>
-            <input
-              type="checkbox"
-              checked={disabled}
-              onChange={e => setDisabled(e.target.checked)}
-            />
-            Disable copying
-          </label>
+          <Checkbox
+            label="Line numbers"
+            checked={numbers}
+            onChange={e => setNumbers(e.target.checked)}
+          />
+          <Checkbox
+            label="Disable copying"
+            checked={disabled}
+            onChange={e => setDisabled(e.target.checked)}
+          />
           {task === 'configuration' ? (
-            <label>
-              <input
-                type="checkbox"
-                checked={highlight}
-                onChange={e => setHighlight(e.target.checked)}
-              />
-              Highlight quoted strings
-            </label>
+            <Checkbox
+              label="Highlight quoted strings"
+              checked={highlight}
+              onChange={e => setHighlight(e.target.checked)}
+            />
           ) : null}
         </div>
       </DemoControls>

@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import dynamic from 'next/dynamic'
-import { type ButtonVariant, type Tone, type ControlSize } from '@cognitap/radiant'
+import { type ButtonVariant, type Tone, type ControlSize, Checkbox } from '@cognitap/radiant'
 import { SelectControl } from '@/components/demo/ActionControls'
 import { DemoControls, DemoPreview } from '@/components/demo/DemoFrame'
 
@@ -38,14 +38,11 @@ export function MotionLinkPlayground() {
             onChange={setControlSize}
           />
         </div>
-        <label>
-          <input
-            type="checkbox"
-            checked={off}
-            onChange={event => setOff(event.target.checked)}
-          />{' '}
-          Turn off spatial motion
-        </label>
+        <Checkbox
+          label="Turn off spatial motion"
+          checked={off}
+          onChange={event => setOff(event.target.checked)}
+        />
       </DemoControls>
       <DemoPreview>
         <MotionLinkExample

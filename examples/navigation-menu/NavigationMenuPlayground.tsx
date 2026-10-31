@@ -1,4 +1,5 @@
 'use client'
+import { Checkbox } from '@cognitap/radiant'
 import { useState } from 'react'
 import type { ControlSize } from '@cognitap/radiant'
 import { SelectControl } from '@/components/demo/ActionControls'
@@ -33,14 +34,11 @@ export function NavigationMenuPlayground({ task = 'library' }: { task?: Navigati
           />
         </div>
         <div className="action-toggles">
-          <label>
-            <input
-              type="checkbox"
-              checked={disabled}
-              onChange={e => setDisabled(e.target.checked)}
-            />
-            Disable dropdowns
-          </label>
+          <Checkbox
+            label="Disable dropdowns"
+            checked={disabled}
+            onChange={e => setDisabled(e.target.checked)}
+          />
         </div>
       </DemoControls>
       <DemoPreview>

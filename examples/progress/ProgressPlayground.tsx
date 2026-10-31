@@ -1,4 +1,5 @@
 'use client'
+import { Checkbox } from '@cognitap/radiant'
 import { useState } from 'react'
 import { SelectControl } from '@/components/demo/ActionControls'
 import { DemoControls, DemoPreview } from '@/components/demo/DemoFrame'
@@ -11,14 +12,11 @@ export function ProgressPlayground({ task = 'export' }: { task?: ProgressTask })
       <DemoControls>
         <div className="action-options">
           {task === 'export' && (
-            <label>
-              <input
-                type="checkbox"
-                checked={unknown}
-                onChange={event => setUnknown(event.target.checked)}
-              />{' '}
-              Unknown remaining amount
-            </label>
+            <Checkbox
+              label="Unknown remaining amount"
+              checked={unknown}
+              onChange={event => setUnknown(event.target.checked)}
+            />
           )}
           <SelectControl
             label="Bar height"

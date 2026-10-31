@@ -352,17 +352,15 @@ body {
 .demo-controls {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
-  gap: 0.5rem 1.25rem;
+  align-items: end;
+  gap: 0.75rem 1.25rem;
   margin: 0;
-  padding: 0.625rem 1.25rem;
+  padding: 0.75rem 1.25rem;
   border: 0;
   border-block: 1px solid var(--docs-border);
-  font-size: 0.8125rem;
-  color: var(--docs-muted);
 }
 
-.demo-controls legend {
+.demo-controls-legend {
   position: absolute;
   width: 1px;
   height: 1px;
@@ -371,62 +369,20 @@ body {
   white-space: nowrap;
 }
 
-.demo-controls label {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  min-height: 2rem;
-}
-
 .demo-controls :is(.action-options, .action-toggles) {
   display: contents;
+}
+
+.demo-control {
+  max-width: 12rem;
 }
 
 .demo-theme-controls {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem 1.25rem;
+  align-items: end;
+  gap: 0.75rem 1.25rem;
   margin-inline-start: auto;
-}
-
-.demo-controls select {
-  min-width: 0;
-  max-width: 12rem;
-  height: 2rem;
-  padding: 0 1.75rem 0 0.625rem;
-  border: 1px solid var(--docs-border);
-  border-radius: 0.375rem;
-  font: inherit;
-  color: var(--docs-foreground);
-  background: var(--docs-background)
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23889892' stroke-width='1.5'%3E%3Cpath d='m4 6 4 4 4-4'/%3E%3C/svg%3E")
-    no-repeat right 0.5rem center / 0.875rem;
-  appearance: none;
-}
-
-.demo-controls button {
-  height: 2rem;
-  padding: 0 0.75rem;
-  border: 1px solid var(--docs-border);
-  border-radius: 0.375rem;
-  font: inherit;
-  color: var(--docs-foreground);
-  background: var(--docs-background);
-  cursor: pointer;
-}
-
-.demo-controls button:hover {
-  border-color: var(--docs-muted);
-}
-
-.demo-controls input[type='checkbox'] {
-  margin: 0;
-  accent-color: var(--docs-accent);
-}
-
-.demo-controls :is(select, input):focus-visible {
-  outline: 2px solid var(--docs-accent);
-  outline-offset: 1px;
 }
 
 .demo-canvas {
@@ -775,32 +731,6 @@ main:focus {
   display: flex;
   flex-wrap: wrap;
   gap: 1rem 2rem;
-}
-
-.recipe-options {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.75rem 1rem;
-}
-
-.recipe-options label {
-  display: grid;
-  width: auto;
-  gap: 0.25rem;
-  min-width: 0;
-}
-
-.recipe-options select {
-  box-sizing: border-box;
-  min-width: 0;
-  max-width: 100%;
-  width: 100%;
-  padding: 0.5rem;
-  border: 1px solid var(--docs-border);
-  border-radius: 0.375rem;
-  color: var(--docs-foreground);
-  background: var(--docs-surface);
-  font: inherit;
 }
 
 .recipe-playground .demo-stage {

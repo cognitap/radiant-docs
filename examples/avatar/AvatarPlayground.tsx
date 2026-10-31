@@ -1,4 +1,5 @@
 'use client'
+import { Button, Checkbox } from '@cognitap/radiant'
 import { useState } from 'react'
 import type { AvatarProps } from '@cognitap/radiant'
 import { SelectControl } from '@/components/demo/ActionControls'
@@ -46,24 +47,22 @@ export function AvatarPlayground({ task = 'identity' }: { task?: AvatarTask }) {
         </div>
         {task === 'identity' && (
           <div className="action-toggles">
-            <label>
-              <input
-                type="checkbox"
-                checked={nameShown}
-                onChange={event => setNameShown(event.target.checked)}
-              />
-              Use adjacent name
-            </label>
+            <Checkbox
+              label="Use adjacent name"
+              checked={nameShown}
+              onChange={event => setNameShown(event.target.checked)}
+            />
           </div>
         )}
         {task === 'comment' && (
           <div className="action-toggles">
-            <button
-              type="button"
+            <Button
+              variant="outline"
+              controlSize="small"
               onClick={() => setBroken(current => !current)}
             >
               {broken ? 'Restore photo' : 'Break photo'}
-            </button>
+            </Button>
           </div>
         )}
       </DemoControls>

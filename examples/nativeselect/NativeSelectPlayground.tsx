@@ -1,4 +1,5 @@
 'use client'
+import { Checkbox } from '@cognitap/radiant'
 import { useState } from 'react'
 import { SelectControl } from '@/components/demo/ActionControls'
 import { DemoControls, DemoPreview } from '@/components/demo/DemoFrame'
@@ -28,30 +29,21 @@ export function NativeSelectPlayground({ task = 'phase' }: { task?: NativeSelect
           />
         </div>
         <div className="action-toggles">
-          <label>
-            <input
-              type="checkbox"
-              checked={disabled}
-              onChange={event => setDisabled(event.target.checked)}
-            />
-            Disabled
-          </label>
-          <label>
-            <input
-              type="checkbox"
-              checked={invalid}
-              onChange={event => setInvalid(event.target.checked)}
-            />
-            Invalid
-          </label>
-          <label>
-            <input
-              type="checkbox"
-              checked={required}
-              onChange={event => setRequired(event.target.checked)}
-            />
-            Required
-          </label>
+          <Checkbox
+            label="Disabled"
+            checked={disabled}
+            onChange={event => setDisabled(event.target.checked)}
+          />
+          <Checkbox
+            label="Invalid"
+            checked={invalid}
+            onChange={event => setInvalid(event.target.checked)}
+          />
+          <Checkbox
+            label="Required"
+            checked={required}
+            onChange={event => setRequired(event.target.checked)}
+          />
         </div>
       </DemoControls>
       <DemoPreview>
