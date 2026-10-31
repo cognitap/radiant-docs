@@ -1,0 +1,63 @@
+---
+title: NavigationMenu
+description: Navigate site sections with native links, delayed hover disclosure and one shared spring viewport.
+---
+
+import {
+  NavigationMenuDemo,
+  NavigationMenuHelpDemo,
+  NavigationMenuWorkspaceDemo
+} from '../../components/NavigationMenuDemo'
+
+## Usage
+
+<NavigationMenuDemo />
+
+Give the navigation landmark a name. Register each dropdown panel in `items`, then render its trigger and content with that key. Put top-level buttons and links in List and Item parts. One Viewport contains every panel.
+
+## Examples
+
+<NavigationMenuHelpDemo />
+
+<NavigationMenuWorkspaceDemo />
+
+## State
+
+Use `value` with `onValueChange(value)` or `defaultValue`. A string opens its registered panel; `null` closes navigation. Controlled owners can refuse requests. Prop synchronization emits no callback.
+
+Applications own routing and current destinations. Link's `active` adds `aria-current="page"`. A cancelled or modified link activation leaves disclosure state unchanged. Router handlers that cancel native navigation explicitly request closure, as the examples show.
+
+Disabling dropdowns hides the viewport without resetting the owner. Top-level native links remain usable.
+
+## Accessibility
+
+The root is a named native nav. List and Item retain native list semantics; triggers are Buttons and destinations are Links. This family uses no menu roles.
+
+Tab follows the normal sequence. Left/Right move among enabled triggers physically, respecting direction. Home/End reach the ends. Down/Up open a panel and focus its first/last interactive descendant.
+
+Escape closes and returns focus from hidden content to its trigger. Moving focus or clicking outside dismisses. Controlled refusal keeps the accepted panel and focus.
+
+The shared viewport is a named native ScrollArea. Closed panels remain mounted, hidden and inert.
+
+## Motion
+
+With `MotionProvider`, the shared viewport springs between panel positions and natural sizes. Live content and container changes are measured. Reduced motion and theme motion-off jump immediately. Set Viewport's `motion="off"` to opt out locally.
+
+## Styling
+
+Native props, styles, classes and refs reach each part's documented host. Button, Link and ScrollArea identities remain available.
+
+Use `components.navigationMenu` for list gap and surface padding, border, radius, colors and shadow. Keep dropdown panels inside the shared viewport. Ancestors must leave the popup room visible.
+
+## API
+
+| Part                  | Contract                                                                                                       |
+| --------------------- | -------------------------------------------------------------------------------------------------------------- |
+| Root                  | `items`, `value`/`defaultValue`, `onValueChange`, `disabled`, `controlSize`, direction and an accessible name. |
+| List / Item           | Native ul / li hosts.                                                                                          |
+| Trigger               | Registered `value`; inherits size and accepts Button presentation and `render`.                                |
+| Link                  | Required `href`, optional `active`; accepts Link presentation and `render`.                                    |
+| Content               | Registered `value`; native div.                                                                                |
+| Viewport              | Shared ScrollArea; `motion` and nonnegative `sideOffset` (default 8).                                          |
+| Timing                | `openDelay` defaults to 200ms; `closeDelay` to 150ms. Switching an open panel is immediate.                    |
+| `useNavigationMenu()` | Returns `null` outside its root, otherwise `value`, `controlled`, `disabled` and `setValue(value)`.            |
