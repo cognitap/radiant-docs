@@ -1,49 +1,138 @@
 ---
 title: Breadcrumb
-description: Ordered location navigation with native links and current-page semantics.
+description: Show where the current page sits in the site hierarchy.
 ---
 
-import { BreadcrumbDemo } from '../../components/BreadcrumbDemo'
+import {
+  BreadcrumbDemo,
+  BreadcrumbLongTrailDemo,
+  BreadcrumbRouterDemo,
+  BreadcrumbSeparatorDemo
+} from '../../components/BreadcrumbDemo'
 
 <BreadcrumbDemo />
 
-## Describe the hierarchy
+## Usage
 
-Breadcrumb renders a native `nav` named “Breadcrumb” by default. Set `aria-label`
-or `aria-labelledby` to distinguish multiple navigation landmarks. Empty explicit
-labels are rejected. Put `BreadcrumbItem` elements inside `BreadcrumbList`, a
-native ordered list. Applications own the actual destinations and hierarchy.
+Breadcrumb is a named navigation landmark: an ordered list of ancestor links ending in the current page. Your application owns the hierarchy. Use [NavLink](/docs/nav-link/) for site navigation between sections, [Pagination](/docs/pagination/) for moving through pages of one list, and a plain [Link](/docs/link/) for a single "Back to" link.
 
-`BreadcrumbLink` composes [Link](/docs/link/) and requires `href`. Native navigation,
-external targets, download attributes, events and anchor refs stay available.
-No router or special keyboard model is added. Use its `render(resolvedProps)`
-contract for a router adapter, forwarding all resolved attributes, children and
-ref to one compatible anchor. `BreadcrumbLinkRenderProps` is exported.
+```tsx
+<Breadcrumb>
+  <BreadcrumbList>
+    <BreadcrumbItem>
+      <BreadcrumbLink href="/projects">Projects</BreadcrumbLink>
+      <BreadcrumbSeparator />
+    </BreadcrumbItem>
+    <BreadcrumbItem>
+      <BreadcrumbPage>Reader study</BreadcrumbPage>
+    </BreadcrumbItem>
+  </BreadcrumbList>
+</Breadcrumb>
+```
 
-## Mark the current page
+`BreadcrumbLink` defaults to the `subtle` variant and `neutral` tone. A trail repeats on every page, so it stays muted and underlines only on hover rather than competing with the page's own links. Both can be overridden.
 
-Use one `BreadcrumbPage` span for a non-link current page, or set `current` on
-one BreadcrumbLink when the current destination should remain a link. Both
-expose `aria-current="page"`. Keep exactly one current item in each hierarchy;
-applications determine it from their route.
+## Examples
 
-`BreadcrumbSeparator` is decorative and hidden from assistive technology. Place
-it inside an item between destinations, not directly under the ordered list.
-Its default text is `/`; replacement content must stay noninteractive.
+### Wrap a long trail
 
-## Customize
+<BreadcrumbLongTrailDemo />
 
-Root and part native attributes, `className`, `style` and refs reach their hosts:
-`nav`, `ol`, `li`, anchor, current-page span and separator span. Slots are
-`breadcrumb`, `breadcrumb-list`, `breadcrumb-item`, `link breadcrumb-link`,
-`breadcrumb-page` and `breadcrumb-separator`. Base Link identity is retained.
-Public prop types are exported for every part.
+Breadcrumb does not collapse. Items wrap and long words break within the available width. To shorten a trail, put your own content, such as a Menu, inside a BreadcrumbItem.
 
-Use `components.breadcrumb` or `--rad-breadcrumb-*` variables for `gap`,
-`fontSize`, `color`, `linkColor`, `linkHoverColor`, `currentColor` and
-`separatorColor`. Lists wrap and long titles break within available space;
-do not hide meaningful ancestors solely to fit a narrow layout.
+### Route with render
 
-Keep native link focus and hover cues visible when restyling. Link's reduced-motion
-and forced-color treatment remains available. [Themes](/docs/foundations/theming/)
-apply normally.
+<BreadcrumbRouterDemo />
+
+`render` receives `BreadcrumbLinkRenderProps`. Forward them, with children and ref, to one router anchor. Leave modified clicks to the browser.
+
+### Use a custom separator
+
+<BreadcrumbSeparatorDemo />
+
+Pass noninteractive content, such as an icon, as BreadcrumbSeparator's children.
+
+## Accessibility
+
+Breadcrumb renders a `nav` named "Breadcrumb" by default. `aria-label` or `aria-labelledby` replaces that name; give one when a page has two breadcrumbs or another nav with the same name. A blank `aria-label` without `aria-labelledby` throws.
+
+Mark exactly one current page. `BreadcrumbPage` renders a span with `aria-current="page"` that is not focusable. Set `current` on a BreadcrumbLink instead when the current page should stay a link. Neither part accepts `aria-current` directly.
+
+Separators are `aria-hidden="true"` and never focusable, so screen readers hear only destinations. Put each inside a BreadcrumbItem, not directly under the list.
+
+| Key             | Behavior                                                        |
+| --------------- | --------------------------------------------------------------- |
+| Tab / Shift+Tab | Move between the trail's links; skip the page and separators    |
+| Enter           | Follow the focused link; a router adapter can handle plain ones |
+
+## Motion
+
+Only BreadcrumbLink's color fades on hover, as in Link. Set `--rad-link-color-duration` to change it; reduced motion turns it off.
+
+## Styling
+
+`className`, `style` and `ref` reach each part's host: `nav`, `ol`, `li`, `a`, `span` and `span`. Each part sets a `data-slot`; BreadcrumbLink also keeps Link's `link` slot, `data-variant`, `data-tone` and `data-control-size`.
+
+| Part                | `data-slot`            |
+| ------------------- | ---------------------- |
+| Breadcrumb          | `breadcrumb`           |
+| BreadcrumbList      | `breadcrumb-list`      |
+| BreadcrumbItem      | `breadcrumb-item`      |
+| BreadcrumbLink      | `link breadcrumb-link` |
+| BreadcrumbPage      | `breadcrumb-page`      |
+| BreadcrumbSeparator | `breadcrumb-separator` |
+
+Theme keys live under `components.breadcrumb`.
+
+| Variable                            | Default                |
+| ----------------------------------- | ---------------------- |
+| `--rad-breadcrumb-gap`              | 0.5rem                 |
+| `--rad-breadcrumb-font-size`        | UI body size, 0.875rem |
+| `--rad-breadcrumb-color`            | Muted foreground       |
+| `--rad-breadcrumb-link-color`       | Muted foreground       |
+| `--rad-breadcrumb-link-hover-color` | Foreground             |
+| `--rad-breadcrumb-current-color`    | Foreground             |
+| `--rad-breadcrumb-separator-color`  | Muted foreground       |
+
+## API
+
+Every part also takes its host's native props and `style?: ThemeStyle`. `role` is not accepted.
+
+### Breadcrumb
+
+| Prop            | Type   | Default                                |
+| --------------- | ------ | -------------------------------------- |
+| aria-label      | string | "Breadcrumb" when no `aria-labelledby` |
+| aria-labelledby | string | None; replaces the default label       |
+
+### BreadcrumbList and BreadcrumbItem
+
+Native `ol` and `li` props.
+
+### BreadcrumbLink
+
+| Prop        | Type                                               | Default       |
+| ----------- | -------------------------------------------------- | ------------- |
+| href        | string                                             | Required      |
+| current     | boolean; sets `aria-current="page"`                | false         |
+| variant     | LinkVariant                                        | subtle        |
+| tone        | Tone                                               | neutral       |
+| controlSize | small / medium / large; action variants only       | medium        |
+| external    | boolean; sets target `_blank` and rel              | false         |
+| render      | (props: BreadcrumbLinkRenderProps) => ReactElement | Native anchor |
+
+Takes every other [Link](/docs/link/) prop except `aria-current`.
+
+### BreadcrumbPage
+
+Native `span` props, without `aria-current`. Always sets `aria-current="page"`.
+
+### BreadcrumbSeparator
+
+| Prop     | Type      | Default |
+| -------- | --------- | ------- |
+| children | ReactNode | "/"     |
+
+Native `span` props, without `aria-hidden` or `tabIndex`.
+
+Exports: `BreadcrumbProps`, `BreadcrumbListProps`, `BreadcrumbItemProps`, `BreadcrumbLinkProps`, `BreadcrumbLinkRenderProps`, `BreadcrumbPageProps` and `BreadcrumbSeparatorProps`. `BreadcrumbLinkRenderProps` is Link's render props with `href: string` and a `data-slot` that includes `link breadcrumb-link`.

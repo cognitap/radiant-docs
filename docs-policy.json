@@ -17,10 +17,6 @@
       "content/docs/releases.mdx",
       "content/docs/workshop.mdx"
     ],
-    "pending": [
-      "content/docs/breadcrumb.mdx",
-      "content/docs/pagination.mdx",
-      "content/docs/table.mdx"
-    ]
+    "pending": []
   }
 }
