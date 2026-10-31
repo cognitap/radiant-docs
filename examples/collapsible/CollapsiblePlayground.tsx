@@ -1,6 +1,6 @@
 'use client'
 import { useState } from 'react'
-import { ThemeScope } from '@cognitap/radiant'
+import { ThemeScope, Checkbox } from '@cognitap/radiant'
 import { SelectControl } from '@/components/demo/ActionControls'
 import { DemoControls, DemoPreview, usePreviewMotionTheme } from '@/components/demo/DemoFrame'
 import { CollapsibleExample, type CollapsibleTask } from './CollapsibleExample'
@@ -21,22 +21,16 @@ export function CollapsiblePlayground({ task = 'shipment' }: { task?: Collapsibl
           />
         </div>
         <div className="action-toggles">
-          <label>
-            <input
-              type="checkbox"
-              checked={off}
-              onChange={event => setOff(event.target.checked)}
-            />
-            Theme motion off
-          </label>
-          <label>
-            <input
-              type="checkbox"
-              checked={localOff}
-              onChange={event => setLocalOff(event.target.checked)}
-            />
-            Local motion off
-          </label>
+          <Checkbox
+            label="Theme motion off"
+            checked={off}
+            onChange={event => setOff(event.target.checked)}
+          />
+          <Checkbox
+            label="Local motion off"
+            checked={localOff}
+            onChange={event => setLocalOff(event.target.checked)}
+          />
         </div>
       </DemoControls>
       <DemoPreview>

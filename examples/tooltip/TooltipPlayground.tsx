@@ -1,4 +1,5 @@
 'use client'
+import { Checkbox, Field, NumberField } from '@cognitap/radiant'
 import { useState } from 'react'
 import { SelectControl } from '@/components/demo/ActionControls'
 import { DemoControls, DemoPreview } from '@/components/demo/DemoFrame'
@@ -26,34 +27,35 @@ export function TooltipPlayground({ task = 'draft' }: { task?: TooltipTask }) {
             options={['start', 'center', 'end']}
             onChange={setAlign}
           />
-          <label>
-            Open delay
-            <input
-              type="number"
-              min="0"
+          <Field
+            label="Open delay"
+            className="demo-control"
+          >
+            <NumberField
+              controlSize="small"
+              min={0}
               value={openDelay}
-              onChange={event => setOpenDelay(Math.max(0, Number(event.target.value)))}
+              onValueChange={value => setOpenDelay(value ?? 0)}
             />
-          </label>
-          <label>
-            Close delay
-            <input
-              type="number"
-              min="0"
+          </Field>
+          <Field
+            label="Close delay"
+            className="demo-control"
+          >
+            <NumberField
+              controlSize="small"
+              min={0}
               value={closeDelay}
-              onChange={event => setCloseDelay(Math.max(0, Number(event.target.value)))}
+              onValueChange={value => setCloseDelay(value ?? 0)}
             />
-          </label>
+          </Field>
         </div>
         <div className="action-toggles">
-          <label>
-            <input
-              type="checkbox"
-              checked={off}
-              onChange={event => setOff(event.target.checked)}
-            />
-            Motion off
-          </label>
+          <Checkbox
+            label="Motion off"
+            checked={off}
+            onChange={event => setOff(event.target.checked)}
+          />
         </div>
       </DemoControls>
       <DemoPreview>

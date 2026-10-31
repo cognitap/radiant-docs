@@ -1,4 +1,5 @@
 'use client'
+import { Checkbox } from '@cognitap/radiant'
 import { useState } from 'react'
 import { SelectControl } from '@/components/demo/ActionControls'
 import { DemoControls, DemoPreview } from '@/components/demo/DemoFrame'
@@ -34,22 +35,16 @@ export function ContextMenuPlayground({ task = 'file' }: { task?: ContextMenuTas
           />
         </div>
         <div className="action-toggles">
-          <label>
-            <input
-              type="checkbox"
-              checked={off}
-              onChange={event => setOff(event.target.checked)}
-            />
-            Motion off
-          </label>
-          <label>
-            <input
-              type="checkbox"
-              checked={initial}
-              onChange={event => setInitial(event.target.checked)}
-            />
-            Initially open
-          </label>
+          <Checkbox
+            label="Motion off"
+            checked={off}
+            onChange={event => setOff(event.target.checked)}
+          />
+          <Checkbox
+            label="Initially open"
+            checked={initial}
+            onChange={event => setInitial(event.target.checked)}
+          />
         </div>
       </DemoControls>
       <DemoPreview>

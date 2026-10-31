@@ -1,5 +1,6 @@
 'use client'
 
+import { Checkbox } from '@cognitap/radiant'
 import { useState } from 'react'
 import dynamic from 'next/dynamic'
 import { DemoControls, DemoPreview } from '@/components/demo/DemoFrame'
@@ -56,51 +57,36 @@ export function CompositionPlayground({
           )}
         </div>
         <div className="action-toggles">
-          <label>
-            <input
-              type="checkbox"
-              checked={compact}
-              onChange={event => setCompact(event.target.checked)}
-            />
-            Compact
-          </label>
+          <Checkbox
+            label="Compact"
+            checked={compact}
+            onChange={event => setCompact(event.target.checked)}
+          />
           {kind === 'dialog' && (
             <>
-              <label>
-                <input
-                  type="checkbox"
-                  checked={modal}
-                  onChange={event => setModal(event.target.checked)}
-                />
-                Modal
-              </label>
-              <label>
-                <input
-                  type="checkbox"
-                  checked={closeOnEscape}
-                  onChange={event => setCloseOnEscape(event.target.checked)}
-                />
-                Close on Escape
-              </label>
-              <label>
-                <input
-                  type="checkbox"
-                  checked={closeOnBackdrop}
-                  onChange={event => setCloseOnBackdrop(event.target.checked)}
-                />
-                Close on backdrop
-              </label>
+              <Checkbox
+                label="Modal"
+                checked={modal}
+                onChange={event => setModal(event.target.checked)}
+              />
+              <Checkbox
+                label="Close on Escape"
+                checked={closeOnEscape}
+                onChange={event => setCloseOnEscape(event.target.checked)}
+              />
+              <Checkbox
+                label="Close on backdrop"
+                checked={closeOnBackdrop}
+                onChange={event => setCloseOnBackdrop(event.target.checked)}
+              />
             </>
           )}
           {kind === 'accordion' && (
-            <label>
-              <input
-                type="checkbox"
-                checked={disabled}
-                onChange={event => setDisabled(event.target.checked)}
-              />
-              Disabled
-            </label>
+            <Checkbox
+              label="Disabled"
+              checked={disabled}
+              onChange={event => setDisabled(event.target.checked)}
+            />
           )}
         </div>
       </DemoControls>

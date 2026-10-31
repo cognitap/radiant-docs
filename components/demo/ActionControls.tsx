@@ -1,6 +1,7 @@
 'use client'
 
-/** Native selects keep the docs controls independent of unreleased components. */
+import { Field, NativeSelect } from '@cognitap/radiant'
+
 export function SelectControl<Value extends string>({
   label,
   value,
@@ -15,9 +16,12 @@ export function SelectControl<Value extends string>({
   onChange: (value: Value) => void
 }) {
   return (
-    <label>
-      {label}
-      <select
+    <Field
+      label={label}
+      className="demo-control"
+    >
+      <NativeSelect
+        controlSize="small"
         value={value}
         onChange={event => {
           const selected = options.find(option => option === event.target.value)
@@ -32,7 +36,7 @@ export function SelectControl<Value extends string>({
             {optionLabels?.[option] ?? option}
           </option>
         ))}
-      </select>
-    </label>
+      </NativeSelect>
+    </Field>
   )
 }

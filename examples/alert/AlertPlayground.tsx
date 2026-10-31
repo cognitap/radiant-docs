@@ -1,4 +1,5 @@
 'use client'
+import { Button } from '@cognitap/radiant'
 import { useState } from 'react'
 import type { AlertAnnouncement, AlertTone } from '@cognitap/radiant'
 import { SelectControl } from '@/components/demo/ActionControls'
@@ -31,18 +32,20 @@ export function AlertPlayground({ task = 'maintenance' }: { task?: AlertTask }) 
         )}
         {task === 'save' && (
           <>
-            <button
-              type="button"
+            <Button
+              variant="outline"
+              controlSize="small"
               onClick={() => setFailed(true)}
             >
               Simulate connection error
-            </button>
-            <button
-              type="button"
+            </Button>
+            <Button
+              variant="outline"
+              controlSize="small"
               onClick={() => setUrgent(true)}
             >
               Simulate urgent interruption
-            </button>
+            </Button>
           </>
         )}
       </DemoControls>

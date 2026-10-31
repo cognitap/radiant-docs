@@ -1,6 +1,6 @@
 'use client'
 import { useState } from 'react'
-import { ThemeScope } from '@cognitap/radiant'
+import { ThemeScope, Checkbox } from '@cognitap/radiant'
 import { DemoControls, DemoPreview, usePreviewMotionTheme } from '@/components/demo/DemoFrame'
 import { AccordionExample, type AccordionTask } from './AccordionExample'
 export function AccordionPlayground({ task = 'guide' }: { task?: AccordionTask }) {
@@ -11,23 +11,17 @@ export function AccordionPlayground({ task = 'guide' }: { task?: AccordionTask }
     <>
       <DemoControls>
         <div className="action-toggles">
-          <label>
-            <input
-              type="checkbox"
-              checked={off}
-              onChange={event => setOff(event.target.checked)}
-            />
-            Motion off
-          </label>
+          <Checkbox
+            label="Motion off"
+            checked={off}
+            onChange={event => setOff(event.target.checked)}
+          />
           {task === 'disabled' && (
-            <label>
-              <input
-                type="checkbox"
-                checked={disabled}
-                onChange={event => setDisabled(event.target.checked)}
-              />
-              Disable every item
-            </label>
+            <Checkbox
+              label="Disable every item"
+              checked={disabled}
+              onChange={event => setDisabled(event.target.checked)}
+            />
           )}
         </div>
       </DemoControls>

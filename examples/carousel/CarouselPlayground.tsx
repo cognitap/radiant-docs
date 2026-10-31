@@ -1,4 +1,5 @@
 'use client'
+import { Checkbox } from '@cognitap/radiant'
 import { useState } from 'react'
 import { SelectControl } from '@/components/demo/ActionControls'
 import { DemoControls, DemoPreview } from '@/components/demo/DemoFrame'
@@ -21,14 +22,11 @@ export function CarouselPlayground({ task }: { task: 'review' | 'notes' | 'compa
           options={['ltr', 'rtl']}
           onChange={setDir}
         />
-        <label>
-          <input
-            type="checkbox"
-            checked={autoPlay}
-            onChange={event => setAutoPlay(event.target.checked)}
-          />
-          Enable automatic rotation
-        </label>
+        <Checkbox
+          label="Enable automatic rotation"
+          checked={autoPlay}
+          onChange={event => setAutoPlay(event.target.checked)}
+        />
       </DemoControls>
       <DemoPreview>
         <Example

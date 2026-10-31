@@ -1,4 +1,5 @@
 'use client'
+import { Button, Checkbox } from '@cognitap/radiant'
 import { useState } from 'react'
 import { DemoControls, DemoPreview } from '@/components/demo/DemoFrame'
 import {
@@ -18,23 +19,21 @@ export function SkeletonPlayground({ task = 'account' }: { task?: SkeletonTask }
     <>
       <DemoControls>
         <div className="action-toggles">
-          <label>
-            <input
-              type="checkbox"
-              checked={motionOff}
-              onChange={event => setMotionOff(event.target.checked)}
-            />
-            Disable placeholder motion
-          </label>
+          <Checkbox
+            label="Disable placeholder motion"
+            checked={motionOff}
+            onChange={event => setMotionOff(event.target.checked)}
+          />
         </div>
         {subject && (
           <div className="action-toggles">
-            <button
-              type="button"
+            <Button
+              variant="outline"
+              controlSize="small"
               onClick={() => setLoaded(value => !value)}
             >
               {loaded ? `Reload ${subject}` : `Simulate ${subject} loaded`}
-            </button>
+            </Button>
           </div>
         )}
       </DemoControls>

@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import dynamic from 'next/dynamic'
+import { SelectControl } from '@/components/demo/ActionControls'
 import { DemoControls, DemoPreview } from '@/components/demo/DemoFrame'
 import type { FormOwner, FormPlacement } from './ProfileRecipe'
 
@@ -22,35 +23,21 @@ export function ProfilePlayground({
   return (
     <div className="recipe-playground">
       <DemoControls label="Recipe options">
-        <div className="recipe-options">
-          <label>
-            Form owner
-            <select
-              value={owner}
-              onChange={event => {
-                if (event.target.value === 'native' || event.target.value === 'tanstack')
-                  setOwner(event.target.value)
-              }}
-            >
-              <option value="native">Native React</option>
-              <option value="tanstack">TanStack Form</option>
-            </select>
-          </label>
-          <label>
-            Placement
-            <select
-              value={placement}
-              onChange={event => {
-                const value = event.target.value
-                if (value === 'standalone' || value === 'card' || value === 'dialog')
-                  setPlacement(value)
-              }}
-            >
-              <option value="standalone">Standalone</option>
-              <option value="card">Card</option>
-              <option value="dialog">Dialog</option>
-            </select>
-          </label>
+        <div className="action-options">
+          <SelectControl
+            label="Form owner"
+            value={owner}
+            options={['native', 'tanstack']}
+            optionLabels={{ native: 'Native React', tanstack: 'TanStack Form' }}
+            onChange={setOwner}
+          />
+          <SelectControl
+            label="Placement"
+            value={placement}
+            options={['standalone', 'card', 'dialog']}
+            optionLabels={{ standalone: 'Standalone', card: 'Card', dialog: 'Dialog' }}
+            onChange={setPlacement}
+          />
         </div>
       </DemoControls>
       <DemoPreview label="Profile recipe preview">

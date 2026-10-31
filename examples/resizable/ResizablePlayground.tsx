@@ -1,4 +1,5 @@
 'use client'
+import { Checkbox } from '@cognitap/radiant'
 import { useState } from 'react'
 import type { Orientation } from '@cognitap/radiant'
 import { SelectControl } from '@/components/demo/ActionControls'
@@ -28,14 +29,11 @@ export function ResizablePlayground({ task = 'files' }: { task?: ResizableTask }
           />
         </div>
         <div className="action-toggles">
-          <label>
-            <input
-              type="checkbox"
-              checked={disabled}
-              onChange={e => setDisabled(e.target.checked)}
-            />
-            Lock layout
-          </label>
+          <Checkbox
+            label="Lock layout"
+            checked={disabled}
+            onChange={e => setDisabled(e.target.checked)}
+          />
         </div>
       </DemoControls>
       <DemoPreview>

@@ -1,4 +1,5 @@
 'use client'
+import { Checkbox } from '@cognitap/radiant'
 import { useState } from 'react'
 import type { ControlSize } from '@cognitap/radiant'
 import { SelectControl } from '@/components/demo/ActionControls'
@@ -27,22 +28,16 @@ export function NumberFieldPlayground({ task = 'participants' }: { task?: Number
           />
         </div>
         <div className="action-toggles">
-          <label>
-            <input
-              type="checkbox"
-              checked={disabled}
-              onChange={e => setDisabled(e.target.checked)}
-            />
-            Disabled
-          </label>
-          <label>
-            <input
-              type="checkbox"
-              checked={readOnly}
-              onChange={e => setReadOnly(e.target.checked)}
-            />
-            Read only
-          </label>
+          <Checkbox
+            label="Disabled"
+            checked={disabled}
+            onChange={e => setDisabled(e.target.checked)}
+          />
+          <Checkbox
+            label="Read only"
+            checked={readOnly}
+            onChange={e => setReadOnly(e.target.checked)}
+          />
         </div>
       </DemoControls>
       <DemoPreview>

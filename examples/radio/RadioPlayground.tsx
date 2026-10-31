@@ -1,6 +1,6 @@
 'use client'
 import { useState } from 'react'
-import { ThemeScope, type ControlSize } from '@cognitap/radiant'
+import { ThemeScope, type ControlSize, Checkbox } from '@cognitap/radiant'
 import { SelectControl } from '@/components/demo/ActionControls'
 import { DemoControls, DemoPreview, usePreviewMotionTheme } from '@/components/demo/DemoFrame'
 import { RadioExample, type RadioTask } from './RadioExample'
@@ -21,14 +21,11 @@ export function RadioPlayground({ task = 'plan' }: { task?: RadioTask }) {
         </div>
         {task === 'plan' && (
           <div className="action-toggles">
-            <label>
-              <input
-                type="checkbox"
-                checked={off}
-                onChange={event => setOff(event.target.checked)}
-              />
-              Motion off
-            </label>
+            <Checkbox
+              label="Motion off"
+              checked={off}
+              onChange={event => setOff(event.target.checked)}
+            />
           </div>
         )}
       </DemoControls>

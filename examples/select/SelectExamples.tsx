@@ -25,7 +25,8 @@ import {
   DialogContent,
   DialogTitle,
   DialogDescription,
-  DialogClose
+  DialogClose,
+  Checkbox
 } from '@cognitap/radiant'
 import type { SelectOption } from '@cognitap/radiant'
 import { MotionProvider } from '@cognitap/radiant/motion/react'
@@ -110,14 +111,11 @@ export function SelectControlledExample() {
           }}
         />
       </Field>
-      <label className="flex gap-2">
-        <input
-          type="checkbox"
-          checked={accept}
-          onChange={event => setAccept(event.target.checked)}
-        />
-        Accept selection requests
-      </label>
+      <Checkbox
+        label="Accept selection requests"
+        checked={accept}
+        onChange={event => setAccept(event.target.checked)}
+      />
       <output>Selected: {value ?? 'none'}</output>
       <Button
         onClick={() => setValue(null)}

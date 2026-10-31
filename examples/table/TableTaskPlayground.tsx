@@ -1,4 +1,5 @@
 'use client'
+import { Checkbox } from '@cognitap/radiant'
 import { useState } from 'react'
 import { DemoControls, DemoPreview } from '@/components/demo/DemoFrame'
 import { TableEmptyExample } from './TableEmptyExample'
@@ -15,14 +16,11 @@ export function TableTaskPlayground({ task }: { task: TableTask }) {
     <>
       <DemoControls>
         {task === 'empty' && (
-          <label>
-            <input
-              type="checkbox"
-              checked={empty}
-              onChange={event => setEmpty(event.target.checked)}
-            />{' '}
-            No invites
-          </label>
+          <Checkbox
+            label="No invites"
+            checked={empty}
+            onChange={event => setEmpty(event.target.checked)}
+          />
         )}
       </DemoControls>
       <DemoPreview>

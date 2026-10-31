@@ -1,4 +1,5 @@
 'use client'
+import { Checkbox } from '@cognitap/radiant'
 import { useState } from 'react'
 import { SelectControl } from '@/components/demo/ActionControls'
 import { DemoControls, DemoPreview } from '@/components/demo/DemoFrame'
@@ -26,14 +27,11 @@ export function ToolbarPlayground({ task = 'editor' }: { task?: ToolbarTask }) {
             onChange={setDir}
           />
         </div>
-        <label>
-          <input
-            type="checkbox"
-            checked={loop}
-            onChange={event => setLoop(event.target.checked)}
-          />
-          Loop focus
-        </label>
+        <Checkbox
+          label="Loop focus"
+          checked={loop}
+          onChange={event => setLoop(event.target.checked)}
+        />
       </DemoControls>
       <DemoPreview>
         <ToolbarExample

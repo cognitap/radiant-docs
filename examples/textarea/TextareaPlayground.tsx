@@ -1,4 +1,5 @@
 'use client'
+import { Checkbox } from '@cognitap/radiant'
 import { useState } from 'react'
 import type { TextareaProps } from '@cognitap/radiant'
 import { SelectControl } from '@/components/demo/ActionControls'
@@ -22,30 +23,21 @@ export function TextareaPlayground({ task = 'describe' }: { task?: TextareaTask 
         </div>
         {task === 'describe' && (
           <div className="action-toggles">
-            <label>
-              <input
-                type="checkbox"
-                checked={disabled}
-                onChange={event => setDisabled(event.target.checked)}
-              />
-              Disabled
-            </label>
-            <label>
-              <input
-                type="checkbox"
-                checked={readOnly}
-                onChange={event => setReadOnly(event.target.checked)}
-              />
-              Read-only
-            </label>
-            <label>
-              <input
-                type="checkbox"
-                checked={invalid}
-                onChange={event => setInvalid(event.target.checked)}
-              />
-              Invalid
-            </label>
+            <Checkbox
+              label="Disabled"
+              checked={disabled}
+              onChange={event => setDisabled(event.target.checked)}
+            />
+            <Checkbox
+              label="Read-only"
+              checked={readOnly}
+              onChange={event => setReadOnly(event.target.checked)}
+            />
+            <Checkbox
+              label="Invalid"
+              checked={invalid}
+              onChange={event => setInvalid(event.target.checked)}
+            />
           </div>
         )}
       </DemoControls>

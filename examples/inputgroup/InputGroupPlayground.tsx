@@ -1,4 +1,5 @@
 'use client'
+import { Checkbox } from '@cognitap/radiant'
 import { useState } from 'react'
 import { SelectControl } from '@/components/demo/ActionControls'
 import { DemoControls, DemoPreview } from '@/components/demo/DemoFrame'
@@ -37,30 +38,21 @@ export function InputGroupPlayground({ task = 'find' }: { task?: InputGroupTask 
           )}
         </div>
         <div className="action-toggles">
-          <label>
-            <input
-              type="checkbox"
-              checked={disabled}
-              onChange={event => setDisabled(event.target.checked)}
-            />
-            Disabled control
-          </label>
-          <label>
-            <input
-              type="checkbox"
-              checked={readOnly}
-              onChange={event => setReadOnly(event.target.checked)}
-            />
-            Read only
-          </label>
-          <label>
-            <input
-              type="checkbox"
-              checked={invalid}
-              onChange={event => setInvalid(event.target.checked)}
-            />
-            Invalid control
-          </label>
+          <Checkbox
+            label="Disabled control"
+            checked={disabled}
+            onChange={event => setDisabled(event.target.checked)}
+          />
+          <Checkbox
+            label="Read only"
+            checked={readOnly}
+            onChange={event => setReadOnly(event.target.checked)}
+          />
+          <Checkbox
+            label="Invalid control"
+            checked={invalid}
+            onChange={event => setInvalid(event.target.checked)}
+          />
         </div>
       </DemoControls>
       <DemoPreview>

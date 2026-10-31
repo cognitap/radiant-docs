@@ -1,4 +1,5 @@
 'use client'
+import { Checkbox } from '@cognitap/radiant'
 import { useState } from 'react'
 import { SelectControl } from '@/components/demo/ActionControls'
 import { DemoControls, DemoPreview } from '@/components/demo/DemoFrame'
@@ -33,14 +34,11 @@ export function BadgePlayground({ task = 'status' }: { task?: BadgeTask }) {
               optionLabels={optionLabels}
               onChange={setStatus}
             />
-            <label>
-              <input
-                type="checkbox"
-                checked={decorative}
-                onChange={event => setDecorative(event.target.checked)}
-              />{' '}
-              Repeat meaning in adjacent text
-            </label>
+            <Checkbox
+              label="Repeat meaning in adjacent text"
+              checked={decorative}
+              onChange={event => setDecorative(event.target.checked)}
+            />
           </div>
         )}
       </DemoControls>

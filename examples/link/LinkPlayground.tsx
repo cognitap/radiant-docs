@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import dynamic from 'next/dynamic'
-import { type LinkVariant, type Tone, type ControlSize } from '@cognitap/radiant'
+import { type LinkVariant, type Tone, type ControlSize, Checkbox } from '@cognitap/radiant'
 import type { LinkTask } from './LinkExample'
 import { SelectControl } from '@/components/demo/ActionControls'
 import { DemoControls, DemoPreview } from '@/components/demo/DemoFrame'
@@ -46,14 +46,11 @@ export function LinkPlayground({ task = 'guide' }: { task?: LinkTask }) {
           )}
         </div>
         {prose ? null : (
-          <label>
-            <input
-              type="checkbox"
-              checked={external}
-              onChange={event => setExternal(event.target.checked)}
-            />
-            Open in a new tab
-          </label>
+          <Checkbox
+            label="Open in a new tab"
+            checked={external}
+            onChange={event => setExternal(event.target.checked)}
+          />
         )}
       </DemoControls>
       <DemoPreview>

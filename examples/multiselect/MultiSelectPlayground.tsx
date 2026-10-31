@@ -1,4 +1,5 @@
 'use client'
+import { Checkbox } from '@cognitap/radiant'
 import { useState } from 'react'
 import { SelectControl } from '@/components/demo/ActionControls'
 import { DemoControls, DemoPreview } from '@/components/demo/DemoFrame'
@@ -31,62 +32,41 @@ export function MultiSelectPlayground({ task }: { task?: MultiSelectTask }) {
           />
         </div>
         <div className="action-toggles">
-          <label>
-            <input
-              type="checkbox"
-              checked={disabled}
-              onChange={event => setDisabled(event.target.checked)}
-            />
-            Disabled
-          </label>
-          <label>
-            <input
-              type="checkbox"
-              checked={readOnly}
-              onChange={event => setReadOnly(event.target.checked)}
-            />
-            Read only
-          </label>
-          <label>
-            <input
-              type="checkbox"
-              checked={empty}
-              onChange={event => setEmpty(event.target.checked)}
-            />
-            Initially empty
-          </label>
-          <label>
-            <input
-              type="checkbox"
-              checked={loading}
-              onChange={event => setLoading(event.target.checked)}
-            />
-            Loading
-          </label>
-          <label>
-            <input
-              type="checkbox"
-              checked={fail}
-              onChange={event => setFail(event.target.checked)}
-            />
-            Lookup failure
-          </label>
-          <label>
-            <input
-              type="checkbox"
-              checked={initial}
-              onChange={event => setInitial(event.target.checked)}
-            />
-            Initially open
-          </label>
-          <label>
-            <input
-              type="checkbox"
-              checked={off}
-              onChange={event => setOff(event.target.checked)}
-            />
-            Motion off
-          </label>
+          <Checkbox
+            label="Disabled"
+            checked={disabled}
+            onChange={event => setDisabled(event.target.checked)}
+          />
+          <Checkbox
+            label="Read only"
+            checked={readOnly}
+            onChange={event => setReadOnly(event.target.checked)}
+          />
+          <Checkbox
+            label="Initially empty"
+            checked={empty}
+            onChange={event => setEmpty(event.target.checked)}
+          />
+          <Checkbox
+            label="Loading"
+            checked={loading}
+            onChange={event => setLoading(event.target.checked)}
+          />
+          <Checkbox
+            label="Lookup failure"
+            checked={fail}
+            onChange={event => setFail(event.target.checked)}
+          />
+          <Checkbox
+            label="Initially open"
+            checked={initial}
+            onChange={event => setInitial(event.target.checked)}
+          />
+          <Checkbox
+            label="Motion off"
+            checked={off}
+            onChange={event => setOff(event.target.checked)}
+          />
         </div>
       </DemoControls>
       <DemoPreview>

@@ -1,4 +1,5 @@
 'use client'
+import { Checkbox } from '@cognitap/radiant'
 import { useState } from 'react'
 import { SelectControl } from '@/components/demo/ActionControls'
 import { DemoControls, DemoPreview } from '@/components/demo/DemoFrame'
@@ -20,30 +21,21 @@ export function ToggleGroupPlayground({ task = 'alignment' }: { task?: ToggleGro
           />
         </div>
         <div className="action-toggles">
-          <label>
-            <input
-              type="checkbox"
-              checked={loop}
-              onChange={event => setLoop(event.target.checked)}
-            />
-            Loop focus
-          </label>
-          <label>
-            <input
-              type="checkbox"
-              checked={disabled}
-              onChange={event => setDisabled(event.target.checked)}
-            />
-            Disabled
-          </label>
-          <label>
-            <input
-              type="checkbox"
-              checked={off}
-              onChange={event => setOff(event.target.checked)}
-            />
-            Motion off
-          </label>
+          <Checkbox
+            label="Loop focus"
+            checked={loop}
+            onChange={event => setLoop(event.target.checked)}
+          />
+          <Checkbox
+            label="Disabled"
+            checked={disabled}
+            onChange={event => setDisabled(event.target.checked)}
+          />
+          <Checkbox
+            label="Motion off"
+            checked={off}
+            onChange={event => setOff(event.target.checked)}
+          />
         </div>
       </DemoControls>
       <DemoPreview>

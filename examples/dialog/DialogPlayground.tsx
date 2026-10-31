@@ -1,4 +1,5 @@
 'use client'
+import { Checkbox } from '@cognitap/radiant'
 import { useState } from 'react'
 import { SelectControl } from '@/components/demo/ActionControls'
 import { DemoControls, DemoPreview } from '@/components/demo/DemoFrame'
@@ -22,38 +23,26 @@ export function DialogPlayground({ task = 'shortcuts' }: { task?: DialogTask }) 
           />
         </div>
         <div className="action-toggles">
-          <label>
-            <input
-              type="checkbox"
-              checked={modal}
-              onChange={event => setModal(event.target.checked)}
-            />
-            Modal
-          </label>
-          <label>
-            <input
-              type="checkbox"
-              checked={backdrop}
-              onChange={event => setBackdrop(event.target.checked)}
-            />
-            Backdrop dismissal
-          </label>
-          <label>
-            <input
-              type="checkbox"
-              checked={escape}
-              onChange={event => setEscape(event.target.checked)}
-            />
-            Escape dismissal
-          </label>
-          <label>
-            <input
-              type="checkbox"
-              checked={off}
-              onChange={event => setOff(event.target.checked)}
-            />
-            Motion off
-          </label>
+          <Checkbox
+            label="Modal"
+            checked={modal}
+            onChange={event => setModal(event.target.checked)}
+          />
+          <Checkbox
+            label="Backdrop dismissal"
+            checked={backdrop}
+            onChange={event => setBackdrop(event.target.checked)}
+          />
+          <Checkbox
+            label="Escape dismissal"
+            checked={escape}
+            onChange={event => setEscape(event.target.checked)}
+          />
+          <Checkbox
+            label="Motion off"
+            checked={off}
+            onChange={event => setOff(event.target.checked)}
+          />
         </div>
       </DemoControls>
       <DemoPreview>

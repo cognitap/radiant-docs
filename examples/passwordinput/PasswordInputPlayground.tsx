@@ -1,4 +1,5 @@
 'use client'
+import { Checkbox } from '@cognitap/radiant'
 import { useState } from 'react'
 import { SelectControl } from '@/components/demo/ActionControls'
 import { DemoControls, DemoPreview } from '@/components/demo/DemoFrame'
@@ -29,40 +30,28 @@ export function PasswordInputPlayground({ task = 'signin' }: { task?: PasswordIn
           />
         </div>
         <div className="action-toggles">
-          <label>
-            <input
-              type="checkbox"
-              checked={disabled}
-              onChange={e => setDisabled(e.target.checked)}
-            />
-            Disabled
-          </label>
-          <label>
-            <input
-              type="checkbox"
-              checked={invalid}
-              onChange={e => setInvalid(e.target.checked)}
-            />
-            Invalid
-          </label>
+          <Checkbox
+            label="Disabled"
+            checked={disabled}
+            onChange={e => setDisabled(e.target.checked)}
+          />
+          <Checkbox
+            label="Invalid"
+            checked={invalid}
+            onChange={e => setInvalid(e.target.checked)}
+          />
           {task !== 'review' && (
             <>
-              <label>
-                <input
-                  type="checkbox"
-                  checked={readOnly}
-                  onChange={e => setReadOnly(e.target.checked)}
-                />
-                Read only
-              </label>
-              <label>
-                <input
-                  type="checkbox"
-                  checked={required}
-                  onChange={e => setRequired(e.target.checked)}
-                />
-                Required
-              </label>
+              <Checkbox
+                label="Read only"
+                checked={readOnly}
+                onChange={e => setReadOnly(e.target.checked)}
+              />
+              <Checkbox
+                label="Required"
+                checked={required}
+                onChange={e => setRequired(e.target.checked)}
+              />
             </>
           )}
         </div>

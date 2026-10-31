@@ -1,4 +1,5 @@
 'use client'
+import { Checkbox } from '@cognitap/radiant'
 import { useState } from 'react'
 import { SelectControl } from '@/components/demo/ActionControls'
 import { DemoControls, DemoPreview } from '@/components/demo/DemoFrame'
@@ -36,38 +37,26 @@ export function MenuPlayground({ task = 'file' }: { task?: MenuTask }) {
           />
         </div>
         <div className="action-toggles">
-          <label>
-            <input
-              type="checkbox"
-              checked={off}
-              onChange={event => setOff(event.target.checked)}
-            />
-            Motion off
-          </label>
-          <label>
-            <input
-              type="checkbox"
-              checked={initial}
-              onChange={event => setInitial(event.target.checked)}
-            />
-            Initially open
-          </label>
-          <label>
-            <input
-              type="checkbox"
-              checked={disabled}
-              onChange={event => setDisabled(event.target.checked)}
-            />
-            Disabled items
-          </label>
-          <label>
-            <input
-              type="checkbox"
-              checked={pending}
-              onChange={event => setPending(event.target.checked)}
-            />
-            Pending items
-          </label>
+          <Checkbox
+            label="Motion off"
+            checked={off}
+            onChange={event => setOff(event.target.checked)}
+          />
+          <Checkbox
+            label="Initially open"
+            checked={initial}
+            onChange={event => setInitial(event.target.checked)}
+          />
+          <Checkbox
+            label="Disabled items"
+            checked={disabled}
+            onChange={event => setDisabled(event.target.checked)}
+          />
+          <Checkbox
+            label="Pending items"
+            checked={pending}
+            onChange={event => setPending(event.target.checked)}
+          />
         </div>
       </DemoControls>
       <DemoPreview>

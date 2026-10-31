@@ -1,4 +1,5 @@
 'use client'
+import { Checkbox } from '@cognitap/radiant'
 import { useState } from 'react'
 import { SelectControl } from '@/components/demo/ActionControls'
 import { DemoControls, DemoPreview } from '@/components/demo/DemoFrame'
@@ -17,14 +18,11 @@ export function SeparatorPlayground({ task = 'sections' }: { task?: SeparatorTas
         <div className="action-options">
           {task === 'sections' && (
             <>
-              <label>
-                <input
-                  type="checkbox"
-                  checked={decorative}
-                  onChange={event => setDecorative(event.target.checked)}
-                />{' '}
-                Decorative division
-              </label>
+              <Checkbox
+                label="Decorative division"
+                checked={decorative}
+                onChange={event => setDecorative(event.target.checked)}
+              />
               <SelectControl
                 label="Orientation"
                 value={orientation}
