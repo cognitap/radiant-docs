@@ -29,8 +29,10 @@ pnpm check
 `pnpm check` runs formatting, lint, the docs word check, types, the Node tests,
 the static build and the site tests. A failed page check saves a screenshot
 under `output/docs/`. `pnpm preview` serves the built `out/` folder.
-`pnpm test:deployment https://<deployment>` runs those site tests against a
-deployed origin and waits until that origin answers.
+`pnpm test:deployment https://<deployment>` waits until a deployed origin
+answers, then checks hosting there: links, search, the 404 page and
+`/deployment.json`. The demos are not tested again, because the deployment is
+the same export that `pnpm check` tested.
 
 ## Add a page
 
