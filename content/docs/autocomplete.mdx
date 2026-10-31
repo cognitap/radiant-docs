@@ -1,6 +1,6 @@
 ---
 title: Autocomplete
-description: Suggest completions while preserving any native text value.
+description: Suggest completions for a text input whose typed text, on or off the list, is the value.
 ---
 
 import {
@@ -13,19 +13,22 @@ import {
 
 ## Usage
 
-Use Autocomplete when suggestions help but any text is allowed. Use [Combobox](/docs/combobox/) when users must choose a registered value, or [Input](/docs/input/) when suggestions are unnecessary.
+Use Autocomplete when suggestions help but any text is allowed. Use [Combobox](/docs/combobox/) or [Select](/docs/select/) when the value must be one of the options, [MultiSelect](/docs/multi-select/) or [TagsInput](/docs/tags-input/) for several values, and [Command](/docs/command/) to run actions.
 
 ```tsx
 <Field label="City">
   <Autocomplete
     name="city"
-    items={[{ value: 'Budapest', label: 'Budapest' }]}
+    items={[
+      { value: 'Budapest', label: 'Budapest' },
+      { value: 'Vienna', label: 'Vienna' }
+    ]}
     defaultValue="Another city"
   />
 </Field>
 ```
 
-A suggestion's value is the literal text inserted into the input. Its label may describe that text; rich labels provide textValue.
+A suggestion's `value` is the text written into the input. A rich `label` needs a plain `textValue` for matching.
 
 ## Examples
 
@@ -39,93 +42,128 @@ A suggestion's value is the literal text inserted into the input. Its label may 
 
 ## State
 
-Choose value with onValueChange or defaultValue; text is a string and empty text is an empty string. There is no separate query owner. Controlled owners may refuse edits. Prop synchronization and unchanged completions emit no change request.
+Use `defaultValue`, or `value` with `onValueChange`, not both; mixing them or switching owner throws. The value is the input text, and empty text is `''`. The text is also the search query, so there is no separate `query`. `open`, `defaultOpen` and `onOpenChange` follow the same rule.
 
-Typing and accepted suggestions edit the same named native input. Native forms submit its text, including off-list values. Native reset silently restores uncontrolled defaults; controlled consumers reset their own values. Cancelled resets preserve text, including externally associated forms.
+The input carries `name` and submits its text, including text that matches no suggestion. `required` uses native constraint validation. Form reset restores the uncontrolled text without calling `onValueChange`; a controlled Autocomplete keeps its value, so reset your state in `onReset`. `disabled` leaves the text out of form data. `readOnly` blocks edits and keeps it submitted. Pass `aria-invalid` to Autocomplete to mark it invalid outside Field.
 
-open with onOpenChange or defaultOpen owns the popup independently. Loading, errors and arriving suggestions never replace text. Applications own requests, cancellation, response ordering and validation; filter=null accepts application-filtered results.
+For server results, set `filter={null}` and pass the current `items`. `loading` shows `loadingText` and `errorText` shows a load failure; neither changes the text. Your application owns requests, cancellation and validation.
 
 ## Accessibility
 
-[Field](/docs/field/) supplies labels, help, errors, disabled and required state. The native input retains DOM focus while aria-activedescendant identifies a highlighted suggestion. Highlighting alone does not accept it. Disabled suggestions cannot be chosen; application validation decides which typed values are allowed.
+The input has `role="combobox"`, and suggestions are `option` items in a `listbox`. Name the input with [Field](/docs/field/) or `aria-label`. A polite `status` region announces loading, empty and error text. Focus stays in the input while `aria-activedescendant` marks the highlighted suggestion.
 
-| Key                             | Behavior                                                         |
-| ------------------------------- | ---------------------------------------------------------------- |
-| Tab / Shift+Tab                 | Follow native form order and dismiss suggestions                 |
-| Up / Down                       | Open and highlight enabled suggestions                           |
-| Enter                           | Accept the highlighted completion; otherwise allow native submit |
-| Escape                          | Dismiss without changing text                                    |
-| Editing shortcuts / composition | Preserve native input editing                                    |
+| Key                 | Behavior                                                      |
+| ------------------- | ------------------------------------------------------------- |
+| Typing              | Edit the text, filter suggestions and open the list           |
+| Arrow Down / Up     | Open and highlight the next or previous enabled suggestion    |
+| Alt+Arrow Down / Up | Open or close without moving the highlight                    |
+| Enter               | Write the highlighted suggestion; with none, close and submit |
+| Escape              | Close and keep the typed text                                 |
+| Tab / Shift+Tab     | Close and move focus                                          |
 
-Trigger and clear Buttons stay outside Tab order; native editing provides keyboard clearing. Keep suggestion labels and status content noninteractive.
+Accepting a suggestion fires a native `input` event. AutocompleteTrigger ("Show suggestions") and AutocompleteClear ("Clear text") stay out of the Tab order; native editing clears the text from the keyboard.
 
 ## Motion
 
-The popup reuses Combobox motion, including reduced-motion handling. Set Content motion="off" to disable its presentation adapter. Opening, dismissal, text changes and focus remain immediate.
+Inside [MotionProvider](/docs/foundations/motion/), the popup fades in; closing is immediate. Set `motion="off"` on AutocompleteContent to turn it off. Reduced motion shows it at full opacity.
 
 ## Styling
 
-The root owns state and has no DOM host. Input props, className, ThemeStyle and ref reach the actual input. Trigger and Clear use real Buttons; Content and Item use native divs. Their slots retain combobox identities and add autocomplete identities.
+Autocomplete and AutocompletePortal have no host. Every other part takes `className`, `style` and `ref`. Each slot keeps its `combobox-*` name and adds an `autocomplete-*` one.
 
-Combobox theme tokens and caller styles customize these hosts.
+| Part                | Attributes                                                                                        |
+| ------------------- | ------------------------------------------------------------------------------------------------- |
+| Control wrapper     | `data-slot="combobox-control autocomplete-control"`; default composition only                     |
+| AutocompleteInput   | `data-slot="combobox-input autocomplete-input"`, `data-control-size`, `data-invalid`              |
+| AutocompleteTrigger | `data-slot="button combobox-trigger autocomplete-trigger"`                                        |
+| AutocompleteClear   | `data-slot="button combobox-clear autocomplete-clear"`; renders only for nonempty text            |
+| AutocompleteContent | `data-slot="combobox-content autocomplete-content"`, `data-state="open \| closed"`, `data-motion` |
+| Listbox             | `data-slot="combobox-listbox autocomplete-listbox"` inside the content                            |
+| AutocompleteItem    | `data-slot="combobox-item autocomplete-item"`, `data-value`, `data-highlighted`, `data-disabled`  |
+| AutocompleteStatus  | `data-slot="combobox-status autocomplete-status"`                                                 |
+
+Theme with the Combobox tokens, such as `--rad-combobox-height`, `--rad-combobox-radius` and `--rad-combobox-border-color`.
 
 ## API
 
 ### Autocomplete
 
-| Prop                              | Type / default                                                                      |
-| --------------------------------- | ----------------------------------------------------------------------------------- |
-| items                             | readonly AutocompleteOption[]; distinct completion values                           |
-| value / defaultValue              | string; one owner; empty string                                                     |
-| onValueChange                     | (value: string) → void                                                              |
-| open / defaultOpen / onOpenChange | boolean owner and request callback; initially closed                                |
-| filter                            | (item, text) → boolean; matches value and readable label; null for supplied results |
-| loading / error                   | boolean / ReactNode; suggestion status                                              |
-| loadingText / emptyText           | Custom status strings                                                               |
-| name / form                       | Native input submission and association                                             |
-| disabled / readOnly / required    | Native booleans; Field adds disabled and required                                   |
-| controlSize                       | small / medium / large; medium                                                      |
-| children                          | Optional custom parts                                                               |
+| Prop                 | Type                                               | Default                                   |
+| -------------------- | -------------------------------------------------- | ----------------------------------------- |
+| items                | `readonly AutocompleteOption[]`; distinct values   | Required                                  |
+| value / defaultValue | string                                             | None / `''`; one owner                    |
+| onValueChange        | `(value: string) => void`                          | None                                      |
+| open / defaultOpen   | boolean                                            | None / false                              |
+| onOpenChange         | `(open: boolean) => void`                          | None                                      |
+| filter               | `((item, query: string) => boolean) \| null`       | Matches value, textValue and string label |
+| loading              | boolean; hides suggestions and shows `loadingText` | false                                     |
+| loadingText          | string                                             | `'Loading results…'`                      |
+| emptyText            | ReactNode                                          | `'No results found.'`                     |
+| errorText            | ReactNode; load failure, hides suggestions         | None                                      |
+| name / form          | string; reach the input                            | None                                      |
+| disabled / required  | boolean                                            | Field's, else false                       |
+| readOnly             | boolean                                            | false                                     |
+| aria-invalid         | Native; forwarded to the input                     | Field's                                   |
+| controlSize          | small / medium / large                             | medium                                    |
+| children             | ReactNode                                          | Input, trigger and content                |
 
 ### AutocompleteInput
 
-| Prop                    | Type / default                                                   |
-| ----------------------- | ---------------------------------------------------------------- |
-| Native props / events   | Input editing, autocomplete, pattern and labels                  |
-| className / style / ref | Native input / ThemeStyle / HTMLInputElement                     |
-| Owned props             | value, name, form, type, role, disabled, required and popup ARIA |
+| Prop         | Type                                                                                              | Default |
+| ------------ | ------------------------------------------------------------------------------------------------- | ------- |
+| aria-invalid | Native; overrides the root's                                                                      | Root's  |
+| autoComplete | string                                                                                            | `'off'` |
+| Other props  | input props except value, defaultValue, name, form, type, role, disabled, required and popup ARIA | Native  |
 
-### AutocompleteTrigger / AutocompleteClear
+### AutocompleteTrigger
 
-| Prop                         | Type / default                   |
-| ---------------------------- | -------------------------------- |
-| Native Button props / render | Compatible native button adapter |
-| aria-label                   | Show suggestions / Clear text    |
-| ref                          | HTMLButtonElement                |
+| Prop        | Type                                                                                                                                         | Default              |
+| ----------- | -------------------------------------------------------------------------------------------------------------------------------------------- | -------------------- |
+| render      | `(props: AutocompleteRenderProps) => ReactElement`                                                                                           | None                 |
+| aria-label  | string                                                                                                                                       | `'Show suggestions'` |
+| children    | ReactNode                                                                                                                                    | Chevron              |
+| Other props | Button props except variant, tone, type, pending, disabled, controlSize, iconOnly, fullWidth, motion, tabIndex, popup ARIA and pressed props | Native               |
 
-Clear appears only for nonempty text.
+### AutocompleteClear
+
+| Prop        | Type                                               | Default        |
+| ----------- | -------------------------------------------------- | -------------- |
+| render      | `(props: AutocompleteRenderProps) => ReactElement` | None           |
+| aria-label  | string                                             | `'Clear text'` |
+| children    | ReactNode                                          | Cross          |
+| Other props | Same as AutocompleteTrigger                        | Native         |
 
 ### AutocompletePortal
 
-Renders children beside the input's local host; no DOM wrapper.
+| Prop     | Type      | Default |
+| -------- | --------- | ------- |
+| children | ReactNode | None    |
+
+Renders beside the input without a wrapper; the popup uses the top layer.
 
 ### AutocompleteContent
 
-| Prop                          | Type / default                          |
-| ----------------------------- | --------------------------------------- |
-| Native props / style / ref    | div props / ThemeStyle / HTMLDivElement |
-| sideOffset / collisionPadding | number; 4 / 8                           |
-| motion                        | inherit / off; inherit                  |
-| children                      | Registered Items; generated by default  |
+| Prop             | Type                               | Default            |
+| ---------------- | ---------------------------------- | ------------------ |
+| sideOffset       | number                             | 4                  |
+| collisionPadding | number                             | 8                  |
+| motion           | inherit / off                      | inherit            |
+| children         | ReactNode                          | One item per match |
+| Other props      | div props except popover, role, id | Native             |
 
 ### AutocompleteItem
 
-| Prop                       | Type / default                          |
-| -------------------------- | --------------------------------------- |
-| value                      | Registered completion string            |
-| children                   | Optional rich label                     |
-| Native props / style / ref | div props / ThemeStyle / HTMLDivElement |
+| Prop        | Type                                | Default    |
+| ----------- | ----------------------------------- | ---------- |
+| value       | string; must exist in `items`       | Required   |
+| children    | ReactNode                           | Item label |
+| Other props | div props except id, role, tabIndex | Native     |
 
 ### AutocompleteStatus
 
-Native div props and styles; children replace the polite status message. Exports each part's Props type and AutocompleteOption.
+| Prop        | Type                  | Default     |
+| ----------- | --------------------- | ----------- |
+| children    | ReactNode             | Root status |
+| Other props | div props except role | Native      |
+
+Exports `AutocompleteProps`, `AutocompleteOption`, `AutocompleteRenderProps`, `AutocompleteInputProps`, `AutocompleteTriggerProps`, `AutocompleteClearProps`, `AutocompletePortalProps`, `AutocompleteContentProps`, `AutocompleteItemProps` and `AutocompleteStatusProps`.

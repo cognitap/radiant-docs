@@ -61,7 +61,7 @@ export function ComboboxAsyncExample() {
             setSelected(next === null ? undefined : result.items.find(item => item.value === next))
           }
           loading={result.loading || result.query !== query}
-          error={result.query === query ? result.error : undefined}
+          errorText={result.query === query ? result.error : undefined}
         />
       </Field>
       <p>Selected: {selected?.label ?? 'None'}</p>
