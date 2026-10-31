@@ -2492,3 +2492,81 @@ test('Form coordinates native validation, custom rules, server recovery and opti
     }
   })
 })
+
+test('Carousel docs navigate real studies, preserve notes and honor controlled refusal', async () => {
+  await withSite(async (baseURL, browser) => {
+    const page = await browser.newPage(),
+      errors = track(page)
+    try {
+      await capture(page, 'carousel', async () => {
+        await page.goto(baseURL + '/docs/carousel/')
+        await page.waitForFunction(
+          () => !document.querySelector<HTMLButtonElement>('.demo-heading button')?.disabled
+        )
+        const review = page.getByRole('region', { name: 'Study library application', exact: true })
+        await review.getByRole('button', { name: 'Next study', exact: true }).click()
+        await review.getByRole('button', { name: 'Review Harbor reading', exact: true }).click()
+        await review
+          .getByRole('status', { name: 'Study review feedback', exact: true })
+          .filter({ hasText: 'Harbor reading opened for review.' })
+          .waitFor()
+        const notes = page.getByRole('region', {
+            name: 'Study preparation application',
+            exact: true
+          }),
+          field = notes.getByRole('textbox', { name: 'Notes for Atlas onboarding', exact: true })
+        await field.fill('Bring large-print consent')
+        await notes
+          .getByRole('button', { name: 'Save Atlas onboarding preparation', exact: true })
+          .click()
+        await notes.getByRole('button', { name: 'Next study', exact: true }).click()
+        await notes.getByRole('button', { name: 'Previous study', exact: true }).click()
+        assert.equal(await field.inputValue(), 'Bring large-print consent')
+        const comparison = page.getByRole('region', {
+          name: 'Research comparison application',
+          exact: true
+        })
+        await comparison
+          .getByRole('checkbox', { name: 'Keep the selected study', exact: true })
+          .check()
+        await comparison.getByRole('button', { name: 'Next study', exact: true }).click()
+        await comparison
+          .getByRole('status', { name: 'Comparison feedback', exact: true })
+          .filter({ hasText: 'locked' })
+          .waitFor()
+        assert.equal(
+          await comparison
+            .locator('[data-slot~="carousel-slide"][data-selected]')
+            .getAttribute('data-rad-carousel-value'),
+          'atlas'
+        )
+        await comparison
+          .getByRole('checkbox', { name: 'Keep the selected study', exact: true })
+          .uncheck()
+        await comparison.getByRole('button', { name: 'Show slide 3 of 3', exact: true }).click()
+        await page.waitForFunction(() =>
+          document
+            .querySelector(
+              '[aria-label="Research comparison application"] [data-rad-carousel-value="orchard"]'
+            )
+            ?.hasAttribute('data-selected')
+        )
+        await page
+          .getByRole('region', { name: 'Prepare research notes', exact: true })
+          .getByRole('combobox', { name: 'Direction', exact: true })
+          .selectOption('rtl')
+        await page.setViewportSize({ width: 320, height: 850 })
+        await notes.getByRole('group', { name: 'Slides', exact: true }).focus()
+        await page.keyboard.press('ArrowLeft')
+        await page.waitForFunction(() =>
+          document
+            .querySelector('[aria-label="Study preparation"] [data-rad-carousel-value="harbor"]')
+            ?.hasAttribute('data-selected')
+        )
+        assert.deepEqual(errors, [])
+      })
+    } finally {
+      await page.close()
+    }
+  })
+})

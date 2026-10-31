@@ -1,0 +1,78 @@
+---
+title: Carousel
+description: Native scrolling slides with accessible navigation and opt-in rotation.
+---
+
+import {
+  CarouselDemo,
+  CarouselPreparationDemo,
+  CarouselComparisonDemo
+} from '../../components/CarouselDemo'
+
+<CarouselDemo />
+
+## Usage
+
+```tsx
+import {
+  Carousel,
+  CarouselViewport,
+  CarouselPrevious,
+  CarouselNext,
+  CarouselIndicators
+} from '@cognitap/radiant'
+
+;<Carousel
+  aria-label="Featured studies"
+  items={[
+    { value: 'atlas', label: 'Atlas', children: <p>Atlas onboarding</p> },
+    { value: 'harbor', label: 'Harbor', children: <p>Harbor reading</p> }
+  ]}
+>
+  <CarouselViewport />
+  <CarouselPrevious>Previous</CarouselPrevious>
+  <CarouselNext>Next</CarouselNext>
+  <CarouselIndicators />
+</Carousel>
+```
+
+## Examples
+
+<CarouselPreparationDemo />
+
+<CarouselComparisonDemo />
+
+Use a carousel for a focused sequence. Keep essential content reachable without waiting for slides to advance.
+
+## State
+
+`items` supplies unique stable keys, optional labels and slide content. `value`, `defaultValue`, `onValueChange` own the selected key; callbacks receive one string or null. Controlled requests may be refused. Keep the selected key in the collection.
+
+Native scrolling and snap own movement. Touch swipes stay native; mouse and pen can drag noninteractive content. Inputs and links retain their own gestures. Slide content stays mounted, preserving drafts. Inactive slides are inert until selected.
+
+`autoPlay` defaults false. `interval` is milliseconds, at least 1000. Hover, contained focus, document visibility and reduced motion pause the timer. Explicit navigation stops playback. Include CarouselAutoPlay when offering automatic rotation.
+
+## Accessibility
+
+Name the native section. Slides announce their label and position; `slideLabel(index, count)` customizes position text. Previous/next are real Buttons and indicators identify the current slide. `indicatorLabel` names each destination.
+
+The viewport is keyboard reachable. Left/Right follow direction; Home/End select the first/last slide. Keys inside native controls retain their meaning. Selection leaves action focus in place. Automatic rotation silences position announcements; manual navigation announces changes.
+
+## Motion
+
+Native smooth scrolling honors reduced motion. No MotionProvider or animation engine is required. Reduced motion also pauses automatic rotation.
+
+## Styling
+
+Root props and refs reach the section; viewport props reach its native scroll div. Action props reach Button. `components.carousel` controls `gap`, `slideGap` and `radius`. Caller classes and style win at each actual host.
+
+## API
+
+| Export                          | Purpose                                            |
+| ------------------------------- | -------------------------------------------------- |
+| Carousel                        | Keyed slide collection and optional rotation       |
+| CarouselViewport                | Native scroll-snap viewport and slides             |
+| CarouselPrevious / CarouselNext | Bounded navigation Buttons                         |
+| CarouselIndicators              | Buttons for named slide destinations               |
+| CarouselAutoPlay                | Start/pause action                                 |
+| useCarousel                     | Selection, count and requests; null outside a root |
