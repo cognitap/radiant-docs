@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { defineMotionProfile, type SpringParameters } from '@cognitap/radiant'
+import { Button, defineMotionProfile, type SpringParameters } from '@cognitap/radiant'
 import {
   applyMotion,
   authoredMotion,
@@ -156,9 +156,9 @@ export function MotionEditor({
       <section className="motion-section">
         <div className="motion-head">
           <h4>Physics for</h4>
-          <button
-            type="button"
-            className="motion-link"
+          <Button
+            variant="ghost"
+            controlSize="small"
             disabled={!override || !Object.keys(override).length}
             onClick={() =>
               onChange(inheritMotion(document, scope), {
@@ -167,7 +167,7 @@ export function MotionEditor({
             }
           >
             {scope === 'shared' ? 'Use default physics' : 'Use common physics'}
-          </button>
+          </Button>
         </div>
         <Chips
           label="Physics for"
@@ -216,14 +216,14 @@ export function MotionEditor({
                 )}
               </Changed>
               {overridden(dial.key) && (
-                <button
-                  type="button"
-                  className="motion-link"
+                <Button
+                  variant="ghost"
+                  controlSize="small"
                   onClick={() => setDial(dial.key, undefined)}
                 >
                   Use common
                   <span className="workshop-sr-only"> {dial.label.toLowerCase()}</span>
-                </button>
+                </Button>
               )}
             </div>
           ))}

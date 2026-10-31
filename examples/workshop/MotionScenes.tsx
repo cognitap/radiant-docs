@@ -10,6 +10,8 @@ import {
   CollapsibleTrigger,
   CollapsibleContent,
   Dialog,
+  Field,
+  Slider,
   DialogTrigger,
   DialogContent,
   DialogTitle,
@@ -291,17 +293,15 @@ function DragScene({
           End
         </Button>
       </div>
-      <label>
-        Manual destination
-        <input
-          type="range"
+      <Field label="Manual destination">
+        <Slider
           min={0}
           max={extent}
           step="any"
           value={Math.min(extent, model.target)}
           onChange={event => to(Number(event.target.value))}
         />
-      </label>
+      </Field>
     </div>
   )
 }
@@ -394,17 +394,15 @@ function FollowScene({
           aria-hidden="true"
         />
       </div>
-      <label>
-        Manual destination
-        <input
-          type="range"
+      <Field label="Manual destination">
+        <Slider
           min={0}
           max={extent}
           step="any"
           value={Math.min(extent, model.target)}
           onChange={event => onChange({ target: Number(event.target.value), running: false })}
         />
-      </label>
+      </Field>
       <Button
         variant="outline"
         aria-pressed={model.running}

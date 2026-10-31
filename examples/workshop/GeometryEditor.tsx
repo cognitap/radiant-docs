@@ -1,9 +1,21 @@
 'use client'
 
-/* oxlint-disable jsx-a11y/no-noninteractive-tabindex -- The named resolved-values table needs keyboard scrolling. */
-
 import { useState, type CSSProperties, type ReactNode } from 'react'
-import { Button, type Theme } from '@cognitap/radiant'
+import {
+  Button,
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+  Fieldset,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableHeader,
+  TableRow,
+  type Theme
+} from '@cognitap/radiant'
 import {
   changeGeometry,
   clearGeometryOverride,
@@ -133,14 +145,14 @@ export function GeometryEditor({
         <span className="geometry-override">
           <span className="geometry-override-dot" />
           {scope} override
-          <button
-            type="button"
-            className="geometry-link"
+          <Button
+            variant="outline"
+            controlSize="small"
             onClick={() => set(key, undefined)}
           >
             Use shared
             <span className="workshop-sr-only"> {settingNames[key].toLowerCase()}</span>
-          </button>
+          </Button>
         </span>
       )
     const modes = (['light', 'dark'] as const).filter(
@@ -190,12 +202,13 @@ export function GeometryEditor({
           </Button>
         </>
       )}
-      <fieldset
+      <Fieldset
+        legend="Spacing and surface decisions"
+        parts={{ legend: { className: 'workshop-sr-only' } }}
         hidden={!recipe}
         disabled={disabled}
         className="geometry-settings"
       >
-        <legend className="workshop-sr-only">Spacing and surface decisions</legend>
         <section className="geometry-section">
           <h4>Starting preset</h4>
           <Changed
@@ -220,16 +233,16 @@ export function GeometryEditor({
           <div className="geometry-head">
             <h4>Editing</h4>
             {scope !== 'shared' && (
-              <button
-                type="button"
-                className="geometry-link"
+              <Button
+                variant="outline"
+                controlSize="small"
                 disabled={!overrides}
                 onClick={() =>
                   onChange(clearGeometryOverride(current, scope), { label: `${scope} overrides` })
                 }
               >
                 Clear all {scope} overrides
-              </button>
+              </Button>
             )}
           </div>
           <Chips
@@ -265,38 +278,39 @@ export function GeometryEditor({
             return level === 1 || level === 2 || level === 3 ? level : 0
           })}
         </section>
-      </fieldset>
-      <details className="geometry-resolved">
-        <summary>Resolved spacing and surface values</summary>
-        <section
-          className="geometry-table-scroll"
-          aria-label="Resolved geometry values"
-          tabIndex={0}
-        >
-          <table>
-            <thead>
-              <tr>
-                <th scope="col">Role</th>
-                <th scope="col">Light</th>
-                <th scope="col">Dark</th>
-              </tr>
-            </thead>
-            <tbody>
-              {geometryMetrics.map(([label, variable]) => (
-                <tr key={variable}>
-                  <th scope="row">{label}</th>
-                  <td>
-                    <code>{theme.modes.light[variable]}</code>
-                  </td>
-                  <td>
-                    <code>{theme.modes.dark[variable]}</code>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </section>
-      </details>
+      </Fieldset>
+      <Collapsible className="geometry-resolved">
+        <CollapsibleTrigger>Resolved spacing and surface values</CollapsibleTrigger>
+        <CollapsibleContent>
+          <TableContainer
+            className="geometry-table-scroll"
+            aria-label="Resolved geometry values"
+          >
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableHeader scope="col">Role</TableHeader>
+                  <TableHeader scope="col">Light</TableHeader>
+                  <TableHeader scope="col">Dark</TableHeader>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {geometryMetrics.map(([label, variable]) => (
+                  <TableRow key={variable}>
+                    <TableHeader scope="row">{label}</TableHeader>
+                    <TableCell>
+                      <code>{theme.modes.light[variable]}</code>
+                    </TableCell>
+                    <TableCell>
+                      <code>{theme.modes.dark[variable]}</code>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </CollapsibleContent>
+      </Collapsible>
     </div>
   )
 }

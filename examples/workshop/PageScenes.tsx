@@ -1,9 +1,24 @@
 'use client'
 
-/* oxlint-disable jsx-a11y/no-noninteractive-tabindex -- Named table/code regions support native keyboard scrolling. */
+/* oxlint-disable jsx-a11y/no-noninteractive-tabindex -- The named code region supports native keyboard scrolling. */
 
 import { useId, type ReactNode } from 'react'
-import { Button, Card, Field, Input, Link, Checkbox } from '@cognitap/radiant'
+import {
+  Button,
+  Card,
+  Checkbox,
+  Field,
+  Input,
+  Link,
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableHeader,
+  TableRow
+} from '@cognitap/radiant'
 import { sceneCopy, readCopy, type CopyEdits, type PageScene } from './page-copy'
 import type { PageSessions } from './workshop-preview'
 
@@ -218,39 +233,38 @@ export function Page({
         >
           {text('data', 'heading')}
         </h3>
-        <section
+        <TableContainer
           className="scene-scroll"
-          tabIndex={0}
           aria-labelledby={`${id}-table`}
         >
-          <table data-rad-text="ui-supporting">
-            <caption data-rad-text="ui-caption">{text('data', 'caption')}</caption>
-            <thead>
-              <tr>
+          <Table data-rad-text="ui-supporting">
+            <TableCaption data-rad-text="ui-caption">{text('data', 'caption')}</TableCaption>
+            <TableHead>
+              <TableRow>
                 {(['projectColumn', 'teamColumn', 'statusColumn', 'budgetColumn'] as const).map(
                   key => (
-                    <th
+                    <TableHeader
                       scope="col"
                       key={key}
                     >
                       {role('ui-label', text('data', key))}
-                    </th>
+                    </TableHeader>
                   )
                 )}
-              </tr>
-            </thead>
-            <tbody>
+              </TableRow>
+            </TableHead>
+            <TableBody>
               {rows.map(({ id, cells: row }) => (
-                <tr key={id}>
-                  <th scope="row">{row[0]}</th>
+                <TableRow key={id}>
+                  <TableHeader scope="row">{row[0]}</TableHeader>
                   {row.slice(1).map((cell, i) => (
-                    <td key={i}>{cell}</td>
+                    <TableCell key={i}>{cell}</TableCell>
                   ))}
-                </tr>
+                </TableRow>
               ))}
-            </tbody>
-          </table>
-        </section>
+            </TableBody>
+          </Table>
+        </TableContainer>
         <output data-rad-text="ui-caption">{rows.length} projects shown.</output>
         <p
           data-rad-text="ui-supporting"
