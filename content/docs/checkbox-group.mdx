@@ -17,7 +17,7 @@ Use `CheckboxGroup` for several related choices and [Checkbox](/docs/checkbox/) 
 
 ```tsx
 <CheckboxGroup
-  legend="Notifications"
+  label="Notifications"
   name="channels"
   items={[
     { value: 'email', label: 'Email' },
@@ -41,11 +41,11 @@ Use `CheckboxGroup` for several related choices and [Checkbox](/docs/checkbox/) 
 
 Choose `value` with `onValueChange`, or initial `defaultValue`. Values are unique strings; empty strings are valid. Controlled callbacks request changes and may be refused. Default changes after mounting do not replace choices.
 
-Native forms submit repeated entries under `name`. Disabled options are excluded. Uncontrolled reset silently restores initial choices; controlled resets belong to your form. Applications own validation and persistence.
+Native forms submit repeated entries under `name`. Disabled options are excluded. Uncontrolled reset silently restores initial choices; controlled resets belong to your form. `required` blocks submission until an enabled option is checked. Applications own other validation and persistence.
 
 ## Accessibility
 
-The legend names a real Fieldset; every native checkbox has its own label. Help and errors describe the group. “Select all” reflects enabled options, announces mixed state and preserves disabled selections; it never submits a value. Disabling the group disables every option.
+The visible `label` names Field’s native fieldset; every native checkbox has its own label. Help and errors describe the group. “Select all” reflects enabled options, announces mixed state and preserves disabled selections; it never submits a value. Disabling the group disables every option.
 
 | Key             | Behavior                        |
 | --------------- | ------------------------------- |
@@ -54,22 +54,22 @@ The legend names a real Fieldset; every native checkbox has its own label. Help 
 
 ## Styling
 
-Root props and ref reach the fieldset. Root identities are `field fieldset checkbox-group`. `parts` styles legend, description, error and options; item and parent configurations retain Checkbox's `parts`, `className`, `style` and input ref. Set `components.checkboxGroup.gap` or `--rad-checkbox-group-gap` for option spacing. Checkbox tokens style the controls.
+Root props and ref reach the fieldset. Root identities are `field checkbox-group`. `parts` styles label, description, error and options; item and parent configurations retain Checkbox's `parts`, `className`, `style` and input ref. Set `components.checkboxGroup.gap` or `--rad-checkbox-group-gap` for option spacing. Checkbox tokens style the controls.
 
 ## API
 
-| CheckboxGroup prop                           | Type                                               | Default         |
-| -------------------------------------------- | -------------------------------------------------- | --------------- |
-| legend / items                               | ReactNode / readonly CheckboxGroupItem[]           | Required        |
-| value / defaultValue                         | readonly string[]                                  | Uncontrolled [] |
-| onValueChange                                | (value: string[]) => void                          | None            |
-| selectAll                                    | CheckboxGroupSelectAll                             | None            |
-| controlSize                                  | small / medium / large                             | medium          |
-| description / error                          | ReactNode                                          | None            |
-| disabled                                     | boolean                                            | false           |
-| parts                                        | legend / description / error / options style hooks | None            |
-| name / form                                  | string                                             | None            |
-| Native fieldset props, className, style, ref | Includes `Ref<HTMLFieldSetElement>`                | Native defaults |
+| CheckboxGroup prop                           | Type                                              | Default         |
+| -------------------------------------------- | ------------------------------------------------- | --------------- |
+| label / items                                | ReactNode / readonly CheckboxGroupItem[]          | Required        |
+| value / defaultValue                         | string[]                                          | Uncontrolled [] |
+| onValueChange                                | (value: string[]) => void                         | None            |
+| selectAll                                    | CheckboxGroupSelectAll                            | None            |
+| controlSize                                  | small / medium / large                            | medium          |
+| description / error                          | ReactNode                                         | None            |
+| disabled                                     | boolean                                           | false           |
+| parts                                        | label / description / error / options style hooks | None            |
+| name / form                                  | string                                            | None            |
+| Native fieldset props, className, style, ref | Includes `Ref<HTMLFieldSetElement>`               | Native defaults |
 
 | Configuration          | Properties                                                                                       |
 | ---------------------- | ------------------------------------------------------------------------------------------------ |

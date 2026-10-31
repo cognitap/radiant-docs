@@ -28,7 +28,7 @@ export function CheckboxGroupExample({ task = 'channels' }: { task?: CheckboxGro
       }}
     >
       <CheckboxGroup
-        legend={saving ? 'Saved preferences' : available ? 'Available channels' : 'Notifications'}
+        label={saving ? 'Saved preferences' : available ? 'Available channels' : 'Notifications'}
         name="channels"
         items={
           available
