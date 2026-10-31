@@ -454,6 +454,7 @@ export function ColorEditor({
                               style={{ background: value, color: readableOn(value) }}
                               onClick={() => openWall({ kind: 'role', mode, role })}
                             >
+                              {/* oxlint-disable-next-line react/forbid-elements -- The value is painted on the swatch, not inline code. */}
                               <code aria-hidden="true">{value}</code>
                               {pinned && (
                                 <span

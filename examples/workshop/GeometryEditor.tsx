@@ -14,7 +14,8 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-  type Theme
+  type Theme,
+  InlineCode
 } from '@cognitap/radiant'
 import {
   changeGeometry,
@@ -299,10 +300,10 @@ export function GeometryEditor({
                   <TableRow key={variable}>
                     <TableHeader scope="row">{label}</TableHeader>
                     <TableCell>
-                      <code>{theme.modes.light[variable]}</code>
+                      <InlineCode>{theme.modes.light[variable]}</InlineCode>
                     </TableCell>
                     <TableCell>
-                      <code>{theme.modes.dark[variable]}</code>
+                      <InlineCode>{theme.modes.dark[variable]}</InlineCode>
                     </TableCell>
                   </TableRow>
                 ))}

@@ -1,7 +1,9 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
   "plugins": ["typescript", "unicorn", "oxc", "react", "jsx-a11y"],
-  "categories": { "correctness": "error" },
+  "categories": {
+    "correctness": "error"
+  },
   "ignorePatterns": [
     "node_modules/**",
     ".next/**",
@@ -9,5 +11,83 @@
     ".scratch/**",
     "out/**",
     "output/**"
+  ],
+  "overrides": [
+    {
+      "files": ["app/**", "components/**", "examples/**"],
+      "rules": {
+        "react/forbid-elements": [
+          "error",
+          {
+            "forbid": [
+              {
+                "element": "select",
+                "message": "Use Radiant NativeSelect or Select. The docs run on the components they document."
+              },
+              {
+                "element": "textarea",
+                "message": "Use Radiant Textarea. The docs run on the components they document."
+              },
+              {
+                "element": "input",
+                "message": "Use Radiant Input, Checkbox, Radio, Slider or NumberField. The docs run on the components they document."
+              },
+              {
+                "element": "details",
+                "message": "Use Radiant Collapsible. The docs run on the components they document."
+              },
+              {
+                "element": "summary",
+                "message": "Use Radiant CollapsibleTrigger. The docs run on the components they document."
+              },
+              {
+                "element": "fieldset",
+                "message": "Use Radiant Fieldset. The docs run on the components they document."
+              },
+              {
+                "element": "legend",
+                "message": "Use Radiant Fieldset. The docs run on the components they document."
+              },
+              {
+                "element": "kbd",
+                "message": "Use Radiant Kbd. The docs run on the components they document."
+              },
+              {
+                "element": "code",
+                "message": "Use Radiant InlineCode or CodeBlock. The docs run on the components they document."
+              },
+              {
+                "element": "pre",
+                "message": "Use Radiant CodeBlock. The docs run on the components they document."
+              },
+              {
+                "element": "table",
+                "message": "Use Radiant Table. The docs run on the components they document."
+              },
+              {
+                "element": "thead",
+                "message": "Use Radiant TableHead. The docs run on the components they document."
+              },
+              {
+                "element": "tbody",
+                "message": "Use Radiant TableBody. The docs run on the components they document."
+              },
+              {
+                "element": "tr",
+                "message": "Use Radiant TableRow. The docs run on the components they document."
+              },
+              {
+                "element": "th",
+                "message": "Use Radiant TableHeader. The docs run on the components they document."
+              },
+              {
+                "element": "td",
+                "message": "Use Radiant TableCell. The docs run on the components they document."
+              }
+            ]
+          }
+        ]
+      }
+    }
   ]
 }

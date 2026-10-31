@@ -463,6 +463,7 @@ export function FontEditor({
           </div>
           <Field label="Local font file">
             {control => (
+              // oxlint-disable-next-line react/forbid-elements -- Radiant has no file input yet.
               <input
                 {...control}
                 ref={fileInput}

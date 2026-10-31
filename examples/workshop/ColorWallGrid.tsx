@@ -1,6 +1,7 @@
 'use client'
 
 /* oxlint-disable jsx-a11y/no-noninteractive-element-to-interactive-role -- One roving tab stop over 198 swatches. */
+/* oxlint-disable react/forbid-elements -- A role="grid" table; Radiant's Table does not take a role. */
 
 import { useState, type KeyboardEvent } from 'react'
 import { roleNames, type Mode, type Role, type WallView, type WorkingRole } from './workshop-color'
@@ -107,7 +108,7 @@ export function ColorWallGrid({
                       onPick(p.id, s.stop, s.value)
                     }}
                   />
-                  <code className="workshop-sr-only">{s.value}</code>
+                  <span className="workshop-sr-only">{s.value}</span>
                 </td>
               )
             })}
