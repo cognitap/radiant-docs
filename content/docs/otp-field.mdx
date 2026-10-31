@@ -1,6 +1,6 @@
 ---
 title: OTPField
-description: One native code input with visual character slots.
+description: Collect a fixed-length one-time code in one native input with visual character slots.
 ---
 
 import {
@@ -13,7 +13,7 @@ import {
 
 ## Usage
 
-Use OTPField for a fixed-length one-time code. Use [Input](/docs/input/) for passwords, arbitrary text or codes without character slots. Verify submitted codes on your server.
+Use OTPField for a fixed-length verification or approval code. Use [Input](/docs/input/) for free text or codes without slots, and [PasswordInput](/docs/password-input/) for passwords. Verify submitted codes on your server.
 
 ```tsx
 <Field
@@ -39,41 +39,57 @@ Use OTPField for a fixed-length one-time code. Use [Input](/docs/input/) for pas
 
 ## State
 
-Choose `value` with native `onChange`, or `defaultValue`. Ownership stays fixed per mount. Controlled applications may refuse edits; accepted props drive both native input and visible slots. Prop synchronization never emits change.
+Choose one value owner per mount: `value` with native `onChange`, or `defaultValue`. Passing both, switching owners, a non-string value or a value longer than `length` throws a TypeError. A controlled owner can refuse an edit by not storing it.
 
-Length and mode stay fixed per mount; remount with a new key to change them. Supplied values must fit the slots. Owners should supply valid ASCII code strings. User edits filter unsupported characters; numeric mode accepts digits and alphanumeric mode preserves letter case. Composition text remains editable until completion.
+`length` and `mode` are fixed per mount; remount with a new `key` to change them. Typing and paste drop characters the mode does not allow: `numeric` keeps digits, `alphanumeric` keeps ASCII letters and digits with their case. IME composition is filtered when it ends.
 
-One native field submits one string under `name`, including external `form` association. Required checks emptiness; pattern validation checks complete length and characters. Disabled fields submit nothing; read-only fields retain values. Native reset silently restores uncontrolled input and slots; controlled owners reset their own value.
+The code submits natively as one string under `name`, and `form` associates a field outside its form. The native `pattern` requires a complete code, and `required` rejects an empty one. Reset restores `defaultValue`; controlled owners reset their own state in `onReset`. `disabled` leaves the value out of form data; `readOnly` keeps it submitted but blocks typing and paste.
 
 ## Accessibility
 
-[Field](/docs/field/) connects the single input's label, help and errors. Slots are decorative and never enter the focus order. The active slot follows the native caret. Native `autocomplete="one-time-code"` supplies the SMS autofill hint; pasting fills the same input.
+Every OTPField needs an accessible name. Wrap it in [Field](/docs/field/) for a label, description and error, or pass `aria-label` or `aria-labelledby`. Screen readers meet one textbox; the slots are `aria-hidden` and never take focus. `autocomplete="one-time-code"` lets browsers offer codes from SMS or email.
 
-| Key                       | Behavior                                |
-| ------------------------- | --------------------------------------- |
-| Tab / Shift+Tab           | Enter or leave the single input         |
-| Character entry           | Advance the caret                       |
-| Backspace                 | Delete before the caret and move back   |
-| Left / Right              | Move between slots, following direction |
-| Shift+arrows / Select all | Native text selection                   |
-| Paste                     | Filter and insert code at the selection |
-| Enter                     | Native form submission when valid       |
+| Key                      | Behavior                                    |
+| ------------------------ | ------------------------------------------- |
+| Tab / Shift+Tab          | Move focus in and out of the single input   |
+| Typing                   | Fill the active slot and advance            |
+| Backspace                | Delete before the caret                     |
+| Left / Right             | Move one slot, following the text direction |
+| Shift+arrows, select all | Native text selection                       |
+| Paste                    | Insert the filtered code at the selection   |
+| Enter                    | Submit the enclosing form natively          |
 
 ## Motion
 
-OTPField has no animation. Focus and editing feedback update immediately.
+OTPField does not animate. The active slot outline and invalid styles change immediately.
 
 ## Styling
 
-Root native props, className, ThemeStyle and ref reach Input. `parts.wrapper` and `parts.slot` style the visible layout and decorative spans. Preserve the editing host's geometry and visible focus/invalid cues.
+A transparent native `<input>` covers the slots, so `className`, `style` and `ref` target it with `data-slot="input otp-field"` and `data-control-size`. Style the visible layout with `parts.wrapper` (`data-slot="otp-field-wrapper"`) and `parts.slot` (`data-slot="otp-field-slot"`). Slots carry `data-active` at the caret and `data-invalid` when invalid.
 
-Slots share Input's presentation tokens. `components.otpField.gap` sets spacing; `slotSize` sets slot width. Height follows Input metrics. Identities are `input otp-field`, `otp-field-wrapper` and `otp-field-slot`; active slots expose `data-active`.
+Slots share the `--rad-input-*` variables. `--rad-otp-field-gap` sets spacing, default 0.375rem, and `--rad-otp-field-slot-size` sets slot width, default the control height. The theme sets both through `components.otpField.gap` and `slotSize`. Keep the focus outline visible on the active slot.
 
 ## API
 
-| Part               | Props                                                                                                                  | Defaults                                             |
-| ------------------ | ---------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
-| OTPField           | value/defaultValue: string; length: integer 1–32; mode: numeric/alphanumeric; parts.wrapper/slot: className/ThemeStyle | ''; 6; numeric; no part override                     |
-| Inherited Input    | name, form, required, disabled, readOnly, controlSize, native events/ref, className, ThemeStyle                        | medium; booleans false; spellCheck false             |
-| Owned native hints | type, inputMode, autoComplete, pattern, maxLength                                                                      | text; mode-derived; one-time-code; full code; length |
-| Types              | OTPFieldProps; OTPFieldMode                                                                                            | Exported from the package root                       |
+### OTPField
+
+| Prop                 | Type                                        | Default             |
+| -------------------- | ------------------------------------------- | ------------------- |
+| value / defaultValue | string                                      | None; one owner     |
+| onChange             | `ChangeEventHandler<HTMLInputElement>`      | None                |
+| length               | integer from 1 to 32                        | 6                   |
+| mode                 | `OTPFieldMode`: numeric / alphanumeric      | numeric             |
+| controlSize          | small / medium / large                      | medium              |
+| name / form          | string                                      | None                |
+| required / disabled  | boolean                                     | Field's, else false |
+| readOnly             | boolean                                     | false               |
+| aria-invalid         | Native; mirrored as `data-invalid` on slots | Field's             |
+| spellCheck           | boolean                                     | false               |
+| parts                | `{ wrapper?, slot? }` of className / style  | None                |
+| className / style    | string / ThemeStyle on the native input     | None                |
+| ref                  | `Ref<HTMLInputElement>`                     | None                |
+| Other props          | Native input attributes and events          | Native defaults     |
+
+OTPField owns `type="text"`, `inputMode`, `autoComplete`, `pattern` and `maxLength`; they are not props.
+
+Exports `OTPField`, `OTPFieldProps` and `OTPFieldMode`.

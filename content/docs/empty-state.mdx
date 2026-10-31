@@ -1,6 +1,6 @@
 ---
 title: EmptyState
-description: Present first-use, empty-search and recovery content with real application actions.
+description: Explain why a list, table or search has nothing to show, and offer the next step.
 ---
 
 import {
@@ -9,59 +9,91 @@ import {
   EmptyStateRecoveryDemo
 } from '../../components/EmptyStateDemo'
 
-## Usage
-
 <EmptyStateDemo />
 
-EmptyState presents missing content with a heading, description, optional decorative icon and actions. The application decides when it appears and what each action does.
+## Usage
+
+Use EmptyState where content would be: before the first record exists, when a search matches nothing, or when loading failed. Use [Skeleton](/docs/skeleton/) or [Spinner](/docs/spinner/) while content loads, [Alert](/docs/alert/) for a message beside content that is present, and [Toast](/docs/toast/) to confirm something the user just did.
+
+```tsx
+<EmptyState>
+  <EmptyStateIcon>
+    <FolderIcon />
+  </EmptyStateIcon>
+  <EmptyStateTitle level={3}>No projects yet</EmptyStateTitle>
+  <EmptyStateDescription>
+    Create a study project to organize participants and reports.
+  </EmptyStateDescription>
+  <EmptyStateActions>
+    <Button onClick={create}>Create study project</Button>
+  </EmptyStateActions>
+</EmptyState>
+```
+
+`variant` sets the treatment: `first-use` (default) draws a dashed border, `no-results` drops the border and background, and `error` draws a solid border. `tone` only sets the border and icon color: `neutral` (default), `accent`, `warning` or `danger`. Say what happened in the text; color only reinforces it.
 
 ## Examples
 
-Use first-use content inside a native Table cell spanning the columns. Creating a project replaces the placeholder with a real row and focuses its action.
+### Show that a search found nothing
+
+Pass EmptyState to Combobox `emptyText`. Keep recovery buttons outside the popup, because Tab closes it.
 
 <EmptyStateSearchDemo />
 
-A Combobox can render EmptyState through emptyText. Its status sits outside the listbox. Keep recovery buttons outside the floating popup so they remain reachable after Tab dismisses results.
+### Recover from a failed load
+
+Pass EmptyState to Command `errorText`. Retry keeps the query, returns focus to the search field and waits for the user to choose a result.
 
 <EmptyStateRecoveryDemo />
 
-Command accepts recovery content through errorText. The example preserves the query, returns focus to search when retrying, cancels stale work and waits for explicit result activation. Expansive recovery content can let CommandList grow and rely on native Dialog scrolling.
-
 ## State
 
-variant selects first-use, no-results or error presentation. It does not fetch data, clear a search or retry a request. tone selects color independently and defaults to neutral.
-
-Applications own records, query state, loading, errors and recovery. New content does not automatically move focus or announce itself.
+EmptyState holds no state and contributes no form value. Your application decides when it shows and what each action does. When an action removes the placeholder, as creating the first project does in the demo above, move focus to the new content yourself.
 
 ## Accessibility
 
-Choose EmptyStateTitle's level to fit the surrounding outline. It renders an actual h1–h6; the default is h2. EmptyStateIcon is decorative and hidden from assistive technology.
+EmptyStateTitle renders a heading, `h2` by default; choose `level` to fit the page outline. EmptyStateIcon is always `aria-hidden`, and its types reject a role, name or tab stop. Use [Button](/docs/button/) for actions and [Link](/docs/link/) for navigation.
 
-Use Button for actions and Link for navigation. Focus an appropriate destination when an action removes the focused placeholder.
+The root has no role and announces nothing. Combobox and Command already announce their empty and error content, so add no second live region inside them. Elsewhere, put the announcement in a status you own.
 
-The root adds no live role. Existing Combobox and Command statuses already announce their content. Put any other live feedback in an application-owned status and avoid duplicate announcements.
+| Key             | Behavior                          |
+| --------------- | --------------------------------- |
+| Tab / Shift+Tab | Move through the actions in order |
+| Enter / Space   | Activate the focused action       |
 
 ## Motion
 
-EmptyState adds no animation. Composed actions retain their own motion and reduced-motion behavior.
+EmptyState has no transitions or enter and exit animation. Buttons inside keep their own motion and reduced-motion behavior.
 
 ## Styling
 
-className/style/ref reach the actual named host. Themes expose padding, gap, radius, boundary, color, icon, title, description and action-spacing slots under emptyState. Shared UI typography supplies the baseline.
+| Part                  | Element              | data-slot                 | Data attributes             |
+| --------------------- | -------------------- | ------------------------- | --------------------------- |
+| EmptyState            | `div`, centered grid | `empty-state`             | `data-variant`, `data-tone` |
+| EmptyStateIcon        | `span`               | `empty-state-icon`        | None                        |
+| EmptyStateTitle       | `h1`–`h6` by `level` | `empty-state-title`       | None                        |
+| EmptyStateDescription | `p`                  | `empty-state-description` | None                        |
+| EmptyStateActions     | `div`, wrapping row  | `empty-state-actions`     | None                        |
 
-| Part                           | Host                  |
-| ------------------------------ | --------------------- |
-| EmptyState / EmptyStateActions | div                   |
-| EmptyStateIcon                 | span                  |
-| EmptyStateTitle                | Chosen native heading |
-| EmptyStateDescription          | p                     |
+Each part takes `className`, `style`, an additive `data-slot` and a native ref. An SVG inside EmptyStateIcon fills the icon box. `components.emptyState` or `--rad-empty-state-*` variables set padding, gap, radius, borderWidth, borderColor, background, color, iconSize, iconColor, titleSize, titleWeight, descriptionSize, descriptionColor and actionsGap. Forced colors use system text and canvas colors.
 
 ## API
 
-| Prop or part                        | Contract                            |
-| ----------------------------------- | ----------------------------------- |
-| variant                             | first-use, no-results, error        |
-| tone                                | neutral, accent, warning, danger    |
-| EmptyStateTitle level               | 1–6; defaults to 2                  |
-| EmptyStateActions                   | Native actions supplied as children |
-| Native props, ref, className, style | Forwarded to the documented host    |
+Every part takes the native props of its element, `style` as ThemeStyle and `data-slot`.
+
+| EmptyState prop | Type                                | Default   |
+| --------------- | ----------------------------------- | --------- |
+| variant         | first-use / no-results / error      | first-use |
+| tone            | neutral / accent / warning / danger | neutral   |
+
+| EmptyStateIcon prop | Type                                                                             | Default |
+| ------------------- | -------------------------------------------------------------------------------- | ------- |
+| Native span props   | Except aria-hidden, aria-label, aria-labelledby, role, tabIndex, contentEditable | None    |
+
+| EmptyStateTitle prop | Type                  | Default |
+| -------------------- | --------------------- | ------- |
+| level                | 1 / 2 / 3 / 4 / 5 / 6 | 2       |
+
+EmptyStateDescription takes native `<p>` props. EmptyStateActions takes native `<div>` props.
+
+Exports: `EmptyState`, `EmptyStateIcon`, `EmptyStateTitle`, `EmptyStateDescription`, `EmptyStateActions`; types `EmptyStateProps`, `EmptyStateIconProps`, `EmptyStateTitleProps`, `EmptyStateDescriptionProps`, `EmptyStateActionsProps`, `EmptyStateVariant`, `EmptyStateTone`, `EmptyStateHeadingLevel`.

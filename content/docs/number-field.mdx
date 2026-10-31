@@ -1,6 +1,6 @@
 ---
 title: NumberField
-description: Edit localized numbers with native forms, keyboard steps and raw numeric values.
+description: Edit an exact number as localized text with stepper buttons and a raw form value.
 ---
 
 import {
@@ -9,54 +9,88 @@ import {
   NumberFieldTargetDemo
 } from '../../components/NumberFieldDemo'
 
-## Usage
-
 <NumberFieldDemo />
 
-Label each field. The editor displays localized text while `name` submits the raw number, or an empty string for `null`.
+## Usage
+
+Use NumberField for an exact count, amount or percentage that people type or step. Use [Slider](/docs/slider/) when an approximate value is easier to choose by feel, and [Input](/docs/input/) for identifiers that only look numeric, such as postal codes.
+
+```tsx
+<Field label="Participants">
+  <NumberField
+    name="participants"
+    defaultValue={3}
+    min={1}
+    max={12}
+  />
+</Field>
+```
 
 ## Examples
 
+### Calculate session budget
+
 <NumberFieldBudgetDemo />
+
+### Choose accuracy target
 
 <NumberFieldTargetDemo />
 
 ## State
 
-Choose `value` with `onValueChange(value)` or `defaultValue`. Controlled requests may be refused. Prop changes and resets do not request changes.
+Choose one value owner per mount: `value` with `onValueChange(value)`, or `defaultValue`. Values are finite numbers or `null`. A controlled owner may refuse a request, and prop changes and resets never request one.
 
-Edits remain editable while incomplete or outside the range; native submission waits until they are valid. Parsed numbers commit immediately. Blur clamps to the bounds and formats the display. Display rounding never changes the raw owner.
+Parsed edits commit immediately. Incomplete or out-of-range text stays editable and blocks native submission. Blur clamps to `min` and `max` and reformats the text.
 
-Uncontrolled form reset restores the initial value. A controlled form resets its application state.
+`name` submits the raw number, or `''` for `null`, through a hidden input; `form` associates it. Reset restores `defaultValue`; controlled owners reset their own state in `onReset`. `disabled` leaves the value out of form data. `readOnly` blocks typing and stepping but still submits.
 
 ## Accessibility
 
-Arrow Up/Down use `step`; Page Up/Down use `largeStep`. Home, End and text-selection shortcuts keep native editing behavior. Steppers keep focus in the input and stay outside the Tab sequence.
+The text input has the spinbutton role. Name it with [Field](/docs/field/), `aria-label` or `aria-labelledby`. Field's description and error IDs come before your own `aria-describedby`. Unparseable or out-of-range text sets `aria-invalid`, as does Field's `error`. Steppers are named by `incrementLabel` and `decrementLabel`, stay out of the Tab order and keep focus in the input.
 
-`Field` connects labels, help and errors. `readOnly` prevents editing and stepping while retaining the submitted value. `disabled` excludes it from submission.
+| Key                 | Behavior                                    |
+| ------------------- | ------------------------------------------- |
+| ArrowUp / ArrowDown | Increase / decrease by `step`               |
+| PageUp / PageDown   | Increase / decrease by `largeStep`          |
+| Home / End          | Move the caret; native text editing         |
+| Modifier + key      | Native behavior; no stepping                |
+| Tab / Shift+Tab     | Move focus in and out; steppers are skipped |
 
 ## Motion
 
-Formatting and stepping update immediately without animating the value.
+NumberField does not animate. Typing, stepping and formatting update immediately.
 
 ## Styling
 
-`className`, `style`, native props and `ref` reach the text input. `parts.wrapper`, `parts.increment` and `parts.decrement` style the actual InputGroup and Buttons.
+`className`, `style` and `ref` target the text input, which carries `data-slot="input input-group-input number-field"`, `data-control-size` and `data-invalid`. The wrapper is `number-field-wrapper`, the hidden value `number-field-value`, the stepper addon `number-field-actions`, and the buttons `number-field-increment` and `number-field-decrement`. Style the wrapper and buttons through `parts`. Set the gap with `--rad-number-field-gap` or `components.numberField.gap`.
 
-Use `components.numberField.gap` for spacing. Input, InputGroup and Button retain their theme roles.
+Percent edits use percent units, so `2.9%` submits `0.029`. Currency accepts the locale's affixes or a bare number. Compact and scientific notation, units and currency names are unsupported.
 
 ## API
 
-| Prop                               | Contract                                                                                                                                   |
-| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| `value`, `defaultValue`            | Finite number or `null`; one owner.                                                                                                        |
-| `onValueChange`                    | Receives the requested raw number or `null`.                                                                                               |
-| `min`, `max`                       | Optional finite bounds.                                                                                                                    |
-| `step`, `largeStep`                | Positive finite deltas; default `1` and ten steps. They do not restrict typed decimals to a grid.                                          |
-| `locale`                           | Number locale; default `en-US` for stable server rendering.                                                                                |
-| `formatOptions`                    | Standard decimal, percent or currency formatting; grouping, fraction digits and sign display. Currency uses symbol, narrow symbol or code. |
-| `incrementLabel`, `decrementLabel` | Stepper accessible names.                                                                                                                  |
-| `controlSize`                      | `small`, `medium` or `large`.                                                                                                              |
-| `parts`                            | Wrapper and stepper presentation hooks.                                                                                                    |
+### NumberField
 
-Percent edits use percent units: `2.9%` submits `0.029`. Currency edits accept the locale's affixes or a bare localized number. Grouping must follow that locale. Compact/scientific notation, units, currency names and hidden negative signs are unsupported.
+| Prop                 | Type                                                          | Default             |
+| -------------------- | ------------------------------------------------------------- | ------------------- |
+| value / defaultValue | finite number / null                                          | None; one owner     |
+| onValueChange        | `(value: number \| null) => void`                             | None                |
+| min / max            | finite number                                                 | None                |
+| step                 | positive number; does not snap typed values                   | 1                   |
+| largeStep            | positive number                                               | `step * 10`         |
+| locale               | string                                                        | en-US               |
+| formatOptions        | `NumberFieldFormatOptions`: decimal, percent or currency      | Decimal             |
+| incrementLabel       | string                                                        | Increase value      |
+| decrementLabel       | string                                                        | Decrease value      |
+| controlSize          | small / medium / large                                        | medium              |
+| parts                | `{ wrapper, increment, decrement }` of `PartStyle`            | None                |
+| name / form          | string                                                        | None                |
+| required / disabled  | boolean                                                       | Field's, else false |
+| readOnly             | boolean                                                       | false               |
+| aria-invalid         | Native; also set for invalid text; mirrored as `data-invalid` | Field's             |
+| className / style    | string / ThemeStyle                                           | None                |
+| ref                  | `Ref<HTMLInputElement>`                                       | None                |
+| Other props          | Native input attributes and events                            | Native defaults     |
+
+Not accepted: `type`, `role`, `children` and the `aria-valuenow`, `aria-valuemin`, `aria-valuemax` and `aria-valuetext` attributes.
+
+Exports `NumberField`, `NumberFieldProps` and `NumberFieldFormatOptions`.
