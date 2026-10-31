@@ -147,7 +147,7 @@ function DocumentActions(options: Options) {
             <DialogTitle>Reading settings</DialogTitle>
             <ToggleGroup
               aria-label="Reading density"
-              appearance="segmented"
+              variant="segmented"
               defaultValue="comfortable"
               onValueChange={setDensity}
             >

@@ -58,7 +58,7 @@ export function MenuPlayground({ task = 'file' }: { task?: MenuTask }) {
               checked={disabled}
               onChange={event => setDisabled(event.target.checked)}
             />
-            Disabled trigger
+            Disabled items
           </label>
           <label>
             <input
@@ -66,7 +66,7 @@ export function MenuPlayground({ task = 'file' }: { task?: MenuTask }) {
               checked={pending}
               onChange={event => setPending(event.target.checked)}
             />
-            Pending trigger
+            Pending items
           </label>
         </div>
       </DemoControls>
