@@ -1,0 +1,79 @@
+---
+title: AppShell
+description: Application landmarks with a responsive Sidebar and mobile Drawer.
+---
+
+import { AppShellDemo, AppShellNotesDemo, AppShellSavedDemo } from '../../components/AppShellDemo'
+
+<AppShellDemo />
+
+## Usage
+
+```tsx
+import {
+  AppShell,
+  AppShellHeader,
+  AppShellMain,
+  AppShellSkipLink,
+  Sidebar,
+  SidebarTrigger,
+  SidebarLabel,
+  NavLink
+} from '@cognitap/radiant'
+
+;<AppShell>
+  <AppShellSkipLink>Skip to content</AppShellSkipLink>
+  <AppShellHeader>
+    <SidebarTrigger>Toggle navigation</SidebarTrigger>
+  </AppShellHeader>
+  <Sidebar label="Projects">
+    <NavLink
+      href="/atlas"
+      icon={<span aria-hidden="true">A</span>}
+    >
+      <SidebarLabel>Atlas</SidebarLabel>
+    </NavLink>
+  </Sidebar>
+  <AppShellMain>
+    <h1>Atlas research</h1>
+  </AppShellMain>
+</AppShell>
+```
+
+## Examples
+
+<AppShellNotesDemo />
+
+<AppShellSavedDemo />
+
+Use AppShell for application landmarks and responsive navigation. Use [NavigationMenu](/docs/navigation-menu/) for site dropdowns and [Resizable](/docs/resizable/) for adjustable panes.
+
+## State
+
+`collapsed`, `defaultCollapsed`, `onCollapsedChange` own desktop collapse. `open`, `defaultOpen`, `onOpenChange` independently own the mobile drawer. Each callback receives one boolean; controlled requests may be refused. `useAppShell` and `useSidebar` expose the nearest owner, or null outside one.
+
+The viewport switches below 40rem. Returning to desktop requests mobile close. Links stay mounted across this change; applications own routes, destination focus and saved layouts. Wrap text in SidebarLabel and use `SidebarContent expandedOnly` for controls hidden by desktop collapse.
+
+## Accessibility
+
+Sidebar is a named native nav. Header and main are native landmarks. SkipLink targets the root-owned main ID; explicit `mainId` and `sidebarId` support stable application IDs. Mobile navigation reuses [Drawer](/docs/drawer/) for modal focus, Escape and restoration. Closing preserves field values; avoid duplicate landmarks inside your page shell.
+
+## Motion
+
+An optional MotionProvider enables spring layout alongside Drawer transitions. `motion="off"` snaps locally; reduced motion also disables movement. The core works without a motion provider.
+
+## Styling
+
+Root props, refs, classes and styles reach the actual div, header, main, nav, anchor or button. Typed `components.appShell` and `components.sidebar` theme overrides control surfaces, widths, padding and labels. Sidebar `parts` styles its label, drawer, viewport and close action.
+
+## API
+
+| Export                        | Purpose                                                            |
+| ----------------------------- | ------------------------------------------------------------------ |
+| AppShell                      | Root with independent collapse/open owners and optional IDs/motion |
+| AppShellHeader / AppShellMain | Native application landmarks                                       |
+| AppShellSkipLink              | Link to the owned main target                                      |
+| Sidebar                       | Navigation with required visible `label` and optional `closeLabel` |
+| SidebarTrigger                | Button requesting desktop collapse or mobile open                  |
+| SidebarLabel / SidebarContent | Collapsible text and optional expanded-only controls               |
+| useAppShell / useSidebar      | Read state and request changes                                     |

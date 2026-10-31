@@ -2355,3 +2355,77 @@ test('NavigationMenu docs navigate real content, resize filtered panels and pres
     }
   })
 })
+
+test('AppShell preserves routing, responsive navigation, notes and saved layouts through real landmarks', async () => {
+  await withSite(async (baseURL, browser) => {
+    const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } }),
+      errors = track(page)
+    try {
+      await capture(page, 'app-shell', async () => {
+        await page.goto(baseURL + '/docs/app-shell/')
+        await page.waitForFunction(
+          () => !document.querySelector<HTMLButtonElement>('.demo-heading button')?.disabled
+        )
+        const sessionsDemo = page.getByRole('region', {
+            name: 'Review research sessions',
+            exact: true
+          }),
+          sessions = sessionsDemo.frameLocator('iframe')
+        const reminder = sessions.getByRole('textbox', { name: 'Project note', exact: true }),
+          toggle = sessions.getByRole('button', { name: 'Toggle project navigation', exact: true })
+        await reminder.fill('Bring large-print tasks')
+        await toggle.click()
+        await sessions.getByRole('link', { name: 'Harbor reading', exact: true }).click()
+        await sessions.getByRole('heading', { name: 'Harbor reading', exact: true }).waitFor()
+        assert.equal(
+          await sessions.getByRole('table').getByRole('cell', { name: '18', exact: true }).count(),
+          1
+        )
+        await toggle.click()
+        assert.equal(await reminder.inputValue(), 'Bring large-print tasks')
+        const notesDemo = page.getByRole('region', { name: 'Write research notes', exact: true }),
+          notes = notesDemo.frameLocator('iframe')
+        await notesDemo
+          .getByRole('combobox', { name: 'Direction', exact: true })
+          .selectOption('rtl')
+        await notes.getByRole('button', { name: 'Toggle project navigation', exact: true }).click()
+        await notes
+          .getByRole('textbox', { name: 'Project note', exact: true })
+          .fill('Preserved mobile note')
+        await notes.getByRole('link', { name: 'Harbor reading', exact: true }).click()
+        await notes
+          .getByRole('textbox', { name: 'Interview notes', exact: true })
+          .fill('The participant preferred larger text.')
+        await notes.getByRole('button', { name: 'Save note', exact: true }).click()
+        assert.equal(
+          await notes.getByRole('blockquote', { name: 'Saved note', exact: true }).innerText(),
+          'The participant preferred larger text.'
+        )
+        await notes.getByRole('button', { name: 'Toggle project navigation', exact: true }).click()
+        assert.equal(
+          await notes.getByRole('textbox', { name: 'Project note', exact: true }).inputValue(),
+          'Preserved mobile note'
+        )
+        await page.keyboard.press('Escape')
+        const saved = page
+          .getByRole('region', { name: 'Restore a research layout', exact: true })
+          .frameLocator('iframe')
+        await saved.getByRole('button', { name: 'Toggle project navigation', exact: true }).click()
+        await saved.getByRole('link', { name: 'Harbor reading', exact: true }).click()
+        await saved.getByRole('button', { name: 'Save layout', exact: true }).click()
+        await saved.getByRole('button', { name: 'Reset layout', exact: true }).click()
+        await saved.getByRole('button', { name: 'Restore saved layout', exact: true }).click()
+        await saved.getByRole('heading', { name: 'Harbor reading', exact: true }).waitFor()
+        assert.equal(
+          await saved
+            .getByRole('button', { name: 'Toggle project navigation', exact: true })
+            .getAttribute('aria-expanded'),
+          'false'
+        )
+        assert.deepEqual(errors, [])
+      })
+    } finally {
+      await page.close()
+    }
+  })
+})
