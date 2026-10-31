@@ -1,21 +1,36 @@
 'use client'
-
-import dynamic from 'next/dynamic'
-import { DemoControls, DemoPreview, usePreviewTheme } from '@/components/demo/DemoFrame'
-
-const Dashboard = dynamic(() =>
-  import('./CardExamples').then(module => module.CardDashboardExample)
-)
-
-export function CardPlayground({ states = false }: { states?: boolean }) {
-  const { theme } = usePreviewTheme()
+import { useState } from 'react'
+import type { CardHeadingLevel } from '@cognitap/radiant'
+import { SelectControl } from '@/components/demo/ActionControls'
+import { DemoControls, DemoPreview } from '@/components/demo/DemoFrame'
+import { CardExample, type CardTask } from './CardExample'
+const levels = { h2: 2, h3: 3, h4: 4 } as const satisfies Record<string, CardHeadingLevel>
+export function CardPlayground({ task = 'note' }: { task?: CardTask }) {
+  const [level, setLevel] = useState<keyof typeof levels>(task === 'note' ? 'h2' : 'h3'),
+    [padding, setPadding] = useState<'standard' | 'compact'>('standard')
   return (
     <>
-      <DemoControls />
+      <DemoControls>
+        <div className="action-options">
+          <SelectControl
+            label="Title level"
+            value={level}
+            options={['h2', 'h3', 'h4']}
+            onChange={setLevel}
+          />
+          <SelectControl
+            label="Padding"
+            value={padding}
+            options={['standard', 'compact']}
+            onChange={setPadding}
+          />
+        </div>
+      </DemoControls>
       <DemoPreview>
-        <Dashboard
-          staticMotion={states}
-          theme={theme}
+        <CardExample
+          task={task}
+          level={levels[level]}
+          style={padding === 'compact' ? { '--rad-card-padding': '0.75rem' } : undefined}
         />
       </DemoPreview>
     </>

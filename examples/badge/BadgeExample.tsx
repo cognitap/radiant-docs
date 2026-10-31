@@ -1,64 +1,94 @@
-'use client'
-import { useState } from 'react'
-import { Badge } from '@cognitap/radiant'
-import { DemoControls, DemoPreview } from '@/components/demo/DemoFrame'
+import {
+  Badge,
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+  type BadgeTone
+} from '@cognitap/radiant'
 import '@cognitap/radiant/styles.css'
-const states = {
+export const statuses = {
   draft: { label: 'Draft', tone: 'neutral' },
   approved: { label: 'Approved', tone: 'accent' },
-  attention: { label: 'Needs attention', tone: 'warning' },
+  review: { label: 'Needs review', tone: 'warning' },
   blocked: { label: 'Blocked', tone: 'danger' }
-} as const
-export function BadgeExample() {
-  const [status, setStatus] = useState<keyof typeof states>('draft')
-  const [decorative, setDecorative] = useState(false)
-  const selection = states[status]
+} as const satisfies Record<string, { label: string; tone: BadgeTone }>
+export type Status = keyof typeof statuses
+export function ReleaseStatus({
+  status,
+  decorative = false
+}: {
+  status: Status
+  decorative?: boolean
+}) {
+  const { label, tone } = statuses[status]
   return (
-    <>
-      <DemoControls>
-        <label>
-          Release status{' '}
-          <select
-            value={status}
-            onChange={event => {
-              const value = event.target.value
-              if (
-                value === 'draft' ||
-                value === 'approved' ||
-                value === 'attention' ||
-                value === 'blocked'
-              )
-                setStatus(value)
-            }}
-          >
-            <option value="draft">Draft</option>
-            <option value="approved">Approved</option>
-            <option value="attention">Needs attention</option>
-            <option value="blocked">Blocked</option>
-          </select>
-        </label>
-        <label>
-          <input
-            type="checkbox"
-            checked={decorative}
-            onChange={event => setDecorative(event.target.checked)}
-          />{' '}
-          Repeat meaning in adjacent text
-        </label>
-      </DemoControls>
-      <DemoPreview>
-        <div style={{ maxWidth: '100%' }}>
-          <p>
-            Release status: {decorative && <span>{selection.label} </span>}
-            <Badge
-              tone={selection.tone}
-              decorative={decorative}
-            >
-              {selection.label}
-            </Badge>
-          </p>
-        </div>
-      </DemoPreview>
-    </>
+    <p>
+      Release status: {decorative && <span>{label} </span>}
+      <Badge
+        tone={tone}
+        decorative={decorative}
+      >
+        {label}
+      </Badge>
+    </p>
+  )
+}
+const releases: { name: string; status: Status }[] = [
+  { name: 'Spring catalogue', status: 'draft' },
+  { name: 'Pricing update', status: 'approved' },
+  { name: 'Partner portal', status: 'review' },
+  { name: 'Data export', status: 'blocked' }
+]
+export function ReleaseTable() {
+  return (
+    <Table style={{ width: '24rem', maxWidth: '100%' }}>
+      <TableCaption>Upcoming releases</TableCaption>
+      <TableHead>
+        <TableRow>
+          <TableHeader>Release</TableHeader>
+          <TableHeader>Status</TableHeader>
+        </TableRow>
+      </TableHead>
+      <TableBody>
+        {releases.map(release => (
+          <TableRow key={release.name}>
+            <TableHeader scope="row">{release.name}</TableHeader>
+            <TableCell>
+              <Badge tone={statuses[release.status].tone}>{statuses[release.status].label}</Badge>
+            </TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
+  )
+}
+const heading = { display: 'flex', alignItems: 'center', gap: '.5rem', margin: 0 } as const
+export function ReviewCounts() {
+  return (
+    <div style={{ display: 'grid', gap: '1rem' }}>
+      <h3 style={heading}>
+        Open reviews <Badge>12</Badge>
+      </h3>
+      <h3 style={heading}>
+        Comment threads <Badge tone="accent">New</Badge>
+      </h3>
+    </div>
+  )
+}
+export function ApprovedNotice() {
+  return (
+    <p>
+      Release approved.{' '}
+      <Badge
+        tone="accent"
+        decorative
+      >
+        Approved
+      </Badge>
+    </p>
   )
 }

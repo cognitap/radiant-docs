@@ -1,39 +1,70 @@
 ---
 title: Separator
-description: Meaningful or decorative static divisions.
+description: Divide content into groups with a horizontal or vertical line.
 ---
 
-import { SeparatorDemo } from '../../components/SeparatorDemo'
+import {
+  SeparatorActionsDemo,
+  SeparatorDemo,
+  SeparatorHeadingDemo
+} from '../../components/SeparatorDemo'
 
 <SeparatorDemo />
 
-## Meaningful or decorative
+## Usage
 
-Separator renders a native `hr`. By default it exposes a static thematic break
-between content sections. Set `decorative` when only a visual division is needed;
-the element is then hidden from assistive technology.
+Use Separator to split related content into groups, such as settings sections or sets of actions. Inside menus, use the menu's own separator from [Menu](/docs/menu/), [Context Menu](/docs/context-menu/) or [Menubar](/docs/menubar/). Between crumbs, use `BreadcrumbSeparator` from [Breadcrumb](/docs/breadcrumb/). Separator never takes focus, so it can't be a resizable splitter.
 
-`orientation` is `horizontal` by default or `vertical`. Meaningful separators
-expose the matching `aria-orientation`. Vertical lines stretch in a sized flex
-row, or can receive a height through `style` or `className`.
+```tsx
+<section>…</section>
+<Separator />
+<section>…</section>
+```
 
-Separator is never a focusable or draggable splitter. It has no interaction,
-resizing state, timers or motion. Keep section headings and navigation names
-meaningful independently of the line.
+## Examples
 
-## Customize
+### Divide a button row
 
-Native attributes, `className`, `style` and an `HTMLHRElement` ref reach the `hr`.
-The `separator` slot is always retained. Role, focusability, orientation and
-decorative treatment stay owned by the component. No children are supported.
-`SeparatorProps` is exported.
+<SeparatorActionsDemo />
 
-Use `components.separator` or `--rad-separator-*` variables for `color`,
-`thickness`, `style` and `spacing`. Thickness defaults to one pixel, style to
-solid, color to the shared border color, and spacing to zero. Spacing applies
-on the block axis for horizontal lines and the inline axis for vertical lines.
-Caller classes and styles can replace appearance on the same host.
+### Underline a heading
 
-Forced colors retain a system-color border. Preserve a visible boundary and
-the appropriate semantics when replacing styles. No provider is required;
-[themes](/docs/foundations/theming/) apply normally.
+<SeparatorHeadingDemo />
+
+## Accessibility
+
+Separator renders a native `<hr>`, whose implicit role is `separator`. It needs no accessible name.
+
+By default the separator is semantic. Screen readers report a break between groups, and `aria-orientation` matches `orientation`. Keep it semantic when the line marks a real boundary that nothing else announces, such as two groups of actions in one row.
+
+Set `decorative` when the line only repeats structure that is already there, such as a rule under a heading. It gets `aria-hidden="true"` and no `aria-orientation`, so screen readers skip it.
+
+Separator owns `role`, `tabIndex`, `aria-hidden` and `aria-orientation`, and drops them if you pass them.
+
+| Key             | Behavior                                  |
+| --------------- | ----------------------------------------- |
+| Tab / Shift+Tab | Skip the separator; it is never focusable |
+
+## Styling
+
+Separator is one part, with `data-slot="separator"`, `data-orientation` and, when decorative, `data-decorative`. `className`, `style` and `ref` reach the `<hr>`. Menu separators carry `data-slot="menu-separator separator"`.
+
+`components.separator` sets `thickness`, `style` and `spacing`. Locally, set `--rad-separator-color` (the shared border color), `--rad-separator-thickness` (`1px`), `--rad-separator-style` (`solid`) and `--rad-separator-spacing` (`0`, a margin on the cross axis). Forced colors draw the line with `CanvasText`.
+
+A vertical separator stretches to the height of a flex row. Anywhere else, give it a height.
+
+## API
+
+### Separator
+
+| Prop        | Type                                                                                          | Default         |
+| ----------- | --------------------------------------------------------------------------------------------- | --------------- |
+| orientation | `Orientation`; horizontal / vertical                                                          | horizontal      |
+| decorative  | boolean; hides the line from assistive technology                                             | false           |
+| className   | string                                                                                        | None            |
+| style       | ThemeStyle, including `--rad-separator-*`                                                     | None            |
+| data-slot   | Extra tokens after `separator`                                                                | separator       |
+| ref         | `Ref<HTMLHRElement>`                                                                          | None            |
+| Other props | Native `<hr>` props except `role`, `tabIndex`, `aria-hidden`, `aria-orientation` and children | Native defaults |
+
+Exports: `Separator`, `SeparatorProps`, `Orientation`.

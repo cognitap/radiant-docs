@@ -1,62 +1,53 @@
-'use client'
-import { useState } from 'react'
-import { Separator } from '@cognitap/radiant'
-import { DemoControls, DemoPreview } from '@/components/demo/DemoFrame'
+import { Button, Separator, type SeparatorProps } from '@cognitap/radiant'
 import '@cognitap/radiant/styles.css'
-export function SeparatorExample() {
-  const [decorative, setDecorative] = useState(false)
-  const [orientation, setOrientation] = useState<'horizontal' | 'vertical'>('horizontal')
+export type SeparatorOptions = Pick<SeparatorProps, 'style' | 'decorative' | 'orientation'>
+export function SettingsSections(options: SeparatorOptions) {
+  const vertical = options.orientation === 'vertical'
   return (
-    <>
-      <DemoControls>
-        <label>
-          <input
-            type="checkbox"
-            checked={decorative}
-            onChange={event => setDecorative(event.target.checked)}
-          />{' '}
-          Decorative division
-        </label>
-        <label>
-          Orientation{' '}
-          <select
-            value={orientation}
-            onChange={event =>
-              setOrientation(event.target.value === 'vertical' ? 'vertical' : 'horizontal')
-            }
-          >
-            <option value="horizontal">Horizontal</option>
-            <option value="vertical">Vertical</option>
-          </select>
-        </label>
-      </DemoControls>
-      <DemoPreview>
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: orientation === 'vertical' ? 'row' : 'column',
-            gap: '1rem',
-            width: '100%',
-            maxWidth: '32rem',
-            height: orientation === 'vertical' ? '12rem' : undefined,
-            padding: '1rem',
-            boxSizing: 'border-box'
-          }}
-        >
-          <section style={{ flex: 1, minWidth: 0, overflowWrap: 'anywhere' }}>
-            <h3>Account details</h3>
-            <p>Your name and email address.</p>
-          </section>
-          <Separator
-            decorative={decorative}
-            orientation={orientation}
-          />
-          <section style={{ flex: 1, minWidth: 0, overflowWrap: 'anywhere' }}>
-            <h3>Notification preferences</h3>
-            <p>Choose which updates you receive.</p>
-          </section>
-        </div>
-      </DemoPreview>
-    </>
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: vertical ? 'row' : 'column',
+        gap: '1rem',
+        width: '100%',
+        maxWidth: '32rem'
+      }}
+    >
+      <section>
+        <h3>Account details</h3>
+        <p>Your name and email address.</p>
+      </section>
+      <Separator {...options} />
+      <section>
+        <h3>Notification preferences</h3>
+        <p>Choose which updates you receive.</p>
+      </section>
+    </div>
+  )
+}
+export function EditorActions(options: SeparatorOptions) {
+  return (
+    <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '.5rem' }}>
+      <Button variant="outline">Undo</Button>
+      <Button variant="outline">Redo</Button>
+      <Separator
+        {...options}
+        orientation="vertical"
+      />
+      <Button variant="outline">Preview</Button>
+      <Button>Publish</Button>
+    </div>
+  )
+}
+export function ReleaseNotes(options: SeparatorOptions) {
+  return (
+    <article style={{ width: '100%', maxWidth: '32rem' }}>
+      <h3 style={{ marginBottom: '.5rem' }}>Release notes</h3>
+      <Separator
+        {...options}
+        decorative
+      />
+      <p>Recordings now sync across devices, and exports keep chapter markers.</p>
+    </article>
   )
 }

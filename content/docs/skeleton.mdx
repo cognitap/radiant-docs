@@ -1,54 +1,84 @@
 ---
 title: Skeleton
-description: Decorative content placeholders with application-owned loading feedback.
+description: Hold the place of content while it loads, with a decorative shape.
 ---
 
-import { SkeletonDemo } from '../../components/SkeletonDemo'
+import {
+  SkeletonDemo,
+  SkeletonArticleDemo,
+  SkeletonCardDemo,
+  SkeletonResultsDemo
+} from '../../components/SkeletonDemo'
 
 <SkeletonDemo />
 
-## Explain the loading state
+## Usage
 
-Skeleton draws an empty visual placeholder. Every shape is hidden from
-assistive technology and cannot contain text, links or controls. Shapes do not
-represent real content or describe whether a request succeeded.
+Use Skeleton when you know the layout of the content that is loading. Use [Spinner](/docs/spinner/) for a compact activity indicator beside text or in a pending [Button](/docs/button/), and [Progress](/docs/progress/) when completion is measurable. When there is no layout to preserve, show plain text in a status region.
 
-Provide useful loading text separately. The application owns fetching,
-cancellation, errors and completion. Use [Alert](/docs/alert/) for concise
-status feedback when an announcement is useful. Avoid announcing every shape
-or repeating an unchanged loading message.
+```tsx
+<section aria-busy={loading}>
+  {loading ? (
+    <>
+      <Skeleton style={{ width: '40%' }} />
+      <Skeleton />
+    </>
+  ) : (
+    <AccountDetails />
+  )}
+</section>
+<output>{loading ? 'Loading account…' : 'Account loaded.'}</output>
+```
 
-Set `aria-busy` on the content region being updated. Keep the status outside
-that busy region so useful updates are not held back. Replace placeholders
-with real content and clear busy state when the work finishes. On failure,
-show meaningful error feedback and an appropriate retry or cancellation action.
-Preserve the user's focus while replacing content; Skeleton never moves it.
+## Examples
 
-Use shapes that resemble the expected layout to reduce movement when content
-arrives. Do not present plausible fake account details as placeholders. Use
-[Progress](/docs/progress/) for measurable task completion, or
-[Spinner](/docs/spinner/) for compact activity feedback.
+### Hold a text block's place
 
-## Customize the shapes
+<SkeletonArticleDemo />
 
-Skeleton renders a native `span` with the `skeleton` slot. Native attributes,
-`className`, `style` and an `HTMLSpanElement` ref reach that host. It owns
-`aria-hidden`, role, focusability and its empty content. Loading-region busy
-state and accessible status belong on separate application elements.
-`SkeletonProps` is exported.
+### Hold a card's place
 
-Use `components.skeleton` or local `--rad-skeleton-*` variables for `width`,
-`height`, `radius`, `color` and `duration`. Defaults fill the available width,
-use a one-rem height, inherit the shared surface radius and use the neutral
-color. Set dimensions and radius through `style` for circles or custom blocks.
-Keep shapes bounded in narrow layouts.
+<SkeletonCardDemo />
 
-## Motion and visibility
+### Swap in loaded results
 
-The default treatment uses a CSS opacity pulse. System reduced motion,
-`motion="off"` and theme motion off retain static visible shapes. Forced colors
-use a static system-color outline. No MotionProvider, timers or animation
-engine are required; removing the element removes its CSS animation.
+<SkeletonResultsDemo />
 
-Preserve visible placeholders and useful loading text when replacing styles.
-No provider is required; [themes](/docs/foundations/theming/) apply normally.
+## State
+
+Skeleton has no state and contributes no form value. The application decides when loading starts and ends, and replaces the shapes with real content.
+
+## Accessibility
+
+Every shape is `aria-hidden="true"` and empty. Children, `role`, ARIA naming, `aria-busy`, `aria-live` and `tabIndex` are rejected by the type and stripped at runtime.
+
+The consumer owns the loading state. Put `aria-busy={loading}` on the region that will hold the content. Put the loading and completion text in a status region, such as `<output>` or [Alert](/docs/alert/), outside the busy region, since some screen readers skip a busy region's content. Replacing shapes with content does not move focus. Don't fill placeholders with plausible fake data.
+
+| Key             | Behavior                              |
+| --------------- | ------------------------------------- |
+| Tab / Shift+Tab | Skip the shape; it is never focusable |
+
+## Motion
+
+Shapes pulse in opacity once per `--rad-skeleton-duration`, `2s` by default. System reduced motion, a theme with motion off, `motion="off"` and forced colors all stop the pulse and leave a static, visible shape. `data-motion` is `off` for the prop or theme setting; it does not reflect system reduced motion. The pulse is CSS only, so no MotionProvider is needed.
+
+## Styling
+
+Skeleton renders a block `span` capped at the container width, with `data-slot="skeleton"` and `data-motion`. A caller `data-slot` is appended, so select with `[data-slot~="skeleton"]`. `className` is merged last, and `style` takes native width, height and border radius. Forced colors draw a `CanvasText` border on `Canvas`.
+
+`components.skeleton` or local variables set `--rad-skeleton-width` (`100%`), `-height` (`1rem`), `-radius` (the surface radius), `-color` (the neutral color) and `-duration`.
+
+## API
+
+### Skeleton
+
+| Prop        | Type                                                                         | Default         |
+| ----------- | ---------------------------------------------------------------------------- | --------------- |
+| motion      | inherit / off                                                                | inherit         |
+| className   | string; merged after the built-in classes                                    | None            |
+| style       | ThemeStyle, including `--rad-skeleton-*`                                     | None            |
+| data-slot   | Extra tokens after `skeleton`                                                | skeleton        |
+| ref         | `Ref<HTMLSpanElement>`                                                       | None            |
+| Other props | Native span props except children, `role`, ARIA naming and state, `tabIndex` | Native defaults |
+
+Exports: `Skeleton`, `SkeletonProps`.

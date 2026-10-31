@@ -1,50 +1,79 @@
 ---
 title: Badge
-description: Compact passive text for categories and statuses.
+description: Label a status, count or category with compact passive text.
 ---
 
-import { BadgeDemo } from '../../components/BadgeDemo'
+import {
+  BadgeDemo,
+  BadgeTableDemo,
+  BadgeCountDemo,
+  BadgeDecorativeDemo
+} from '../../components/BadgeDemo'
 
 <BadgeDemo />
 
-## Keep the meaning in text
+## Usage
 
-Badge presents compact status or category text in a passive `span`. Include
-words such as “Approved” or “Needs attention”; color alone cannot communicate
-the meaning. Give counts useful context, such as “3 unread”, rather than an
-unexplained number.
+Use Badge for short text that labels a status, a count or a category. Use [Tag](/docs/tag/) when people can remove the item, [Kbd](/docs/kbd/) for keyboard keys, [Button](/docs/button/) or [Link](/docs/link/) for anything clickable, and [Alert](/docs/alert/) for updates that must be announced.
 
-`tone` accepts `accent`, `neutral` (default), `warning` and `danger`. It chooses
-the shared palette, not announcement urgency or application state.
+```tsx
+<Badge tone="warning">Needs review</Badge>
+```
 
-Informative badges expose their text normally. Set `decorative` only when
-adjacent accessible text already conveys the same information. That hides the
-entire badge from assistive technology; do not hide unique status information.
-There is no separate accessible-label prop to replace the visible meaning.
+`tone` only sets color: `neutral` (default) for information, `accent` for success or confirmation, `warning` for a problem the user can still avoid, and `danger` for a failure. Say the status in the text; color only reinforces it.
 
-## Presentation and actions
+## Examples
 
-Badge adds no live region, focus handling or keyboard interaction. Applications
-own status changes and important announcements through [Alert](/docs/alert/).
-Avoid repeatedly announcing unchanged category text.
+### Show status in a table
 
-Use [Button](/docs/button/) or [Link](/docs/link/) for actions. A badge can appear
-inside an otherwise clearly named control, but never put controls inside Badge
-or turn it into a keyboard target. Keep the control's name meaningful when a
-badge is decorative.
+<BadgeTableDemo />
 
-## Customize
+### Count items beside a heading
 
-Native span attributes, `className`, `style` and an `HTMLSpanElement` ref reach
-the host. It retains the `badge` slot and exposes `data-tone`. Role, decorative
-treatment, naming and focusability stay owned by the component.
-`BadgeProps` and `BadgeTone` are exported.
+<BadgeCountDemo />
 
-Use `components.badge` or `--rad-badge-*` variables for `radius`, `background`,
-`color`, `borderColor`, `borderWidth`, `borderStyle`, `paddingInline`,
-`paddingBlock` and `fontSize`. Shared typography supplies label weight and
-rhythm. Long text wraps within the available width.
+A bare number reads with its surrounding text, as "Open reviews 12", so keep counts next to a label that explains them.
 
-No motion is added. Forced colors retain readable system text and a border.
-Preserve meaningful text, contrast and bounds when replacing styles.
-[Themes](/docs/foundations/theming/) apply without a provider.
+### Hide repeated text
+
+<BadgeDecorativeDemo />
+
+`decorative` hides the badge from assistive technology. Use it only when adjacent text already says the same thing.
+
+## State
+
+Badge holds no state, has no controlled or uncontrolled props and contributes no form value.
+
+## Accessibility
+
+Badge renders a plain `span` with no role, so its visible text is its accessible content. Its types reject `role`, `tabIndex`, `contentEditable`, `aria-label`, `aria-labelledby`, `aria-live` and `aria-hidden`, and the component strips them at runtime. Badge adds no live region; applications announce status changes themselves.
+
+| Key             | Behavior                              |
+| --------------- | ------------------------------------- |
+| Tab / Shift+Tab | Skip the badge; it is never focusable |
+
+## Motion
+
+Badge has no motion. Forced colors use `CanvasText` for text and border and `Canvas` for the background.
+
+## Styling
+
+| Part  | Element | data-slot | Data attributes                |
+| ----- | ------- | --------- | ------------------------------ |
+| Badge | `span`  | `badge`   | `data-tone`, `data-decorative` |
+
+`className`, `style` and the ref reach the span. Caller classes merge after the defaults, caller `style` wins, and a caller `data-slot` is appended to `badge`. `components.badge` or `--rad-badge-*` variables set radius, background, color, borderColor, borderWidth, borderStyle, paddingInline, paddingBlock and fontSize. Long text wraps within the available width.
+
+## API
+
+| Badge prop        | Type                                                                   | Default         |
+| ----------------- | ---------------------------------------------------------------------- | --------------- |
+| children          | ReactNode                                                              | None            |
+| tone              | neutral / accent / warning / danger                                    | neutral         |
+| decorative        | boolean                                                                | false           |
+| className / style | string / ThemeStyle                                                    | None            |
+| data-slot         | Additional identity tokens                                             | badge           |
+| ref               | `Ref<HTMLSpanElement>`                                                 | None            |
+| Native span props | Except role, tabIndex, contentEditable and naming, live or hidden ARIA | Native defaults |
+
+Exports: `Badge`; types `BadgeProps`, `BadgeTone`.

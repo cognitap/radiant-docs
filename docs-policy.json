@@ -18,13 +18,8 @@
       "content/docs/workshop.mdx"
     ],
     "pending": [
-      "content/docs/avatar.mdx",
-      "content/docs/badge.mdx",
       "content/docs/breadcrumb.mdx",
-      "content/docs/card.mdx",
       "content/docs/pagination.mdx",
-      "content/docs/separator.mdx",
-      "content/docs/skeleton.mdx",
       "content/docs/table.mdx"
     ]
   }
