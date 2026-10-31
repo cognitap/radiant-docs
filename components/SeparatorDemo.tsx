@@ -3,7 +3,7 @@ import { SeparatorPlayground } from '@/examples/separator/SeparatorPlayground'
 export function SeparatorDemo() {
   return (
     <Demo
-      title="Settings sections"
+      title="Section separation"
       files={['separator/SeparatorExample.tsx']}
     >
       <SeparatorPlayground />

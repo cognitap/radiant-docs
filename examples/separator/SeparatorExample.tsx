@@ -1,9 +1,18 @@
 import { Button, Separator, type SeparatorProps } from '@cognitap/radiant'
 import '@cognitap/radiant/styles.css'
-export type SeparatorOptions = Pick<SeparatorProps, 'style'>
+export type SeparatorOptions = Pick<SeparatorProps, 'style' | 'decorative' | 'orientation'>
 export function SettingsSections(options: SeparatorOptions) {
+  const vertical = options.orientation === 'vertical'
   return (
-    <div style={{ display: 'grid', gap: '1rem', width: '100%', maxWidth: '32rem' }}>
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: vertical ? 'row' : 'column',
+        gap: '1rem',
+        width: '100%',
+        maxWidth: '32rem'
+      }}
+    >
       <section>
         <h3>Account details</h3>
         <p>Your name and email address.</p>

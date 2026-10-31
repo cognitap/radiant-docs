@@ -7,13 +7,32 @@ export type SeparatorTask = 'sections' | 'actions' | 'heading'
 export function SeparatorPlayground({ task = 'sections' }: { task?: SeparatorTask }) {
   const [thickness, setThickness] = useState<'1px' | '2px' | '4px'>('1px'),
     [lineStyle, setLineStyle] = useState<'solid' | 'dashed' | 'dotted'>('solid'),
-    options = {
-      style: { '--rad-separator-thickness': thickness, '--rad-separator-style': lineStyle }
-    }
+    [decorative, setDecorative] = useState(false),
+    [orientation, setOrientation] = useState<'horizontal' | 'vertical'>('horizontal'),
+    style = { '--rad-separator-thickness': thickness, '--rad-separator-style': lineStyle },
+    options = task === 'sections' ? { style, decorative, orientation } : { style }
   return (
     <>
       <DemoControls>
         <div className="action-options">
+          {task === 'sections' && (
+            <>
+              <label>
+                <input
+                  type="checkbox"
+                  checked={decorative}
+                  onChange={event => setDecorative(event.target.checked)}
+                />{' '}
+                Decorative division
+              </label>
+              <SelectControl
+                label="Orientation"
+                value={orientation}
+                options={['horizontal', 'vertical']}
+                onChange={setOrientation}
+              />
+            </>
+          )}
           <SelectControl
             label="Thickness"
             value={thickness}
