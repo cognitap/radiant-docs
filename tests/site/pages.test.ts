@@ -55,6 +55,12 @@ async function checkPage(baseURL: string, browser: Browser, route: string) {
         }
         await resetFrame(frame, page)
       }
+      for (const block of await page.locator('.prose > .mdx-code').all()) {
+        const text = await block.locator('code').evaluate(node => node.textContent ?? '')
+        await block.getByRole('button', { name: 'Copy', exact: true }).click()
+        await block.getByText('Code copied.', { exact: true }).waitFor()
+        assert.equal(await page.evaluate(() => navigator.clipboard.readText()), text, route)
+      }
       assert.deepEqual(errors, [], route)
     })
   } finally {

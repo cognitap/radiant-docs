@@ -451,78 +451,17 @@ body {
   margin-block: 0.5rem;
 }
 
-.prose > p code,
-.prose > ul code,
-.prose > ol code,
-.mdx-callout code,
-.mdx-table-scroll code {
-  border: 1px solid var(--docs-border);
-  border-radius: 0.25rem;
-  background: var(--docs-surface);
-  padding: 0.1em 0.3em;
-  font-size: 0.875em;
-}
-
 .prose > :is(h2, h3, h4)[id] {
   scroll-margin-top: 2rem;
 }
 
-.mdx-callout {
+.prose :is(.mdx-callout, .mdx-code, .mdx-table) {
   margin-block: 1.5rem;
-  padding: 1rem 1.25rem;
-  border: 1px solid var(--docs-border);
-  border-inline-start: 3px solid var(--docs-accent);
-  border-radius: 0.5rem;
-  background: var(--docs-surface);
 }
 
-.callout-title {
-  font-weight: 650;
-  margin: 0;
-}
-
-.mdx-callout > :last-child {
-  margin-bottom: 0;
-}
-
-.mdx-table-scroll {
-  overflow-x: auto;
-  margin-block: 1.5rem;
-  border: 1px solid var(--docs-border);
-  border-radius: 0.5rem;
-}
-
-.mdx-table-scroll table {
-  width: 100%;
-  min-width: 32rem;
-  border-collapse: collapse;
-  text-align: start;
-  font-size: 0.8125rem;
-}
-
-.mdx-table-scroll th,
-.mdx-table-scroll td {
-  padding: 0.75rem 1rem;
-  border-bottom: 1px solid var(--docs-border);
-}
-
-.mdx-table-scroll th {
-  background: var(--docs-surface);
-  font-weight: 650;
-}
-
-.prose pre:not(:where(.proof-page *)):not([data-slot]) {
-  overflow-x: auto;
-  padding: 1.5rem;
-  border: 1px solid var(--docs-border);
-  border-radius: 0.75rem;
-  font-size: 0.8125rem;
-  line-height: 1.8;
-}
-
-.prose pre:not(:where(.proof-page *)):not([data-slot]) code {
-  display: block;
-  min-width: max-content;
+.mdx-code-header {
+  justify-content: flex-end;
+  padding-block: 0.25rem;
 }
 
 .shiki {
@@ -604,11 +543,6 @@ a:not([data-slot~='link']) {
   outline-offset: 4px;
 }
 
-.mdx-table-scroll:focus-visible {
-  outline: 3px solid var(--docs-accent);
-  outline-offset: 3px;
-}
-
 main:focus {
   outline: none;
 }
@@ -657,13 +591,6 @@ main:focus {
 
   .outline-mobile {
     display: block;
-    border-bottom: 1px solid var(--docs-border);
-    padding-block: 0 1rem;
-  }
-
-  .outline-mobile summary {
-    cursor: pointer;
-    font-size: 0.8125rem;
   }
 
   .docs-layout .docs-page {
