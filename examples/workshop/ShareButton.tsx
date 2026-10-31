@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useId, useRef, useState } from 'react'
-import { Button } from '@cognitap/radiant'
+import { Button, Input } from '@cognitap/radiant'
 import { errorMessage, handoffAPI, jsonText, type Recipes } from './workshop-handoff'
 import { encodeShare } from './workshop-share'
 import { downloadText } from './workshop-download'
@@ -120,9 +120,9 @@ export function ShareButton({
             <output className="share-status">
               {popover.copied ? 'Link copied' : 'Copy failed. Select the link below.'}
             </output>
-            <input
-              type="text"
+            <Input
               readOnly
+              controlSize="small"
               aria-label="Share link"
               value={popover.url}
               onFocus={event => event.target.select()}

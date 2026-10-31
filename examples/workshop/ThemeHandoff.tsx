@@ -10,7 +10,22 @@ import {
   type ReactNode,
   type RefObject
 } from 'react'
-import { Button } from '@cognitap/radiant'
+import {
+  Button,
+  CheckboxGroup,
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+  Field,
+  Fieldset,
+  InlineCode,
+  Input,
+  Link,
+  NativeSelect,
+  Radio,
+  RadioGroup,
+  Textarea
+} from '@cognitap/radiant'
 import { useHydrated } from '../profile/useHydrated'
 import {
   errorMessage,
@@ -68,24 +83,23 @@ function CodeField({
   const rows = expanded ? total : Math.min(total, collapsedRows)
   return (
     <div className="handoff-code">
-      <label>
-        {label}
-        <textarea
+      <Field label={label}>
+        <Textarea
           readOnly
           rows={rows}
           wrap="off"
           value={text}
         />
-      </label>
+      </Field>
       {expandable && total > collapsedRows && (
-        <button
-          type="button"
-          className="handoff-expand"
+        <Button
+          variant="ghost"
+          controlSize="small"
           aria-expanded={expanded}
           onClick={() => setExpanded(value => !value)}
         >
           {expanded ? 'Collapse' : `Expand · ${total} lines`}
-        </button>
+        </Button>
       )}
     </div>
   )
@@ -240,10 +254,10 @@ export function ThemeHandoff({
     </div>
   )
   const format = (name: string, children: ReactNode) => (
-    <details className="handoff-format">
-      <summary>{name}</summary>
-      {children}
-    </details>
+    <Collapsible className="handoff-format">
+      <CollapsibleTrigger>{name}</CollapsibleTrigger>
+      <CollapsibleContent>{children}</CollapsibleContent>
+    </Collapsible>
   )
   function stepBody(step: SetupStep) {
     if (!step.label || step.code === undefined) return null
@@ -285,48 +299,51 @@ export function ThemeHandoff({
       >
         {result?.message ?? ''}
       </output>
-      <fieldset
-        className="handoff-setups"
+      <RadioGroup
+        label="How do you use Radiant?"
+        value={setup}
         disabled={unavailable}
+        parts={{ options: { className: 'handoff-setup-options' } }}
+        onValueChange={value => {
+          const choice = setups.find(item => item.id === value)
+          if (choice) chooseSetup(choice.id)
+        }}
       >
-        <legend>How do you use Radiant?</legend>
         {setups.map(choice => (
-          <label
+          <Radio
             key={choice.id}
-            className="handoff-setup"
-          >
-            <input
-              type="radio"
-              name="handoff-setup"
-              value={choice.id}
-              checked={setup === choice.id}
-              aria-labelledby={`${resultId}-${choice.id}`}
-              aria-describedby={`${resultId}-${choice.id}-hint`}
-              onChange={() => chooseSetup(choice.id)}
-            />
-            <span
-              id={`${resultId}-${choice.id}`}
-              className="handoff-setup-label"
-            >
-              {choice.label}
-            </span>
-            <span
-              id={`${resultId}-${choice.id}-hint`}
-              className="handoff-setup-hint"
-            >
-              {choice.hint}
-            </span>
-          </label>
+            value={choice.id}
+            aria-labelledby={`${resultId}-${choice.id}`}
+            aria-describedby={`${resultId}-${choice.id}-hint`}
+            parts={{ wrapper: { className: 'handoff-setup' } }}
+            label={
+              <>
+                <span
+                  id={`${resultId}-${choice.id}`}
+                  className="handoff-setup-label"
+                >
+                  {choice.label}
+                </span>
+                <span
+                  id={`${resultId}-${choice.id}-hint`}
+                  className="handoff-setup-hint"
+                >
+                  {choice.hint}
+                </span>
+              </>
+            }
+          />
         ))}
-      </fieldset>
+      </RadioGroup>
       {guide && (
-        <fieldset
-          className="handoff-output"
+        <Fieldset
           disabled={unavailable}
+          legend={
+            <>
+              {guide.output.label} · <InlineCode>{guide.output.name}</InlineCode>
+            </>
+          }
         >
-          <legend>
-            {guide.output.label} · <code>{guide.output.name}</code>
-          </legend>
           {guide.error ? (
             <p>{guide.error}</p>
           ) : (
@@ -376,23 +393,23 @@ export function ThemeHandoff({
                           {font.files.map(file => (
                             <span key={file.url}>
                               {' · '}
-                              <a
+                              <Link
                                 href={file.url}
                                 download
                               >
                                 {file.style} WOFF2
-                              </a>
+                              </Link>
                             </span>
                           ))}
                           {font.license && (
                             <>
                               {' · '}
-                              <a
+                              <Link
                                 href={font.license}
                                 download
                               >
                                 Font license
-                              </a>
+                              </Link>
                             </>
                           )}
                         </li>
@@ -404,182 +421,180 @@ export function ThemeHandoff({
               </li>
             ))}
           </ol>
-        </fieldset>
+        </Fieldset>
       )}
-      <details className="handoff-more">
-        <summary>Other formats</summary>
-        <fieldset disabled={unavailable}>
-          {format(
-            'Configuration file',
-            <>
-              <p>
-                The whole workshop state: theme document, palette and font metadata, editor recipes.
-              </p>
-              {actions('Configuration', configText, 'radiant-workshop.json', 'application/json')}
-              <CodeField
-                label="Configuration output"
-                text={configText}
-                collapsedRows={12}
-              />
-            </>
-          )}
-          {format(
-            'Selective sections',
-            <>
-              <p>
-                Whole public sections. Color needs Surface for its canvas; Surface includes
-                geometry.
-              </p>
-              <div className="handoff-sections">
-                {sectionNames.map(name => (
-                  <label key={name}>
-                    <input
-                      type="checkbox"
-                      checked={selected.includes(name)}
-                      onChange={event =>
-                        setSelected(previous =>
-                          event.target.checked
-                            ? [...previous, name]
-                            : previous.filter(value => value !== name)
-                        )
-                      }
-                    />
-                    {name}
-                  </label>
-                ))}
-              </div>
-              {actions('Sections', sections, 'radiant-sections.json', 'application/json')}
-              <CodeField
-                label="Section output"
-                text={sections}
-                collapsedRows={12}
-              />
-            </>
-          )}
-          {format(
-            'Motion only',
-            <>
-              <p>
-                Save as <code>radiant-motion.ts</code>; <code>applyMotion(target)</code> returns a
-                document to compile for ThemeScope.
-              </p>
-              {actions(
-                'Motion TypeScript',
-                prepared.motionTyped,
-                'radiant-motion.ts',
-                'text/typescript'
-              )}
-              <CodeField
-                label="Motion TypeScript output"
-                text={prepared.motionTyped}
-                collapsedRows={12}
-              />
-            </>
-          )}
-          {format(
-            'Typography only',
-            <>
-              <p>
-                <code>applyTypography(target)</code> keeps every other section. The CSS scopes to{' '}
-                <code>radiant-typography</code> with the same mode attribute.
-              </p>
-              {actions(
-                'Typography TypeScript',
-                prepared.typographyTyped,
-                'radiant-typography.ts',
-                'text/typescript'
-              )}
-              <CodeField
-                label="Typography TypeScript output"
-                text={prepared.typographyTyped}
-                collapsedRows={12}
-              />
-              {prepared.typographyCSSError ? (
-                <p>{prepared.typographyCSSError}</p>
-              ) : (
-                <>
-                  {actions(
-                    'Typography CSS',
-                    prepared.typographyCSS,
-                    'radiant-typography.css',
-                    'text/css'
-                  )}
-                  <CodeField
-                    label="Typography CSS output"
-                    text={prepared.typographyCSS}
-                    collapsedRows={12}
-                  />
-                </>
-              )}
-            </>
-          )}
-          {other &&
-            format(
-              other.setup === 'react' ? 'Typed theme' : 'Scoped CSS',
-              other.error ? (
-                <p>{other.error}</p>
-              ) : (
-                <>
-                  {actions(
-                    other.output.label,
-                    other.output.text,
-                    other.output.name,
-                    other.output.type
-                  )}
-                  <CodeField
-                    label={outputField(other)}
-                    text={other.output.text}
-                    collapsedRows={12}
-                  />
-                </>
-              )
+      <Collapsible className="handoff-more">
+        <CollapsibleTrigger>Other formats</CollapsibleTrigger>
+        <CollapsibleContent>
+          <Fieldset
+            legend="Export formats"
+            parts={{ legend: { className: 'workshop-sr-only' } }}
+            disabled={unavailable}
+          >
+            {format(
+              'Configuration file',
+              <>
+                <p>
+                  The whole workshop state: theme document, palette and font metadata, editor
+                  recipes.
+                </p>
+                {actions('Configuration', configText, 'radiant-workshop.json', 'application/json')}
+                <CodeField
+                  label="Configuration output"
+                  text={configText}
+                  collapsedRows={12}
+                />
+              </>
             )}
-          {format(
-            'Import',
-            <>
-              <p>
-                A configuration or full theme replaces the current theme. A section file applies the
-                mode below and keeps the rest.
-              </p>
-              <label>
-                Section apply mode
-                <select
-                  value={applyMode}
-                  onChange={event =>
-                    setApplyMode(event.target.value === 'replace' ? 'replace' : 'merge')
+            {format(
+              'Selective sections',
+              <>
+                <p>
+                  Whole public sections. Color needs Surface for its canvas; Surface includes
+                  geometry.
+                </p>
+                <CheckboxGroup
+                  className="handoff-sections"
+                  label="Sections"
+                  value={selected}
+                  items={sectionNames.map(name => ({ value: name, label: name }))}
+                  parts={{ options: { className: 'handoff-sections-options' } }}
+                  onValueChange={value =>
+                    setSelected(sectionNames.filter(name => value.includes(name)))
                   }
-                >
-                  <option value="merge">Merge supplied leaves</option>
-                  <option value="replace">Replace supplied sections</option>
-                </select>
-              </label>
-              <label>
-                Import configuration file
-                <input
-                  type="file"
-                  aria-describedby={resultId}
-                  accept="application/json,.json"
-                  onChange={event => {
-                    const file = event.target.files?.[0]
-                    event.target.value = ''
-                    if (file) void importFile(file)
-                  }}
                 />
-              </label>
-              <label>
-                Configuration JSON
-                <textarea
-                  rows={8}
-                  aria-describedby={resultId}
-                  value={input}
-                  onChange={event => setInput(event.target.value)}
+                {actions('Sections', sections, 'radiant-sections.json', 'application/json')}
+                <CodeField
+                  label="Section output"
+                  text={sections}
+                  collapsedRows={12}
                 />
-              </label>
-              <Button onClick={() => importText(input)}>Import JSON</Button>
-            </>
-          )}
-        </fieldset>
-      </details>
+              </>
+            )}
+            {format(
+              'Motion only',
+              <>
+                <p>
+                  Save as <InlineCode>radiant-motion.ts</InlineCode>;{' '}
+                  <InlineCode>applyMotion(target)</InlineCode> returns a document to compile for
+                  ThemeScope.
+                </p>
+                {actions(
+                  'Motion TypeScript',
+                  prepared.motionTyped,
+                  'radiant-motion.ts',
+                  'text/typescript'
+                )}
+                <CodeField
+                  label="Motion TypeScript output"
+                  text={prepared.motionTyped}
+                  collapsedRows={12}
+                />
+              </>
+            )}
+            {format(
+              'Typography only',
+              <>
+                <p>
+                  <InlineCode>applyTypography(target)</InlineCode> keeps every other section. The
+                  CSS scopes to <InlineCode>radiant-typography</InlineCode> with the same mode
+                  attribute.
+                </p>
+                {actions(
+                  'Typography TypeScript',
+                  prepared.typographyTyped,
+                  'radiant-typography.ts',
+                  'text/typescript'
+                )}
+                <CodeField
+                  label="Typography TypeScript output"
+                  text={prepared.typographyTyped}
+                  collapsedRows={12}
+                />
+                {prepared.typographyCSSError ? (
+                  <p>{prepared.typographyCSSError}</p>
+                ) : (
+                  <>
+                    {actions(
+                      'Typography CSS',
+                      prepared.typographyCSS,
+                      'radiant-typography.css',
+                      'text/css'
+                    )}
+                    <CodeField
+                      label="Typography CSS output"
+                      text={prepared.typographyCSS}
+                      collapsedRows={12}
+                    />
+                  </>
+                )}
+              </>
+            )}
+            {other &&
+              format(
+                other.setup === 'react' ? 'Typed theme' : 'Scoped CSS',
+                other.error ? (
+                  <p>{other.error}</p>
+                ) : (
+                  <>
+                    {actions(
+                      other.output.label,
+                      other.output.text,
+                      other.output.name,
+                      other.output.type
+                    )}
+                    <CodeField
+                      label={outputField(other)}
+                      text={other.output.text}
+                      collapsedRows={12}
+                    />
+                  </>
+                )
+              )}
+            {format(
+              'Import',
+              <>
+                <p>
+                  A configuration or full theme replaces the current theme. A section file applies
+                  the mode below and keeps the rest.
+                </p>
+                <Field label="Section apply mode">
+                  <NativeSelect
+                    value={applyMode}
+                    onChange={event =>
+                      setApplyMode(event.target.value === 'replace' ? 'replace' : 'merge')
+                    }
+                  >
+                    <option value="merge">Merge supplied leaves</option>
+                    <option value="replace">Replace supplied sections</option>
+                  </NativeSelect>
+                </Field>
+                <Field label="Import configuration file">
+                  <Input
+                    type="file"
+                    aria-describedby={resultId}
+                    accept="application/json,.json"
+                    onChange={event => {
+                      const file = event.target.files?.[0]
+                      event.target.value = ''
+                      if (file) void importFile(file)
+                    }}
+                  />
+                </Field>
+                <Field label="Configuration JSON">
+                  <Textarea
+                    rows={8}
+                    aria-describedby={resultId}
+                    value={input}
+                    onChange={event => setInput(event.target.value)}
+                  />
+                </Field>
+                <Button onClick={() => importText(input)}>Import JSON</Button>
+              </>
+            )}
+          </Fieldset>
+        </CollapsibleContent>
+      </Collapsible>
     </section>
   )
 }

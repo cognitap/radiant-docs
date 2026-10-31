@@ -34,7 +34,7 @@
 .preview-options > .preview-tools {
   order: 2;
 }
-.preview-options > label {
+.preview-options > [data-slot~='field'] {
   display: flex;
   min-width: 0;
   flex: 0 1 auto;
@@ -49,26 +49,17 @@
 }
 /* Fixed widths keep the row steady as options change; long names clip inside their select. */
 .preview-choices select {
-  box-sizing: border-box;
   min-width: 0;
-  width: 7rem;
-  height: var(--rad-control-small-height, 2rem);
-  padding: 0 0.4rem;
-  font: inherit;
-  font-size: 0.8125rem;
-  color: var(--docs-foreground);
-  background: var(--docs-surface);
-  border: 1px solid var(--docs-border);
-  border-radius: 0.375rem;
+  width: 8rem;
 }
 .preview-scene select {
-  width: 8.5rem;
+  width: 9.5rem;
 }
 .preview-mode select {
-  width: 6.75rem;
+  width: 7.5rem;
 }
 .preview-compare select {
-  width: 7.75rem;
+  width: 9rem;
 }
 .preview-icon {
   display: block;
@@ -97,12 +88,6 @@
   color: var(--docs-muted);
   line-height: 1.6;
 }
-.preview-copy-editor > summary {
-  cursor: pointer;
-  font-size: 0.8125rem;
-  font-weight: 600;
-  line-height: var(--rad-control-small-height, 2rem);
-}
 .preview-copy-editor[open] {
   flex-basis: 100%;
 }
@@ -112,26 +97,6 @@
   gap: 0.75rem;
   padding-block: 0.75rem;
 }
-.preview-copy-fields label {
-  display: grid;
-  gap: 0.25rem;
-  font-size: 0.8125rem;
-}
-.preview-copy-fields textarea {
-  box-sizing: border-box;
-  width: 100%;
-  min-width: 0;
-  resize: vertical;
-  color: var(--docs-foreground);
-  background: var(--docs-surface);
-  border: 1px solid var(--docs-border);
-  border-radius: 0.25rem;
-  padding: 0.5rem;
-  font: inherit;
-}
-.preview-choices select:focus-visible,
-.preview-copy-fields textarea:focus-visible,
-.preview-copy-editor > summary:focus-visible,
 .scene-scroll:focus-visible {
   outline: 2px solid var(--docs-accent);
   outline-offset: 3px;
@@ -253,24 +218,8 @@
   gap: 0.375rem;
 }
 .preview-inspector-group button {
-  display: flex;
-  align-items: center;
   gap: 0.5rem;
-  padding: 0.3rem 0.6rem;
-  font: inherit;
-  font-size: 0.8125rem;
-  color: var(--docs-foreground);
-  background: transparent;
-  border: 1px solid var(--docs-border);
-  border-radius: 999px;
-  cursor: pointer;
-}
-.preview-inspector-group button:hover {
-  border-color: var(--docs-accent);
-}
-.preview-inspector-group button:focus-visible {
-  outline: 2px solid var(--docs-accent);
-  outline-offset: 2px;
+  --rad-button-radius: 999px;
 }
 .preview-inspector-group button small {
   color: var(--docs-muted);
@@ -381,20 +330,7 @@
 }
 .scene-scroll table {
   min-width: 40rem;
-  width: 100%;
   max-inline-size: none;
-  border-collapse: collapse;
-  text-align: left;
-}
-.scene-scroll caption {
-  text-align: left;
-  color: var(--rad-color-muted-foreground);
-  padding-block-end: 0.75rem;
-}
-.scene-scroll :where(td, th) {
-  padding: var(--rad-spacing-field-gap) 0.75rem;
-  border-bottom: 1px solid var(--rad-color-border);
-  vertical-align: top;
 }
 .scene-scroll tbody th {
   max-width: 16rem;
@@ -482,11 +418,9 @@
     box-shadow: 0 0.75rem 1.5rem rgb(0 0 0 / 0.12);
   }
   /* The folded panel has room for visible labels. */
-  .preview-options[data-open] > label {
+  .preview-options[data-open] > [data-slot~='field'] {
     display: grid;
-    gap: 0.3rem;
     flex: 1 1 8rem;
-    font-size: 0.8125rem;
   }
   .preview-options[data-open] .preview-control-label {
     position: static;
@@ -498,8 +432,6 @@
   .preview-options[data-open] select {
     width: 100%;
     max-width: none;
-    height: auto;
-    padding: 0.5rem;
   }
   .preview-options[data-open] .preview-reset {
     gap: 0.4rem;

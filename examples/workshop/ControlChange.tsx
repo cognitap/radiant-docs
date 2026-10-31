@@ -1,6 +1,7 @@
 'use client'
 
 import { useId, type ReactNode } from 'react'
+import { Button } from '@cognitap/radiant'
 import type { Changes, Fields } from './workshop-fields'
 
 const focusable = 'input:not([type="hidden"]), select, textarea, button'
@@ -51,13 +52,14 @@ export function Changed<F extends Fields, K extends keyof F & string>({
       {changed && (
         <span className="control-change-marker">
           <span id={id}>Changed from {format(changes.baseline[field])}</span>
-          <button
-            type="button"
+          <Button
+            variant="outline"
+            controlSize="small"
             aria-label={`Reset ${label}`}
             onClick={() => set(changes.baseline[field])}
           >
             Reset
-          </button>
+          </Button>
         </span>
       )}
     </div>
