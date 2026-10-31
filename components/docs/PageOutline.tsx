@@ -1,5 +1,6 @@
 'use client'
 
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@cognitap/radiant'
 import { AnchorProvider, TOCItem, type TableOfContents } from 'fumadocs-core/toc'
 
 export function PageOutline({ toc }: { toc: TableOfContents }) {
@@ -22,10 +23,12 @@ export function PageOutline({ toc }: { toc: TableOfContents }) {
       single
     >
       <div className="outline-mobile">
-        <details>
-          <summary>On this page</summary>
-          <nav aria-label="On this page">{links}</nav>
-        </details>
+        <Collapsible>
+          <CollapsibleTrigger>On this page</CollapsibleTrigger>
+          <CollapsibleContent>
+            <nav aria-label="On this page">{links}</nav>
+          </CollapsibleContent>
+        </Collapsible>
       </div>
       <aside className="outline-desktop">
         <nav aria-label="On this page">
