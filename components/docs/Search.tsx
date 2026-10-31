@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useSyncExternalStore } from 'react'
 import dynamic from 'next/dynamic'
 import {
   Dialog,
@@ -8,7 +8,9 @@ import {
   DialogContent,
   DialogDescription,
   DialogTitle,
-  DialogTrigger
+  DialogTrigger,
+  Kbd,
+  KbdGroup
 } from '@cognitap/radiant'
 
 const SearchPanel = dynamic(() => import('./SearchPanel').then(module => module.SearchPanel), {
@@ -45,7 +47,8 @@ export function Search() {
       onOpenChange={setOpen}
     >
       <DialogTrigger variant="outline">
-        Search docs <kbd aria-hidden="true">⌘ / Ctrl K</kbd>
+        Search docs
+        <Shortcut />
       </DialogTrigger>
       <DialogContent className="docs-search-dialog">
         <div className="docs-dialog-heading">
@@ -64,5 +67,26 @@ export function Search() {
         {open ? <SearchPanel onNavigate={() => setOpen(false)} /> : null}
       </DialogContent>
     </Dialog>
+  )
+}
+
+const subscribe = () => () => {}
+
+/** The platform is unknown on the server, so the hint appears after hydration. */
+function Shortcut() {
+  const modifier = useSyncExternalStore(
+    subscribe,
+    () => (/Mac|iPhone|iPad/.test(navigator.platform) ? '⌘' : 'Ctrl'),
+    () => null
+  )
+  if (!modifier) return null
+  return (
+    <KbdGroup
+      aria-hidden="true"
+      className="search-shortcut"
+    >
+      <Kbd>{modifier}</Kbd>
+      <Kbd>K</Kbd>
+    </KbdGroup>
   )
 }

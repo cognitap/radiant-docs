@@ -1,7 +1,7 @@
 'use client'
 
 import { createContext, useContext, useState, type ReactNode } from 'react'
-import { ThemeScope, type ThemeMode } from '@cognitap/radiant'
+import { Field, NativeSelect, ThemeScope, type ThemeMode } from '@cognitap/radiant'
 import { radiant } from '@cognitap/radiant/examples'
 
 const AppearanceContext = createContext<{
@@ -29,9 +29,12 @@ export function AppearanceControl() {
   const appearance = useContext(AppearanceContext)
   if (!appearance) throw new Error('AppearanceControl needs SiteTheme.')
   return (
-    <label className="appearance-control">
-      <span className="appearance-label">Appearance</span>
-      <select
+    <Field
+      label="Appearance"
+      parts={{ label: { className: 'appearance-label' } }}
+    >
+      <NativeSelect
+        controlSize="small"
         value={appearance.mode}
         onChange={event => {
           const mode = event.target.value
@@ -41,7 +44,7 @@ export function AppearanceControl() {
         <option value="light">Light</option>
         <option value="dark">Dark</option>
         <option value="system">System</option>
-      </select>
-    </label>
+      </NativeSelect>
+    </Field>
   )
 }

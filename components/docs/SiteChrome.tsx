@@ -4,6 +4,7 @@ import { radiantCandidate, radiantLabel } from '@/lib/radiant'
 import { AppearanceControl } from './SiteTheme'
 import { Search } from './Search'
 import { RadiantMark } from './RadiantMark'
+import { SiteLinks } from './SiteLinks'
 
 /** The header's contents. `start` holds page-level controls such as the sidebar trigger. */
 export function SiteHeaderContent({ start }: { start?: ReactNode }) {
@@ -21,8 +22,7 @@ export function SiteHeaderContent({ start }: { start?: ReactNode }) {
         aria-label="Site"
         className="site-tools"
       >
-        <NextLink href="/docs/getting-started/">Documentation</NextLink>
-        <NextLink href="/workshop/">Workshop</NextLink>
+        <SiteLinks />
         <Search />
         <AppearanceControl />
       </nav>
