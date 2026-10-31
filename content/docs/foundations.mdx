@@ -36,7 +36,8 @@ optional TanStack bindings. Radiant does not require a form library.
 Use the public `ThemeScope` and a published preset around the relevant subtree:
 
 ```tsx
-import { Button, ThemeScope, jelly } from '@cognitap/radiant'
+import { Button, ThemeScope } from '@cognitap/radiant'
+import { jelly } from '@cognitap/radiant/examples'
 
 export function ThemedAction() {
   return (
@@ -50,8 +51,8 @@ export function ThemedAction() {
 }
 ```
 
-The public `themes` registry contains Radiant, Default, Soft squircle, Expressive, Glass,
-Sharp 3D, Jelly and Ticket. Preset implementations live in the library. Try
+The public `themes` registry contains Radiant, Default, Soft squircle, Sharp 3D,
+Glass, Jelly, Ticket, Neon and Editorial. Preset implementations live in the library. Try
 them in the [interactive gallery](/docs/foundations/theming/#example-themes)
 without changing form behavior.
 

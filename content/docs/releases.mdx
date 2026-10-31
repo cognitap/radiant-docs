@@ -8,14 +8,16 @@ by this site. Keep package JavaScript and CSS on the same version.
 
 ## Latest release
 
-The current release adds [Charts](/docs/charts/) through an optional entry with palette-aware SVG figures, keyboard tooltips and native data tables.
-See the [release notes](https://github.com/cognitap/radiant/releases/tag/v0.0.70).
+The current release gives themes [roles](/docs/foundations/theming/#roles): one setting styles every action, field and selected item. The example themes are redesigned, and Neon and Editorial are new.
+See the [release notes](https://github.com/cognitap/radiant/releases/tag/v0.0.71).
 
 ## Upgrade existing themes
 
-Example themes live at `@cognitap/radiant/examples`. Move imports of `themes`,
-`radiant`, `soft`, `expressive`, `glass`, `sharp`, `jelly` and `ticket` there;
-the theme definitions are unchanged. The core entry retains `defaultTheme`.
+Example themes live at `@cognitap/radiant/examples`, and the core entry
+retains `defaultTheme`. `expressive` was removed; start from `soft` or `jelly`.
+A theme that set Button's shadows, fonts or press motion under
+`components.button` can move them to the `control.action` and `motion` roles,
+so every family follows.
 
 Motion uses explicit entrypoints and dedicated layout slots/parts. Review the
 [motion guide](/docs/foundations/motion/) before adopting layout animation.
