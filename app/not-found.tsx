@@ -1,5 +1,11 @@
-import NextLink from 'next/link'
+import {
+  EmptyState,
+  EmptyStateActions,
+  EmptyStateDescription,
+  EmptyStateTitle
+} from '@cognitap/radiant'
 import { SiteFrame } from '@/components/docs/SiteChrome'
+import { RouteLink } from '@/components/docs/RouteLink'
 
 export default function NotFound() {
   return (
@@ -9,9 +15,18 @@ export default function NotFound() {
         className="home"
         tabIndex={-1}
       >
-        <h1>Page not found</h1>
-        <p>This page may have moved.</p>
-        <NextLink href="/docs/getting-started/">Browse the documentation</NextLink>
+        <EmptyState variant="no-results">
+          <EmptyStateTitle level={1}>Page not found</EmptyStateTitle>
+          <EmptyStateDescription>This page may have moved.</EmptyStateDescription>
+          <EmptyStateActions>
+            <RouteLink
+              href="/docs/getting-started/"
+              variant="solid"
+            >
+              Browse the documentation
+            </RouteLink>
+          </EmptyStateActions>
+        </EmptyState>
       </main>
     </SiteFrame>
   )

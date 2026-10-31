@@ -1,8 +1,7 @@
 'use client'
 
-import NextLink from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Link } from '@cognitap/radiant'
+import { RouteLink } from './RouteLink'
 
 const links = [
   { href: '/docs/getting-started/', section: '/docs/', label: 'Documentation' },
@@ -12,7 +11,7 @@ const links = [
 export function SiteLinks() {
   const pathname = usePathname()
   return links.map(link => (
-    <Link
+    <RouteLink
       key={link.href}
       href={link.href}
       variant="ghost"
@@ -20,14 +19,8 @@ export function SiteLinks() {
       controlSize="small"
       className="site-link"
       aria-current={pathname.startsWith(link.section) ? 'page' : undefined}
-      render={props => (
-        <NextLink
-          {...props}
-          href={link.href}
-        />
-      )}
     >
       {link.label}
-    </Link>
+    </RouteLink>
   ))
 }
