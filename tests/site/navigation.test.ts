@@ -18,16 +18,16 @@ test('sidebar, search, mobile navigation, missing pages and deployment metadata'
           assert.equal((await page.request.get(`${baseURL}${href}`)).status(), 200, href ?? '')
         }
 
-        await page.getByRole('button', { name: /^Search docs/ }).click()
+        await page.keyboard.press('Control+k')
         const search = page.getByRole('dialog', { name: 'Search documentation', exact: true })
         await search
-          .getByRole('searchbox', { name: 'Search documentation', exact: true })
+          .getByRole('combobox', { name: 'Search documentation', exact: true })
           .fill('Button')
-        const result = search.locator('a[href^="/docs/button/"]')
-        await result.first().waitFor()
-        const href = await result.first().getAttribute('href')
-        assert.ok(href?.startsWith('/docs/button/'))
-        await result.first().click()
+        await search
+          .getByRole('group', { name: 'Components', exact: true })
+          .getByRole('option', { name: 'Button', exact: true })
+          .click()
+        await search.waitFor({ state: 'hidden' })
         await page.waitForURL(url => url.pathname === '/docs/button/')
 
         await page.setViewportSize({ width: 390, height: 800 })
