@@ -11,7 +11,8 @@ import {
   Field,
   Input,
   type DialogContentProps,
-  type DialogProps
+  type DialogProps,
+  Kbd
 } from '@cognitap/radiant'
 import { MotionProvider } from '@cognitap/radiant/motion/react'
 import '@cognitap/radiant/styles.css'
@@ -47,7 +48,7 @@ export function ReviewShortcuts({
               style={{ display: 'contents' }}
             >
               <dt>
-                <kbd>{keys}</kbd>
+                <Kbd>{keys}</Kbd>
               </dt>
               <dd style={{ margin: 0 }}>{action}</dd>
             </div>

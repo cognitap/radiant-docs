@@ -188,6 +188,7 @@ function FieldValidationForm({ controlSize, off }: { controlSize: ControlSize; o
                 error={touched.address ? addressError : undefined}
               >
                 {control => (
+                  // oxlint-disable-next-line react/forbid-elements -- This example shows Field adapting a native input.
                   <input
                     {...control}
                     ref={addressInput}

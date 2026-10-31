@@ -1,6 +1,7 @@
 'use client'
 
 /* oxlint-disable jsx-a11y/no-noninteractive-tabindex -- The named code region supports native keyboard scrolling. */
+/* oxlint-disable react/forbid-elements -- The article scene is plain authored HTML that the theme styles. */
 
 import { useId, type ReactNode } from 'react'
 import {

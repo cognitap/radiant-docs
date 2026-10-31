@@ -188,6 +188,7 @@ export function OptionCards({
           className="option-card"
           style={option.style}
         >
+          {/* oxlint-disable-next-line react/forbid-elements -- Option cards draw a sample of each option; Radio always draws its own dot. */}
           <input
             type="radio"
             name={id}
