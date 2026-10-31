@@ -2570,3 +2570,74 @@ test('Carousel docs navigate real studies, preserve notes and honor controlled r
     }
   })
 })
+
+test('Charts docs filter research data and expose exact tables with real keyboard tooltips', async () => {
+  await withSite(async (baseURL, browser) => {
+    const page = await browser.newPage(),
+      errors = track(page)
+    try {
+      await capture(page, 'charts', async () => {
+        await page.goto(baseURL + '/docs/charts/')
+        await page.waitForFunction(
+          () => !document.querySelector<HTMLButtonElement>('.demo-heading button')?.disabled
+        )
+        const recruitment = page.getByRole('region', {
+          name: 'Recruitment review application',
+          exact: true
+        })
+        await recruitment
+          .getByRole('combobox', { name: 'Research project', exact: true })
+          .selectOption('atlas')
+        await recruitment
+          .getByRole('checkbox', { name: 'Use generated chart palette', exact: true })
+          .check()
+        await recruitment
+          .getByRole('button', { name: 'Round 1, Completed: 6', exact: true })
+          .focus()
+        await recruitment
+          .getByRole('tooltip')
+          .filter({ hasText: 'Round 1, Completed: 6' })
+          .waitFor()
+        await page.keyboard.press('ArrowRight')
+        assert.ok(
+          await recruitment
+            .getByRole('button', { name: 'Round 1, Scheduled: 9', exact: true })
+            .evaluate(node => node === node.ownerDocument.activeElement)
+        )
+        await page.keyboard.press('Escape')
+        await recruitment.getByText('View chart data', { exact: true }).click()
+        await recruitment
+          .getByRole('table', { name: 'Atlas recruitment data', exact: true })
+          .waitFor()
+        assert.equal(await recruitment.getByRole('cell', { name: '16', exact: true }).count(), 1)
+        const enrollment = page.getByRole('region', {
+          name: 'Enrollment review application',
+          exact: true
+        })
+        await enrollment
+          .getByRole('combobox', { name: 'Chart presentation', exact: true })
+          .selectOption('line')
+        await enrollment
+          .getByRole('button', { name: 'Round 2, Completed: 18', exact: true })
+          .focus()
+        await enrollment
+          .getByRole('tooltip')
+          .filter({ hasText: 'Round 2, Completed: 18' })
+          .waitFor()
+        await page.keyboard.press('Escape')
+        const mix = page.getByRole('region', { name: 'Session mix application', exact: true })
+        await mix
+          .getByRole('combobox', { name: 'Research round', exact: true })
+          .selectOption('previous')
+        await mix.getByRole('button', { name: 'Moderated, Sessions: 12', exact: true }).focus()
+        await mix.getByRole('tooltip').filter({ hasText: 'Moderated, Sessions: 12' }).waitFor()
+        await page.keyboard.press('Escape')
+        await mix.getByText('View chart data', { exact: true }).click()
+        await mix.getByRole('table', { name: 'Session method mix data', exact: true }).waitFor()
+        assert.deepEqual(errors, [])
+      })
+    } finally {
+      await page.close()
+    }
+  })
+})
