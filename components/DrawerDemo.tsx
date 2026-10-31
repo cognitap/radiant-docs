@@ -30,3 +30,13 @@ export function DrawerOrderDemo() {
     </Demo>
   )
 }
+export function DrawerControlledDemo() {
+  return (
+    <Demo
+      title="Open at a set size"
+      files={['drawer/DrawerExample.tsx']}
+    >
+      <DrawerPlayground task="controlled" />
+    </Demo>
+  )
+}

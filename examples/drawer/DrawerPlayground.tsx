@@ -6,10 +6,10 @@ import { DrawerExample, type DrawerTask } from './DrawerExample'
 import type { DrawerSide } from '@cognitap/radiant'
 export function DrawerPlayground({ task = 'settings' }: { task?: DrawerTask }) {
   const [side, setSide] = useState<DrawerSide>(
-      task === 'order' ? 'bottom' : task === 'outline' ? 'start' : 'end'
+      task === 'order' || task === 'controlled' ? 'bottom' : task === 'outline' ? 'start' : 'end'
     ),
     [dir, setDir] = useState<'ltr' | 'rtl'>('ltr'),
-    [size, setSize] = useState('1'),
+    [size, setSize] = useState(task === 'controlled' ? '0.5' : '1'),
     [off, setOff] = useState(false),
     [modal, setModal] = useState(task !== 'outline'),
     [backdrop, setBackdrop] = useState(true),

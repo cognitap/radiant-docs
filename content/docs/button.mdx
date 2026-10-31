@@ -1,6 +1,6 @@
 ---
 title: Button
-description: Native actions, optional pressed state and shared presentation.
+description: Run one action, submit a form, or toggle a pressed state with a native button.
 ---
 
 import {
@@ -14,10 +14,30 @@ import {
 
 ## Usage
 
-Use Button for actions and form submission. Use [Link](/docs/link/) for navigation.
+Use Button for an action or a form submission. Pass `pressed`, `defaultPressed` or `onPressedChange` to make it a two-state toggle. Choose something else when:
+
+- [Link](/docs/link/): navigation. Button cannot render an anchor.
+- [ToggleGroup](/docs/toggle-group/): several related pressed buttons.
+- [ButtonGroup](/docs/button-group/): adjacent actions joined visually.
+- [Toolbar](/docs/toolbar/): a set of controls reached with arrow keys.
+
+Dialogs, menus and popovers open from their own Trigger.
 
 ```tsx
-<Button onClick={save}>Save changes</Button>
+<Button
+  type="submit"
+  pending={saving}
+>
+  Save changes
+</Button>
+<Button
+  iconOnly
+  aria-label="Bold"
+  pressed={bold}
+  onPressedChange={setBold}
+>
+  <BoldIcon />
+</Button>
 ```
 
 ## Examples
@@ -36,50 +56,55 @@ Use Button for actions and form submission. Use [Link](/docs/link/) for navigati
 
 ## State
 
-Opt into toggling with `pressed`, `defaultPressed` or `onPressedChange`. Use one owner: controlled callbacks request changes; prop sync fires none. Ordinary actions omit `aria-pressed`. Raw `aria-pressed` supports application-owned mixed state. Form reset leaves pressed state unchanged.
+Toggle mode turns on when you pass any pressed prop. Use `pressed` with `onPressedChange` for a controlled toggle, or `defaultPressed` for an uncontrolled one; switching owner throws. Call `preventDefault` in `onClick` to refuse a change. Form reset leaves pressed state unchanged.
 
-`disabled` uses native behavior. `pending` blocks activation before the consumer handler, preserves focus and the name, and shows decorative progress. The application owns async work and duplicate-submit guards. Prevent default in `onClick` to cancel a pressed-state request.
+`type` defaults to `"button"`, not the native `"submit"`. With `type="submit"`, native `name`, `value`, `form` and `formAction` reach the submitter. `pending` cancels the click before your `onClick`, so a pending submit button does not submit and a pending toggle does not flip.
 
 ## Accessibility
 
-Keep toggle labels stable. Give icon-only actions an accessible name and hide decorative icons. Native `type="submit"` and `type="reset"` retain form behavior.
+Button renders a native `<button>`. A toggle (`pressed`) keeps one stable label. A button that renames itself to name its next action, such as "Show password", is an action and must not set `pressed`.
 
-| Key             | Behavior                                       |
-| --------------- | ---------------------------------------------- |
-| Tab / Shift+Tab | Reach enabled actions; pending stays focusable |
-| Enter           | Native activation                              |
-| Space           | Native activation on release                   |
+Give `iconOnly` buttons an `aria-label`. `pending` sets `aria-busy="true"`, keeps focus and keeps the name.
+
+| Key             | Behavior                                    |
+| --------------- | ------------------------------------------- |
+| Tab / Shift+Tab | Reach enabled buttons; pending ones stay in |
+| Enter           | Activate; a toggle flips                    |
+| Space           | Activate on release; a toggle flips         |
 
 ## Motion
 
-`MotionProvider` from `@cognitap/radiant/motion/react` enables theme press springs. Local off and system reduced motion win. Physical feedback is independent from pressed state.
+Inside a [`MotionProvider`](/docs/foundations/motion/), a spring scales, moves and reshapes the button while it is pressed. Turn it off with `motion="off"` on the button, globally with theme `motion.mode: 'off'`, or through the reduced-motion preference. A caller `scale` style or `scale-*` class replaces the press scale. Under reduced motion the pending spinner hides and the label stays visible.
 
 ## Styling
 
-Props, ref, classes and typed styles target the button. `data-slot` retains `button`; `data-variant`, `data-tone` and `data-control-size` describe presentation. Style `aria-pressed`, `aria-busy` and `:disabled`; retain focus and selected cues.
+`className`, `style`, `ref` and native props reach the button. Select it with `[data-slot~="button"]`; your `data-slot` tokens are appended. Style state with `data-variant`, `data-tone`, `data-control-size`, `aria-pressed`, `aria-busy` and `:disabled`. Keep the focus ring and the pressed cue, an inset ring that becomes a double underline in forced colors.
 
-Use `components.button` or `--rad-button-*` overrides. A custom `render` forwards all resolved props, ref and children to one compatible button; children include pending presentation.
+Theme keys live under `components.button`, such as `radius`, `radiusPressed`, `cornerShape`, `shadowPressed` and `pressScale`. Override one in `style`, as in `--rad-button-radius`.
 
 ## API
 
-| Button prop                  | Type                                          | Default             |
-| ---------------------------- | --------------------------------------------- | ------------------- |
-| variant                      | solid / soft / outline / ghost                | solid               |
-| tone                         | accent / neutral / warning / danger           | accent              |
-| controlSize                  | small / medium / large                        | medium              |
-| pressed / defaultPressed     | boolean; exclusive owner                      | false when opted in |
-| onPressedChange              | (pressed: boolean) => void                    | None                |
-| pending / disabled           | boolean                                       | false               |
-| iconOnly / fullWidth         | boolean                                       | false               |
-| motion                       | inherit / off                                 | inherit             |
-| type                         | button / submit / reset                       | button              |
-| render                       | (resolved: ButtonRenderProps) => ReactElement | Native button       |
-| className / style            | string / ThemeStyle                           | None                |
-| data-slot                    | Additional identity tokens                    | button              |
-| children                     | ReactNode                                     | None                |
-| ref                          | `Ref<HTMLButtonElement>`                      | None                |
-| Native attributes and events | Includes form, name, value and onClick        | Native defaults     |
+| Prop              | Type                                          | Default              |
+| ----------------- | --------------------------------------------- | -------------------- |
+| variant           | solid / soft / outline / ghost                | solid                |
+| tone              | accent / neutral / warning / danger           | accent               |
+| controlSize       | small / medium / large                        | medium               |
+| iconOnly          | boolean; square, needs `aria-label`           | false                |
+| fullWidth         | boolean                                       | false                |
+| pending           | boolean; blocks activation, sets `aria-busy`  | false                |
+| disabled          | boolean; native                               | false                |
+| pressed           | boolean; controlled toggle                    | None                 |
+| defaultPressed    | boolean; uncontrolled toggle                  | false in toggle mode |
+| onPressedChange   | `(pressed: boolean) => void`                  | None                 |
+| aria-pressed      | boolean / 'mixed'; only without pressed props | None                 |
+| type              | button / submit / reset                       | button               |
+| motion            | inherit / off                                 | inherit              |
+| render            | `(props: ButtonRenderProps) => ReactElement`  | Native button        |
+| data-slot         | string; extra identity tokens                 | button               |
+| className / style | string / ThemeStyle                           | None                 |
+| ref               | `Ref<HTMLButtonElement>`                      | None                 |
+| Native attributes | Button attributes and events                  | Native               |
 
-`ButtonProps` is a union. Compose wrapper props with `type Props = ButtonProps & { hint?: string }`; interface extension cannot preserve the union. Use distributive omission when removing props from every branch.
+`render` must return one button, or a component that forwards every prop, the ref and children to one. `ButtonProps` is a union, so extend it with `ButtonProps & { hint?: string }`, not an interface.
 
-Exports: `Button`, `ButtonProps`, `ButtonRenderProps`, `ButtonVariant`.
+Exports `Button`, `ButtonProps`, `ButtonRenderProps` and `ButtonVariant`.

@@ -249,9 +249,85 @@ export function ReviewOrder({
   )
 }
 
+export function ControlledFilters({
+  dir,
+  initialOpen,
+  initialSize = 0.5,
+  disabled,
+  pending,
+  modal,
+  closeOnBackdrop,
+  closeOnEscape,
+  ...surface
+}: DrawerOptions) {
+  const [open, setOpen] = useState(initialOpen ?? false),
+    [snapPoint, setSnapPoint] = useState(initialSize)
+  return (
+    <div
+      dir={dir}
+      style={{ display: 'grid', gap: '1rem' }}
+    >
+      <p>
+        Filters are {open ? 'open' : 'closed'} at {Math.round(snapPoint * 100)}%.
+      </p>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+        <Button
+          variant="outline"
+          disabled={disabled}
+          pending={pending}
+          onClick={() => {
+            setSnapPoint(0.5)
+            setOpen(true)
+          }}
+        >
+          Open filters at half size
+        </Button>
+        <Button
+          variant="outline"
+          disabled={disabled}
+          pending={pending}
+          onClick={() => {
+            setSnapPoint(1)
+            setOpen(true)
+          }}
+        >
+          Open filters at full size
+        </Button>
+      </div>
+      <Drawer
+        open={open}
+        onOpenChange={setOpen}
+        snapPoint={snapPoint}
+        onSnapPointChange={setSnapPoint}
+        modal={modal}
+        closeOnBackdrop={closeOnBackdrop}
+        closeOnEscape={closeOnEscape}
+      >
+        <DrawerContent
+          {...surface}
+          parts={{ viewport: { style: { gap: '0.75rem' } } }}
+        >
+          <DrawerHandle
+            aria-label="Resize filters"
+            disabled={disabled}
+            pending={pending}
+          />
+          <DrawerTitle>Filters</DrawerTitle>
+          <DrawerDescription>Narrow the study list by status.</DrawerDescription>
+          <Checkbox
+            label="Show archived studies"
+            name="archived"
+          />
+          <DrawerClose variant="outline">Close filters</DrawerClose>
+        </DrawerContent>
+      </Drawer>
+    </div>
+  )
+}
+
 import { MotionProvider } from '@cognitap/radiant/motion/react'
 import '@cognitap/radiant/styles.css'
-export type DrawerTask = 'settings' | 'outline' | 'order'
+export type DrawerTask = 'settings' | 'outline' | 'order' | 'controlled'
 export function DrawerExample({
   task = 'settings',
   ...options
@@ -262,6 +338,8 @@ export function DrawerExample({
         <ReportOutline {...options} />
       ) : task === 'order' ? (
         <ReviewOrder {...options} />
+      ) : task === 'controlled' ? (
+        <ControlledFilters {...options} />
       ) : (
         <ProjectSettings {...options} />
       )}

@@ -1,6 +1,6 @@
 ---
 title: ButtonGroup
-description: Join related native Buttons while preserving their own tab stops.
+description: Join related Buttons visually while each keeps its own focus and action.
 ---
 
 import {
@@ -13,7 +13,7 @@ import {
 
 ## Usage
 
-Use ButtonGroup for actions that belong together visually. Use [Toolbar](/docs/toolbar/) for arrow-key navigation and one tab entry, or [ToggleGroup](/docs/toggle-group/) for a selection among pressed buttons.
+Use ButtonGroup for adjacent actions that belong together. Use [Toolbar](/docs/toolbar/) when arrow keys should move between controls, [ToggleGroup](/docs/toggle-group/) for one or many pressed choices, and a single [Button](/docs/button/) for one action.
 
 ```tsx
 <ButtonGroup aria-label="Project actions">
@@ -21,13 +21,13 @@ Use ButtonGroup for actions that belong together visually. Use [Toolbar](/docs/t
     variant="outline"
     type="submit"
   >
-    Save
+    Save project
   </Button>
   <Button
     variant="outline"
     type="reset"
   >
-    Restore
+    Restore title
   </Button>
 </ButtonGroup>
 ```
@@ -44,38 +44,39 @@ Use ButtonGroup for actions that belong together visually. Use [Toolbar](/docs/t
 
 ## State
 
-ButtonGroup owns no state. Each Button retains its native action, disabled or pending state and optional pressed owner. Put submit and reset Buttons in a form or associate them with an external form normally. Native reset affects form controls; it does not change group orientation or application state.
-
-Applications own action results, submission and persistence. A split action uses a real [Menu](/docs/menu/), whose state and keyboard behavior remain independent of the group. Portal markers do not change the first or last Button's outer corners.
+ButtonGroup has no value, selection or roving focus. Each Button keeps its own action, `disabled`, `pending` and `pressed` state. Submit and reset Buttons inside a group work as they do anywhere else in a form. A split action pairs a Button with a [Menu](/docs/menu/) trigger, and the Menu keeps its own state.
 
 ## Accessibility
 
-The root is a native div with `role="group"`. An accessible name is optional; use `aria-label` or `aria-labelledby` when it clarifies the relationship. The group name does not replace individual Button names. Name icon-only actions explicitly.
+The root has `role="group"`, which you can't override. Name it with `aria-label` or `aria-labelledby` when the buttons need context. The group name doesn't replace each Button's name, so name icon-only Buttons too.
 
-| Key              | Behavior                               |
-| ---------------- | -------------------------------------- |
-| Tab / Shift+Tab  | Visit each enabled or pending Button   |
-| Enter / Space    | Activate the focused Button            |
-| Arrow keys       | Native behavior; no group roving focus |
-| MenuTrigger keys | Follow Menu's keyboard contract        |
-
-Disabled Buttons leave the tab order. Pending Buttons retain focus and their names while blocking activation. Keep the group meaningful when actions become unavailable.
+| Key             | Behavior                             |
+| --------------- | ------------------------------------ |
+| Tab / Shift+Tab | Visit each enabled or pending Button |
+| Enter / Space   | Activate the focused Button          |
+| Arrow keys      | No group behavior                    |
 
 ## Motion
 
-The group has no animation. Buttons retain their own [motion](/docs/button/) and reduced-motion behavior; set Button motion off when needed. Orientation changes use ordinary layout and existing Button corner transitions.
+The group doesn't animate. Each Button keeps its press [motion](/docs/button/#motion); set `motion="off"` on a Button to turn it off.
 
 ## Styling
 
-Root native props, className, ThemeStyle and ref reach the actual div. `data-slot="button-group"` identifies it; `data-orientation` is horizontal or vertical. Layout follows inherited direction and can change live.
+The root is one `div`. `className`, `style` and `ref` reach it. It has `data-slot="button-group"`, followed by any tokens you pass in `data-slot`, and `data-orientation` is `horizontal` or `vertical`.
 
-Direct native button hosts share borders and keep only outer corners. Use real Buttons, including composed MenuTrigger or TooltipTrigger Buttons. Wrappers remain untouched. Keep child control sizes and variants consistent; style individual actions through Button.
-
-`components.buttonGroup.radius` or `--rad-button-group-radius` sets outer corners, falling back to Button's radius. Button border-width tokens determine overlap. Preserve focus outlines, operable hit targets and visible state cues.
+Direct `button` children lose their inner corners and overlap borders by `--rad-button-border-width`, so wrapped Buttons stay unjoined. `components.buttonGroup.radius` or `--rad-button-group-radius` sets the outer corners and falls back to the Button radius. Corners are logical, so `dir="rtl"` works.
 
 ## API
 
-| Part             | Props                                                                                                                                      | Defaults                                    |
-| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------- |
-| ButtonGroup      | Native div props/events/ref except role and aria-orientation; orientation: horizontal/vertical; children: ReactNode; className; ThemeStyle | horizontal; role group; no name or tabIndex |
-| ButtonGroupProps | Exported root prop type; ref: HTMLDivElement                                                                                               | No state or selection API                   |
+### ButtonGroup
+
+| Prop                  | Type                                                                            | Default        |
+| --------------------- | ------------------------------------------------------------------------------- | -------------- |
+| orientation           | `Orientation` (horizontal / vertical); others throw                             | horizontal     |
+| children              | ReactNode; Buttons or Button-based triggers                                     | None           |
+| data-slot             | string; extra tokens after `button-group`                                       | `button-group` |
+| className / style     | string / ThemeStyle                                                             | None           |
+| ref                   | `Ref<HTMLDivElement>`                                                           | None           |
+| Native div attributes | `aria-label`, `aria-labelledby`, `dir`, events; no `role` or `aria-orientation` | Native         |
+
+Exports: `ButtonGroup`, `ButtonGroupProps`, `Orientation`.

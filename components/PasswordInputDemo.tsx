@@ -30,3 +30,13 @@ export function PasswordInputReviewDemo() {
     </Demo>
   )
 }
+export function PasswordInputLengthDemo() {
+  return (
+    <Demo
+      title="Check password length"
+      files={['passwordinput/PasswordInputExample.tsx']}
+    >
+      <PasswordInputPlayground task="length" />
+    </Demo>
+  )
+}
