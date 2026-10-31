@@ -4,13 +4,13 @@
 
 import {
   useEffect,
-  useId,
   useRef,
   useState,
   type CSSProperties,
   type KeyboardEvent,
   type PointerEvent
 } from 'react'
+import { Field, Slider } from '@cognitap/radiant'
 import { clampTo, hexToHsv, hsvToHex, pickerHueName, type Hsv } from './workshop-color-view'
 
 /* A hue strip and a saturation/brightness surface, both drawn with real colors. HSV keeps every
@@ -29,7 +29,6 @@ export function BrandPicker({
   describedBy?: string
   onChange: (hex: string) => void
 }) {
-  const id = useId()
   const [hsv, setHsv] = useState<Hsv>(() => hexToHsv(value))
   const [seen, setSeen] = useState(value)
   if (seen !== value) {
@@ -137,25 +136,23 @@ export function BrandPicker({
           style={{ left: `${hsv.s}%`, top: `${100 - hsv.v}%`, background: hex }}
         />
       </div>
-      <label
+      <Field
         className="color-brand-hue"
-        htmlFor={`${id}-hue`}
+        label="Brand hue"
+        parts={{ label: { className: 'workshop-sr-only' } }}
+        disabled={disabled}
       >
-        <span className="workshop-sr-only">Brand hue</span>
-        <input
-          id={`${id}-hue`}
-          type="range"
+        <Slider
           min={0}
           max={360}
           step={1}
           value={round(hsv.h)}
-          disabled={disabled}
           aria-describedby={describedBy}
           aria-valuetext={hueText}
           onKeyDown={onHueKey}
           onChange={event => apply({ ...hsv, h: Number(event.target.value) })}
         />
-      </label>
+      </Field>
     </div>
   )
 }

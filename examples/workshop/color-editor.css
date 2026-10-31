@@ -53,11 +53,7 @@ fieldset.workshop-options {
 .color-editor code {
   font-size: 0.85em;
 }
-.color-editor input:focus-visible,
-.color-editor button:focus-visible,
-.color-editor [role='slider']:focus-visible,
-.color-wall-scroll:focus-visible,
-.color-data-scroll:focus-visible {
+.color-editor [role='slider']:focus-visible {
   outline: 2px solid var(--docs-accent);
   outline-offset: 2px;
 }
@@ -106,16 +102,17 @@ fieldset.workshop-options {
     0 1px 3px rgb(0 0 0 / 0.4);
   pointer-events: none;
 }
-.color-brand-hue input,
-.color-strip-track input {
-  display: block;
-  width: 100%;
-  height: 1.5rem;
-  margin: 0;
-  appearance: none;
-  -webkit-appearance: none;
-  background: transparent;
-  cursor: ew-resize;
+.color-brand-hue,
+.color-strip-track {
+  --rad-slider-height: 1.5rem;
+  --rad-slider-track-size: 1.5rem;
+  --rad-slider-track-color: transparent;
+  --rad-slider-thumb-size: 1.5rem;
+  --rad-slider-thumb-radius: 0.4rem;
+  --rad-slider-thumb-color: transparent;
+  --rad-slider-thumb-border-width: 2px;
+  --rad-slider-thumb-border-color: #fff;
+  --rad-slider-thumb-shadow: 0 0 0 1px rgb(0 0 0 / 0.55), inset 0 0 0 1px rgb(0 0 0 / 0.55);
 }
 .color-brand-hue input {
   border-radius: 0.5rem;
@@ -130,41 +127,6 @@ fieldset.workshop-options {
     hsl(300 100% 50%),
     hsl(360 100% 50%)
   );
-}
-.color-brand-hue input::-webkit-slider-runnable-track,
-.color-strip-track input::-webkit-slider-runnable-track {
-  height: 1.5rem;
-  background: transparent;
-}
-.color-brand-hue input::-moz-range-track,
-.color-strip-track input::-moz-range-track {
-  height: 1.5rem;
-  background: transparent;
-}
-.color-brand-hue input::-webkit-slider-thumb,
-.color-strip-track input::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 0.75rem;
-  height: 1.5rem;
-  margin-top: 0;
-  border: 2px solid #fff;
-  border-radius: 0.3rem;
-  background: transparent;
-  box-shadow:
-    0 0 0 1px rgb(0 0 0 / 0.55),
-    inset 0 0 0 1px rgb(0 0 0 / 0.55);
-}
-.color-brand-hue input::-moz-range-thumb,
-.color-strip-track input::-moz-range-thumb {
-  width: 0.75rem;
-  height: 1.5rem;
-  border: 2px solid #fff;
-  border-radius: 0.3rem;
-  background: transparent;
-  box-shadow:
-    0 0 0 1px rgb(0 0 0 / 0.55),
-    inset 0 0 0 1px rgb(0 0 0 / 0.55);
 }
 .color-brand-side {
   display: grid;
@@ -191,20 +153,15 @@ fieldset.workshop-options {
   gap: 0.3rem;
   min-width: 0;
 }
-.color-strip-head {
-  display: flex;
+.color-strip .color-strip-field {
+  grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: baseline;
-  gap: 0.5rem;
-  min-width: 0;
+  gap: 0.3rem 0.5rem;
 }
-.color-strip-head label {
+.color-strip-field > [data-slot='field-label'] {
   white-space: nowrap;
 }
-.color-strip-head label {
-  font-weight: 600;
-}
-.color-strip-head output {
-  flex: 1 1 auto;
+.color-strip-field > output {
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -212,24 +169,17 @@ fieldset.workshop-options {
   color: var(--docs-muted);
   font-size: 0.75rem;
 }
-.color-strip-auto {
-  flex: none;
-  margin: 0;
-  padding: 0.05rem 0.5rem;
-  font: inherit;
+.color-strip-field > .color-strip-auto {
+  --rad-control-selected-background: var(--docs-accent);
+  --rad-control-selected-foreground: var(--docs-background);
+  --rad-control-selected-border-color: var(--docs-accent);
+  min-height: 1.5rem;
+  padding-inline: 0.5rem;
   font-size: 0.7rem;
-  font-weight: 600;
-  line-height: 1.5;
-  color: var(--docs-muted);
-  background: transparent;
-  border: 1px solid var(--docs-border);
-  border-radius: 1em;
-  cursor: pointer;
 }
-.color-strip-auto[aria-pressed='true'] {
-  color: var(--docs-background);
-  background: var(--docs-accent);
-  border-color: var(--docs-accent);
+.color-strip-field > .color-strip-track,
+.color-strip-field > .color-strip-ends {
+  grid-column: 1 / -1;
 }
 .color-strip-track {
   border-radius: 0.5rem;
@@ -241,12 +191,6 @@ fieldset.workshop-options {
 }
 .color-strip[data-automatic] .color-strip-track input::-moz-range-thumb {
   border-style: dashed;
-}
-.color-strip[data-disabled] .color-strip-track {
-  opacity: 0.45;
-}
-.color-strip[data-disabled] input {
-  cursor: default;
 }
 .color-strip-ends {
   display: flex;
@@ -267,9 +211,6 @@ fieldset.workshop-options {
   gap: 0.3rem 0.75rem;
   align-items: center;
   min-width: 0;
-  margin: 0;
-  padding: 0;
-  border: 0;
 }
 @media (min-width: 30rem) {
   .color-choice-group {
@@ -277,49 +218,26 @@ fieldset.workshop-options {
   }
 }
 .color-choice-label {
-  float: left;
-  padding: 0;
   font-weight: 600;
-}
-.color-choice input {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  margin: 0;
-  opacity: 0;
-  cursor: pointer;
-}
-.color-choice:has(input:focus-visible) {
-  outline: 2px solid var(--docs-accent);
-  outline-offset: 2px;
 }
 .color-choices {
   display: flex;
   flex-wrap: wrap;
+  width: 100%;
   gap: 0.4rem;
 }
-.color-choice {
-  position: relative;
+.color-choices .color-choice {
   display: grid;
   gap: 0.3rem;
   flex: 1 1 6rem;
-  min-width: 0;
-  margin: 0;
+  height: auto;
   padding: 0.35rem 0.5rem 0.4rem;
-  font: inherit;
   font-size: 0.75rem;
-  color: var(--docs-foreground);
-  background: var(--docs-surface);
-  border: 1px solid var(--docs-border);
-  border-radius: 0.4rem;
   text-align: left;
-  cursor: pointer;
 }
-.color-choice:has(input:checked) {
+.color-choices .color-choice[aria-pressed='true'] {
   border-color: var(--docs-accent);
   box-shadow: inset 0 0 0 1px var(--docs-accent);
-  font-weight: 600;
 }
 .color-choice-ramp {
   display: block;
@@ -495,39 +413,24 @@ fieldset.workshop-options {
   line-height: 1.5;
   overflow-wrap: anywhere;
 }
-.color-fix {
-  margin: 0;
-  padding: 0.1rem 0.6rem;
-  font: inherit;
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--docs-accent);
-  background: transparent;
-  border: 1px solid currentColor;
-  border-radius: 1em;
-  cursor: pointer;
-}
 .color-contrast-summary {
   font-weight: 650;
 }
 
 /* Wall */
-.color-editor summary {
-  cursor: pointer;
-  padding-block: 0.5rem;
-  font-weight: 600;
+.color-editor [data-slot~='collapsible'] {
+  --rad-collapsible-padding: 0.5rem;
+  --rad-collapsible-gap: 0;
 }
-.color-wall-details {
-  padding-top: 0.5rem;
-  border-top: 1px solid var(--docs-border);
+.color-contrast table {
+  min-width: 30rem;
+  font-size: 0.75rem;
+}
+.color-contrast td:nth-child(3) {
+  white-space: nowrap;
 }
 .color-wall-scroll {
-  position: relative;
-  max-width: 100%;
   max-height: 32rem;
-  overflow: auto;
-  border: 1px solid var(--docs-border);
-  border-radius: 0.5rem;
 }
 .color-wall {
   width: 100%;
@@ -563,22 +466,6 @@ fieldset.workshop-options {
 .color-swatch[aria-pressed='true'] {
   outline: 2px solid var(--docs-accent);
   outline-offset: 1px;
-}
-.color-data-scroll {
-  max-width: 100%;
-  overflow-x: auto;
-}
-.color-data-scroll table {
-  width: 100%;
-  min-width: 30rem;
-  border-collapse: collapse;
-  font-size: 0.75rem;
-  text-align: left;
-}
-.color-data-scroll th,
-.color-data-scroll td {
-  padding: 0.4rem 0.5rem;
-  border-bottom: 1px solid var(--docs-border);
 }
 @media (forced-colors: active) {
   .color-swatch,

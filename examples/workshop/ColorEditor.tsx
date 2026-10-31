@@ -1,9 +1,20 @@
 'use client'
 
-/* oxlint-disable jsx-a11y/no-noninteractive-tabindex -- Named scrolling data regions need keyboard access. */
-
 import { useId, useMemo, useState } from 'react'
-import { Button } from '@cognitap/radiant'
+import {
+  Button,
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableHeader,
+  TableRow
+} from '@cognitap/radiant'
 import {
   chooseWorkingFamily,
   defaultColorRecipe,
@@ -62,13 +73,13 @@ function Fix({
       </strong>{' '}
       {check.ratio.toFixed(2)}:1, needs {check.minimum}:1.
       {fix && (
-        <button
-          type="button"
-          className="color-fix"
+        <Button
+          variant="outline"
+          controlSize="small"
           onClick={() => onChange(fix.recipe, { label: fix.label.toLowerCase() })}
         >
           {fix.label}
-        </button>
+        </Button>
       )}
     </>
   )
@@ -545,34 +556,35 @@ export function ColorEditor({
         )}
       </section>
 
-      <details
+      <Collapsible
         id={`${id}-wall`}
         className="color-wall-details"
         open={wallOpen}
-        onToggle={event => setWallOpen(event.currentTarget.open)}
+        onOpenChange={setWallOpen}
       >
-        <summary>
+        <CollapsibleTrigger>
           Color wall · {wall.color.palettes.length} families ·{' '}
           {picking.kind === 'role'
             ? `pick for ${picking.mode} ${roleNames[picking.role].toLowerCase()}`
             : `pick the ${picking.name} family`}
-        </summary>
-        <section
-          className="color-wall-scroll"
-          aria-label="Color wall"
-          tabIndex={0}
-        >
-          <ColorWallGrid
-            wall={wall}
-            pick={wallPick}
-            disabled={disabled}
-            onPick={(paletteId, _stop, value) => {
-              if (picking.kind === 'role') setRole(picking.mode, picking.role, value)
-              else setFamily(picking.name, paletteId)
-            }}
-          />
-        </section>
-      </details>
+        </CollapsibleTrigger>
+        <CollapsibleContent>
+          <TableContainer
+            className="color-wall-scroll"
+            aria-label="Color wall"
+          >
+            <ColorWallGrid
+              wall={wall}
+              pick={wallPick}
+              disabled={disabled}
+              onPick={(paletteId, _stop, value) => {
+                if (picking.kind === 'role') setRole(picking.mode, picking.role, value)
+                else setFamily(picking.name, paletteId)
+              }}
+            />
+          </TableContainer>
+        </CollapsibleContent>
+      </Collapsible>
 
       <section
         className="color-section color-contrast"
@@ -596,57 +608,55 @@ export function ColorEditor({
                   problem={problem}
                   onChange={onChange}
                 />
-                <button
-                  type="button"
-                  className="color-fix"
+                <Button
+                  variant="outline"
+                  controlSize="small"
                   onClick={() => openWall({ kind: 'role', mode: problem.mode, role: problem.role })}
                 >
                   Show {roleNames[problem.role].toLowerCase()}
-                </button>
+                </Button>
               </li>
             ))}
           </ul>
         )}
-        <details>
-          <summary>All {palette.checks.length} measurements</summary>
-          <section
-            className="color-data-scroll"
-            aria-label="Contrast measurements"
-            tabIndex={0}
-          >
-            <table>
-              <caption>Measured foreground/background pairs</caption>
-              <thead>
-                <tr>
-                  <th>Mode and pair</th>
-                  <th>Colors</th>
-                  <th>Ratio</th>
-                  <th>Result</th>
-                </tr>
-              </thead>
-              <tbody>
-                {palette.checks.map(c => (
-                  <tr key={`${c.mode}:${c.foregroundRole}:${c.backgroundRole}`}>
-                    <th scope="row">
-                      {c.mode} · {c.foregroundRole} / {c.backgroundRole}
-                    </th>
-                    <td>
-                      {c.foreground} / {c.background}
-                    </td>
-                    <td>{c.ratio.toFixed(2)}:1</td>
-                    <td>
-                      {c.pass === null
-                        ? 'Informational: inactive control'
-                        : c.pass
-                          ? `Pass ≥ ${c.minimum}:1`
-                          : `Fail < ${c.minimum}:1`}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </section>
-        </details>
+        <Collapsible>
+          <CollapsibleTrigger>All {palette.checks.length} measurements</CollapsibleTrigger>
+          <CollapsibleContent>
+            <TableContainer aria-label="Contrast measurements">
+              <Table>
+                <TableCaption>Measured foreground/background pairs</TableCaption>
+                <TableHead>
+                  <TableRow>
+                    <TableHeader>Mode and pair</TableHeader>
+                    <TableHeader>Colors</TableHeader>
+                    <TableHeader>Ratio</TableHeader>
+                    <TableHeader>Result</TableHeader>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {palette.checks.map(c => (
+                    <TableRow key={`${c.mode}:${c.foregroundRole}:${c.backgroundRole}`}>
+                      <TableHeader scope="row">
+                        {c.mode} · {c.foregroundRole} / {c.backgroundRole}
+                      </TableHeader>
+                      <TableCell>
+                        {c.foreground} / {c.background}
+                      </TableCell>
+                      <TableCell>{c.ratio.toFixed(2)}:1</TableCell>
+                      <TableCell>
+                        {c.pass === null
+                          ? 'Informational: inactive control'
+                          : c.pass
+                            ? `Pass ≥ ${c.minimum}:1`
+                            : `Fail < ${c.minimum}:1`}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </CollapsibleContent>
+        </Collapsible>
       </section>
     </div>
   )

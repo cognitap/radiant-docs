@@ -1,6 +1,7 @@
 'use client'
 
 import { useId, type KeyboardEvent } from 'react'
+import { Button, Field, Slider, ToggleGroup, ToggleGroupItem } from '@cognitap/radiant'
 import {
   bandBackground,
   clampTo,
@@ -46,10 +47,13 @@ export function ColorStrip({
     <div
       className="color-strip"
       data-automatic={automatic || undefined}
-      data-disabled={disabled || undefined}
     >
-      <div className="color-strip-head">
-        <label htmlFor={id}>{strip.label}</label>
+      <Field
+        className="color-strip-field"
+        label={strip.label}
+        controlId={id}
+        disabled={disabled}
+      >
         <output
           htmlFor={id}
           aria-hidden="true"
@@ -57,43 +61,41 @@ export function ColorStrip({
           {disabled ? 'only for grey brands' : strip.words(value)}
         </output>
         {onAutomatic && (
-          <button
-            type="button"
+          <Button
             className="color-strip-auto"
-            aria-pressed={automatic}
+            variant="outline"
+            controlSize="small"
+            pressed={automatic}
+            onPressedChange={onAutomatic}
             aria-label={`Automatic ${strip.label.toLowerCase()}`}
             disabled={disabled}
-            onClick={() => onAutomatic(!automatic)}
           >
             Auto
-          </button>
+          </Button>
         )}
-      </div>
-      <div
-        className="color-strip-track"
-        style={bandBackground(walls, strip.bands)}
-      >
-        <input
-          id={id}
-          type="range"
-          min={strip.min}
-          max={strip.max}
-          step={strip.step}
-          value={value}
-          disabled={disabled}
-          aria-describedby={describedBy}
-          aria-valuetext={words}
-          onKeyDown={onKeyDown}
-          onChange={event => onChange(Number(event.target.value))}
-        />
-      </div>
-      <div
-        className="color-strip-ends"
-        aria-hidden="true"
-      >
-        <span>{strip.ends[0]}</span>
-        <span>{strip.ends[1]}</span>
-      </div>
+        <div
+          className="color-strip-track"
+          style={bandBackground(walls, strip.bands)}
+        >
+          <Slider
+            min={strip.min}
+            max={strip.max}
+            step={strip.step}
+            value={value}
+            aria-describedby={describedBy}
+            aria-valuetext={words}
+            onKeyDown={onKeyDown}
+            onChange={event => onChange(Number(event.target.value))}
+          />
+        </div>
+        <div
+          className="color-strip-ends"
+          aria-hidden="true"
+        >
+          <span>{strip.ends[0]}</span>
+          <span>{strip.ends[1]}</span>
+        </div>
+      </Field>
     </div>
   )
 }
@@ -114,33 +116,38 @@ export function ChoiceCards({
 }) {
   const id = useId()
   return (
-    <fieldset
-      className="color-choice-group"
-      aria-describedby={describedBy}
-    >
-      <legend className="color-choice-label">{group.label}</legend>
-      <div className="color-choices">
+    <div className="color-choice-group">
+      <span
+        id={`${id}-label`}
+        className="color-choice-label"
+      >
+        {group.label}
+      </span>
+      <ToggleGroup
+        className="color-choices"
+        aria-labelledby={`${id}-label`}
+        aria-describedby={describedBy}
+        controlSize="small"
+        value={value}
+        onValueChange={next => {
+          if (next !== null) onChange(next)
+        }}
+      >
         {group.choices.map(choice => (
-          <label
+          <ToggleGroupItem
             key={choice.value}
+            value={choice.value}
             className="color-choice"
           >
-            <input
-              type="radio"
-              name={id}
-              value={choice.value}
-              checked={choice.value === value}
-              onChange={() => onChange(choice.value)}
-            />
             <span
               className="color-choice-ramp"
               aria-hidden="true"
               style={swatchRow(wallFor(choice.value), group.bands as readonly Band[])}
             />
             {choice.label}
-          </label>
+          </ToggleGroupItem>
         ))}
-      </div>
-    </fieldset>
+      </ToggleGroup>
+    </div>
   )
 }
