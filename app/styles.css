@@ -312,8 +312,12 @@ body {
   overflow: clip;
 }
 
-.demo-heading,
 .demo-heading {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
   justify-content: flex-start;
   padding-block: 0.625rem;
   min-height: 2.25rem;
