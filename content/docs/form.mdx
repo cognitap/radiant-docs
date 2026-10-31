@@ -1,0 +1,83 @@
+---
+title: Form
+description: Native forms with accessible validation, pending submission and server errors.
+---
+
+import { FormDemo, FormRecoveryDemo, FormProfileDemo } from '../../components/FormDemo'
+
+<FormDemo />
+
+## Usage
+
+```tsx
+import { Form, FormField, FormError, Input, Button } from '@cognitap/radiant'
+
+;<Form
+  aria-label="Join workspace"
+  onSubmitValues={async data => {
+    const response = await invite(data)
+    return response.errors
+  }}
+>
+  {({ pending }) => (
+    <>
+      <FormField
+        name="email"
+        label="Email"
+        required
+      >
+        <Input
+          name="email"
+          type="email"
+        />
+      </FormField>
+      <FormError />
+      <Button
+        type="submit"
+        pending={pending}
+      >
+        Join workspace
+      </Button>
+    </>
+  )}
+</Form>
+```
+
+## Examples
+
+<FormRecoveryDemo />
+
+<FormProfileDemo />
+
+Native constraints and custom rules share the same error presentation. TanStack can own controlled values while Form coordinates submission; it remains an optional application dependency.
+
+## State
+
+`onSubmitValues(FormData, { form, submitter, signal })` may return `{ fields, form }` or a promise of that shape. Field errors use native names; the form message appears in FormError. Returning nothing clears errors.
+
+`validate(FormData)` supplies synchronous custom rules. Native constraints remain authoritative. Form owns `noValidate` so messages render through Field instead of browser bubbles. Match each FormField `name` to its real control.
+
+Form stores errors and pending status, never values. Use `errors`, `defaultErrors`, `onErrorsChange` for one controlled or uncontrolled error owner. Render callbacks read `errors` and `pending`; `useForm` also exposes `focusInvalid` and returns null outside a form.
+
+Reset clears errors, cancels the current request and restores native defaults. Applications reset controlled values. Edits discard stale server errors. Duplicate submissions are blocked while pending; reset and unmount abort the supplied signal. Requests must honor it to cancel network work.
+
+## Accessibility
+
+Give the native form an accessible name. FormField composes [Field](/docs/field/) for labels, descriptions and error IDs. Failed submission focuses the first invalid control in document order; form-only errors focus the actual Alert. Consumer submit/reset cancellation wins.
+
+## Motion
+
+Form adds no animation. Button and Alert keep their existing presentation and motion behavior.
+
+## Styling
+
+Root classes, style and ref reach the native form. FormField retains Field's native div or fieldset host; FormError retains Alert's div. `components.form.gap` controls spacing.
+
+## API
+
+| Export    | Purpose                                        |
+| --------- | ---------------------------------------------- |
+| Form      | Native form, validation and submit coordinator |
+| FormField | Field with a matching native control name      |
+| FormError | Form-level Alert                               |
+| useForm   | Errors, pending and invalid-focus action       |
