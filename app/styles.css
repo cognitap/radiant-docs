@@ -595,7 +595,7 @@ body {
   font-weight: 650;
 }
 
-.prose pre:not(:where(.proof-page *)) {
+.prose pre:not(:where(.proof-page *)):not([data-slot]) {
   overflow-x: auto;
   padding: 1.5rem;
   border: 1px solid var(--docs-border);
@@ -604,7 +604,7 @@ body {
   line-height: 1.8;
 }
 
-.prose pre:not(:where(.proof-page *)) code {
+.prose pre:not(:where(.proof-page *)):not([data-slot]) code {
   display: block;
   min-width: max-content;
 }

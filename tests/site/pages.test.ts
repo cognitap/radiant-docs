@@ -75,12 +75,13 @@ async function openSources(frame: Locator) {
 }
 
 async function settledText(canvas: Locator) {
-  let text = await canvas.innerText()
+  // HTML parsing normalizes line endings; compare the visible reset result.
+  let text = (await canvas.innerText()).replace(/\r\n?/g, '\n')
   let stableSince = Date.now()
   const started = Date.now()
   while (Date.now() - started < 4_000) {
     await canvas.page().waitForTimeout(50)
-    const next = await canvas.innerText()
+    const next = (await canvas.innerText()).replace(/\r\n?/g, '\n')
     if (next !== text) {
       text = next
       stableSince = Date.now()
