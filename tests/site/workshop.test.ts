@@ -69,7 +69,7 @@ async function journey(page: Page, baseURL: string, width: number) {
     await startType.click()
     typed = await untilChanges(page, 'typography', typed, where)
   }
-  const families = frame.getByRole('radiogroup', { name: 'UI assignment', exact: true })
+  const families = frame.getByRole('group', { name: 'UI assignment', exact: true })
   const radios = families.getByRole('radio')
   const count = await radios.count()
   let picked = false

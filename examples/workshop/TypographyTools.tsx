@@ -1,6 +1,13 @@
 'use client'
 
-import { Button } from '@cognitap/radiant'
+import {
+  Button,
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+  Field,
+  Textarea
+} from '@cognitap/radiant'
 import { pageNames, readCopy, sceneCopy } from './page-copy'
 import type { ToolProps } from './preview-tools'
 
@@ -19,24 +26,33 @@ export function TypographyTools({ view, session, dispatch, disabled }: ToolProps
         Text spacing
       </Button>
       {page && (
-        <details className="preview-copy-editor">
-          <summary>Edit copy</summary>
-          <div className="preview-copy-fields">
-            {Object.entries(sceneCopy[page]).map(([key, fallback]) => (
-              <label key={`${page}:${key}`}>
-                {pageNames[page]} · {key.replace(/([A-Z])/g, ' $1').toLowerCase()}
-                <textarea
-                  disabled={disabled}
-                  value={readCopy(session.copy, page, key as keyof (typeof sceneCopy)[typeof page])}
-                  rows={fallback.length > 90 ? 3 : 2}
-                  onChange={event =>
-                    dispatch({ type: 'copy', page, key, value: event.target.value })
-                  }
-                />
-              </label>
-            ))}
-          </div>
-        </details>
+        <Collapsible className="preview-copy-editor">
+          <CollapsibleTrigger>Edit copy</CollapsibleTrigger>
+          <CollapsibleContent>
+            <div className="preview-copy-fields">
+              {Object.entries(sceneCopy[page]).map(([key, fallback]) => (
+                <Field
+                  key={`${page}:${key}`}
+                  label={`${pageNames[page]} · ${key.replace(/([A-Z])/g, ' $1').toLowerCase()}`}
+                >
+                  <Textarea
+                    controlSize="small"
+                    disabled={disabled}
+                    value={readCopy(
+                      session.copy,
+                      page,
+                      key as keyof (typeof sceneCopy)[typeof page]
+                    )}
+                    rows={fallback.length > 90 ? 3 : 2}
+                    onChange={event =>
+                      dispatch({ type: 'copy', page, key, value: event.target.value })
+                    }
+                  />
+                </Field>
+              ))}
+            </div>
+          </CollapsibleContent>
+        </Collapsible>
       )}
     </div>
   )
