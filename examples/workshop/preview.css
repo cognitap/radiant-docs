@@ -88,6 +88,14 @@
   color: var(--docs-muted);
   line-height: 1.6;
 }
+.preview-copy-editor {
+  --rad-collapsible-padding: 0.25rem 0.5rem;
+  --rad-collapsible-border-width: 0;
+  --rad-collapsible-background: transparent;
+  --rad-collapsible-shadow: none;
+  width: auto;
+  font-size: 0.8125rem;
+}
 .preview-copy-editor[open] {
   flex-basis: 100%;
 }

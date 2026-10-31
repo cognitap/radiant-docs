@@ -15,6 +15,7 @@
   min-width: 0;
   margin-block-start: 0.75rem;
   font-size: 0.875rem;
+  --rad-field-label-size: 0.75rem;
 }
 .font-editor *,
 .font-editor *::before,
@@ -31,35 +32,9 @@
   flex: 1 1 7.5rem;
   min-width: 0;
 }
-.font-controls > .typesetting-link {
+.font-controls > .font-reset {
   flex: none;
   align-self: center;
-}
-.font-editor label:not(.face-card, .scrub-label) {
-  display: grid;
-  gap: 0.3rem;
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--docs-muted);
-  min-width: 0;
-}
-.font-editor select,
-.font-editor textarea,
-.font-editor input:not([type='radio'], [type='number'], [type='file']) {
-  width: 100%;
-  min-width: 0;
-  max-width: 100%;
-  padding: 0.35rem 0.5rem;
-  border: 1px solid var(--docs-border);
-  border-radius: 0.4rem;
-  background: var(--docs-surface);
-  color: var(--docs-foreground);
-  font: inherit;
-  font-size: 0.8125rem;
-}
-.font-editor :is(input, select, textarea, summary, button, a):focus-visible {
-  outline: 2px solid var(--docs-accent);
-  outline-offset: 2px;
 }
 .font-status-row {
   display: flex;
@@ -70,21 +45,6 @@
   color: var(--docs-muted);
 }
 .font-status {
-  overflow-wrap: anywhere;
-}
-.font-fit {
-  padding: 0 0.5rem;
-  border: 1px solid var(--docs-border);
-  border-radius: 1em;
-  white-space: nowrap;
-}
-.font-warning {
-  margin: 0;
-  padding: 0.35rem 0.6rem;
-  border-inline-start: 3px solid #c62828;
-  background: rgb(198 40 40 / 0.06);
-  border-radius: 0 0.3rem 0.3rem 0;
-  font-size: 0.8125rem;
   overflow-wrap: anywhere;
 }
 .font-sample {
@@ -114,20 +74,10 @@
   align-items: center;
   gap: 0.5rem 1rem;
 }
-.font-license {
-  font-size: 0.75rem;
-  color: var(--docs-muted);
-}
-.font-copy,
-.font-local {
+.font-collapse {
   display: grid;
   gap: 0.6rem;
-}
-.font-copy summary,
-.font-local summary {
-  cursor: pointer;
-  font-size: 0.8125rem;
-  color: var(--docs-muted);
+  padding-block-start: 0.6rem;
 }
 .font-file-info {
   font-size: 0.75rem;

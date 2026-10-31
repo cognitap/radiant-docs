@@ -2,7 +2,17 @@
 
 import { useEffect, useState, useSyncExternalStore } from 'react'
 import {
+  Alert,
+  AlertDescription,
+  Badge,
   Button,
+  Checkbox,
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+  Field,
+  Input,
+  NativeSelect,
   type TypographyAssignment,
   type TypographyInput,
   type TypographyPreset,
@@ -185,13 +195,13 @@ export function TypographyEditor({
       <section className="typesetting-section">
         <div className="typesetting-head">
           <h4>Starting point</h4>
-          <button
-            type="button"
-            className="typesetting-link"
+          <Button
+            variant="outline"
+            controlSize="small"
             onClick={() => startingPoint(input.preset)}
           >
             Restore starting point
-          </button>
+          </Button>
         </div>
         <Changed
           changes={changes}
@@ -215,16 +225,16 @@ export function TypographyEditor({
         <div className="typesetting-head">
           <h4>Fonts</h4>
           {failed && (
-            <button
-              type="button"
-              className="typesetting-link"
+            <Button
+              variant="outline"
+              controlSize="small"
               onClick={() => {
                 for (const font of curatedFonts) loader?.remove(font.family)
                 setRetry(value => value + 1)
               }}
             >
               Retry assigned fonts
-            </button>
+            </Button>
           )}
         </div>
         {assignments.map(assignment => {
@@ -239,7 +249,7 @@ export function TypographyEditor({
               <span className="typesetting-assignment-name">
                 {assignmentName(assignment)}
                 {value.profile === 'manual' && (
-                  <small className="typesetting-badge">Uncalibrated</small>
+                  <Badge className="typesetting-badge">Uncalibrated</Badge>
                 )}
               </span>
               <Changed
@@ -272,62 +282,69 @@ export function TypographyEditor({
             </div>
           )
         })}
-        <details className="typesetting-manual">
-          <summary>Other family</summary>
-          <div className="typesetting-row">
-            <label>
-              Manual assignment
-              <select
-                value={customAssignment}
-                onChange={event => setCustomAssignment(event.target.value as TypographyAssignment)}
+        <Collapsible className="typesetting-manual">
+          <CollapsibleTrigger>Other family</CollapsibleTrigger>
+          <CollapsibleContent>
+            <div className="typesetting-row">
+              <Field label="Manual assignment">
+                <NativeSelect
+                  controlSize="small"
+                  value={customAssignment}
+                  onChange={event =>
+                    setCustomAssignment(event.target.value as TypographyAssignment)
+                  }
+                >
+                  {assignmentOptions.map(option => (
+                    <option
+                      key={option.value}
+                      value={option.value}
+                    >
+                      {option.label}
+                    </option>
+                  ))}
+                </NativeSelect>
+              </Field>
+              <Field
+                label="Manual CSS family"
+                className="typesetting-grow"
               >
-                {assignmentOptions.map(option => (
-                  <option
-                    key={option.value}
-                    value={option.value}
-                  >
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label className="typesetting-grow">
-              Manual CSS family
-              <input
-                value={custom}
-                onChange={event => setCustom(event.target.value)}
-              />
-            </label>
-            <Button
-              variant="outline"
-              onClick={() =>
-                change(
-                  {
-                    ...input,
-                    fonts: {
-                      ...input.fonts,
-                      [customAssignment]: { family: custom, profile: 'manual' }
-                    }
-                  },
-                  { label: `${assignmentName(customAssignment).toLowerCase()} assignment` }
-                )
-              }
-            >
-              Use manual family
-            </Button>
-          </div>
-        </details>
+                <Input
+                  controlSize="small"
+                  value={custom}
+                  onChange={event => setCustom(event.target.value)}
+                />
+              </Field>
+              <Button
+                variant="outline"
+                onClick={() =>
+                  change(
+                    {
+                      ...input,
+                      fonts: {
+                        ...input.fonts,
+                        [customAssignment]: { family: custom, profile: 'manual' }
+                      }
+                    },
+                    { label: `${assignmentName(customAssignment).toLowerCase()} assignment` }
+                  )
+                }
+              >
+                Use manual family
+              </Button>
+            </div>
+          </CollapsibleContent>
+        </Collapsible>
       </section>
       <section className="typesetting-section">
         <div className="typesetting-head">
           <h4>Prose rhythm</h4>
-          <button
-            type="button"
-            className="typesetting-link"
+          <Button
+            variant="outline"
+            controlSize="small"
             onClick={() => change(resetRhythm(input, 'prose'), { label: 'prose rhythm' })}
           >
             Reset prose rhythm
-          </button>
+          </Button>
         </div>
         <div className="typesetting-scrubs">
           {proseScrubs.map(scrub => (
@@ -352,13 +369,13 @@ export function TypographyEditor({
         </div>
         <div className="typesetting-head">
           <h4>UI rhythm</h4>
-          <button
-            type="button"
-            className="typesetting-link"
+          <Button
+            variant="outline"
+            controlSize="small"
             onClick={() => change(resetRhythm(input, 'ui'), { label: 'UI rhythm' })}
           >
             Reset UI rhythm
-          </button>
+          </Button>
         </div>
         <div className="typesetting-scrubs">
           {uiScrubs.map(scrub => (
@@ -385,9 +402,9 @@ export function TypographyEditor({
       <section className="typesetting-section typesetting-inspector">
         <div className="typesetting-head">
           <h4>Text styles</h4>
-          <button
-            type="button"
-            className="typesetting-link"
+          <Button
+            variant="outline"
+            controlSize="small"
             onClick={() => {
               setFluidModes(previous => {
                 const next = { ...previous }
@@ -400,7 +417,7 @@ export function TypographyEditor({
             }}
           >
             Reset selected style
-          </button>
+          </Button>
         </div>
         <RoleList
           rows={rows}
@@ -429,17 +446,15 @@ export function TypographyEditor({
             )}
           </Changed>
           <div className="typesetting-endpoints">
-            <label className="chip typesetting-fluid">
-              <input
-                type="checkbox"
-                checked={fluid}
-                onChange={event => {
-                  setFluidModes(previous => ({ ...previous, [role]: event.target.checked }))
-                  if (!event.target.checked) styleSize(style.narrow)
-                }}
-              />
-              Responsive endpoints
-            </label>
+            <Checkbox
+              label="Responsive endpoints"
+              controlSize="small"
+              checked={fluid}
+              onChange={event => {
+                setFluidModes(previous => ({ ...previous, [role]: event.target.checked }))
+                if (!event.target.checked) styleSize(style.narrow)
+              }}
+            />
             {fluid ? (
               <>
                 <Changed
@@ -528,16 +543,15 @@ export function TypographyEditor({
           </div>
         </div>
       </section>
-      {warnings.length > 0 && (
-        <ul
-          role="alert"
-          className="typesetting-warning"
+      {warnings.map(message => (
+        <Alert
+          key={message}
+          tone="danger"
+          announce="assertive"
         >
-          {warnings.map(message => (
-            <li key={message}>{message}</li>
-          ))}
-        </ul>
-      )}
+          <AlertDescription>{message}</AlertDescription>
+        </Alert>
+      ))}
       <output className="typesetting-notice">{notice}</output>
     </div>
   )

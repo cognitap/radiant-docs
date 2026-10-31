@@ -1,6 +1,7 @@
 'use client'
 
 import { useId, type ReactNode } from 'react'
+import { Radio, RadioGroup, ToggleGroup, ToggleGroupItem } from '@cognitap/radiant'
 import type { Face, FaceOption, Specimen } from './workshop-typography-view'
 
 /** One sample, drawn in its face only once the file is in. */
@@ -38,58 +39,56 @@ export function FaceCards({
   describedBy?: string
   onChange: (value: string) => void
 }) {
-  const id = useId()
   return (
-    <div
-      className="face-group"
-      role="radiogroup"
-      aria-label={label}
+    <RadioGroup
+      label={label}
+      className="face-fieldset"
+      data-pairs={options.some(option => option.faces.length > 1) || undefined}
       aria-describedby={describedBy}
+      controlSize="small"
+      value={value}
+      onValueChange={onChange}
+      parts={{ label: { className: 'workshop-sr-only' }, options: { className: 'face-group' } }}
     >
       {options.map(option => {
         const pair = option.faces.length > 1
         return (
-          <label
+          <Radio
             key={option.value}
-            className="face-card"
-            data-pair={pair || undefined}
-            data-face={option.faces.some(face => face.state !== 'ready') ? 'pending' : undefined}
-          >
-            <input
-              type="radio"
-              name={id}
-              value={option.value}
-              checked={option.value === value}
-              aria-label={option.name}
-              onChange={() => onChange(option.value)}
-            />
-            <span
-              className="face-preview"
-              aria-hidden="true"
-            >
-              {pair ? (
-                <>
-                  <FaceSample face={option.faces[0]!}>
-                    <span className="face-heading">Heading</span>
-                  </FaceSample>
-                  <FaceSample face={option.faces[1]!}>
-                    <span className="face-body">Body text reads on.</span>
-                  </FaceSample>
-                </>
-              ) : (
-                <FaceSample face={option.faces[0]!}>
-                  <span className="face-aa">Aa</span>
-                </FaceSample>
-              )}
-            </span>
-            <span className="face-name">
-              {option.name}
-              {option.note && <small> · {option.note}</small>}
-            </span>
-          </label>
+            value={option.value}
+            aria-label={option.name}
+            parts={{ wrapper: { className: 'face-card' }, label: { className: 'face-body' } }}
+            label={
+              <>
+                <span
+                  className="face-preview"
+                  aria-hidden="true"
+                >
+                  {pair ? (
+                    <>
+                      <FaceSample face={option.faces[0]!}>
+                        <span className="face-heading">Heading</span>
+                      </FaceSample>
+                      <FaceSample face={option.faces[1]!}>
+                        <span className="face-text">Body text reads on.</span>
+                      </FaceSample>
+                    </>
+                  ) : (
+                    <FaceSample face={option.faces[0]!}>
+                      <span className="face-aa">Aa</span>
+                    </FaceSample>
+                  )}
+                </span>
+                <span className="face-name">
+                  {option.name}
+                  {option.note && <small> · {option.note}</small>}
+                </span>
+              </>
+            }
+          />
         )
       })}
-    </div>
+    </RadioGroup>
   )
 }
 
@@ -99,7 +98,7 @@ export interface ChipOption {
   /** A dot on the chip, with this text describing it to assistive technology. */
   marked?: string
 }
-/** Small radio chips for a short enumeration. */
+/** Small toggle chips for a short enumeration. */
 export function Chips({
   label,
   options,
@@ -115,44 +114,41 @@ export function Chips({
 }) {
   const id = useId()
   return (
-    <div
+    <ToggleGroup
       className="chip-group"
-      role="radiogroup"
+      variant="segmented"
       aria-label={label}
       aria-describedby={describedBy}
+      controlSize="small"
+      value={value}
+      onValueChange={next => {
+        if (next !== null) onChange(next)
+      }}
     >
       {options.map(option => (
-        <label
+        <ToggleGroupItem
           key={option.value}
-          className="chip"
-          data-marked={option.marked ? '' : undefined}
+          value={option.value}
+          aria-describedby={option.marked ? `${id}-${option.value}` : undefined}
         >
-          <input
-            type="radio"
-            name={id}
-            value={option.value}
-            checked={option.value === value}
-            aria-describedby={option.marked ? `${id}-${option.value}` : undefined}
-            onChange={() => onChange(option.value)}
-          />
           {option.label}
           {option.marked && (
-            <span
-              className="chip-dot"
-              aria-hidden="true"
-            />
+            <>
+              <span
+                className="chip-dot"
+                aria-hidden="true"
+              />
+              <span
+                id={`${id}-${option.value}`}
+                hidden
+              >
+                {option.marked}
+              </span>
+            </>
           )}
-          {option.marked && (
-            <span
-              id={`${id}-${option.value}`}
-              hidden
-            >
-              {option.marked}
-            </span>
-          )}
-        </label>
+        </ToggleGroupItem>
       ))}
-    </div>
+    </ToggleGroup>
   )
 }
 
@@ -174,61 +170,62 @@ export function RoleList({
 }) {
   const id = useId()
   return (
-    <div
-      className="typesetting-roles"
-      role="radiogroup"
-      aria-label="Text style"
+    <RadioGroup
+      label="Text style"
+      controlSize="small"
+      value={value}
+      onValueChange={onChange}
+      parts={{
+        label: { className: 'workshop-sr-only' },
+        options: { className: 'typesetting-roles' }
+      }}
     >
       {rows.map(row => (
-        <label
+        <Radio
           key={row.role}
-          className="role-row"
-          data-overridden={row.overridden || undefined}
-        >
-          <input
-            type="radio"
-            name={id}
-            value={row.role}
-            checked={row.role === value}
-            aria-label={row.name}
-            aria-describedby={row.overridden ? `${id}-${row.role}` : undefined}
-            onChange={() => onChange(row.role)}
-          />
-          <span
-            className="role-specimen"
-            aria-hidden="true"
-            data-face={row.specimen.ready ? undefined : 'loading'}
-            style={
-              row.specimen.ready
-                ? {
-                    fontFamily: row.specimen.fontFamily,
-                    fontSize: row.specimen.fontSize,
-                    fontWeight: row.specimen.fontWeight,
-                    letterSpacing: row.specimen.letterSpacing,
-                    lineHeight: row.specimen.lineHeight
-                  }
-                : undefined
-            }
-          >
-            {row.name}
-          </span>
-          <span
-            className="role-meta"
-            aria-hidden="true"
-          >
-            {row.specimen.meta}
-          </span>
-          {row.overridden && (
-            <span
-              id={`${id}-${row.role}`}
-              className="role-dot"
-              title="Overridden"
-            >
-              <span className="workshop-sr-only">overridden</span>
-            </span>
-          )}
-        </label>
+          value={row.role}
+          aria-label={row.name}
+          aria-describedby={row.overridden ? `${id}-${row.role}` : undefined}
+          parts={{ wrapper: { className: 'role-row' }, label: { className: 'role-body' } }}
+          label={
+            <>
+              <span
+                className="role-specimen"
+                aria-hidden="true"
+                data-face={row.specimen.ready ? undefined : 'loading'}
+                style={
+                  row.specimen.ready
+                    ? {
+                        fontFamily: row.specimen.fontFamily,
+                        fontSize: row.specimen.fontSize,
+                        fontWeight: row.specimen.fontWeight,
+                        letterSpacing: row.specimen.letterSpacing,
+                        lineHeight: row.specimen.lineHeight
+                      }
+                    : undefined
+                }
+              >
+                {row.name}
+              </span>
+              <span
+                className="role-meta"
+                aria-hidden="true"
+              >
+                {row.specimen.meta}
+              </span>
+              {row.overridden && (
+                <span
+                  id={`${id}-${row.role}`}
+                  className="role-dot"
+                  title="Overridden"
+                >
+                  <span className="workshop-sr-only">overridden</span>
+                </span>
+              )}
+            </>
+          }
+        />
       ))}
-    </div>
+    </RadioGroup>
   )
 }

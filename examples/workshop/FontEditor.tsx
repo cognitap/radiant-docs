@@ -1,7 +1,20 @@
 'use client'
 
 import { useEffect, useRef, useState, useSyncExternalStore, type CSSProperties } from 'react'
-import { Button } from '@cognitap/radiant'
+import {
+  Alert,
+  AlertDescription,
+  Badge,
+  Button,
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+  Field,
+  Input,
+  Link,
+  NativeSelect,
+  Textarea
+} from '@cognitap/radiant'
 import { WorkshopFontLoader } from './font-runtime'
 import {
   applyTrialFont,
@@ -249,11 +262,11 @@ export function FontEditor({
       </div>
       <div className="font-status-row">
         <output className="font-status">{load.message}</output>
-        <span className="font-fit">
+        <Badge tone={recommendation.supported ? 'neutral' : 'warning'}>
           {recommendation.supported
             ? `Studied for ${context}`
             : `Uncalibrated for ${context} · manual metrics`}
-        </span>
+        </Badge>
         {load.state === 'failed' && (
           <Button
             variant="outline"
@@ -274,9 +287,9 @@ export function FontEditor({
         onChange={select}
       />
       <div className="font-controls">
-        <label>
-          Trial context
-          <select
+        <Field label="Trial context">
+          <NativeSelect
+            controlSize="small"
             value={context}
             onChange={event => setContext(event.target.value as FontContext)}
           >
@@ -288,11 +301,11 @@ export function FontEditor({
                 {item[0].toUpperCase() + item.slice(1)}
               </option>
             ))}
-          </select>
-        </label>
-        <label>
-          Trial style
-          <select
+          </NativeSelect>
+        </Field>
+        <Field label="Trial style">
+          <NativeSelect
+            controlSize="small"
             value={style}
             onChange={event => setStyle(event.target.value as FontStyle)}
           >
@@ -306,24 +319,24 @@ export function FontEditor({
                 {!font.styles.includes(value) ? ' · file missing' : ''}
               </option>
             ))}
-          </select>
-        </label>
+          </NativeSelect>
+        </Field>
         <ScrubField
           scrub={weightScrub}
           value={weight}
           onChange={setWeight}
         />
         {font.axes.some(axis => axis.tag === 'opsz') && (
-          <label>
-            Optical sizing
-            <select
+          <Field label="Optical sizing">
+            <NativeSelect
+              controlSize="small"
               value={optical}
               onChange={e => setOptical(e.target.value)}
             >
               <option value="auto">Automatic</option>
               <option value="manual">Manual optical size</option>
-            </select>
-          </label>
+            </NativeSelect>
+          </Field>
         )}
         {extraAxes.map(axis => (
           <ScrubField
@@ -341,16 +354,18 @@ export function FontEditor({
         ))}
       </div>
       {(unsupportedWeight || unsupportedStyle) && (
-        <p
-          className="font-warning"
-          role="alert"
+        <Alert
+          tone="danger"
+          announce="assertive"
         >
-          {unsupportedWeight
-            ? `Weight ${weight} is outside ${font.weights.join('–')}; the browser may use a nearby weight. `
-            : ''}
-          {unsupportedStyle ? 'The selected style has no file. ' : ''}
-          It cannot be applied to the theme.
-        </p>
+          <AlertDescription>
+            {unsupportedWeight
+              ? `Weight ${weight} is outside ${font.weights.join('–')}; the browser may use a nearby weight. `
+              : ''}
+            {unsupportedStyle ? 'The selected style has no file. ' : ''}
+            It cannot be applied to the theme.
+          </AlertDescription>
+        </Alert>
       )}
       <div className="font-controls">
         {sampleScrubs.map(item => (
@@ -361,9 +376,10 @@ export function FontEditor({
             onChange={value => editMetric(item.key, value)}
           />
         ))}
-        <button
-          type="button"
-          className="typesetting-link"
+        <Button
+          variant="outline"
+          className="font-reset"
+          controlSize="small"
           onClick={() =>
             setManual(previous => {
               const next = { ...previous }
@@ -373,7 +389,7 @@ export function FontEditor({
           }
         >
           Reset context sample
-        </button>
+        </Button>
       </div>
       <div className="font-actions">
         <Button
@@ -396,84 +412,90 @@ export function FontEditor({
           Use family in theme
         </Button>
         {font.license && (
-          <a
-            className="font-license"
+          <Link
+            variant="subtle"
             href={font.license}
           >
             SIL Open Font License
-          </a>
+          </Link>
         )}
       </div>
-      <details className="font-copy">
-        <summary>Sample copy</summary>
-        <label>
-          Sample copy
-          <textarea
-            rows={3}
-            value={text}
-            onChange={e => setText(e.target.value)}
-          />
-        </label>
-      </details>
-      <details className="font-local">
-        <summary>Try a local font file</summary>
-        <div className="font-controls">
-          <label>
-            Local CSS family
-            <input
-              value={family}
-              maxLength={80}
-              onChange={e => setFamily(e.target.value)}
+      <Collapsible>
+        <CollapsibleTrigger>Sample copy</CollapsibleTrigger>
+        <CollapsibleContent className="font-collapse">
+          <Field label="Sample copy">
+            <Textarea
+              controlSize="small"
+              rows={3}
+              value={text}
+              onChange={e => setText(e.target.value)}
             />
-          </label>
-          <ScrubField
-            scrub={fileWeightScrub}
-            value={fileWeight}
-            onChange={setFileWeight}
-          />
-          <label>
-            Declared file style
-            <select
-              value={fileStyle}
-              onChange={e => setFileStyle(e.target.value as FontStyle)}
+          </Field>
+        </CollapsibleContent>
+      </Collapsible>
+      <Collapsible>
+        <CollapsibleTrigger>Try a local font file</CollapsibleTrigger>
+        <CollapsibleContent className="font-collapse">
+          <div className="font-controls">
+            <Field label="Local CSS family">
+              <Input
+                controlSize="small"
+                value={family}
+                maxLength={80}
+                onChange={e => setFamily(e.target.value)}
+              />
+            </Field>
+            <ScrubField
+              scrub={fileWeightScrub}
+              value={fileWeight}
+              onChange={setFileWeight}
+            />
+            <Field label="Declared file style">
+              <NativeSelect
+                controlSize="small"
+                value={fileStyle}
+                onChange={e => setFileStyle(e.target.value as FontStyle)}
+              >
+                <option value="normal">normal</option>
+                <option value="italic">italic</option>
+              </NativeSelect>
+            </Field>
+          </div>
+          <Field label="Local font file">
+            {control => (
+              <input
+                {...control}
+                ref={fileInput}
+                type="file"
+                accept=".woff2,.woff,.ttf,.otf"
+                onChange={e => void chooseFile(e.target.files?.[0])}
+              />
+            )}
+          </Field>
+          <span className="font-file-info">
+            {fileInfo || 'WOFF2, WOFF, TTF or OTF up to 10 MiB, kept in memory for this session.'}
+          </span>
+          {custom && (
+            <Button
+              variant="outline"
+              onClick={() => {
+                ++uploadRevision.current
+                loader.current!.remove(custom.family)
+                onLocalReady?.(null)
+                bytes.current = undefined
+                setCustom(null)
+                setFileInfo('')
+                select('inter')
+                setNotice(
+                  'Local file removed. A theme referencing it falls back until it is provided again.'
+                )
+              }}
             >
-              <option value="normal">normal</option>
-              <option value="italic">italic</option>
-            </select>
-          </label>
-        </div>
-        <label>
-          Local font file
-          <input
-            ref={fileInput}
-            type="file"
-            accept=".woff2,.woff,.ttf,.otf"
-            onChange={e => void chooseFile(e.target.files?.[0])}
-          />
-        </label>
-        <span className="font-file-info">
-          {fileInfo || 'WOFF2, WOFF, TTF or OTF up to 10 MiB, kept in memory for this session.'}
-        </span>
-        {custom && (
-          <Button
-            variant="outline"
-            onClick={() => {
-              ++uploadRevision.current
-              loader.current!.remove(custom.family)
-              onLocalReady?.(null)
-              bytes.current = undefined
-              setCustom(null)
-              setFileInfo('')
-              select('inter')
-              setNotice(
-                'Local file removed. A theme referencing it falls back until it is provided again.'
-              )
-            }}
-          >
-            Remove local font
-          </Button>
-        )}
-      </details>
+              Remove local font
+            </Button>
+          )}
+        </CollapsibleContent>
+      </Collapsible>
       <output className="font-notice">{notice}</output>
     </div>
   )
