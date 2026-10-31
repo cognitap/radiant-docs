@@ -1,60 +1,150 @@
 ---
 title: Command
-description: Search and run actions in a native Dialog with grouped Combobox results.
+description: A search-and-run palette that opens in a native dialog and runs the action people pick.
 ---
 
 import { CommandDemo, CommandNavigationDemo, CommandLookupDemo } from '../../components/CommandDemo'
 
-## Usage
-
 <CommandDemo />
 
-Command combines a native Dialog with the Combobox listbox. It runs actions rather than selecting a form value. Applications own actions, navigation, fetching and shortcut registration. Modal behavior is the default; `modal={false}` uses native non-modal behavior.
+## Usage
+
+Use Command when people search for an action and run it. Activating a result calls `onAction` and closes the palette; the query never becomes a value. Choose something else when:
+
+- [Combobox](/docs/combobox/): the choice is a form value.
+- [Menu](/docs/menu/): a short, fixed list of actions opens from a button.
+- [Dialog](/docs/dialog/): the task is not search.
+
+```tsx
+<Command
+  items={[{ value: 'create', label: 'Create project', group: 'Projects' }]}
+  onAction={runAction}
+>
+  <CommandTrigger>Commands</CommandTrigger>
+  <CommandContent>
+    <CommandTitle>Commands</CommandTitle>
+    <CommandInput />
+    <CommandList />
+  </CommandContent>
+</Command>
+```
+
+Command installs no keyboard shortcut. The demos register Ctrl/⌘K on their own application region and show it with [Kbd](/docs/kbd/).
 
 ## Examples
 
-The project application creates, duplicates and archives local records. Its scoped Ctrl/⌘K and Ctrl/⌘N handlers match the displayed Kbd hints. Core Command installs no global shortcut.
+### Open a page and move focus
 
 <CommandNavigationDemo />
 
-This application moves focus to the destination heading after an accepted navigation action.
+### Search results from a server
 
 <CommandLookupDemo />
 
-The report application cancels stale requests and supports disconnection and recovery. Results never run themselves. Pass `filter={null}` for application-filtered results, or provide a custom filter. Default filtering matches readable labels.
+Pass `filter={null}` when the application filters results, and set `loading` or `errorText` while it fetches.
 
 ## State
 
-query/defaultQuery and open/defaultOpen are independent owners. Choose one owner per axis. Controlled callbacks request changes; the owner may decline. Prop synchronization is silent. Query persists across dismissal; clear it explicitly when your application needs that behavior.
+| State  | Controlled | Uncontrolled   | Callback                       | Empty   |
+| ------ | ---------- | -------------- | ------------------------------ | ------- |
+| Search | `query`    | `defaultQuery` | `onQueryChange(query: string)` | `''`    |
+| Dialog | `open`     | `defaultOpen`  | `onOpenChange(open: boolean)`  | `false` |
+| Action | None       | None           | `onAction(value: string)`      | None    |
 
-onAction receives the activated value, then Command requests close. The query never becomes a command ID or a submitted form value.
+Choose one owner per pair. Callbacks are requests that a controlled owner may decline, and prop changes fire none. The query survives closing; clear it yourself if needed. Command submits nothing to a form, and Enter in the search never submits an ancestor form.
 
 ## Accessibility
 
-Provide CommandTitle and CommandDescription. Place CommandInput before footer actions so native opening focuses search. Its default name is “Search commands”; override it with aria-label or aria-labelledby.
+CommandContent is a native dialog named by CommandTitle and described by CommandDescription. CommandInput is a `combobox` named "Search commands" unless you pass `aria-label` or `aria-labelledby`. Results form a `listbox`; each `group` is named by its heading. Loading, empty and error text sit in a `status` region. Place CommandInput before footer buttons so it takes focus on open.
 
-Arrow keys highlight enabled results while focus remains on search. Enter runs the highlighted action; Tab reaches footer controls. Escape follows native Dialog cancellation, including closeOnEscape and onCancel. Short windows retain visible results and native scrolling.
+| Key             | Behavior                                                                              |
+| --------------- | ------------------------------------------------------------------------------------- |
+| Typing          | Filters the results; never runs an action                                             |
+| Arrow Down / Up | Moves the highlight past disabled results; focus stays in the search                  |
+| Enter           | Runs the highlighted action, then closes                                              |
+| Tab / Shift+Tab | Moves to the footer controls                                                          |
+| Escape          | Native dialog cancel; closes unless `closeOnEscape={false}` or `onCancel` prevents it |
 
-Check names, focus, dismissal and action feedback with your application's assistive technologies.
+Focus returns to CommandTrigger on close.
 
 ## Motion
 
-CommandContent inherits Dialog motion through MotionProvider. Set `motion="off"` to opt out. Native closing and focus never wait for an exit animation.
+Inside a [`MotionProvider`](/docs/foundations/motion/), CommandContent uses [Dialog](/docs/dialog/) motion. Turn it off with `motion="off"` on CommandContent, theme `motion.mode: 'off'` or the reduced-motion preference. Closing and focus never wait for the exit.
 
 ## Styling
 
-className/style/ref reach each named host. CommandContent is a native dialog; input is a native input; list and items are divs. Trigger and close compose Button and support CommandRenderProps.
+Each part takes `className`, `style` and `ref` on its own element. Dialog, Combobox and Kbd tokens style the composed parts.
 
-Dialog, Combobox and Kbd themes style the actual composed parts. command.resultsMaxHeight bounds results. controlSize sizes search and rows. Direction inherits; Kbd combinations keep readable key order.
+| Part               | `data-slot`                                                       |
+| ------------------ | ----------------------------------------------------------------- |
+| CommandContent     | `dialog command`                                                  |
+| CommandTitle       | `dialog-title command-title`                                      |
+| CommandDescription | `dialog-description command-description`                          |
+| CommandTrigger     | `button dialog-trigger command-trigger`                           |
+| CommandClose       | `button dialog-close command-close`                               |
+| CommandInput       | `combobox-input command-input`                                    |
+| CommandList        | `combobox-content command-list`                                   |
+| Group / heading    | `command-group` / `command-group-label`                           |
+| CommandItem        | `combobox-item command-item`, `data-highlighted`, `data-disabled` |
+
+Set `--rad-command-results-max-height` (default `24rem`, theme `command.resultsMaxHeight`) to bound the results; they never exceed half the viewport.
 
 ## API
 
-| Part or prop                                       | Purpose                                                                          |
-| -------------------------------------------------- | -------------------------------------------------------------------------------- |
-| Command                                            | Query and Dialog owners                                                          |
-| items                                              | Distinct values, readable label/textValue, optional group, shortcut and disabled |
-| onAction                                           | Explicit action callback                                                         |
-| loading / loadingText / emptyText / errorText      | Search status                                                                    |
-| CommandTrigger / CommandClose                      | Native Button actions                                                            |
-| CommandContent / CommandTitle / CommandDescription | Connected native modal structure                                                 |
-| CommandInput / CommandList / CommandItem           | Actual Combobox search and results                                               |
+### Command
+
+| Prop                 | Type                                                        | Default                     |
+| -------------------- | ----------------------------------------------------------- | --------------------------- |
+| items                | `readonly CommandOption[]`; distinct values                 | Required                    |
+| onAction             | `(value: string) => void`; runs, then requests close        | Required                    |
+| query / defaultQuery | string; one owner                                           | None / `''`                 |
+| onQueryChange        | `(query: string) => void`                                   | None                        |
+| open / defaultOpen   | boolean; one owner                                          | None / false                |
+| onOpenChange         | `(open: boolean) => void`                                   | None                        |
+| filter               | `((item: CommandOption, query: string) => boolean) \| null` | Case-insensitive text match |
+| loading              | boolean; hides results                                      | false                       |
+| loadingText          | string                                                      | `'Loading results…'`        |
+| emptyText            | ReactNode                                                   | `'No results found.'`       |
+| errorText            | ReactNode; hides results                                    | None                        |
+| controlSize          | small / medium / large; search and rows                     | medium                      |
+| modal                | boolean; `false` leaves the page active                     | true                        |
+| closeOnBackdrop      | boolean; modal only                                         | true                        |
+| closeOnEscape        | boolean; modal only                                         | true                        |
+| children             | ReactNode                                                   | None                        |
+
+`CommandOption` is a [`ComboboxOption`](/docs/combobox/#api) plus an optional `group` name and `shortcut` key labels. Groups render in order of first appearance; a blank group name throws.
+
+### CommandTrigger and CommandClose
+
+Same props as [DialogTrigger](/docs/dialog/#dialogtrigger), with `render` receiving `CommandRenderProps`. CommandTrigger opens the palette; CommandClose closes it.
+
+### CommandContent, CommandTitle and CommandDescription
+
+Same props as [DialogContent](/docs/dialog/#dialogcontent), DialogTitle and DialogDescription.
+
+### CommandInput
+
+| Prop                         | Type                                                                                            | Default             |
+| ---------------------------- | ----------------------------------------------------------------------------------------------- | ------------------- |
+| aria-label / aria-labelledby | string                                                                                          | `'Search commands'` |
+| style                        | ThemeStyle                                                                                      | None                |
+| Other props                  | Input props except value, defaultValue, name, form, type, role, disabled, required, ARIA wiring | Native              |
+
+### CommandList
+
+| Prop        | Type                         | Default                           |
+| ----------- | ---------------------------- | --------------------------------- |
+| aria-label  | string; listbox name         | Input's label                     |
+| children    | ReactNode                    | Grouped items for visible results |
+| style       | ThemeStyle                   | None                              |
+| Other props | div props except role and id | Native                            |
+
+### CommandItem
+
+| Prop        | Type                                | Default            |
+| ----------- | ----------------------------------- | ------------------ |
+| value       | string; must exist in `items`       | Required           |
+| children    | ReactNode                           | Label and shortcut |
+| Other props | div props except id, role, tabIndex | Native             |
+
+Exports each part's Props type, `CommandOption` and `CommandRenderProps`.
