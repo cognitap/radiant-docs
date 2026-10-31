@@ -1,6 +1,6 @@
 ---
 title: ScrollArea
-description: A native scroll viewport with themed bars for long or wide content.
+description: Scroll long or wide content natively with themed overlay scrollbars.
 ---
 
 import {
@@ -14,7 +14,7 @@ import {
 
 ## Usage
 
-Use `ScrollArea` for themed scrolling in constrained content. Use [TableContainer](/docs/table/) for a table's native overflow.
+Use ScrollArea for themed scrolling in constrained content. Use plain `overflow: auto` when default scrollbars are fine, and [TableContainer](/docs/table/) for a table's native overflow. Virtualize very long data.
 
 ```tsx
 <ScrollArea
@@ -43,7 +43,7 @@ Use `ScrollArea` for themed scrolling in constrained content. Use [TableContaine
 
 ## State
 
-The browser owns scroll positions. Use the viewport ref's `scrollTo` for application actions; content changes clamp offsets natively. `onScroll` observes the native viewport. Prevent default in `onPointerDown` to cancel bar dragging.
+The browser owns scroll positions. Use the viewport ref's `scrollTo` for application actions; content changes clamp offsets natively. `onScroll` observes the native viewport. Prevent default in `onPointerDown` to cancel bar dragging. ScrollArea has no controlled state and no form value.
 
 ## Accessibility
 
@@ -57,7 +57,7 @@ Supply `aria-label` or `aria-labelledby`. The viewport is a named group with `ta
 
 ## Motion
 
-Thumbs follow native scroll positions directly. Wheel, touch and keyboard scrolling use browser behavior; dragging adds no easing.
+Thumbs follow native scroll positions directly; dragging adds no easing. Scrollbars fade by opacity. With `visibility="scroll"` they hide 900 ms after scrolling stops; use `always` to keep them shown. MotionProvider has no effect.
 
 ## Styling
 
@@ -69,16 +69,17 @@ Theme hooks: `components.scrollArea.size`, `radius`, `thumbColor`, `trackColor`,
 
 ## API
 
-| ScrollArea prop                  | Type                                    | Default         |
-| -------------------------------- | --------------------------------------- | --------------- |
-| aria-label / aria-labelledby     | string                                  | One required    |
-| orientation                      | vertical / horizontal / both            | vertical        |
-| visibility                       | hover / scroll / always                 | hover           |
-| tabIndex                         | number                                  | 0               |
-| parts                            | content / scrollbar / thumb style hooks | None            |
-| children                         | ReactNode                               | None            |
-| className / style                | string / ThemeStyle                     | None            |
-| ref                              | `Ref<HTMLDivElement>`                   | None            |
-| Native div attributes and events | Includes dir and onScroll               | Native defaults |
+### ScrollArea
 
-Exports: `ScrollArea`, `ScrollAreaProps`, `ScrollAreaOrientation`, `ScrollAreaVisibility`.
+| Prop                         | Type / default                                                                       |
+| ---------------------------- | ------------------------------------------------------------------------------------ |
+| aria-label / aria-labelledby | string; one required                                                                 |
+| orientation                  | `Orientation \| 'both'`; vertical                                                    |
+| visibility                   | hover / scroll / always; hover                                                       |
+| tabIndex                     | number; 0                                                                            |
+| parts                        | `{ content?, scrollbar?, thumb?: PartStyle }`                                        |
+| className / style            | string / ThemeStyle; the viewport                                                    |
+| ref                          | HTMLDivElement                                                                       |
+| Other props                  | Native div props and events except role, contentEditable and dangerouslySetInnerHTML |
+
+Exports `ScrollAreaProps`, `ScrollAreaOrientation` (`Orientation | 'both'`) and `ScrollAreaVisibility`.

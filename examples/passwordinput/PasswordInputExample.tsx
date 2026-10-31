@@ -166,6 +166,39 @@ export function ChooseWorkspacePassword({
     </form>
   )
 }
+export function CheckPasswordLength({ invalid, required, ...props }: PasswordInputTaskOptions) {
+  const [password, setPassword] = useState('')
+  return (
+    <div style={{ display: 'grid', gap: '1rem', width: '100%', maxWidth: '26rem', minWidth: 0 }}>
+      <Field
+        label="Recovery password"
+        description="Use at least 12 characters."
+        disabled={props.disabled}
+        required={required}
+        error={invalid ? 'Choose a longer password.' : undefined}
+      >
+        <PasswordInput
+          {...props}
+          autoComplete="new-password"
+          value={password}
+          onChange={event => setPassword(event.target.value)}
+        />
+      </Field>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '.5rem' }}>
+        <Button
+          variant="outline"
+          disabled={props.disabled || password === ''}
+          onClick={() => setPassword('')}
+        >
+          Clear password
+        </Button>
+      </div>
+      <output aria-live="polite">
+        {password.length >= 12 ? 'Long enough.' : `${12 - password.length} more characters needed.`}
+      </output>
+    </div>
+  )
+}
 const connections = {
   reader: {
     name: 'Reader study',
@@ -231,7 +264,7 @@ export function ReviewConnectionPassword({
 
 import { MotionProvider } from '@cognitap/radiant/motion/react'
 import '@cognitap/radiant/styles.css'
-export type PasswordInputTask = 'signin' | 'change' | 'review'
+export type PasswordInputTask = 'signin' | 'change' | 'review' | 'length'
 export function PasswordInputExample({
   task = 'signin',
   ...props
@@ -242,6 +275,8 @@ export function PasswordInputExample({
         <ChooseWorkspacePassword {...props} />
       ) : task === 'review' ? (
         <ReviewConnectionPassword {...props} />
+      ) : task === 'length' ? (
+        <CheckPasswordLength {...props} />
       ) : (
         <PrepareWorkspaceSignIn {...props} />
       )}

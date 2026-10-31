@@ -1530,7 +1530,7 @@ test('Meter docs retain native passive gauges and meaningful storage, recorder a
   })
 })
 
-test('PasswordInput docs preserve autofill hosts, pressed reveal state and hidden form submission without echoing credentials', async () => {
+test('PasswordInput docs preserve autofill hosts, a renamed reveal action and hidden form submission without echoing credentials', async () => {
   await withSite(async (baseURL, browser) => {
     const page = await browser.newPage(),
       errors = track(page)
@@ -1550,7 +1550,7 @@ test('PasswordInput docs preserve autofill hosts, pressed reveal state and hidde
           await signin
             .getByRole('button', { name: 'Hide password', exact: true })
             .getAttribute('aria-pressed'),
-          'true'
+          null
         )
         await signin.getByRole('button', { name: 'Prepare sign in', exact: true }).click()
         assert.equal(await password.getAttribute('type'), 'password')
