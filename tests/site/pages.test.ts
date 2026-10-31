@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
+import { setTimeout as delay } from 'node:timers/promises'
 import type { Browser, Locator, Page } from 'playwright'
 import { capture, docRoutes, exampleSource, track, withSite } from './site.ts'
 
@@ -39,6 +40,8 @@ async function checkPage(baseURL: string, browser: Browser, route: string) {
     await capture(page, name, async () => {
       const response = await page.goto(`${baseURL}${route}`)
       assert.equal(response?.status(), 200, route)
+      const canvases = page.locator('.demo-canvas')
+      await settled(async () => (await canvases.allInnerTexts()).join('\n'))
       for (const frame of await page.locator('.demo-frame').all()) {
         await openSources(frame)
         for (const listing of await sourceListings(frame)) {
@@ -74,14 +77,19 @@ async function openSources(frame: Locator) {
   if ((await details.getAttribute('open')) === null) await details.locator('summary').click()
 }
 
-async function settledText(canvas: Locator) {
-  // HTML parsing normalizes line endings; compare the visible reset result.
-  let text = (await canvas.innerText()).replace(/\r\n?/g, '\n')
+/** HTML parsing turns CRLF into LF and a client render brings it back, so compare LF text. */
+async function canvasText(canvas: Locator) {
+  return (await canvas.innerText()).replace(/\r\n?/g, '\n')
+}
+
+/** Text that stays the same for 300ms, read within 4 seconds. */
+async function settled(read: () => Promise<string>) {
+  let text = await read()
   let stableSince = Date.now()
   const started = Date.now()
   while (Date.now() - started < 4_000) {
-    await canvas.page().waitForTimeout(50)
-    const next = (await canvas.innerText()).replace(/\r\n?/g, '\n')
+    await delay(50)
+    const next = await read()
     if (next !== text) {
       text = next
       stableSince = Date.now()
@@ -90,11 +98,22 @@ async function settledText(canvas: Locator) {
   return text
 }
 
+/** Wait up to 4 seconds for the text to match, and return the last text read. */
+async function textBecomes(canvas: Locator, expected: string) {
+  const started = Date.now()
+  let text = await canvasText(canvas)
+  while (text !== expected && Date.now() - started < 4_000) {
+    await canvas.page().waitForTimeout(50)
+    text = await canvasText(canvas)
+  }
+  return text
+}
+
 async function resetFrame(frame: Locator, page: Page) {
   const reset = frame.getByRole('button', { name: 'Reset preview', exact: true })
   if ((await reset.count()) === 0) return
   const canvas = frame.locator('.demo-canvas')
-  const before = (await canvas.count()) > 0 ? await settledText(canvas) : ''
+  const before = (await canvas.count()) > 0 ? await canvasText(canvas) : ''
   const field = canvas.getByRole('textbox').first()
   const box = canvas.getByRole('checkbox').first()
   let value: string | undefined
@@ -115,7 +134,7 @@ async function resetFrame(frame: Locator, page: Page) {
   await reset.click()
   await frame.locator('.demo-feedback').getByText('Preview reset.', { exact: true }).waitFor()
   if ((await canvas.count()) === 0) return
-  assert.equal(await settledText(canvas), before)
+  assert.equal(await textBecomes(canvas, before), before)
   if (value !== undefined)
     assert.equal(await canvas.getByRole('textbox').first().inputValue(), value)
   if (checked !== undefined)

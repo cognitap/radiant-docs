@@ -39,8 +39,8 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Install Chromium
-        run: pnpm exec playwright install --with-deps chromium
+      - name: Install headless Chromium
+        run: pnpm exec playwright install --only-shell chromium
 
       - name: Check documentation
         run: pnpm check
@@ -125,8 +125,8 @@ jobs:
             pnpm deploy:pages --branch "$DOCS_DEPLOY_BRANCH"
           fi
 
-      - name: Install Chromium
-        run: pnpm exec playwright install --with-deps chromium
+      - name: Install headless Chromium
+        run: pnpm exec playwright install --only-shell chromium
 
       - name: Verify the deployed site
         env:
