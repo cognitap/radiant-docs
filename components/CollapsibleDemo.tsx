@@ -1,27 +1,53 @@
 import { Demo } from './demo/Demo'
 import { CollapsiblePlayground } from '@/examples/collapsible/CollapsiblePlayground'
-
-export function CollapsibleSettingsDemo() {
+const files = ['collapsible/CollapsibleExample.tsx', 'profile/useHydrated.ts']
+export function CollapsibleDemo() {
   return (
     <Demo
-      title="A quieter inbox"
-      files={['collapsible/CollapsibleExamples.tsx']}
+      title="Check a shipment"
+      files={files}
     >
-      <CollapsiblePlayground />
-      <noscript className="demo-feedback">
-        Enable JavaScript to save this demo. Its source is available below.
-      </noscript>
+      <CollapsiblePlayground task="shipment" />
     </Demo>
   )
 }
-
-export function CollapsibleHeightDemo() {
+export function CollapsibleNotesDemo() {
   return (
     <Demo
-      title="Collapsible height lab"
-      files={['collapsible/CollapsibleExamples.tsx']}
+      title="Start with details open"
+      files={files}
     >
-      <CollapsiblePlayground states />
+      <CollapsiblePlayground task="notes" />
+    </Demo>
+  )
+}
+export function CollapsibleReviewDemo() {
+  return (
+    <Demo
+      title="Open from another control"
+      files={files}
+    >
+      <CollapsiblePlayground task="review" />
+    </Demo>
+  )
+}
+export function CollapsibleAnswersDemo() {
+  return (
+    <Demo
+      title="Keep one answer open"
+      files={files}
+    >
+      <CollapsiblePlayground task="answers" />
+    </Demo>
+  )
+}
+export function CollapsibleDeliveryDemo() {
+  return (
+    <Demo
+      title="Fold advanced fields in a form"
+      files={files}
+    >
+      <CollapsiblePlayground task="delivery" />
     </Demo>
   )
 }

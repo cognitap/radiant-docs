@@ -1,27 +1,43 @@
 import { Demo } from './demo/Demo'
 import { AccordionPlayground } from '@/examples/accordion/AccordionPlayground'
-
-export function AccordionGuideDemo() {
+const files = ['accordion/AccordionExample.tsx', 'profile/useHydrated.ts']
+export function AccordionDemo() {
   return (
     <Demo
-      title="The field guide"
-      files={['accordion/AccordionExamples.tsx']}
+      title="Good questions. Clear answers."
+      files={files}
     >
       <AccordionPlayground />
-      <noscript className="demo-feedback">
-        Enable JavaScript for coordinated selection. Source is available below.
-      </noscript>
     </Demo>
   )
 }
-
-export function AccordionSelectionDemo() {
+export function AccordionMultipleDemo() {
   return (
     <Demo
-      title="Accordion selection lab"
-      files={['accordion/AccordionExamples.tsx']}
+      title="Open several sections"
+      files={files}
     >
-      <AccordionPlayground states />
+      <AccordionPlayground task="multiple" />
+    </Demo>
+  )
+}
+export function AccordionControlledDemo() {
+  return (
+    <Demo
+      title="Control the open section"
+      files={files}
+    >
+      <AccordionPlayground task="controlled" />
+    </Demo>
+  )
+}
+export function AccordionDisabledDemo() {
+  return (
+    <Demo
+      title="Disable an item"
+      files={files}
+    >
+      <AccordionPlayground task="disabled" />
     </Demo>
   )
 }

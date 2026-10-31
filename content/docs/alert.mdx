@@ -1,59 +1,97 @@
 ---
 title: Alert
-description: Inline feedback with independent visual tone and announcement urgency.
+description: Show inline feedback whose color and announcement urgency you choose separately.
 ---
 
-import { AlertDemo } from '../../components/AlertDemo'
+import {
+  AlertDemo,
+  AlertTonesDemo,
+  AlertActionDemo,
+  AlertSaveDemo
+} from '../../components/AlertDemo'
 
 <AlertDemo />
 
-## Choose urgency deliberately
+## Usage
 
-Alert groups inline feedback. `announce="off"` is the default for static
-information: it adds no live role. A static Alert with `aria-label` or
-`aria-labelledby` becomes a named `group`.
+Use Alert for a message that must stay in the page. Use [Toast](/docs/toast/) to confirm or report something the user just did, and [AlertDialog](/docs/alert-dialog/) for a decision the user must make before continuing. Use [Field](/docs/field/) for an error tied to one control.
 
-Use `announce="polite"` for nonurgent updates such as a save result. It supplies
-`role="status"`. Reserve `announce="assertive"`, which supplies `role="alert"`,
-for interruptions requiring immediate attention. Both roles provide implicit
-live and atomic semantics; Alert does not add redundant `aria-live` attributes.
-These role/live settings are owned by Alert.
+```tsx
+<Alert tone="warning">
+  <AlertTitle>Connection interrupted</AlertTitle>
+  <AlertDescription>Your changes remain on this device until you reconnect.</AlertDescription>
+</Alert>
+```
 
-`tone` selects `neutral` (default), `accent`, `warning` or `danger`. Color never
-chooses urgency. State the outcome and next step in text; icons and color can
-reinforce that meaning. Applications supply meaningful content and optional
-accessible names through native ARIA naming props.
+`tone` only sets color: `neutral` (default) for information, `accent` for success or confirmation, `warning` for a problem the user can still avoid, and `danger` for a failure. There is no `success` or `info` tone. Say the outcome in the text; color only reinforces it.
 
-## Update without repetition
+## Examples
 
-Mount the empty live Alert before a message arrives, then update its children
-in place. Keep its urgency stable and avoid changing its key. Static server
-content does not promise an announcement on arrival.
+### Match the tone to the message
 
-Keep feedback brief, announce meaningful changes once, and avoid frequent
-updates, duplicated live regions or announcement-only copies of visible text.
-Alert adds no timers, replay or announcement queue. Assistive technology
-determines how live changes are presented.
+<AlertTonesDemo />
 
-Alert leaves focus where it is and never dismisses itself. Keep messages
-available long enough to read. Put recovery actions outside the live text so
-updates do not repeat control names. Use [AlertDialog](/docs/alert-dialog/) for
-an urgent decision that must interrupt the workflow; use [Field](/docs/field/)
-for errors tied to a particular control.
+### Offer an action
 
-## Compose and customize
+<AlertActionDemo />
 
-Root is a `div`; AlertTitle is an `h2` by default, with `level` from 1–6 for
-the surrounding outline. AlertDescription is a `p`. Each forwards native props,
-`className`, `style` and its native ref. Title and Description are optional.
-The parts expose `alert`, `alert-title` and `alert-description` slots; Root
-adds `data-tone` and `data-announce`.
+Put actions in a flex row inside the Alert, or its grid stretches each Button to full width.
 
-Use `components.alert` or local `--rad-alert-*` variables for `padding`, `gap`,
-`radius`, surface colors/borders/shadow, `titleSize`, `titleWeight` and
-`descriptionSize`. Preserve readable text, wrapping and forced-colors meaning.
-Color transitions honor reduced motion. No provider is required; [themes](/docs/foundations/theming/)
-apply normally.
+### Announce a save result
 
-`AlertProps`, part prop types, `AlertTone`, `AlertAnnouncement` and
-`AlertHeadingLevel` are exported.
+<AlertSaveDemo />
+
+## State
+
+Alert holds no state and contributes no form value. It has no timers and never dismisses itself, so remove it from your own state when the message no longer applies.
+
+## Accessibility
+
+`announce` chooses urgency, independently of tone:
+
+| announce        | Role     | Use for                                        |
+| --------------- | -------- | ---------------------------------------------- |
+| `off` (default) | None     | Static information present when the page loads |
+| `polite`        | `status` | Nonurgent results, such as "Draft saved"       |
+| `assertive`     | `alert`  | Problems that need attention now               |
+
+Both live roles are implicitly live and atomic, so Alert renders no `aria-live` or `aria-atomic`, and its types reject them. Mount a live Alert empty before the message arrives, then update its children in place. Keep `announce` and `key` stable. Give live alerts `aria-label` or `aria-labelledby`. A named static Alert becomes a `group`.
+
+Alert never takes or moves focus. Keep recovery controls outside the live region so updates don't repeat their names.
+
+| Key             | Behavior                               |
+| --------------- | -------------------------------------- |
+| Tab / Shift+Tab | Move through controls inside the Alert |
+
+## Motion
+
+Background, text and border colors transition over `--rad-motion-color-duration`. Reduced motion removes the transition. Alert has no enter or exit animation.
+
+## Styling
+
+| Part             | Element              | data-slot           | Data attributes              |
+| ---------------- | -------------------- | ------------------- | ---------------------------- |
+| Alert            | `div`                | `alert`             | `data-tone`, `data-announce` |
+| AlertTitle       | `h1`–`h6` by `level` | `alert-title`       | None                         |
+| AlertDescription | `p`                  | `alert-description` | None                         |
+
+Each part takes `className`, `style` and a native ref. `components.alert` or `--rad-alert-*` variables set radius, padding, gap, background, color, borderColor, borderWidth, borderStyle, shadow, titleSize, titleWeight and descriptionSize. Forced colors use system text and canvas colors.
+
+## API
+
+| Alert prop       | Type                                   | Default         |
+| ---------------- | -------------------------------------- | --------------- |
+| tone             | neutral / accent / warning / danger    | neutral         |
+| announce         | off / polite / assertive               | off             |
+| style            | ThemeStyle                             | None            |
+| Native div props | Except role, aria-live and aria-atomic | Native defaults |
+
+| AlertTitle prop | Type                  | Default         |
+| --------------- | --------------------- | --------------- |
+| level           | 1 / 2 / 3 / 4 / 5 / 6 | 2               |
+| style           | ThemeStyle            | None            |
+| Native h2 props | Includes className    | Native defaults |
+
+AlertDescription takes `style` and native `<p>` props.
+
+Exports: `Alert`, `AlertTitle`, `AlertDescription`; types `AlertProps`, `AlertTitleProps`, `AlertDescriptionProps`, `AlertTone`, `AlertAnnouncement`, `AlertHeadingLevel`.

@@ -1,21 +1,56 @@
 'use client'
-
-import dynamic from 'next/dynamic'
-import { DemoControls, DemoPreview, usePreviewTheme } from '@/components/demo/DemoFrame'
-
-const Profile = dynamic(() =>
-  import('./CollapsibleExamples').then(module => module.CollapsibleSettingsExample)
-)
-const Transition = dynamic(() =>
-  import('./CollapsibleExamples').then(module => module.CollapsibleHeightExample)
-)
-
-export function CollapsiblePlayground({ states = false }: { states?: boolean }) {
-  const { theme } = usePreviewTheme()
+import { useState } from 'react'
+import { ThemeScope } from '@cognitap/radiant'
+import { SelectControl } from '@/components/demo/ActionControls'
+import { DemoControls, DemoPreview, usePreviewMotionTheme } from '@/components/demo/DemoFrame'
+import { CollapsibleExample, type CollapsibleTask } from './CollapsibleExample'
+export function CollapsiblePlayground({ task = 'shipment' }: { task?: CollapsibleTask }) {
+  const [dir, setDir] = useState<'ltr' | 'rtl'>('ltr'),
+    [off, setOff] = useState(false),
+    [localOff, setLocalOff] = useState(false),
+    theme = usePreviewMotionTheme(off)
   return (
     <>
-      <DemoControls />
-      <DemoPreview>{states ? <Transition theme={theme} /> : <Profile theme={theme} />}</DemoPreview>
+      <DemoControls>
+        <div className="action-options">
+          <SelectControl
+            label="Direction"
+            value={dir}
+            options={['ltr', 'rtl']}
+            onChange={setDir}
+          />
+        </div>
+        <div className="action-toggles">
+          <label>
+            <input
+              type="checkbox"
+              checked={off}
+              onChange={event => setOff(event.target.checked)}
+            />
+            Theme motion off
+          </label>
+          <label>
+            <input
+              type="checkbox"
+              checked={localOff}
+              onChange={event => setLocalOff(event.target.checked)}
+            />
+            Local motion off
+          </label>
+        </div>
+      </DemoControls>
+      <DemoPreview>
+        <ThemeScope
+          theme={theme}
+          style={{ minWidth: 0, maxWidth: '100%' }}
+        >
+          <CollapsibleExample
+            task={task}
+            dir={dir}
+            motion={localOff ? 'off' : 'inherit'}
+          />
+        </ThemeScope>
+      </DemoPreview>
     </>
   )
 }
