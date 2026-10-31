@@ -32,7 +32,7 @@ test('sidebar, search, mobile navigation, missing pages and deployment metadata'
 
         await page.setViewportSize({ width: 390, height: 800 })
         await page.getByRole('button', { name: 'Browse documentation', exact: true }).click()
-        const menu = page.getByRole('dialog', { name: 'Documentation menu', exact: true })
+        const menu = page.getByRole('dialog', { name: 'Documentation', exact: true })
         const mobile = await menu
           .getByRole('link')
           .evaluateAll(nodes => nodes.map(node => node.getAttribute('href')))

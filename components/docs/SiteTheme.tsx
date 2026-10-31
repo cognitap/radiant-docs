@@ -30,7 +30,7 @@ export function AppearanceControl() {
   if (!appearance) throw new Error('AppearanceControl needs SiteTheme.')
   return (
     <label className="appearance-control">
-      Appearance
+      <span className="appearance-label">Appearance</span>
       <select
         value={appearance.mode}
         onChange={event => {
