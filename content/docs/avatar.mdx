@@ -1,53 +1,98 @@
 ---
 title: Avatar
-description: Images and fallback text with a deliberate accessible name.
+description: Show a person or entity as a fixed-size image with a plain-text fallback.
 ---
 
-import { AvatarDemo } from '../../components/AvatarDemo'
+import {
+  AvatarButtonDemo,
+  AvatarCommentDemo,
+  AvatarDemo,
+  AvatarMembersDemo,
+  AvatarTeamDemo
+} from '../../components/AvatarDemo'
 
 <AvatarDemo />
 
-## Choose the alternative deliberately
+## Usage
 
-`alt` is required. Use a meaningful name for a standalone image, such as a
-person's full name. Use `alt=""` when the avatar is decorative or adjacent text
-already identifies the person. Whitespace-only alternatives throw.
+Use Avatar to picture a person or entity. It shows the image once it loads and short text, usually initials, while it loads or when it fails. Use [Badge](/docs/badge/) for a status or count and [Tag](/docs/tag/) for a removable chip. For a profile control, put an Avatar with `alt=""` inside a [Button](/docs/button/) or [Link](/docs/link/) named by its text.
 
-Avatar exposes one named graphic throughout loading, success and failure.
-Its image and visual fallback never add duplicate names. Empty alt hides the
-whole graphic from assistive technology. Do not repeat the same identity in
-both a named avatar and adjacent text.
+```tsx
+<Avatar
+  alt="Jordan Rivera"
+  src={user.photoUrl}
+  fallback="JR"
+/>
+```
 
-`fallback` is short plain text, usually application-supplied initials. It defaults
-to `?`; it is not inferred from a name. Fallback text is visual only: `alt`
-still supplies the accessible meaning. Interactive fallback content is rejected.
+`alt` is required. Write the full name for a standalone avatar. Use `alt=""` when the avatar is decorative or visible text beside it already names the person, so the name is read once. `fallback` is plain text, usually initials, and defaults to `?`. It is never inferred from `alt` and never supplies the name.
 
-## Image lifecycle
+## Examples
 
-Native image load/error events choose the image or fallback. Requests completed
-before hydration are reconciled from native completion and image dimensions.
-Server and no-JavaScript content retain the meaningful fallback; successful
-images appear after hydration. The fixed box stays the same size as sources change.
+### List members by initials
 
-Applications own image URLs, permission/privacy decisions, alternative text and
-fallback content. Pass `src`, `srcSet`, `sizes`, `loading`, `decoding`, `crossOrigin`
-and `referrerPolicy` as needed. Applications revoke their own object URLs.
-Avatar adds no timers, focus handling, live announcements or animation engine.
+<AvatarMembersDemo />
 
-## Customize
+### Keep a name when a photo fails
 
-`controlSize` is `small`, `medium` (default) or `large`. Native span attributes,
-`className`, `style` and an `HTMLSpanElement` ref reach the stable root. It retains
-the `avatar` slot. Root role, naming and decoration stay owned by Avatar.
-`AvatarProps` is exported.
+<AvatarCommentDemo />
 
-The `image` and `fallback` parts accept `className` and `style`; their slots are
-`avatar-image` and `avatar-fallback`. Image `data-state` is `loading`, `loaded`
-or `error`. Visible fallback state is `loading`, `error` or `fallback` when no
-source exists; successful images remove the fallback.
+### Show an avatar beside a name
 
-Use `components.avatar` or `--rad-avatar-*` variables for `size`, `sizeSmall`,
-`sizeLarge`, `radius`, `background`, `color`, `borderColor`, `borderWidth` and
-`fontSize`. Preserve bounds, image visibility and useful fallback contrast when
-restyling. Forced colors retain a system-color frame and fallback text.
-[Themes](/docs/foundations/theming/) apply normally.
+<AvatarButtonDemo />
+
+### Stack a team with overflow
+
+<AvatarTeamDemo />
+
+## State
+
+Avatar has no controlled or uncontrolled value and submits nothing. Image load state is internal. It resets when `src`, `srcSet`, `sizes`, `crossOrigin` or `referrerPolicy` change, and the root element, its ref and its size stay the same. Images that finish loading before hydration are detected on mount. The application owns image URLs, privacy and revoking object URLs.
+
+## Accessibility
+
+The root span is the only named element, and its name holds through loading, failure and recovery. A non-empty `alt` gives it `role="img"` and `aria-label`. An empty `alt` gives it `aria-hidden="true"` and no role. Whitespace-only `alt` throws. The image and the fallback are always hidden from assistive technology.
+
+Avatar rejects `aria-label`, `aria-labelledby`, `aria-hidden`, `aria-live`, `role`, `tabIndex`, `children` and `contentEditable`. A non-string `fallback` throws.
+
+| Key             | Behavior                               |
+| --------------- | -------------------------------------- |
+| Tab / Shift+Tab | Skip the avatar; it is never focusable |
+
+## Motion
+
+None. A loaded image replaces the fallback without a transition.
+
+## Styling
+
+| Part     | Element | Data attributes                                                            | Target               |
+| -------- | ------- | -------------------------------------------------------------------------- | -------------------- |
+| Root     | `span`  | `data-slot="avatar"`, `data-control-size="small \| medium \| large"`       | `className`, `style` |
+| Image    | `img`   | `data-slot="avatar-image"`, `data-state="loading \| loaded \| error"`      | `parts.image`        |
+| Fallback | `span`  | `data-slot="avatar-fallback"`, `data-state="fallback \| loading \| error"` | `parts.fallback`     |
+
+The fallback is `fallback` when there is no source and is removed once the image loads. `components.avatar` or local variables set `--rad-avatar-size` (with `-small` and `-large`), `-radius`, `-border-width`, `-border-color`, `-background`, `-color` and `-font-size`. Forced colors use `CanvasText` and `Canvas`.
+
+## API
+
+### Avatar
+
+| Prop           | Type                                                                        | Default         |
+| -------------- | --------------------------------------------------------------------------- | --------------- |
+| alt            | string; the accessible name, `""` when decorative                           | Required        |
+| fallback       | string; short visual text such as initials                                  | `?`             |
+| src            | string                                                                      | None            |
+| srcSet / sizes | string; native responsive sources                                           | None            |
+| loading        | eager / lazy                                                                | None            |
+| decoding       | sync / async / auto                                                         | None            |
+| crossOrigin    | anonymous / use-credentials / `''`                                          | None            |
+| referrerPolicy | `HTMLAttributeReferrerPolicy`                                               | None            |
+| controlSize    | small / medium / large; 2rem, 2.5rem, 3rem                                  | medium          |
+| parts          | `{ image?: PartStyle; fallback?: PartStyle }`                               | None            |
+| className      | string                                                                      | None            |
+| style          | ThemeStyle, including `--rad-avatar-*`                                      | None            |
+| data-slot      | Extra tokens after `avatar`                                                 | avatar          |
+| ref            | `Ref<HTMLSpanElement>`                                                      | None            |
+| Other props    | Native span props except the rejected naming, role, focus and content props | Native defaults |
+
+Exports: `Avatar`, `AvatarProps`.

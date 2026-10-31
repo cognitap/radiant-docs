@@ -1,0 +1,32 @@
+.card-example {
+  width: 24rem;
+  max-width: 100%;
+}
+
+.card-example p,
+.card-example-list p {
+  margin: 0;
+}
+
+.card-example-list {
+  display: grid;
+  gap: 1rem;
+  width: 24rem;
+  max-width: 100%;
+}
+
+.card-example-target:target {
+  outline: var(--rad-focus-width) var(--rad-focus-style) var(--rad-color-focus);
+  outline-offset: var(--rad-focus-offset);
+}
+
+/* The title link's ::after covers the card, so the whole card follows the link. */
+.card-link {
+  position: relative;
+}
+
+.card-link [data-slot~='card-title'] a::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+}

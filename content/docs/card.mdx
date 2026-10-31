@@ -1,128 +1,117 @@
 ---
 title: Card
-description: Group content and explicit actions on a passive surface, with opt-in measured layout motion.
+description: Group a title, supporting text, content and actions about one subject on a passive surface.
 ---
 
-import { CompositionDemo } from '../../components/CompositionDemo'
+import { CardDemo, CardActionsDemo, CardLinkDemo } from '../../components/CardDemo'
 import { ProfileFormDemo } from '../../components/ProfileFormDemo'
-import { CardDashboardDemo, CardStaticDemo } from '../../components/CardDemo'
 
-<CardDashboardDemo />
+<CardDemo />
 
-## Give content a home
+## Usage
+
+Use Card when several items about one subject sit side by side, such as projects in a grid. A single section in the page flow needs only a heading and content. Use [Alert](/docs/alert/) for a message with a tone, [Dialog](/docs/dialog/) or [Drawer](/docs/drawer/) for a focused task that interrupts the page, [HoverCard](/docs/hover-card/) for a preview on hover or focus, [EmptyState](/docs/empty-state/) for a placeholder and [Separator](/docs/separator/) between sections.
 
 ```tsx
 <Card>
   <CardHeader>
-    <CardTitle level={2}>Studio notes</CardTitle>
-    <CardDescription>Keep the next step close.</CardDescription>
+    <CardTitle>Studio note</CardTitle>
+    <CardDescription>Kiln schedule for this week.</CardDescription>
   </CardHeader>
-  <CardContent>A little room for a good idea.</CardContent>
+  <CardContent>The glaze fires overnight.</CardContent>
   <CardFooter>
     <Button onClick={save}>Save note</Button>
-    <Link href="/projects">All projects</Link>
   </CardFooter>
 </Card>
 ```
 
-Card is a passive div. Its named parts organize content without adding
-selection, focus management or click behavior. Put [Button](/docs/button/)
-actions and [Link](/docs/link/) destinations inside. Keep controls out of
-clickable wrappers. Compose an article or named region around Card when needed.
+## Examples
 
-CardTitle defaults to h2; choose `level` for the surrounding page outline,
-independently of visual size. Cards in a list often use h3 beneath a section h2.
+### Add actions
 
-<CompositionDemo kind="card" />
+<CardActionsDemo />
 
-## Add measured layout motion
+### Make the whole card one link
 
-```tsx
-import { useRef } from 'react'
-import { Card } from '@cognitap/radiant'
-import { useSpringLayout } from '@cognitap/radiant/motion/react'
+Put a [Link](/docs/link/) in CardTitle, make Card `position: relative`, and stretch the link's `::after` over it.
 
-function Projects({ items }: { items: { id: string; title: string }[] }) {
-  const root = useRef<HTMLDivElement>(null)
-  useSpringLayout(root)
+<CardLinkDemo />
 
-  return (
-    <div
-      ref={root}
-      style={{ display: 'grid', gap: '1rem' }}
-    >
-      {items.map(item => (
-        <div
-          key={item.id}
-          data-rad-layout-slot=""
-          style={{ display: 'flow-root' }}
-        >
-          <div data-rad-layout-part="">
-            <Card>{item.title}</Card>
-          </div>
-        </div>
-      ))}
-    </div>
-  )
-}
-```
+### Hold a form
 
-The hook measures natural-flow slots together and animates resize and reorder.
-Use stable keys and one dedicated part per slot. Text reflows without scaling;
-inputs, selection and form submission stay native. Content appears or hides
-immediately. The application restores focus after reordering.
+<ProfileFormDemo placement="card" />
 
-Only the dedicated part animates size and translation;
-Card's styles and refs still belong to its div. Keep slots borderless and
-unpadded, and both wrappers free of transforms, transitions and outer margins.
-Avoid scaled or rotated ancestors and nested layout groups. See the
-[shared layout contract](/docs/foundations/motion/#animate-layout).
+## State
 
-Theme motion off and live reduced motion settle layout immediately. Server
-markup stays in natural flow. Card needs no motion prop or provider; the
-optional provider enhances child actions separately.
+Card has no state, value or callbacks, and submits nothing. A form inside it owns values, validation, reset and submission. Disabling the surface does not disable its children.
 
-<CardStaticDemo />
+## Accessibility
 
-## Parts and customization
+Card is a `<div>` with no role. To make it a landmark, pass `role="region"` and `aria-labelledby` with the CardTitle `id`. CardTitle renders a heading, `h2` by default; choose `level` to fit the page outline. CardDescription is a `<p>` and is not linked automatically.
 
-| Component       | Native style/ref target | Identity         |
-| --------------- | ----------------------- | ---------------- |
-| Card            | div                     | card             |
-| CardHeader      | div                     | card-header      |
-| CardTitle       | Heading, default h2     | card-title       |
-| CardDescription | p                       | card-description |
-| CardContent     | div                     | card-content     |
-| CardFooter      | div, wrapping actions   | card-footer      |
+A link card has one tab stop, named by the title text alone, and screen readers list it as a link in a heading. Keep other controls out of it; they sit under the link layer and cannot be clicked. Do not wrap the card in `<a>`, which names the link with all its text.
 
-Each named part accepts native props, className, typed theme style, ref and
-additive `data-slot` tokens. Caller classes and styles override defaults.
-These are components, not a root parts map. Set `--rad-card-padding` or
-`--rad-card-gap` locally; shared surface and typography roles supply defaults.
-Preserve visible focus and leave room around child controls.
+| Key             | Behavior                                      |
+| --------------- | --------------------------------------------- |
+| Tab / Shift+Tab | Visit links, buttons and fields in DOM order  |
+| Enter           | Follow a link; in a link card, the title link |
 
-## Forms and state
+## Motion
 
-Put a form in CardContent and give it explicit submit/reset actions. The form
-owns validation, values and persistence. Card has no open, selected, pending or
-disabled state; disabling a surface cannot disable its children. Use
-[Dialog](/docs/dialog/) or [Collapsible](/docs/collapsible/) for those behaviors.
-The same [profile recipe](/docs/recipes/profile-form/) works in all three placements.
+Every part transitions color, background and border over `--rad-motion-color-duration`. Reduced motion removes the transition. To animate cards as they move or resize, see [layout motion](/docs/foundations/motion/#animate-layout).
 
-<ProfileFormDemo compare />
+## Styling
 
-## Public props
+| Part            | Element              | data-slot          |
+| --------------- | -------------------- | ------------------ |
+| Card            | `div`, grid          | `card`             |
+| CardHeader      | `div`, grid          | `card-header`      |
+| CardTitle       | `h1`–`h6` by `level` | `card-title`       |
+| CardDescription | `p`                  | `card-description` |
+| CardContent     | `div`                | `card-content`     |
+| CardFooter      | `div`, wrapping row  | `card-footer`      |
 
-Every part's prop type and CardHeadingLevel are exported.
+Parts can appear in any order. Caller classes win, and a caller `data-slot` adds tokens after the part's own. `components.card` or `--rad-card-*` variables set radius, corner-shape, background, color, border, padding, gap, header-gap, footer-gap, shadow, title-size, title-weight, description-color and description-size. Forced colors use system canvas and text colors and drop the shadow.
 
-| Prop               | Applies to / purpose                       |
-| ------------------ | ------------------------------------------ |
-| children           | Every named part                           |
-| level              | CardTitle heading 1–6; default 2           |
-| className, style   | Actual host, including local theme tokens  |
-| ref                | Actual div, heading or paragraph           |
-| data-slot          | Additional identity tokens                 |
-| Other native props | Corresponding host's attributes and events |
+## API
 
-Copy the dashboard file on its own. Existing composition/profile examples keep
-their accompanying paths; the profile recipe documents its optional form adapter.
+Every part takes the native props of its element, `className`, `style` as ThemeStyle, additive `data-slot` and a ref.
+
+| Card prop | Type                  | Default |
+| --------- | --------------------- | ------- |
+| style     | ThemeStyle            | None    |
+| data-slot | string                | card    |
+| ref       | `Ref<HTMLDivElement>` | None    |
+
+| CardHeader prop | Type                  | Default     |
+| --------------- | --------------------- | ----------- |
+| style           | ThemeStyle            | None        |
+| data-slot       | string                | card-header |
+| ref             | `Ref<HTMLDivElement>` | None        |
+
+| CardTitle prop | Type                      | Default    |
+| -------------- | ------------------------- | ---------- |
+| level          | 1 / 2 / 3 / 4 / 5 / 6     | 2          |
+| style          | ThemeStyle                | None       |
+| data-slot      | string                    | card-title |
+| ref            | `Ref<HTMLHeadingElement>` | None       |
+
+| CardDescription prop | Type                        | Default          |
+| -------------------- | --------------------------- | ---------------- |
+| style                | ThemeStyle                  | None             |
+| data-slot            | string                      | card-description |
+| ref                  | `Ref<HTMLParagraphElement>` | None             |
+
+| CardContent prop | Type                  | Default      |
+| ---------------- | --------------------- | ------------ |
+| style            | ThemeStyle            | None         |
+| data-slot        | string                | card-content |
+| ref              | `Ref<HTMLDivElement>` | None         |
+
+| CardFooter prop | Type                  | Default     |
+| --------------- | --------------------- | ----------- |
+| style           | ThemeStyle            | None        |
+| data-slot       | string                | card-footer |
+| ref             | `Ref<HTMLDivElement>` | None        |
+
+Exports: `Card`, `CardHeader`, `CardTitle`, `CardDescription`, `CardContent`, `CardFooter`; types `CardProps`, `CardHeaderProps`, `CardTitleProps`, `CardDescriptionProps`, `CardContentProps`, `CardFooterProps`, `CardHeadingLevel`.

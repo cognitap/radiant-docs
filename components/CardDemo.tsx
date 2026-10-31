@@ -1,27 +1,33 @@
 import { Demo } from './demo/Demo'
 import { CardPlayground } from '@/examples/card/CardPlayground'
-
-export function CardDashboardDemo() {
+const files = ['card/CardExample.tsx', 'card/card-example.css']
+export function CardDemo() {
   return (
     <Demo
-      title="Project dashboard"
-      files={['card/CardExamples.tsx']}
+      title="Post a studio note"
+      files={files}
     >
       <CardPlayground />
-      <noscript className="demo-feedback">
-        Enable JavaScript for editing and layout controls. Source is available below.
-      </noscript>
     </Demo>
   )
 }
-
-export function CardStaticDemo() {
+export function CardActionsDemo() {
   return (
     <Demo
-      title="Static project cards"
-      files={['card/CardExamples.tsx']}
+      title="Track a shipment"
+      files={files}
     >
-      <CardPlayground states />
+      <CardPlayground task="actions" />
+    </Demo>
+  )
+}
+export function CardLinkDemo() {
+  return (
+    <Demo
+      title="Open a project from its card"
+      files={files}
+    >
+      <CardPlayground task="link" />
     </Demo>
   )
 }
