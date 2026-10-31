@@ -1,0 +1,63 @@
+---
+title: Charts
+description: Line, bar, area and pie figures with native data alternatives and keyboard tooltips.
+---
+
+import { ChartsDemo, ChartsEnrollmentDemo, ChartsMixDemo } from '../../components/ChartsDemo'
+
+<ChartsDemo />
+
+## Usage
+
+```tsx
+import { LineChart } from '@cognitap/radiant/charts'
+
+;<LineChart
+  label="Completed sessions"
+  data={[
+    { key: 'one', label: 'Round 1', values: { sessions: 12 } },
+    { key: 'two', label: 'Round 2', values: { sessions: 24 } }
+  ]}
+  series={[{ key: 'sessions', label: 'Sessions' }]}
+/>
+```
+
+Charts share the installed package and stylesheet. The optional entry keeps the SVG renderer outside the core root import.
+
+## Examples
+
+<ChartsEnrollmentDemo />
+
+<ChartsMixDemo />
+
+## State
+
+Applications own data, filters and formatting. Chart rows and series use unique nonempty keys and visible labels. Values are finite numbers or null; missing values leave gaps. Cartesian charts accept one to six series. PieChart accepts one series with nonnegative values. All-zero pies show the empty message while retaining their data table.
+
+Line and area charts connect category centers; bars compare series within each category. Areas share a zero baseline rather than stacking. `formatValue(value, series)` formats both inspected values and table cells. Short category labels fit the plot; the table retains full records.
+
+## Accessibility
+
+A required visible `label` names each native figure; `description` adds context. Every chart includes a native data-table disclosure with exact values. `tableLabel`, `categoryLabel`, `plotLabel`, `legendLabel` and `emptyText` customize internal text.
+
+Focus the first point to inspect its existing Tooltip. Arrow keys move through values; Home/End reach the first/last point. Horizontal keys follow direction, and Escape dismisses the tooltip. The plot uses [ScrollArea](/docs/scroll-area/) at narrow widths. Series also differ through numbered legends and line patterns.
+
+## Motion
+
+Charts update immediately. Tooltip follows the motion provider and reduced-motion preference.
+
+## Styling
+
+Root props, classes, style and ref reach the native figure. Named `parts` target caption, description, plot, legend, actual point Buttons, Tooltip and Table.
+
+`components.chart` controls gap, height, strokeWidth, gridColor and series1–series6. `chartPalette` maps the existing color recommendation into light/dark component overrides. Apply those through defineTheme or use the example's mode-aware CSS variables.
+
+## API
+
+| Export                                | Purpose                                        |
+| ------------------------------------- | ---------------------------------------------- |
+| LineChart / BarChart / AreaChart      | Categorical series figures                     |
+| PieChart                              | One nonnegative series, divided by category    |
+| ChartDataTable                        | Standalone native Table alternative            |
+| chartPalette                          | Existing palette → mode-specific series colors |
+| ChartDatum / ChartSeries / ChartProps | Shared data and presentation types             |
