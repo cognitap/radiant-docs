@@ -14,31 +14,30 @@ Apply a theme to the subtree that needs it, after the
 Radiant's core entry ships `defaultTheme`. The other presets are examples to
 use or copy, from `@cognitap/radiant/examples`, and the
 [theme workshop](/docs/workshop/) starts from the same ones. Its readonly
-`themes` registry lists all eight. Changing presentation preserves a form's
+`themes` registry lists all nine. Changing presentation preserves a form's
 state.
 
 <FoundationDemo kind="presets" />
 
-| Stable ID       | Name          | Named export   | Shared font      | Action font/weight              |
-| --------------- | ------------- | -------------- | ---------------- | ------------------------------- |
-| `radiant`       | Radiant       | `radiant`      | Inter            | Inter 550                       |
-| `default`       | Default       | `defaultTheme` | System sans      | Baseline                        |
-| `soft-squircle` | Soft squircle | `soft`         | Nunito           | Nunito 800                      |
-| `expressive`    | Expressive    | `expressive`   | Poppins          | Poppins 600                     |
-| `glass`         | Glass         | `glass`        | Manrope          | Manrope 700                     |
-| `sharp-3d`      | Sharp 3D      | `sharp`        | System sans      | Archivo Black 400, uppercase    |
-| `jelly`         | Jelly         | `jelly`        | Baloo 2          | Baloo 2 700                     |
-| `ticket`        | Ticket        | `ticket`       | Barlow Condensed | Barlow Condensed 600, uppercase |
+| Stable ID       | Name          | Named export   | Fonts                                  | Language                                            |
+| --------------- | ------------- | -------------- | -------------------------------------- | --------------------------------------------------- |
+| `radiant`       | Radiant       | `radiant`      | Inter                                  | Calm product UI, raised white selection             |
+| `default`       | Default       | `defaultTheme` | System sans                            | The neutral baseline                                |
+| `soft-squircle` | Soft squircle | `soft`         | Nunito                                 | Squircles, filled wells, diffuse shadows            |
+| `sharp-3d`      | Sharp 3D      | `sharp`        | System sans; Archivo Black for actions | Neo-brutalist ink outlines and hard offset shadows  |
+| `glass`         | Glass         | `glass`        | Manrope                                | Frosted translucent layers over a gradient          |
+| `jelly`         | Jelly         | `jelly`        | Baloo 2                                | Clay bevels, pressed-in wells, springy presses      |
+| `ticket`        | Ticket        | `ticket`       | Barlow Condensed                       | Notched controls, scooped dashed stubs, inked picks |
+| `neon`          | Neon          | `neon`         | IBM Plex Mono                          | Bevel-cut corners and glows on a grid               |
+| `editorial`     | Editorial     | `editorial`    | Source Serif 4                         | Serif on paper, hairlines, underlined selection     |
 
 Import a preset by its named export from `@cognitap/radiant/examples`. Store a selection by its stable `id`, not
 its name. A theme does not install fonts or change a control's semantic role.
 
 ### Fonts and browser fallbacks
 
-Radiant does not download preset fonts, and `Theme` has no `fonts` field. Load
-them yourself: body 400, label 600, heading 700 and the action weight in the
-table. Default uses label 550 and heading 600. Inter 550 needs a variable font
-or a face covering that weight. Sharp 3D also needs its separate action font.
+Radiant never downloads preset fonts. Load weights 400, 600 and 700 yourself,
+plus 550 for Default and Radiant and Archivo Black for Sharp 3D actions.
 
 Glass uses translucent surfaces and a gradient canvas, so surrounding content
 affects its appearance. Browsers without `corner-shape` fall back to rounded
@@ -78,11 +77,17 @@ baseline**.
 | `components.radioGroup.gap` | `--rad-radio-group-gap`   | Space between radio options |
 
 Reusable exceptions use the `ThemeComponentOverrides` type; local styles can
-use `ThemeStyle`, with typed CSS and custom properties. Button's font, uppercase
-text, shadow and press effects belong under `components.button`.
+use `ThemeStyle`, with typed CSS and custom properties.
 `radio.labelGap` spaces an option's label; `radioGroup.gap` spaces the options.
 Checkbox caps inherited rounding to stay a box, and Radio stays circular unless
 overridden. Variables beginning `--_` are private.
+
+### Roles
+
+A role reads one token group and reaches every family that plays it:
+`control.action` for actions, `control.field` for wells, `control.selected`
+for the chosen tab, segment or page. See the
+[roles reference](https://github.com/cognitap/radiant/blob/main/docs/theming.md#roles).
 
 ## Nested scopes
 

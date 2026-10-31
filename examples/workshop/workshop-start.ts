@@ -26,7 +26,7 @@ export interface StartingRecipe {
 export interface StartingTheme {
   id: string
   name: string
-  /** A few words of character, read after the name: "Start from Jelly: squishy, playful". */
+  /** A few words of character, read after the name: "Start from Jelly: clay, squishy, playful". */
   character: string
   definition: ThemeDefinition
 }
@@ -42,12 +42,13 @@ export const defaultRecipe: StartingRecipe = {
 const characters: Record<string, string> = {
   radiant: 'calm green, balanced',
   default: 'the neutral baseline',
-  'soft-squircle': 'rounded, friendly',
-  expressive: 'bold type, lively',
-  glass: 'translucent, airy',
-  'sharp-3d': 'square, hard shadows',
-  jelly: 'squishy, playful',
-  ticket: 'condensed, uppercase'
+  'soft-squircle': 'soft, filled, rounded',
+  'sharp-3d': 'neo-brutalist, hard shadows',
+  glass: 'frosted, translucent, airy',
+  jelly: 'clay, squishy, playful',
+  ticket: 'printed stub, uppercase',
+  neon: 'sci-fi glow, cut corners',
+  editorial: 'serif, hairlines, underlines'
 }
 /** Radiant's example themes, so the workshop and the docs pages start from the same values. */
 export const startingThemes: readonly StartingTheme[] = themeDefinitions.map(definition => ({
