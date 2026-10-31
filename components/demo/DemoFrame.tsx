@@ -10,12 +10,26 @@ import {
   useState,
   type ReactNode
 } from 'react'
-import { Button, Fieldset, ThemeScope, type Theme, type ThemeMode } from '@cognitap/radiant'
+import {
+  Button,
+  CodeBlock,
+  CodeBlockContent,
+  CodeBlockCopy,
+  CodeBlockHeader,
+  CodeBlockViewport,
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+  Fieldset,
+  ThemeScope,
+  type Theme,
+  type ThemeMode
+} from '@cognitap/radiant'
 import { radiant, themes } from '@cognitap/radiant/examples'
 import { useHydrated } from '@/examples/profile/useHydrated'
 import { SelectControl } from './ActionControls'
 
-/** `html` is the highlighted `code`, rendered on the server. */
+/** `html` is the highlighted lines of `code`, rendered on the server. */
 export type DemoSource = { name: string; code: string; html: string }
 
 /**
@@ -70,10 +84,12 @@ export function DemoFrame({
       {typeof sources === 'string' ? (
         <RemoteSources url={sources} />
       ) : (
-        <details className="demo-sources">
-          <summary>View source</summary>
-          <SourceFiles sources={sources} />
-        </details>
+        <Collapsible className="demo-sources">
+          <CollapsibleTrigger className="demo-sources-trigger">View source</CollapsibleTrigger>
+          <CollapsibleContent>
+            <SourceFiles sources={sources} />
+          </CollapsibleContent>
+        </Collapsible>
       )}
     </section>
   )
@@ -151,9 +167,9 @@ type Listing =
   | { status: 'loaded'; sources: readonly DemoSource[] }
 
 function RemoteSources({ url }: { url: string }) {
+  const [open, setOpen] = useState(false)
   const [listing, setListing] = useState<Listing>({ status: 'idle' })
-  const details = useRef<HTMLDetailsElement>(null)
-  const summary = useRef<HTMLElement>(null)
+  const trigger = useRef<HTMLElement>(null)
 
   async function load() {
     setListing({ status: 'loading' })
@@ -166,86 +182,79 @@ function RemoteSources({ url }: { url: string }) {
     }
   }
 
-  // The listing may have been opened before hydration, when no toggle handler was attached.
+  // Collapsible adopts a listing opened before hydration, so this also covers that case.
   useEffect(() => {
-    if (details.current?.open) void load()
-    // oxlint-disable-next-line react-hooks/exhaustive-deps -- Only the open state at hydration.
-  }, [])
+    if (open && listing.status === 'idle') void load()
+    // oxlint-disable-next-line react-hooks/exhaustive-deps -- load only reads the URL.
+  }, [open, listing.status])
 
   return (
-    <details
-      ref={details}
+    <Collapsible
       className="demo-sources"
-      onToggle={event => {
-        if (event.currentTarget.open && listing.status === 'idle') void load()
-      }}
+      open={open}
+      onOpenChange={setOpen}
     >
-      <summary ref={summary}>View source</summary>
-      {listing.status === 'loaded' ? (
-        <SourceFiles sources={listing.sources} />
-      ) : (
-        <div className="demo-sources-status">
-          {listing.status === 'idle' && (
-            <p>
-              The source loads when JavaScript runs. <a href={url}>Open the listing as JSON</a>
-            </p>
-          )}
-          <output>
-            {listing.status === 'loading' && 'Loading source…'}
-            {listing.status === 'failed' && 'The source did not load.'}
-          </output>
-          {listing.status === 'failed' && (
-            <Button
-              onClick={() => {
-                summary.current?.focus()
-                void load()
-              }}
-            >
-              Retry
-            </Button>
-          )}
-        </div>
-      )}
-    </details>
+      <CollapsibleTrigger
+        ref={trigger}
+        className="demo-sources-trigger"
+      >
+        View source
+      </CollapsibleTrigger>
+      <CollapsibleContent>
+        {listing.status === 'loaded' ? (
+          <SourceFiles sources={listing.sources} />
+        ) : (
+          <div className="demo-sources-status">
+            {listing.status === 'idle' && (
+              <p>
+                The source loads when JavaScript runs. <a href={url}>Open the listing as JSON</a>
+              </p>
+            )}
+            <output>
+              {listing.status === 'loading' && 'Loading source…'}
+              {listing.status === 'failed' && 'The source did not load.'}
+            </output>
+            {listing.status === 'failed' && (
+              <Button
+                onClick={() => {
+                  trigger.current?.focus()
+                  void load()
+                }}
+              >
+                Retry
+              </Button>
+            )}
+          </div>
+        )}
+      </CollapsibleContent>
+    </Collapsible>
   )
 }
 
 function SourceFile({ source }: { source: DemoSource }) {
-  const [feedback, setFeedback] = useState('')
-  const [copying, setCopying] = useState(false)
   const ready = useHydrated()
-
-  async function copy() {
-    setCopying(true)
-    setFeedback('')
-    try {
-      await navigator.clipboard.writeText(source.code)
-      setFeedback(`Copied ${source.name}.`)
-    } catch {
-      setFeedback('Copy failed. Select and copy the code below.')
-    } finally {
-      setCopying(false)
-    }
-  }
-
   return (
-    <div className="demo-source">
-      <div className="demo-source-heading">
+    <CodeBlock
+      code={source.code}
+      copiedText={`Copied ${source.name}.`}
+    >
+      <CodeBlockHeader>
         <span className="demo-filename">{source.name}</span>
-        <Button
+        <CodeBlockCopy
+          controlSize="small"
+          variant="outline"
           aria-label={`Copy ${source.name}`}
           disabled={!ready}
-          aria-disabled={!ready || copying}
-          onClick={() => {
-            if (!copying) void copy()
-          }}
         >
-          {copying ? 'Copying…' : 'Copy'}
-        </Button>
-      </div>
-      <output className="demo-copy-feedback">{feedback}</output>
-      <div dangerouslySetInnerHTML={{ __html: source.html }} />
-    </div>
+          Copy
+        </CodeBlockCopy>
+      </CodeBlockHeader>
+      <CodeBlockViewport aria-label={`Source: ${source.name}`}>
+        <CodeBlockContent>
+          <span dangerouslySetInnerHTML={{ __html: source.html }} />
+        </CodeBlockContent>
+      </CodeBlockViewport>
+    </CodeBlock>
   )
 }
 

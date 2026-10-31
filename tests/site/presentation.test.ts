@@ -750,7 +750,7 @@ test('Toolbar shares one focus entry while native actions and nested dialog keep
         await page.keyboard.press('ArrowDown')
         await page.getByRole('menuitem', { name: 'Export document', exact: true }).click()
         assert.match(
-          await demo.locator('output[aria-live="polite"]').innerText(),
+          await demo.locator('.demo-canvas output[aria-live="polite"]').innerText(),
           /Export requested/
         )
         const actions = page.getByRole('region', { name: 'Manage document actions', exact: true })
@@ -835,7 +835,7 @@ test('HoverCard opens supplementary real-link previews and preserves keyboard, c
         const resource = page.getByRole('region', { name: 'Open reference material', exact: true })
         await resource.getByRole('link', { name: 'Accessibility resources', exact: true }).click()
         assert.match(
-          await resource.locator('output[aria-live="polite"]').innerText(),
+          await resource.locator('.demo-canvas output[aria-live="polite"]').innerText(),
           /External resource is ready/
         )
         assert.deepEqual(errors, [])
@@ -863,7 +863,7 @@ test('ContextMenu exposes visible alternatives and supports pointer, keyboard an
         await menu.waitFor({ state: 'visible' })
         await menu.getByRole('menuitem', { name: 'Duplicate', exact: true }).click()
         assert.match(
-          await demo.locator('output[aria-live="polite"]').innerText(),
+          await demo.locator('.demo-canvas output[aria-live="polite"]').innerText(),
           /Copy of Project brief created/
         )
         await demo.getByRole('button', { name: 'Rename file', exact: true }).click()
@@ -886,7 +886,10 @@ test('ContextMenu exposes visible alternatives and supports pointer, keyboard an
         )
         await canvas.getByRole('menuitem', { name: 'Move to', exact: true }).click()
         await canvas.getByRole('menuitem', { name: 'Design team', exact: true }).click()
-        assert.match(await canvas.locator('output[aria-live="polite"]').innerText(), /Design team/)
+        assert.match(
+          await canvas.locator('.demo-canvas output[aria-live="polite"]').innerText(),
+          /Design team/
+        )
         assert.deepEqual(errors, [])
       })
     } finally {
@@ -912,7 +915,7 @@ test('Menu docs demonstrate checkable state and nested destination commands', as
         await demo.getByRole('menuitem', { name: 'Shared drives', exact: true }).click()
         await demo.getByRole('menuitem', { name: 'Design team', exact: true }).click()
         assert.match(
-          await demo.locator('output[aria-live="polite"]').innerText(),
+          await demo.locator('.demo-canvas output[aria-live="polite"]').innerText(),
           /CSV.*Design team/i
         )
         assert.deepEqual(errors, [])
@@ -966,7 +969,10 @@ test('Menubar keeps one keyboard entry, switches menus, shares nested commands a
         await board.getByRole('menuitem', { name: 'Move board', exact: true }).click()
         await board.getByRole('menuitem', { name: 'Team spaces', exact: true }).click()
         await board.getByRole('menuitem', { name: 'Design team', exact: true }).click()
-        assert.match(await board.locator('output[aria-live="polite"]').innerText(), /Design team/)
+        assert.match(
+          await board.locator('.demo-canvas output[aria-live="polite"]').innerText(),
+          /Design team/
+        )
         const report = page.getByRole('region', { name: 'Submit report commands', exact: true })
         await report.getByRole('checkbox', { name: 'Keep File menu open', exact: true }).check()
         const exportItem = report.getByRole('menuitem', { name: 'Export report', exact: true })
@@ -976,7 +982,7 @@ test('Menubar keeps one keyboard entry, switches menus, shares nested commands a
         await report.getByRole('checkbox', { name: 'Review before export', exact: true }).check()
         await exportItem.click()
         assert.match(
-          await report.locator('output[aria-live="polite"]').innerText(),
+          await report.locator('.demo-canvas output[aria-live="polite"]').innerText(),
           /Review the report/
         )
         await report.getByRole('checkbox', { name: 'Keep File menu open', exact: true }).uncheck()
@@ -984,7 +990,7 @@ test('Menubar keeps one keyboard entry, switches menus, shares nested commands a
         await report.getByRole('menuitem', { name: 'File', exact: true }).click()
         await exportItem.click()
         assert.match(
-          await report.locator('output[aria-live="polite"]').innerText(),
+          await report.locator('.demo-canvas output[aria-live="polite"]').innerText(),
           /Export requested for Quarterly review/
         )
         assert.deepEqual(errors, [])

@@ -12,7 +12,7 @@ const languages: Partial<Record<string, 'tsx' | 'ts' | 'css' | 'json'>> = {
 }
 const themes = { light: 'github-light', dark: 'github-dark' } as const
 
-/** File reads and syntax highlighting stay on the server. */
+/** File reads and syntax highlighting stay on the server. `html` is the highlighted lines. */
 export async function highlightSource(file: string): Promise<DemoSource> {
   const path = resolve(examplesRoot, file)
   const lang = languages[extname(path)]
@@ -24,16 +24,15 @@ export async function highlightSource(file: string): Promise<DemoSource> {
   const html = highlighter.codeToHtml(code, {
     lang,
     themes,
-    defaultColor: 'light',
+    defaultColor: false,
+    // CodeBlock owns the pre and code elements, so keep only the highlighted lines.
     transformers: [
       {
-        pre(node) {
-          // The scrollable pre needs keyboard focus and a named region.
-          Object.assign(node.properties, {
-            tabindex: 0,
-            role: 'region',
-            'aria-label': `Source: ${file}`
-          })
+        root(root) {
+          const pre = root.children.find(node => node.type === 'element')
+          const element = pre?.children.find(node => node.type === 'element')
+          if (!element) throw new Error('Shiki output has no code element.')
+          return { ...root, children: element.children }
         }
       }
     ]
