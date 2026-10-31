@@ -2274,3 +2274,84 @@ test('Resizable docs preserve fractional drag collapse, keyboard layout changes 
     }
   })
 })
+
+test('NavigationMenu docs navigate real content, resize filtered panels and preserve controlled refusal and RTL keyboard entry', async () => {
+  await withSite(async (baseURL, browser) => {
+    const page = await browser.newPage(),
+      errors = track(page)
+    try {
+      await capture(page, 'navigation-menu', async () => {
+        await page.goto(baseURL + '/docs/navigation-menu/')
+        await page.waitForFunction(
+          () => !document.querySelector<HTMLButtonElement>('.demo-heading button')?.disabled
+        )
+        const library = page.getByRole('region', {
+            name: 'Research library application',
+            exact: true
+          }),
+          nav = library.getByRole('navigation', { name: 'Research library', exact: true }),
+          studies = nav.getByRole('button', { name: 'Studies', exact: true })
+        await studies.focus()
+        await page.keyboard.press('ArrowDown')
+        const first = nav.getByRole('link', { name: 'Reading comprehension', exact: true })
+        assert.ok(await first.evaluate(node => node === node.ownerDocument.activeElement))
+        await nav.getByRole('link', { name: 'Navigation study', exact: true }).click()
+        await library.getByRole('heading', { name: 'Navigation study', exact: true }).waitFor()
+        assert.equal(await studies.getAttribute('aria-expanded'), 'false')
+        const help = page.getByRole('region', { name: 'Research help application', exact: true })
+        await help
+          .getByRole('combobox', { name: 'Guide audience', exact: true })
+          .selectOption('new')
+        await help.getByRole('button', { name: 'Guides', exact: true }).click()
+        assert.equal(
+          await help.getByRole('link', { name: 'Compare research rounds', exact: true }).count(),
+          0
+        )
+        await help.getByRole('link', { name: 'Share session results', exact: true }).click()
+        await help.getByRole('heading', { name: 'Share session results', exact: true }).waitFor()
+        const workspace = page.getByRole('region', {
+            name: 'Research workspace application',
+            exact: true
+          }),
+          projects = workspace.getByRole('button', { name: 'Projects', exact: true })
+        await workspace.getByRole('checkbox', { name: 'Keep navigation open', exact: true }).check()
+        await projects.click()
+        await page.keyboard.press('Escape')
+        assert.equal(await projects.getAttribute('aria-expanded'), 'true')
+        assert.match(
+          await workspace
+            .getByRole('status', { name: 'Research workspace feedback', exact: true })
+            .innerText(),
+          /Keep navigation open is enabled/
+        )
+        await workspace
+          .getByRole('checkbox', { name: 'Keep navigation open', exact: true })
+          .uncheck()
+        await projects.click()
+        await projects.focus()
+        await page.keyboard.press('ArrowDown')
+        await workspace.getByRole('link', { name: 'Harbor reading', exact: true }).click()
+        await workspace.getByRole('heading', { name: 'Harbor reading', exact: true }).waitFor()
+        const demo = page.getByRole('region', { name: 'Find study materials', exact: true })
+        await demo.getByRole('combobox', { name: 'Direction', exact: true }).selectOption('rtl')
+        await page.setViewportSize({ width: 320, height: 850 })
+        await studies.focus()
+        await page.keyboard.press('ArrowLeft')
+        assert.ok(
+          await nav
+            .getByRole('button', { name: 'Resources', exact: true })
+            .evaluate(node => node === node.ownerDocument.activeElement)
+        )
+        await page.keyboard.press('ArrowDown')
+        const viewport = nav.locator('[data-slot~="navigation-menu-viewport"]')
+        assert.ok((await viewport.boundingBox())!.width <= 288)
+        await page.keyboard.press('Escape')
+        assert.equal(await studies.getAttribute('aria-expanded'), 'false')
+        assert.equal(await nav.getByRole('menu').count(), 0)
+        assert.deepEqual(errors, [])
+      })
+    } finally {
+      await page.close()
+    }
+  })
+})
