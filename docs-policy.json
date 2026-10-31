@@ -19,23 +19,18 @@
     ],
     "pending": [
       "content/docs/accordion.mdx",
-      "content/docs/alert-dialog.mdx",
       "content/docs/alert.mdx",
       "content/docs/avatar.mdx",
       "content/docs/badge.mdx",
       "content/docs/breadcrumb.mdx",
       "content/docs/card.mdx",
       "content/docs/collapsible.mdx",
-      "content/docs/dialog.mdx",
       "content/docs/pagination.mdx",
-      "content/docs/popover.mdx",
       "content/docs/progress.mdx",
       "content/docs/separator.mdx",
       "content/docs/skeleton.mdx",
       "content/docs/spinner.mdx",
-      "content/docs/table.mdx",
-      "content/docs/toast.mdx",
-      "content/docs/tooltip.mdx"
+      "content/docs/table.mdx"
     ]
   }
 }

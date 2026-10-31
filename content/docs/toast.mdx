@@ -1,60 +1,131 @@
 ---
 title: Toast
-description: Queued feedback with deliberate announcements, timing and reachable actions.
+description: Brief notifications that appear one at a time without moving focus.
 ---
 
-import { ToastDemo } from '../../components/ToastDemo'
+import {
+  ToastDemo,
+  ToastSaveDemo,
+  ToastUndoDemo,
+  ToastErrorDemo,
+  ToastQueueDemo
+} from '../../components/ToastDemo'
 
 <ToastDemo />
 
-## Queue notifications
+## Usage
 
-Keep ToastProvider mounted before messages arrive. Place Toast roots inside
-ToastViewport. One notification is visible at a time, in registration order;
-closed or removed roots release the next slot. Queued roots stay hidden and
-inert. They consume no timeout. Server markup keeps them hidden until hydration.
+Use Toast to confirm or report something the user just did. Use [Alert](/docs/alert/) for a message that must stay in the page, and [AlertDialog](/docs/alert-dialog/) for a decision the user must make before continuing.
 
-Use controlled `open`/`onOpenChange` or initial `defaultOpen`. A controlled owner
-may refuse requests. `useToast()` exposes `open`, `visible` and `setOpen`, or
-returns `null` outside its root. Remount distinct events with unique keys;
-identical text in two notifications remains two events.
+```tsx
+<ToastProvider>
+  <Button onClick={() => setOpen(true)}>Save draft</Button>
+  <ToastViewport>
+    <Toast
+      open={open}
+      onOpenChange={setOpen}
+    >
+      <ToastTitle>Draft saved</ToastTitle>
+      <ToastDescription>Your latest edits are stored.</ToastDescription>
+      <ToastClose>Dismiss</ToastClose>
+    </Toast>
+  </ToastViewport>
+</ToastProvider>
+```
 
-## Choose announcements and timing
+There is no `toast()` function. Render a Toast for each message from your own state.
 
-`announce` defaults to `polite`; `assertive` is for urgent interruptions, and
-`off` suppresses announcements. Persistent provider live hosts receive Title,
-Description and Action's required `altText`; Close is excluded. Unchanged text
-is not replayed. Optional `announcement` supplies replacement text for rich
-content. Root's name defaults to Title text; native ARIA naming overrides it.
+## Examples
 
-Provider and Root accept `duration` in milliseconds from 0–2147483647.
-Default `0` persists. Positive timeouts begin when visible, pause on mouse/pen
-hover, focus within, or hidden documents, and resume with remaining time.
-Changing duration restarts the timer. Cleanup cancels timers and announcements.
+### Confirm a save
 
-Pausing alone does not make a time limit accessible. Offer timing controls or
-an untimed equivalent. Keep essential outcomes and actions available through
-[Alert](/docs/alert/) or ordinary page content. Use [AlertDialog](/docs/alert-dialog/)
-for an urgent decision requiring interruption.
+<ToastSaveDemo />
 
-## Reach actions
+### Undo a deletion
 
-Opening preserves focus. F8 focuses the current toast; Viewport's `hotkey={false}`
-disables this shortcut. Focus never leaves an unrelated modal. Put the viewport
-inside an active Dialog when its actions belong there.
+<ToastUndoDemo />
 
-Action and Close compose [Button](/docs/button/). Guards run before handlers;
-`preventDefault()` cancels dismissal. Native forms, `render` and refs remain
-available. Escape inside dismisses. Closing returns focus to the control used
-to enter the toast when it remains available; deliberate outside focus is preserved.
+### Report a failed upload
 
-## Style the parts
+<ToastErrorDemo />
 
-Root is an Alert `div`, Viewport a named `section`, Title a heading and
-Description a paragraph. Actions are buttons. Parts retain their base slots
-and add `toast-*`; Root exposes `data-state`, `data-queued` and `data-urgency`.
+### Queue notifications from an event handler
 
-Use `components.toast`, local `--rad-toast-*` variables, classes, styles and
-native refs. Viewport defaults to fixed bottom-right placement; preserve bounds,
-scrolling and focus rings when restyling. Optional popup motion honors off and
-reduced motion. All part prop types and `ToastState` are exported.
+<ToastQueueDemo />
+
+## State
+
+Use `open` or `defaultOpen`, never both. ToastAction, ToastClose, Escape inside the toast and the timeout each call `onOpenChange(false)`. An action's `onClick` runs first; `event.preventDefault()` keeps the toast open.
+
+Toast `duration` overrides the provider's, in milliseconds. The default `0` keeps the toast until it is dismissed. The timer starts when the toast is visible and pauses while it is hovered or focused, or the document is hidden.
+
+A provider shows one toast at a time. The rest wait hidden and inert, in the order they opened, with `data-queued`. `useToast()` returns `{ open, visible, setOpen }` inside a Toast and `null` outside.
+
+## Accessibility
+
+Opening never moves focus. The provider announces the toast politely, or through `role="alert"` with `announce="assertive"`. It reads ToastTitle, ToastDescription and each ToastAction's `altText`, never ToastClose. `announcement` replaces that text.
+
+`altText` is required because the user hears the toast from outside it, often after it has closed. Say where the action is: "Undo is available in Notifications, reached with F8." A blank value throws. The button's name stays its visible text. Keep `duration` at `0` when the user must reach an action.
+
+| Key             | Behavior                                     |
+| --------------- | -------------------------------------------- |
+| F8              | Focus the visible toast from anywhere        |
+| Tab / Shift+Tab | Move between actions inside the toast        |
+| Enter / Space   | Activate an action or Close; close the toast |
+| Escape          | Close the toast                              |
+
+Closing returns focus to where it was. `hotkey={false}` on ToastViewport turns F8 off.
+
+## Motion
+
+With a `MotionProvider` from `@cognitap/radiant/motion/react`, the toast fades in. `motion="off"` and reduced motion remove the fade.
+
+## Styling
+
+Every part takes `className` and has a `toast-*` `data-slot`. Toast has `data-state`, `data-queued`, `data-urgency`, `data-tone` and `data-motion`.
+
+Pass `--rad-toast-*` tokens through `style`. Toast takes padding, gap, radius, background, color, border and shadow tokens. The viewport takes `--rad-toast-inset`, `--rad-toast-width` and `--rad-toast-z-index`, and is fixed to the bottom right by default.
+
+## API
+
+| ToastProvider prop | Type      | Default |
+| ------------------ | --------- | ------- |
+| duration           | number    | 0       |
+| children           | ReactNode | None    |
+
+| ToastViewport prop   | Type                                        | Default         |
+| -------------------- | ------------------------------------------- | --------------- |
+| hotkey               | boolean                                     | true            |
+| aria-label           | string                                      | "Notifications" |
+| style                | ThemeStyle                                  | None            |
+| Native section props | Except role, tabIndex and aria-keyshortcuts | Native defaults |
+
+| Toast prop                 | Type                                                  | Default           |
+| -------------------------- | ----------------------------------------------------- | ----------------- |
+| open / defaultOpen         | boolean; exclusive owner                              | false             |
+| onOpenChange               | (open: boolean) => void                               | None              |
+| duration                   | number of milliseconds, 0 to 2147483647               | Provider duration |
+| tone                       | neutral / accent / warning / danger                   | neutral           |
+| announce                   | polite / assertive / off                              | polite            |
+| announcement               | string                                                | Derived           |
+| motion                     | inherit / off                                         | inherit           |
+| Alert and native div props | Except hidden, inert, aria-hidden, tabIndex, onSelect | Native defaults   |
+
+| ToastTitle prop | Type                  | Default         |
+| --------------- | --------------------- | --------------- |
+| level           | 1 / 2 / 3 / 4 / 5 / 6 | 2               |
+| Native h2 props | Includes className    | Native defaults |
+
+ToastDescription takes native `<p>` props.
+
+| ToastAction prop             | Type                                   | Default         |
+| ---------------------------- | -------------------------------------- | --------------- |
+| altText                      | string; required, not blank            | None            |
+| onClick                      | MouseEventHandler; runs before closing | None            |
+| variant / tone / controlSize | As [Button](/docs/button/#api)         | Button's        |
+| pending / disabled / render  | As Button                              | Button's        |
+| Button props                 | Except pressed state and aria-pressed  | Native defaults |
+
+ToastClose takes the same props as ToastAction without `altText`.
+
+Exports: `ToastProvider`, `ToastViewport`, `Toast`, `ToastTitle`, `ToastDescription`, `ToastAction`, `ToastClose`, `useToast`; types `ToastProviderProps`, `ToastViewportProps`, `ToastProps`, `ToastState`, `ToastAnnouncement`, `ToastTitleProps`, `ToastDescriptionProps`, `ToastActionProps`, `ToastCloseProps`, `ToastRenderProps`.

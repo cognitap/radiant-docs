@@ -1,56 +1,105 @@
 ---
 title: Tooltip
-description: Supplementary descriptions on hover and keyboard focus.
+description: Add a short, nonessential description to a button on hover and keyboard focus.
 ---
 
-import { TooltipDemo } from '../../components/TooltipDemo'
+import {
+  TooltipDemo,
+  TooltipToolbarDemo,
+  TooltipDelayDemo,
+  TooltipControlledDemo
+} from '../../components/TooltipDemo'
 
 <TooltipDemo />
 
-## Keep the action understandable
+## Usage
 
-Use Tooltip for brief, nonessential descriptions. Keep names, instructions and
-critical information visible without hovering. Content must contain no links,
-buttons or other interactive elements. Use [Popover](/docs/popover/) for
-interactive anchored content.
+Use Tooltip for a brief description of a button. Use [Popover](/docs/popover/) for interactive content such as links, buttons or inputs, and [HoverCard](/docs/hover-card/) for rich previews on links. Keep names, instructions and anything essential in visible text.
 
-Trigger composes [Button](/docs/button/), including native props, guards,
-`render` and refs. Forward all resolved props to one button. Tooltip owns an
-`aria-describedby` relationship and merges existing description IDs; it does
-not replace the accessible name. Content is a nonfocusable `span` with
-`role="tooltip"`. Native disabled buttons cannot receive focus: place any
-explanation in visible text rather than depending on their tooltip.
+```tsx
+<Tooltip>
+  <TooltipTrigger onClick={exportReport}>Export report</TooltipTrigger>
+  <TooltipPortal>
+    <TooltipContent>Download the report as a CSV file.</TooltipContent>
+  </TooltipPortal>
+</Tooltip>
+```
 
-## Timing and dismissal
+## Examples
 
-Keyboard focus opens immediately. Mouse and pen hover open after `openDelay`
-(default 500 ms). Leaving both trigger and content closes after `closeDelay`
-(default 150 ms); moving across the placement gap keeps the description open.
-Both delays must be finite and nonnegative.
+### Describe icon buttons
 
-Escape dismisses the top overlay without moving focus. The current hover/focus
-session stays dismissed; leaving and entering again permits reopening.
-Clicking the trigger dismisses the tooltip while preserving its action. Touch
-activation does not open it. No essential information should depend on touch
-users discovering a tooltip.
+<TooltipToolbarDemo />
 
-Choose controlled `open`/`onOpenChange` or initial `defaultOpen`. Owners may
-refuse state requests. Unmount cancels timers and listeners.
+### Open without a delay
 
-## Position and style
+<TooltipDelayDemo />
 
-Content accepts `side`, `align`, `sideOffset` and `collisionPadding`, following
-[Popover positioning](/docs/popover/#position-and-customize). Portal mounts
-beside the trigger to preserve themes and modal ancestry; the top layer
-escapes clipping. Keep the trigger mounted and visible.
+### Show a tooltip from your own state
 
-Style Content through `className`, `style`, a span ref, `components.tooltip`
-or local `--rad-tooltip-*` variables. Overrides include `maxWidth`, `padding`,
-`radius`, `background`, `color`, borders, `shadow`, `fontSize` and `fontWeight`.
-Preserve hidden closed content and readable wrapping. Optional popup motion
-honors `motion="off"` and reduced motion.
+<TooltipControlledDemo />
 
-Parts expose `tooltip-trigger` and `tooltip-content` slots plus `data-state`,
-`data-side` and `data-align`. Root and Portal add no host. All part prop types,
-`TooltipRenderProps` and `TooltipState` are exported; `useTooltip()` returns
-state or `null` outside its owner.
+## State
+
+Use `open` with `onOpenChange`, or `defaultOpen`, never both. A controlled owner may refuse a change: the tooltip stays open after Escape while `open` stays true. Prop changes do not call `onOpenChange`. `useTooltip()` returns `{ open, setOpen, contentId }`, or `null` outside a Tooltip.
+
+Tooltip takes no part in forms. TooltipTrigger defaults to `type="button"`.
+
+## Accessibility
+
+A tooltip only describes. It never holds essential information, because touch never opens it. Content is a `span` with `role="tooltip"` that cannot take focus and must contain no interactive elements. The trigger gets `aria-describedby` pointing at it, after any description IDs you pass. The tooltip never names the button, so an icon-only trigger needs `aria-label`.
+
+A natively `disabled` button cannot take focus, so keyboard and touch users never see its tooltip. Put the reason a control is disabled in visible text.
+
+TooltipTrigger keeps `pressed` for toolbar toggles. It opens nothing on click, so it has no `aria-expanded` or `aria-haspopup`; clicking runs the button's action and closes the tooltip.
+
+| Key           | Behavior                                                           |
+| ------------- | ------------------------------------------------------------------ |
+| Tab           | Focus the trigger and open at once, ignoring `openDelay`           |
+| Tab away      | Close after `closeDelay`                                           |
+| Escape        | Close without moving focus until focus or hover leaves and returns |
+| Enter / Space | Run the button's action and close the tooltip                      |
+
+Hover opens after `openDelay`; the pointer can cross the gap to the content. Inside a Popover, the tooltip gets Escape first.
+
+## Motion
+
+With `MotionProvider` from `@cognitap/radiant/motion/react`, content fades in. Closing never waits for an animation. `motion="off"` on TooltipContent or reduced motion shows it at full opacity.
+
+## Styling
+
+Tooltip and TooltipPortal render no element. The portal mounts content beside the trigger, keeping theme and modal ancestry, and content shows in the top layer.
+
+TooltipTrigger renders [Button](/docs/button/) with `data-slot="button tooltip-trigger"`. TooltipContent has `data-slot="tooltip-content"`, `data-state`, `data-motion`, and the `data-side` and `data-align` used after flipping. `className`, `style` and `ref` target the span.
+
+Use `components.tooltip` or `--rad-tooltip-*` variables: `max-width` (20rem), `padding`, `radius`, `background`, `color`, `border-color`, `border-width`, `border-style`, `shadow`, `font-size` and `font-weight`.
+
+## API
+
+| Tooltip prop       | Type                                    | Default |
+| ------------------ | --------------------------------------- | ------- |
+| open / defaultOpen | boolean; exclusive owner                | false   |
+| onOpenChange       | (open: boolean) => void                 | None    |
+| openDelay          | Finite nonnegative ms; focus ignores it | 500     |
+| closeDelay         | Finite nonnegative ms                   | 150     |
+| children           | ReactNode                               | None    |
+
+| TooltipTrigger prop | Type                                                         | Default         |
+| ------------------- | ------------------------------------------------------------ | --------------- |
+| Button props        | Includes variant, tone, iconOnly, pending, disabled, pressed | Button defaults |
+| render              | (props: TooltipRenderProps) => ReactElement                  | Native button   |
+| ref                 | `Ref<HTMLButtonElement>`                                     | None            |
+
+| TooltipContent prop           | Type                                           | Default         |
+| ----------------------------- | ---------------------------------------------- | --------------- |
+| side                          | top / right / bottom / left; flips when needed | top             |
+| align                         | start / center / end                           | center          |
+| sideOffset / collisionPadding | Pixels                                         | 8 / 8           |
+| motion                        | inherit / off                                  | inherit         |
+| className / style             | string / ThemeStyle                            | None            |
+| ref                           | `Ref<HTMLSpanElement>`                         | None            |
+| Native span attributes        | Except id, role, popover and tabIndex          | Native defaults |
+
+`TooltipPortal` accepts children and has no host. Tooltip composes the trigger's focus, blur, pointer and click handlers with yours.
+
+Exports: `Tooltip`, `TooltipTrigger`, `TooltipContent`, `TooltipPortal`, `useTooltip`; types `TooltipProps`, `TooltipState`, `TooltipTriggerProps`, `TooltipContentProps`, `TooltipPortalProps`, `TooltipRenderProps`.

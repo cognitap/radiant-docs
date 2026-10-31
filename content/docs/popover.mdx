@@ -1,24 +1,26 @@
 ---
 title: Popover
-description: Nonmodal anchored content that preserves the surrounding page.
+description: Nonmodal content anchored to a button, for details or a small form opened on demand.
 ---
 
-```tsx
 import {
-  Popover,
-  PopoverTrigger,
-  PopoverPortal,
-  PopoverContent,
-  PopoverClose
-} from '@cognitap/radiant'
+  PopoverDemo,
+  PopoverEditDemo,
+  PopoverControlledDemo,
+  PopoverPlacementDemo
+} from '../../components/PopoverDemo'
 
-;<Popover>
+<PopoverDemo />
+
+## Usage
+
+Use Popover for details or a small form the reader opens on demand. Use [Tooltip](/docs/tooltip/) to describe a control, [HoverCard](/docs/hover-card/) for a link preview, [Menu](/docs/menu/) for a list of actions and [Dialog](/docs/dialog/) for a modal task.
+
+```tsx
+<Popover>
   <PopoverTrigger>Delivery details</PopoverTrigger>
   <PopoverPortal>
-    <PopoverContent
-      side="bottom"
-      align="start"
-    >
+    <PopoverContent>
       <p>Standard delivery takes three to five working days.</p>
       <PopoverClose variant="outline">Got it</PopoverClose>
     </PopoverContent>
@@ -26,52 +28,87 @@ import {
 </Popover>
 ```
 
-## Own the content semantics
+## Examples
 
-Popover supplies a nonmodal top-layer surface. Content stays a `div` without
-an implicit role. Supply appropriate semantics and names: an interactive
-preferences panel can use `role="dialog"` with `aria-label`. A menu or listbox
-also needs its own keyboard and selection behavior; a role alone is insufficient.
-Use [Dialog](/docs/dialog/) when the surrounding page must become inert.
+### Edit a value
 
-Trigger owns `aria-expanded` and `aria-controls`; it adds no `aria-haspopup`.
-Trigger and Close compose [Button](/docs/button/), including guards, native
-form props, `render` and refs. Forward all resolved props to one button.
-`preventDefault()` in their click handler cancels the state request.
+<PopoverEditDemo />
 
-## Focus and dismissal
+### Refuse a close
 
-Opening keeps focus on the trigger. Content's `initialFocusRef` can target a
-descendant on each open. Native navigation places content after the trigger
-in Tab order. Focus is never trapped. Moving focus outside dismisses it.
+<PopoverControlledDemo />
 
-Escape dismisses the top Popover layer; Close dismisses its owner. They return
-focus to the trigger when focus was inside. Outside pointer/focus dismissal
-preserves the new target. Closing an ancestor Popover or Dialog hides its
-descendants. Unmount removes observers, listeners and motion bindings.
+### Choose a placement
 
-Choose controlled `open`/`onOpenChange` or initial `defaultOpen`. Controlled
-owners may refuse requests. Independent controlled surfaces may coexist.
-Keep the trigger mounted and visible while using its content.
+<PopoverPlacementDemo />
 
-## Position and customize
+## State
 
-Content accepts `side` (`top`, `right`, `bottom`, `left`), `align` (`start`,
-`center`, `end`), `sideOffset` (8) and `collisionPadding` (8). Numeric values
-must be finite and nonnegative. Placement flips and shifts within the visual
-viewport and updates after scrolling, resizing and content changes. Top/bottom
-start/end follow RTL; left/right are physical sides.
+Use `open` with `onOpenChange`, or `defaultOpen`, never both. `onOpenChange` fires once per request: trigger, Close, Escape, outside pointer or focus leaving. A controlled owner refuses a close by not updating `open`. Closing an ancestor Popover or Dialog still hides descendants. `usePopover()` returns `{ open, setOpen, contentId }`, or `null` outside a Popover.
 
-Root and Portal add no wrapper. Portal mounts beside the trigger, preserving
-themes, native forms and modal ancestry while the top layer escapes clipping.
-Content owns its style/ref target. Use `components.popover` or local
-`--rad-popover-*` variables, such as `width`, `padding`, `radius` and `shadow`.
-Retain bounded scrolling, visible focus and hidden closed content.
+Popover adds no form value. `PopoverPortal` mounts content in the trigger's nearest block container, so a surrounding `<form>`, theme and modal ancestry still apply.
 
-Content exposes `data-state`, effective `data-side`/`data-align`, and
-`data-slot="popover-content"`. Buttons add `popover-trigger` or `popover-close`
-to their Button identity. Optional MotionProvider entry feedback honors
-Content's `motion="off"` and reduced motion; closing stays immediate.
+## Accessibility
 
-Each part's prop type, `PopoverRenderProps`, `PopoverSide`, `PopoverAlign` and
-`PopoverState` are exported. `usePopover()` returns state or `null` outside its owner.
+The trigger is a native button with `aria-expanded` and `aria-controls`. Content is a plain `div`: give it the role and name it needs, such as `role="dialog"` with `aria-label` for a form. Popover adds no menu or listbox behavior.
+
+Opening keeps focus on the trigger unless `initialFocusRef` names a descendant. Content follows the trigger in Tab order, without a focus trap. Escape and Close return focus to the trigger when focus was inside; outside dismissal leaves focus where it landed.
+
+| Key             | Where              | Behavior                              |
+| --------------- | ------------------ | ------------------------------------- |
+| Enter / Space   | Trigger            | Toggle the popover                    |
+| Tab             | Open trigger       | Move into the content                 |
+| Tab / Shift+Tab | Leaving content    | Move on and close                     |
+| Escape          | Trigger or content | Close the topmost popover             |
+| Enter / Space   | PopoverClose       | Close and return focus to the trigger |
+
+## Motion
+
+With a `MotionProvider` from `@cognitap/radiant/motion/react`, content fades in. Reduced motion and `motion="off"` on PopoverContent remove it. Closing is immediate.
+
+## Styling
+
+Content flips and shifts to stay inside the visual viewport. On top and bottom sides, `start` and `end` follow text direction. `data-side` and `data-align` report the placement after flipping.
+
+Content exposes `data-slot="popover-content"`, `data-state`, `data-side`, `data-align` and `data-motion`. The trigger and close add `popover-trigger` and `popover-close` to Button's `data-slot`. Caller `data-slot` values are appended; `className` merges over the defaults.
+
+Use `components.popover` or `--rad-popover-*` variables, such as `--rad-popover-width` (default `20rem`), `padding`, `radius` and `shadow`.
+
+## API
+
+| Popover prop       | Type                     | Default |
+| ------------------ | ------------------------ | ------- |
+| open / defaultOpen | boolean; exclusive owner | false   |
+| onOpenChange       | (open: boolean) => void  | None    |
+| children           | ReactNode                | None    |
+
+| PopoverTrigger prop          | Type                                                           | Default                 |
+| ---------------------------- | -------------------------------------------------------------- | ----------------------- |
+| variant / tone / controlSize | ButtonVariant / Tone / ControlSize                             | solid / accent / medium |
+| pending / disabled           | boolean                                                        | false                   |
+| render                       | (props: PopoverRenderProps) => ReactElement                    | Native button           |
+| onClick                      | Runs first; `preventDefault()` cancels the toggle              | None                    |
+| Native button props          | `aria-controls`, `aria-expanded` and `popoverTarget` are owned | Native defaults         |
+| ref                          | `Ref<HTMLButtonElement>`                                       | None                    |
+
+| PopoverContent prop           | Type                                        | Default         |
+| ----------------------------- | ------------------------------------------- | --------------- |
+| side                          | top / right / bottom / left                 | bottom          |
+| align                         | start / center / end                        | start           |
+| sideOffset / collisionPadding | Finite nonnegative pixels                   | 8 / 8           |
+| initialFocusRef               | `RefObject<HTMLElement \| null>`            | Trigger focus   |
+| motion                        | inherit / off                               | inherit         |
+| className / style             | string / ThemeStyle                         | None            |
+| Native div props              | Includes role and naming; not id or popover | Native defaults |
+| ref                           | `Ref<HTMLDivElement>`                       | None            |
+
+| PopoverClose prop            | Type                                             | Default                 |
+| ---------------------------- | ------------------------------------------------ | ----------------------- |
+| variant / tone / controlSize | ButtonVariant / Tone / ControlSize               | solid / accent / medium |
+| render                       | (props: PopoverRenderProps) => ReactElement      | Native button           |
+| onClick                      | Runs first; `preventDefault()` cancels the close | None                    |
+| Button and native props, ref | `Ref<HTMLButtonElement>`                         | Button defaults         |
+
+`PopoverPortal` accepts children, has no host and renders nothing until the trigger mounts.
+
+Exports: `Popover`, `PopoverTrigger`, `PopoverPortal`, `PopoverContent`, `PopoverClose`, `usePopover`; types `PopoverProps`, `PopoverState`, `PopoverTriggerProps`, `PopoverContentProps`, `PopoverCloseProps`, `PopoverPortalProps`, `PopoverRenderProps`, `PopoverSide`, `PopoverAlign`.
