@@ -263,7 +263,7 @@ export function FindStudyDataset({ required = true, ...options }: AutocompleteTa
           controlSize={options.controlSize}
           readOnly={options.readOnly}
           loading={loading}
-          error={loading ? undefined : result.error}
+          errorText={loading ? undefined : result.error}
           loadingText="Looking up datasets…"
           emptyText="No saved datasets match. You can still enter a new name."
         >

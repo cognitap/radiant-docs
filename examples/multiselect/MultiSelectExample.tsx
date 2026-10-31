@@ -135,7 +135,7 @@ export function AssignProjectReviewers({
           onValueChange={setValues}
           name="reviewers"
           loading={loading || result.query !== query}
-          error={result.query === query ? result.error : undefined}
+          errorText={result.query === query ? result.error : undefined}
           defaultOpen={initialOpen}
           disabled={disabled}
           readOnly={readOnly}

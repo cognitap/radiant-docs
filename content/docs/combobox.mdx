@@ -1,79 +1,192 @@
 ---
 title: Combobox
-description: Search options with independent query and committed selection.
+description: Search a list and commit one or several keys that a form submits.
 ---
 
-import { ComboboxDemo, AsyncComboboxDemo } from '../../components/ComboboxDemo'
+import {
+  ComboboxDemo,
+  ControlledComboboxDemo,
+  MultipleComboboxDemo,
+  AsyncComboboxDemo
+} from '../../components/ComboboxDemo'
 
 <ComboboxDemo />
 
 ## Usage
 
-Use Combobox for one searchable choice. Use [MultiSelect](/docs/multi-select/) for several known choices, [Select](/docs/select/) without text search, or [TagsInput](/docs/tags-input/) for free text.
+Use Combobox when people type to find a choice. Search text filters the list but never becomes the value. Choose something else when:
+
+- [Select](/docs/select/): the list is short and needs no typing.
+- [Autocomplete](/docs/autocomplete/): any text is allowed and suggestions only help.
+- [MultiSelect](/docs/multi-select/): people pick several values; it matches `type="multiple"` with its own part names.
 
 ```tsx
-<Field
-  label="Destination"
-  required
->
+<Field label="Destination">
   <Combobox
-    items={cities}
     name="city"
     defaultValue="budapest"
+    items={[
+      { value: 'budapest', label: 'Budapest' },
+      { value: 'vienna', label: 'Vienna' }
+    ]}
   />
 </Field>
 ```
 
-Items need distinct string keys; rich labels require plain `textValue`. Local filtering ignores case. Supply a custom filter or null for application-filtered results.
+Without children, Combobox renders an input, trigger, clear button and a listbox of `items`. Give rich labels a plain `textValue`.
 
 ## Examples
 
-### Search asynchronous results
+### Clear a choice from outside
+
+<ControlledComboboxDemo />
+
+### Choose several cities
+
+<MultipleComboboxDemo />
+
+### Search results from a server
 
 <AsyncComboboxDemo />
 
 ## State
 
-Selection, query and expansion independently choose controlled `value`, `query`, `open`, or their default counterparts. Callbacks request changes; owners may refuse. Ownership and multiple mode stay fixed per mount. Prop synchronization and no-op requests do not notify.
+| State               | Controlled | Uncontrolled   | Callback                               | Empty   |
+| ------------------- | ---------- | -------------- | -------------------------------------- | ------- |
+| Selection, single   | `value`    | `defaultValue` | `onValueChange(value: string \| null)` | `null`  |
+| Selection, multiple | `value`    | `defaultValue` | `onValueChange(value: string[])`       | `[]`    |
+| Search              | `query`    | `defaultQuery` | `onQueryChange(query: string)`         | `''`    |
+| Popup               | `open`     | `defaultOpen`  | `onOpenChange(open: boolean)`          | `false` |
 
-Single mode uses string or null. Multiple mode uses string arrays, toggles membership and retains the open popup. `selectedItem` or multiple `selectedItems` supplies absent labels. Chosen labels survive result replacement. Applications own fetching, cancellation and ordering; results never select themselves.
+Passing both props of a pair, or changing the owner or `type` during a mount, throws; remount with a new `key`. Prop changes fire no callback.
 
-Committed keys submit under `name`, repeatedly in multiple mode. Query never submits. An empty string is a valid required key. Disabled fields submit nothing; root readOnly protects the whole field and retains values. Native reset silently restores uncontrolled selection/query; controlled owners reset themselves.
+Single mode submits the selected key under `name`, or `''` when empty. Multiple mode submits one `name` entry per key. `required` needs a selection. Native reset restores uncontrolled selection and search silently. `disabled` leaves the value out of the form; `readOnly` keeps it submitted but blocks edits.
 
-`useCombobox()` reads scalar state. `useCombobox({multiple:true})` reads array state. Both expose value/query/open/disabled and setValue/setQuery/setOpen requests, returning null outside their matching mode.
+For server results, pass `filter={null}`, `loading`, `errorText` and `selectedItem` when the selection is outside the results.
 
 ## Accessibility
 
-[Field](/docs/field/) supplies naming and validation. Focus stays in the input with a highlighted listbox option. Loading/error hide unavailable options and supply polite status.
+The input is a `combobox` that controls a `listbox` of `option` items, with `aria-multiselectable` in multiple mode. Loading, empty and error text sit in a `status` region outside the list. Name the input with [Field](/docs/field/) or `aria-label` on ComboboxInput. Pass `aria-invalid` to Combobox to mark it invalid outside Field.
 
-| Key                              | Behavior                                           |
-| -------------------------------- | -------------------------------------------------- |
-| Up / Down                        | Open and highlight enabled results                 |
-| Enter                            | Commit or toggle highlighted value                 |
-| Tab / blur / Escape              | Discard search and dismiss                         |
-| Escape while closed              | Clear single selection; retain multiple selections |
-| Empty Backspace in multiple mode | Remove last value                                  |
-| Home / End                       | Native text editing                                |
+| Key                       | Behavior                                                                  |
+| ------------------------- | ------------------------------------------------------------------------- |
+| Typing                    | Filter and open; never commits                                            |
+| Arrow Down / Up           | Open and move the highlight past disabled items                           |
+| Alt+Arrow Down / Up       | Open or close without moving the highlight                                |
+| Enter                     | Commit the highlighted item; multiple mode toggles and stays open         |
+| Escape                    | Close and discard the search; with the popup closed, clear a single value |
+| Tab                       | Close and move on without committing                                      |
+| Backspace on empty search | Remove the last value in multiple mode                                    |
+
+Focus stays on the input. ComboboxTrigger is not a Tab stop; ComboboxClear is one only in multiple mode.
 
 ## Motion
 
-[MotionProvider](/docs/foundations/motion/) adds popup opacity; off and reduced motion remove it. Closing remains immediate.
+Inside [MotionProvider](/docs/foundations/motion/), ComboboxContent fades in; closing is immediate. Set `motion="off"` on ComboboxContent to turn it off. Reduced motion shows it at full opacity.
 
 ## Styling
 
-Root/Portal have no host. Input props/ref reach input; Content/Item/Status/Tags reach divs. Trigger/Clear are real Buttons. Parts retain `combobox-*`; multiple mode adds `multi-select-*`. Use component Combobox tokens and preserve owned ARIA, placement and focus.
+Every hosted part takes `className`, `style` and `ref`. Multiple mode adds `multi-select-*` to each slot.
+
+| Part            | Attributes                                                                                      |
+| --------------- | ----------------------------------------------------------------------------------------------- |
+| ComboboxInput   | `data-slot="combobox-input"`, `data-control-size`, `data-invalid`                               |
+| ComboboxTrigger | `data-slot="button combobox-trigger"`                                                           |
+| ComboboxClear   | `data-slot="button combobox-clear"`                                                             |
+| ComboboxContent | `data-slot="combobox-content"`, `data-state="open \| closed"`, `data-motion`                    |
+| ComboboxItem    | `data-slot="combobox-item"`, `data-value`, `data-highlighted`, `data-selected`, `data-disabled` |
+| ComboboxStatus  | `data-slot="combobox-status"`                                                                   |
+| ComboboxTags    | `data-slot="combobox-tags"`                                                                     |
+
+Theme with `--rad-combobox-*` tokens, such as `--rad-combobox-radius` on the input `style`.
 
 ## API
 
-| Part                    | Props                                                                                                                                                                                                                                                                                         | Defaults                                                                                                                                          |
-| ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Combobox                | items: readonly ComboboxOption[]; multiple; value/defaultValue; onValueChange; query/defaultQuery; onQueryChange; open/defaultOpen; onOpenChange; filter; selectedItem/selectedItems; loading; error; loadingText; emptyText; name; form; disabled; readOnly; required; controlSize; children | multiple false; null or []; query ''; closed; local filter; loading/disabled/readOnly/required false; medium; Loading results…; No results found. |
-| ComboboxInput           | Native text input props/ref, ThemeStyle; owned value/ARIA/type                                                                                                                                                                                                                                | Root metrics; no placeholder                                                                                                                      |
-| ComboboxTrigger / Clear | Button props/ref/render excluding owned activation/state                                                                                                                                                                                                                                      | Generated names/icons; type button; clear optional                                                                                                |
-| ComboboxPortal          | children                                                                                                                                                                                                                                                                                      | Local owner document portal                                                                                                                       |
-| ComboboxContent         | div props/ref, ThemeStyle; motion: inherit/off; sideOffset; collisionPadding                                                                                                                                                                                                                  | inherit; 4; 8; generated options/status                                                                                                           |
-| ComboboxItem            | div props/ref; required value; children; ThemeStyle                                                                                                                                                                                                                                           | Registry label                                                                                                                                    |
-| ComboboxStatus          | div props/ref, children, ThemeStyle                                                                                                                                                                                                                                                           | Root status                                                                                                                                       |
-| ComboboxTags            | div props/ref, ThemeStyle                                                                                                                                                                                                                                                                     | Generated selected Tags; multiple mode only                                                                                                       |
+### Combobox
 
-Exports include `ComboboxProps`, `ComboboxMultipleProps`, `ComboboxState`, `ComboboxMultipleState`, `ComboboxOption` and each hosted part's Props type.
+| Prop                           | Type                                                     | Default                     |
+| ------------------------------ | -------------------------------------------------------- | --------------------------- |
+| items                          | `readonly ComboboxOption[]`; distinct values             | Required                    |
+| type                           | single / multiple; fixed for the mount                   | single                      |
+| value / defaultValue           | `string \| null`, or `string[]` when multiple; one owner | None / `null` or `[]`       |
+| onValueChange                  | `(value) => void`                                        | None                        |
+| selectedItem / selectedItems   | `ComboboxOption` / `readonly ComboboxOption[]`           | None                        |
+| query / defaultQuery           | string; one owner                                        | None / `''`                 |
+| onQueryChange                  | `(query: string) => void`                                | None                        |
+| open / defaultOpen             | boolean; one owner                                       | None / false                |
+| onOpenChange                   | `(open: boolean) => void`                                | None                        |
+| filter                         | `((item, query) => boolean) \| null`                     | Case-insensitive text match |
+| loading                        | boolean; hides results                                   | false                       |
+| loadingText                    | string                                                   | `'Loading results…'`        |
+| emptyText                      | ReactNode                                                | `'No results found.'`       |
+| errorText                      | ReactNode; hides results                                 | None                        |
+| name / form                    | string                                                   | None                        |
+| disabled / readOnly / required | boolean                                                  | Field's, else false         |
+| aria-invalid                   | Native; forwarded to the input                           | Field's                     |
+| controlSize                    | small / medium / large                                   | medium                      |
+| children                       | ReactNode                                                | Default parts               |
+
+### ComboboxInput
+
+| Prop         | Type                                                                                            | Default |
+| ------------ | ----------------------------------------------------------------------------------------------- | ------- |
+| aria-invalid | Native; overrides the root                                                                      | Root's  |
+| style        | ThemeStyle                                                                                      | None    |
+| Other props  | Input props except value, defaultValue, name, form, type, role, disabled, required, ARIA wiring | Native  |
+
+### ComboboxTrigger and ComboboxClear
+
+| Prop        | Type                                                                                                                                          | Default                                |
+| ----------- | --------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------- |
+| render      | `(props: ComboboxRenderProps) => ReactElement`                                                                                                | Native button                          |
+| children    | ReactNode; replaces the icon                                                                                                                  | Chevron / cross                        |
+| aria-label  | string                                                                                                                                        | `'Show options'` / `'Clear selection'` |
+| Other props | Button props except type, disabled, pending, variant, tone, controlSize, iconOnly, fullWidth, motion, tabIndex, ARIA wiring and pressed props | Native                                 |
+
+ComboboxClear hides when nothing is selected.
+
+### ComboboxPortal
+
+| Prop     | Type      | Default |
+| -------- | --------- | ------- |
+| children | ReactNode | None    |
+
+Renders next to the input; the popup uses the top layer.
+
+### ComboboxContent
+
+| Prop             | Type                               | Default                    |
+| ---------------- | ---------------------------------- | -------------------------- |
+| sideOffset       | number; gap from the input in px   | 4                          |
+| collisionPadding | number; viewport margin in px      | 8                          |
+| motion           | inherit / off                      | inherit                    |
+| aria-label       | string; listbox name               | Input's label              |
+| children         | ReactNode                          | An item per visible result |
+| Other props      | div props except popover, role, id | Native                     |
+
+### ComboboxItem
+
+| Prop        | Type                                | Default         |
+| ----------- | ----------------------------------- | --------------- |
+| value       | string; must exist in `items`       | Required        |
+| children    | ReactNode                           | Label and check |
+| Other props | div props except id, role, tabIndex | Native          |
+
+### ComboboxStatus
+
+| Prop        | Type                  | Default     |
+| ----------- | --------------------- | ----------- |
+| children    | ReactNode             | Root status |
+| Other props | div props except role | Native      |
+
+### ComboboxTags
+
+| Prop        | Type                      | Default       |
+| ----------- | ------------------------- | ------------- |
+| Other props | div props except children | Selected Tags |
+
+Throws outside `type="multiple"`.
+
+`useCombobox()` returns `{ value, query, open, disabled, setValue, setQuery, setOpen }` inside a single Combobox; `useCombobox({ type: 'multiple' })` does the same for a multiple one. Both return `null` elsewhere.
+
+Exports `ComboboxProps`, `ComboboxMultipleProps`, `ComboboxOption`, `ComboboxState`, `ComboboxMultipleState`, `ComboboxRenderProps`, `ComboboxInputProps`, `ComboboxTriggerProps`, `ComboboxClearProps`, `ComboboxContentProps`, `ComboboxItemProps`, `ComboboxStatusProps` and `ComboboxTagsProps`.

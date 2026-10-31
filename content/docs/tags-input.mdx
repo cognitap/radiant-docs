@@ -1,6 +1,6 @@
 ---
 title: TagsInput
-description: Commit free text values with native editing and named removal actions.
+description: Commit free text into a list of removable tags that edit natively and submit as an array.
 ---
 
 import {
@@ -13,7 +13,11 @@ import {
 
 ## Usage
 
-Use TagsInput for free text labels or recipients. Use [MultiSelect](/docs/multi-select/) when values must come from known options, or [Input](/docs/input/) for one string.
+Use TagsInput when people type their own values, such as labels or recipients. Choose something else when:
+
+- [MultiSelect](/docs/multi-select/): values must come from a fixed list of options.
+- [Tag](/docs/tag/): you only show removable values and people don't type new ones.
+- [Input](/docs/input/): you need one string.
 
 ```tsx
 <Field
@@ -40,34 +44,64 @@ Use TagsInput for free text labels or recipients. Use [MultiSelect](/docs/multi-
 
 ## State
 
-Choose `value` with `onValueChange` or `defaultValue`; ownership stays fixed per mount. Values are distinct, trimmed, nonempty strings. Controlled owners may refuse requests without losing unfinished text. Prop synchronization and no-op requests do not notify.
+Use `defaultValue`, or `value` with `onValueChange`, not both; the owner stays fixed per mount. Values must be distinct, trimmed, nonempty strings, or TagsInput throws. A controlled owner can refuse a change, and the draft text stays.
 
-Draft text stays separate from committed tags. Enter, configured separators and pasted line breaks split text. Duplicates are ignored; rejected or excess tokens remain editable. `validate` accepts a trimmed value with true, or rejects with false or a message. `maxCount` limits accepted values.
+Enter, a separator or a pasted line break commits the draft. Duplicates are ignored; rejected or excess tokens stay in the draft. `validate` returns true to accept, or false or a message to reject.
 
-Only committed values submit as repeated fields under `name`; read them with `FormData.getAll`. Draft text never submits. Native reset silently restores uncontrolled values and clears the draft. Controlled values reset through their owner. Disabled fields submit nothing; read-only fields retain their submitted values. Required checks the committed array.
+Each committed value submits under `name` as a repeated field; read it with `FormData.getAll`. Draft text never submits. Form reset restores uncontrolled values and clears the draft. `disabled` submits nothing. `readOnly` submits its values, blocks edits and skips `required`. `required` checks the committed array, and an invalid submit focuses the text input.
 
 ## Accessibility
 
-[Field](/docs/field/) connects naming, help and errors. The native input keeps ordinary editing and composition behavior. Removal uses real named [Tags](/docs/tag/). Rejected input exposes an invalid state and polite feedback.
+The text input is a native textbox; name it with [Field](/docs/field/) or `aria-label`. Each tag's remove Button is named `Remove <value>`. Rejected input sets `aria-invalid="true"` and shows a polite live message linked by `aria-describedby`.
 
-| Key                        | Behavior                             |
-| -------------------------- | ------------------------------------ |
-| Enter                      | Commit draft outside IME composition |
-| Separator                  | Commit completed tokens              |
-| Backspace with empty draft | Request removal of last tag          |
-| Tab / Shift+Tab            | Native input and removal navigation  |
-| Enter / Space on removal   | Request removal                      |
+| Key                         | Behavior                                        |
+| --------------------------- | ----------------------------------------------- |
+| Enter                       | Commit the draft when it isn't blank            |
+| Separator (default `,`)     | Commit the text before it                       |
+| Paste with separators       | Split and commit; rejected tokens stay as draft |
+| Backspace on an empty draft | Remove the last tag                             |
+| Tab / Shift+Tab             | Visit each remove Button, then the text input   |
+| Enter / Space on remove     | Remove that tag and return focus to the input   |
+
+IME composition and Ctrl, Meta or Alt combinations never commit. An `onKeyDown` or `onPaste` that calls `preventDefault` wins.
+
+## Motion
+
+Nothing animates. Remove Buttons use `motion="off"`.
 
 ## Styling
 
-Root props, styles and ref reach the native Input. `parts.wrapper`, `tag`, `remove` and `message` style their actual hosts. Identities retain Input, Badge and Button tokens and add `tags-input-*`. `components.tagsInput.gap` changes spacing. Preserve visible focus, validation and editable text.
+`className`, `style` and `ref` reach the text input. Style the other hosts through `parts`.
+
+| Host          | Attributes                                          | Styled by       |
+| ------------- | --------------------------------------------------- | --------------- |
+| Wrapper       | `data-slot="tags-input-control"`                    | `parts.wrapper` |
+| Each tag      | `data-slot="badge tag"`                             | `parts.tag`     |
+| Remove Button | `data-slot="tag-remove"`                            | `parts.remove`  |
+| Text input    | `data-slot="input tags-input"`, `data-control-size` | Root props      |
+| Error message | `data-slot="tags-input-error"`                      | `parts.error`   |
+
+`components.tagsInput.gap` sets `--rad-tags-input-gap`, which defaults to `0.5rem`.
 
 ## API
 
-| Part            | Props                                                                                                                                                                                                    | Defaults                           |
-| --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------- |
-| TagsInput       | Input native props except value/defaultValue/type/children; value/defaultValue: string[]; onValueChange(values); separators: readonly string[]; validate(value): boolean/string; maxCount: number; parts | []; comma; no validator or maximum |
-| Inherited Input | name, form, required, disabled, readOnly, controlSize, native events/ref, className, ThemeStyle                                                                                                          | medium; booleans false             |
-| TagsInputProps  | Exported root type; parts use `{ className, style }`                                                                                                                                                     | No part overrides                  |
+### TagsInput
 
-Separators must be single characters; line breaks also split pasted text. `maxCount` must be a nonnegative integer. Native `onChange` observes draft edits; `onValueChange` requests committed arrays.
+| Prop                 | Type                                                               | Default             |
+| -------------------- | ------------------------------------------------------------------ | ------------------- |
+| value / defaultValue | `string[]`; one owner                                              | None / `[]`         |
+| onValueChange        | `(value: string[]) => void`                                        | None                |
+| separators           | `readonly string[]`; single characters                             | `[',']`             |
+| validate             | `(value: string) => boolean \| string`                             | None                |
+| maxCount             | number; nonnegative integer                                        | No maximum          |
+| controlSize          | small / medium / large                                             | medium              |
+| name / form          | string; `form` reaches every hidden input                          | None                |
+| disabled / required  | boolean                                                            | Field's, else false |
+| readOnly             | boolean                                                            | false               |
+| aria-invalid         | Native                                                             | Field's             |
+| parts                | `{ wrapper?, tag?, remove?, error? }`, each `{ className, style }` | None                |
+| Other props          | Input props except value, defaultValue, type and children          | Native              |
+
+Native `onChange` observes draft edits; `onValueChange` requests committed arrays.
+
+Exports `TagsInputProps`.
