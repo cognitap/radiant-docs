@@ -1,60 +1,104 @@
 ---
 title: Progress
-description: Native task progress with determinate and indeterminate feedback.
+description: Show how far a task has got with a native progress bar.
 ---
 
-import { ProgressDemo } from '../../components/ProgressDemo'
+import {
+  ProgressDemo,
+  ProgressImportDemo,
+  ProgressRecorderDemo,
+  ProgressUploadDemo
+} from '../../components/ProgressDemo'
 
 <ProgressDemo />
 
-## Describe the task
+## Usage
 
-Progress renders a native `progress` element. Give it a meaningful name using
-a native `label` with `htmlFor`, `aria-label`, or `aria-labelledby`. Its fallback
-text is not an accessible name. Keep a visible phase or completion description
-nearby so the amount is understandable without relying on color.
+Use Progress for a task advancing toward completion, such as an export or upload. Use [Meter](/docs/meter/) for a measured level in a known range, such as storage or battery. Use [Spinner](/docs/spinner/) for a short wait with no amount and [Skeleton](/docs/skeleton/) for content loading in place.
 
-Use Progress for task completion. Resource usage or measurements belong in a
-[Meter](/docs/meter/); user-adjustable values belong in [Slider](/docs/slider/).
+```tsx
+<label htmlFor="export">Export progress</label>
+<Progress id="export" value={40} />
+<p>40 of 100 items prepared.</p>
+```
 
-## Values and limits
+## Examples
 
-`max` defaults to 100 and must be positive and finite. The native minimum is
-always zero; there is no `min` prop. Numeric `value` must be finite and between
-zero and `max`, including both boundaries. Invalid ranges throw instead of
-silently presenting a different value.
+### Wait for a recorder
 
-Omit `value` or pass `null` when the remaining amount is unknown. The native
-value attribute is then absent, preserving indeterminate semantics. `0` means
-known progress with no work completed. `data-state` is `indeterminate`,
-`loading`, or `complete`; complete means the amount reached `max`, while the
-application owns the actual outcome.
+Omit `value` or pass `null` while the remaining work is unknown.
 
-The browser supplies progressbar range semantics. Radiant owns the role and
-numeric ARIA relationships. Optional `aria-valuetext` can express a meaningful
-phase or unit when a percentage alone is insufficient.
+<ProgressRecorderDemo />
 
-## Announce milestones
+### Import a study in steps
 
-Progress adds no live region, timers or focus management. Values update
-immediately. Avoid announcing every rapid change: use [Alert](/docs/alert/) with
-polite feedback for useful milestones such as completion or a failure.
+`aria-valuetext` replaces the announced percentage with the current phase.
 
-Set `aria-busy` on the region whose content is changing, and clear it when that
-work finishes. Keep the milestone live region outside that busy region so
-updates are not held back. Applications own loading, cancellation and errors.
+<ProgressImportDemo />
 
-## Customize
+### Upload study files
 
-Native props, events, `className`, `style` and an `HTMLProgressElement` ref reach
-the actual element. It exposes the `progress` slot. No provider is required;
-[themes](/docs/foundations/theming/) apply normally.
+The bar stays indeterminate while preparing, then advances one step per file. One status message announces completion.
 
-Use `components.progress` or local `--rad-progress-*` variables for `height`,
-`radius`, `trackColor`, `indicatorColor`, `borderColor`, `borderWidth` and
-`borderStyle`. Native WebKit and Firefox tracks/values receive these colors.
-Preserve readable bounds and meaningful contrast when replacing appearance.
+<ProgressUploadDemo />
 
-Indeterminate feedback uses static stripes and a dashed frame. Forced colors
-retain a system-color track, fill and border. No authored movement is added.
-`ProgressProps` is exported.
+## State
+
+Progress is read-only. The caller owns `value`; there is no `defaultValue` and no change callback. It is not a form control and submits nothing.
+
+The minimum is always zero. `max` must be finite and positive. A numeric `value` must be finite and between zero and `max`. Invalid values throw a RangeError. `0` means known progress with no work done.
+
+## Accessibility
+
+The native element has the progressbar role. Name it with a `<label htmlFor>`, `aria-label` or `aria-labelledby`; Radiant documents this but does not enforce it. Screen readers announce a percentage unless you set `aria-valuetext`. The fallback content is `aria-valuetext` when given, else "value of max". It is not an accessible name.
+
+Progress adds no live region. Announce milestones such as completion or failure with your own status element, not every update. Set `aria-busy` on the region whose content is changing.
+
+| Key             | Behavior                                 |
+| --------------- | ---------------------------------------- |
+| Tab / Shift+Tab | Skip the bar, which is not focusable     |
+| Arrow keys      | No adjustment; the caller owns the value |
+
+## Motion
+
+Nothing moves. The indeterminate state is a static striped track with a dashed border, so it reads the same with reduced motion.
+
+## Styling
+
+Progress renders one `<progress data-slot="progress">`. `className`, `style` and `ref` target it, and a caller `data-slot` is joined after `progress`. `data-state` is `indeterminate`, `loading` or `complete`; complete means `value` equals `max`. `:indeterminate` also matches with no value.
+
+Override `--rad-progress-*` variables in `style` or `components.progress` in a theme:
+
+```tsx
+<Progress
+  aria-label="Upload progress"
+  value={3}
+  max={5}
+  style={{
+    '--rad-progress-height': '1rem',
+    '--rad-progress-radius': '.25rem',
+    '--rad-progress-indicator-color': 'var(--rad-color-warning)'
+  }}
+/>
+```
+
+Variables cover height, radius, border width, style and color, track color and indicator color. Forced colors use Canvas, CanvasText and Highlight.
+
+## API
+
+### Progress
+
+| Prop                         | Type                        | Default              |
+| ---------------------------- | --------------------------- | -------------------- |
+| value                        | number / null; 0 to max     | None; indeterminate  |
+| max                          | number; finite and positive | 100                  |
+| aria-valuetext               | string                      | None; the percentage |
+| aria-label / aria-labelledby | string                      | None; or a `<label>` |
+| className / style            | string / ThemeStyle         | None                 |
+| data-slot                    | string                      | None; after progress |
+| ref                          | `Ref<HTMLProgressElement>`  | None                 |
+| Other props                  | Native progress attributes  | Native defaults      |
+
+Not accepted: `defaultValue`, `children`, `role` and the `aria-valuenow`, `aria-valuemin` and `aria-valuemax` attributes.
+
+Exports `Progress` and `ProgressProps`.
