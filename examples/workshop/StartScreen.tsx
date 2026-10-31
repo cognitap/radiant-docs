@@ -233,10 +233,10 @@ export function StartScreen({
           >
             Open link
           </Button>
-          <label className="start-file">
-            Or choose a configuration file
-            <input
+          <Field label="Or choose a configuration file">
+            <Input
               type="file"
+              controlSize="small"
               accept="application/json,.json"
               disabled={!ready}
               aria-describedby={message ? `${id}-message` : undefined}
@@ -246,7 +246,7 @@ export function StartScreen({
                 if (file) void openFile(file)
               }}
             />
-          </label>
+          </Field>
           <output
             id={`${id}-message`}
             className="start-message"

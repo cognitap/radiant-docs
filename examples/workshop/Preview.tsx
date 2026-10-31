@@ -1,7 +1,15 @@
 'use client'
 
 import { useEffect, useId, useRef, useState, type Dispatch } from 'react'
-import { Button, type Theme, type ThemeMode, type TypographyResult } from '@cognitap/radiant'
+import {
+  Button,
+  Fieldset,
+  Field,
+  NativeSelect,
+  type Theme,
+  type ThemeMode,
+  type TypographyResult
+} from '@cognitap/radiant'
 import type { Editor } from './workshop-theme'
 import type { ColorRecipe } from './workshop-color'
 import { authoredMotion } from './workshop-motion'
@@ -50,9 +58,13 @@ function Choice({
   onChange: (value: string) => void
 }) {
   return (
-    <label className={className}>
-      <span className="preview-control-label">{label}</span>
-      <select
+    <Field
+      className={className}
+      label={label}
+      parts={{ label: { className: 'preview-control-label' } }}
+    >
+      <NativeSelect
+        controlSize="small"
         value={value}
         disabled={disabled}
         onChange={event => onChange(event.target.value)}
@@ -65,8 +77,8 @@ function Choice({
             {name}
           </option>
         ))}
-      </select>
-    </label>
+      </NativeSelect>
+    </Field>
   )
 }
 
@@ -167,11 +179,12 @@ export function Preview({
       data-inspecting={inspecting || undefined}
       data-scene={scene.kind}
     >
-      <fieldset
+      <Fieldset
         className="preview-toolbar"
+        legend="Preview"
+        parts={{ legend: { className: 'workshop-sr-only' } }}
         disabled={!ready}
       >
-        <legend className="workshop-sr-only">Preview</legend>
         <div className="preview-choices">
           <Button
             ref={optionsToggle}
@@ -191,9 +204,13 @@ export function Preview({
             className="preview-options"
             data-open={optionsOpen || undefined}
           >
-            <label className="preview-scene">
-              <span className="preview-control-label">Scene</span>
-              <select
+            <Field
+              className="preview-scene"
+              label="Scene"
+              parts={{ label: { className: 'preview-control-label' } }}
+            >
+              <NativeSelect
+                controlSize="small"
                 value={key}
                 disabled={!ready}
                 onChange={event => {
@@ -216,8 +233,8 @@ export function Preview({
                     ))}
                   </optgroup>
                 ))}
-              </select>
-            </label>
+              </NativeSelect>
+            </Field>
             <Choice
               label="Preview mode"
               className="preview-mode"
@@ -335,7 +352,7 @@ export function Preview({
           />
         )}
         <output className="preview-feedback workshop-sr-only">{feedback}</output>
-      </fieldset>
+      </Fieldset>
       <div className="preview-body">
         <Inspection
           enabled={inspecting}

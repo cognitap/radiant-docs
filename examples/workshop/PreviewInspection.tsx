@@ -3,6 +3,7 @@
 /* oxlint-disable jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events -- Delegated picking handles clicks and Enter/Space on the preview's own focusable elements. */
 
 import { useEffect, useId, useRef, useState, type CSSProperties, type ReactNode } from 'react'
+import { Button } from '@cognitap/radiant'
 import {
   displayValue,
   inheritedColorToken,
@@ -268,14 +269,15 @@ export function Inspector({
           <ul>
             {group.items.map(item => (
               <li key={item.field}>
-                <button
-                  type="button"
+                <Button
+                  variant="outline"
+                  controlSize="small"
                   onClick={() => onJump({ editor: item.editor, field: item.field })}
                 >
                   <Value item={item} />
                   <span className="inspect-label">{item.label}</span>
                   {item.note && <small>{item.note}</small>}
-                </button>
+                </Button>
               </li>
             ))}
           </ul>

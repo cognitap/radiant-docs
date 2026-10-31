@@ -14,11 +14,17 @@ import {
 } from 'react'
 import {
   Button,
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
   Dialog,
   DialogClose,
   DialogContent,
   DialogDescription,
   DialogTitle,
+  Field,
+  Fieldset,
+  NativeSelect,
   generateTypography
 } from '@cognitap/radiant'
 import { useHydrated } from '../profile/useHydrated'
@@ -73,9 +79,9 @@ function Choice({
   onChange: (value: string) => void
 }) {
   return (
-    <label>
-      {label}
-      <select
+    <Field label={label}>
+      <NativeSelect
+        controlSize="small"
         value={value}
         onChange={event => onChange(event.target.value)}
       >
@@ -88,8 +94,8 @@ function Choice({
             {name}
           </option>
         ))}
-      </select>
-    </label>
+      </NativeSelect>
+    </Field>
   )
 }
 
@@ -482,7 +488,9 @@ function WorkshopShell({
                 Reset {current.label.toLowerCase()}
               </Button>
             </div>
-            <fieldset
+            <Fieldset
+              legend={`${current.label} options`}
+              parts={{ legend: { className: 'workshop-sr-only' } }}
               disabled={!ready}
               className="workshop-options"
             >
@@ -572,30 +580,32 @@ function WorkshopShell({
                 hidden={editor !== 'typography'}
                 className="workshop-font-panel"
               >
-                <details className="workshop-typeface-lab">
-                  <summary>Try a font</summary>
-                  <FontEditor
-                    key={fontRevision}
-                    onSession={setFontLoader}
-                    onLocalReady={setLocalFont}
-                    onAssignFont={(next, font, context) =>
-                      applyTypesetting(
-                        next,
-                        chooseAssignment(
-                          documentTypesetting(next)?.input ?? generateTypography().input,
-                          context,
-                          font
-                        ),
-                        font.source === 'local' ? font : localFont
-                      )
-                    }
-                    active={editor === 'typography'}
-                    document={document}
-                    onChange={next => updateDocument(next, { label: 'font assignment' })}
-                  />
-                </details>
+                <Collapsible className="workshop-typeface-lab">
+                  <CollapsibleTrigger>Try a font</CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <FontEditor
+                      key={fontRevision}
+                      onSession={setFontLoader}
+                      onLocalReady={setLocalFont}
+                      onAssignFont={(next, font, context) =>
+                        applyTypesetting(
+                          next,
+                          chooseAssignment(
+                            documentTypesetting(next)?.input ?? generateTypography().input,
+                            context,
+                            font
+                          ),
+                          font.source === 'local' ? font : localFont
+                        )
+                      }
+                      active={editor === 'typography'}
+                      document={document}
+                      onChange={next => updateDocument(next, { label: 'font assignment' })}
+                    />
+                  </CollapsibleContent>
+                </Collapsible>
               </div>
-            </fieldset>
+            </Fieldset>
           </section>
           <output className="workshop-feedback">{feedback}</output>
           {importResult && <p className="workshop-notice">{importResult.message}</p>}
