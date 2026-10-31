@@ -1,0 +1,62 @@
+---
+title: NumberField
+description: Edit localized numbers with native forms, keyboard steps and raw numeric values.
+---
+
+import {
+  NumberFieldDemo,
+  NumberFieldBudgetDemo,
+  NumberFieldTargetDemo
+} from '../../components/NumberFieldDemo'
+
+## Usage
+
+<NumberFieldDemo />
+
+Label each field. The editor displays localized text while `name` submits the raw number, or an empty string for `null`.
+
+## Examples
+
+<NumberFieldBudgetDemo />
+
+<NumberFieldTargetDemo />
+
+## State
+
+Choose `value` with `onValueChange(value)` or `defaultValue`. Controlled requests may be refused. Prop changes and resets do not request changes.
+
+Edits remain editable while incomplete or outside the range; native submission waits until they are valid. Parsed numbers commit immediately. Blur clamps to the bounds and formats the display. Display rounding never changes the raw owner.
+
+Uncontrolled form reset restores the initial value. A controlled form resets its application state.
+
+## Accessibility
+
+Arrow Up/Down use `step`; Page Up/Down use `largeStep`. Home, End and text-selection shortcuts keep native editing behavior. Steppers keep focus in the input and stay outside the Tab sequence.
+
+`Field` connects labels, help and errors. `readOnly` prevents editing and stepping while retaining the submitted value. `disabled` excludes it from submission.
+
+## Motion
+
+Formatting and stepping update immediately without animating the value.
+
+## Styling
+
+`className`, `style`, native props and `ref` reach the text input. `parts.wrapper`, `parts.increment` and `parts.decrement` style the actual InputGroup and Buttons.
+
+Use `components.numberField.gap` for spacing. Input, InputGroup and Button retain their theme roles.
+
+## API
+
+| Prop                               | Contract                                                                                                                                   |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `value`, `defaultValue`            | Finite number or `null`; one owner.                                                                                                        |
+| `onValueChange`                    | Receives the requested raw number or `null`.                                                                                               |
+| `min`, `max`                       | Optional finite bounds.                                                                                                                    |
+| `step`, `largeStep`                | Positive finite deltas; default `1` and ten steps. They do not restrict typed decimals to a grid.                                          |
+| `locale`                           | Number locale; default `en-US` for stable server rendering.                                                                                |
+| `formatOptions`                    | Standard decimal, percent or currency formatting; grouping, fraction digits and sign display. Currency uses symbol, narrow symbol or code. |
+| `incrementLabel`, `decrementLabel` | Stepper accessible names.                                                                                                                  |
+| `controlSize`                      | `small`, `medium` or `large`.                                                                                                              |
+| `parts`                            | Wrapper and stepper presentation hooks.                                                                                                    |
+
+Percent edits use percent units: `2.9%` submits `0.029`. Currency edits accept the locale's affixes or a bare localized number. Grouping must follow that locale. Compact/scientific notation, units, currency names and hidden negative signs are unsupported.

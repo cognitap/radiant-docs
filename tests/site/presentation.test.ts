@@ -2117,3 +2117,79 @@ test('CodeBlock docs copy raw commands and generated exports, report denied writ
     }
   })
 })
+
+test('NumberField docs preserve keyboard steps, raw locale forms, clamping and controlled percentage refusals', async () => {
+  await withSite(async (baseURL, browser) => {
+    const page = await browser.newPage()
+    const errors = track(page)
+    try {
+      await capture(page, 'number-field', async () => {
+        await page.goto(baseURL + '/docs/number-field/')
+        await page.waitForFunction(
+          () => !document.querySelector<HTMLButtonElement>('.demo-heading button')?.disabled
+        )
+        const participants = page.getByRole('form', { name: 'Session participants', exact: true })
+        const count = participants.getByRole('spinbutton', { name: /Participants/ })
+        await count.focus()
+        await page.keyboard.press('ArrowUp')
+        await page.keyboard.press('PageUp')
+        assert.equal(await count.inputValue(), '9')
+        await participants.getByRole('button', { name: 'Plan session', exact: true }).click()
+        assert.match(
+          await participants.getByRole('status').innerText(),
+          /9 participants; 135 participant-minutes/
+        )
+        await count.fill('30')
+        assert.equal(
+          await count.evaluate(node => {
+            if (!(node instanceof HTMLInputElement)) throw new Error('Expected numeric editor')
+            return node.validity.valid
+          }),
+          false
+        )
+        await participants.getByRole('button', { name: 'Plan session', exact: true }).click()
+        assert.equal(await count.inputValue(), '12')
+        assert.match(await participants.getByRole('status').innerText(), /12 participants/)
+        await participants.getByRole('button', { name: 'Reset participants', exact: true }).click()
+        await page.waitForFunction(
+          () => document.querySelector<HTMLInputElement>('[name="participants"]')?.value === '3'
+        )
+        const budget = page.getByRole('form', { name: 'Session budget', exact: true })
+        await budget.getByRole('spinbutton', { name: /Session rate/ }).fill('123,50 €')
+        await budget.getByRole('button', { name: 'Calculate four sessions', exact: true }).click()
+        assert.match(await budget.getByRole('status').innerText(), /Raw session rate: 123.5/)
+        const target = page.getByRole('form', { name: 'Accuracy target', exact: true })
+        const percent = target.getByRole('spinbutton', { name: /Required accuracy/ })
+        await percent.fill('96%')
+        assert.equal(await percent.inputValue(), '85%')
+        assert.match(await target.getByRole('status').innerText(), /above 95% need review/)
+        await percent.fill('90%')
+        await target.getByRole('button', { name: 'Save target', exact: true }).click()
+        assert.match(await target.getByRole('status').innerText(), /Raw value: 0.9/)
+        await target.getByRole('button', { name: 'Restore target', exact: true }).click()
+        await page.waitForFunction(
+          () => document.querySelector<HTMLInputElement>('[name="target"]')?.value === '0.85'
+        )
+        const demo = page.getByRole('region', { name: 'Calculate session budget', exact: true })
+        await demo.getByRole('combobox', { name: 'Direction', exact: true }).selectOption('rtl')
+        await demo
+          .getByRole('combobox', { name: 'Control size', exact: true })
+          .selectOption('large')
+        await page.setViewportSize({ width: 320, height: 800 })
+        await budget
+          .getByRole('combobox', { name: 'Number locale', exact: true })
+          .selectOption('ar-EG')
+        const bounds = await budget
+          .locator('[data-slot~="number-field-wrapper"]')
+          .evaluate(node => ({
+            width: node.getBoundingClientRect().width,
+            scroll: node.scrollWidth
+          }))
+        assert.ok(bounds.width <= 288 && bounds.scroll <= bounds.width + 1)
+        assert.deepEqual(errors, [])
+      })
+    } finally {
+      await page.close()
+    }
+  })
+})
