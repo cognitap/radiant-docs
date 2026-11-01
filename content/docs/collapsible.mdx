@@ -82,7 +82,18 @@ Content height animates between closed and its natural height, springing under a
 | CollapsibleTrigger | `summary` | `collapsible-trigger` | `data-state`                 |
 | CollapsibleContent | `div`     | `collapsible-content` | `data-state`, generated `id` |
 
-`--rad-collapsible-*` tokens cover gap, radius, corner shape, border, background, color, padding, focus ring, content color and size, and duration.
+`--rad-collapsible-*` tokens cover gap, radius, corner shape, border, background, color, focus ring, content color and size, and duration. `--rad-collapsible-padding` pads the trigger and content together. Set them apart with `--rad-collapsible-trigger-padding`, which takes any padding shorthand, and `--rad-collapsible-content-padding`, which takes one length.
+
+```tsx
+<Collapsible
+  style={{
+    '--rad-collapsible-trigger-padding': '.5rem 1rem',
+    '--rad-collapsible-content-padding': '1rem'
+  }}
+>
+  …
+</Collapsible>
+```
 
 ## API
 

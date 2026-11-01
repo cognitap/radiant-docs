@@ -1,0 +1,96 @@
+---
+title: FileInput
+description: A native file input with a button to choose files and the chosen names beside it.
+---
+
+import {
+  FileInputDemo,
+  FileInputRecordingsDemo,
+  FileInputConsentDemo
+} from '../../components/FileInputDemo'
+
+<FileInputDemo />
+
+## Usage
+
+Use FileInput to attach one or more files to a form. The browser's own file input stays the single control, so the picker, drag and drop, validation and form submission are native. Use [Input](/docs/input/) for text.
+
+```tsx
+<Field
+  label="Study protocol"
+  description="A PDF or Word document."
+>
+  <FileInput
+    name="protocol"
+    accept=".pdf,.doc,.docx"
+  />
+</Field>
+```
+
+## Examples
+
+### Attach several files
+
+Add `multiple`. The names list in the order the browser reports them.
+
+<FileInputRecordingsDemo />
+
+### Submit with a form
+
+Read the file from `FormData` on submit. Reset clears the names too.
+
+<FileInputConsentDemo />
+
+## State
+
+FileInput has no `value` or `defaultValue`, because browsers only let a person choose files. Read them from `event.currentTarget.files` in `onChange`, or from `FormData` on submit. `accept` filters the picker but does not validate, so check the type and size of each file yourself.
+
+The text beside the button follows the chosen files, including after a form reset. Without `name`, the form submits nothing.
+
+## Accessibility
+
+There is one native control. It carries the label, description, error and required state from [Field](/docs/field/), or from `aria-label` or `aria-labelledby`. The browser announces the chosen files. The visible button and names are decorative and hidden from assistive technology.
+
+| Key             | Behavior                        |
+| --------------- | ------------------------------- |
+| Tab / Shift+Tab | Move focus in and out           |
+| Enter / Space   | Open the browser's file chooser |
+
+Testing Library's `userEvent.upload` assigns `files` directly. Check `FormData` and reset in a real browser.
+
+## Motion
+
+The button presses like any [Button](/docs/button/#motion). Nothing else animates.
+
+## Styling
+
+`className`, `style` and `ref` reach the native input, which is invisible. Style what people see through `parts`.
+
+| Part    | `data-slot`                 | Part key  |
+| ------- | --------------------------- | --------- |
+| Wrapper | `file-input-wrapper`        | `wrapper` |
+| Input   | `file-input`                | None      |
+| Button  | `button file-input-trigger` | `trigger` |
+| Names   | `file-input-files`          | `files`   |
+
+`components.fileInput.gap` or `--rad-file-input-gap` sets the space between the button and the names. The button takes its size from `controlSize`.
+
+## API
+
+### FileInput
+
+| Prop                                             | Type                                                              | Default                                   |
+| ------------------------------------------------ | ----------------------------------------------------------------- | ----------------------------------------- |
+| onChange                                         | Native input change handler                                       | None                                      |
+| multiple                                         | boolean                                                           | false                                     |
+| accept                                           | string; filters the picker                                        | None                                      |
+| chooseLabel                                      | string; the button text                                           | `'Choose file'` or `'Choose files'`       |
+| emptyText                                        | string; shown while nothing is chosen                             | `'No file chosen'` or `'No files chosen'` |
+| controlSize                                      | small / medium / large                                            | medium                                    |
+| parts                                            | `{ wrapper?: PartStyle; trigger?: PartStyle; files?: PartStyle }` | None                                      |
+| name / form / required / disabled / aria-invalid | Native; Field supplies them when wrapped                          | None                                      |
+| className / style                                | string / ThemeStyle; the input                                    | None                                      |
+| ref                                              | `Ref<HTMLInputElement>`                                           | None                                      |
+| Native input attributes                          | Except `type`, `value`, `defaultValue`, `readOnly` and `children` | Native                                    |
+
+Exports: `FileInput`, `FileInputProps`.

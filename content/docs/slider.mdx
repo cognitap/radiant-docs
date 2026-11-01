@@ -37,7 +37,7 @@ Native `<datalist>` ticks do not draw on the styled track, so render the marks y
 
 ## State
 
-Choose one value owner per mount: `value` with `onChange`, or `defaultValue`. Read `event.target.valueAsNumber`. Passing both, switching owners or passing a non-finite number throws a TypeError; remount with a new `key` to change owners. With neither, the value starts at the midpoint of `min` and `max`. The browser clamps values to the range and snaps them to `step`.
+Choose one value owner per mount: `value` with `onValueChange(value)`, or `defaultValue`. `onValueChange` receives the new number after the native `onChange`, which still fires. Passing both, switching owners or passing a non-finite number throws a TypeError; remount with a new `key` to change owners. With neither, the value starts at the midpoint of `min` and `max`. The browser clamps values to the range and snaps them to `step`.
 
 With `name`, the form submits the value as a string, such as `"1.25"`. A disabled slider submits nothing. Reset restores `defaultValue`; controlled owners reset their own state in `onReset`. A range always has a value, so `required` and `readOnly` are not accepted.
 
@@ -68,7 +68,7 @@ Override `--rad-slider-*` variables in `style` or `components.slider` in a theme
 />
 ```
 
-Variables cover height, length, track size, radius and color, thumb size, radius, color, border and shadow, corner shape, invalid and disabled colors, and focus.
+Variables cover height, length, track size, radius and color, corner shape, invalid and disabled colors, focus, and the thumb: color, radius, border and shadow. `--rad-slider-thumb-size` sizes the thumb, while `thumb-width`, `thumb-height` and `thumb-border-style` set one aspect.
 
 ## API
 
@@ -77,6 +77,7 @@ Variables cover height, length, track size, radius and color, thumb size, radius
 | Prop                 | Type                                      | Default             |
 | -------------------- | ----------------------------------------- | ------------------- |
 | value / defaultValue | number                                    | None; one owner     |
+| onValueChange        | `(value: number) => void`                 | None                |
 | onChange             | `ChangeEventHandler<HTMLInputElement>`    | None                |
 | min                  | number / string                           | 0                   |
 | max                  | number / string                           | 100                 |

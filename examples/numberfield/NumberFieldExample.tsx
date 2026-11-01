@@ -118,8 +118,7 @@ export function CalculateSessionBudget(options: NumberFieldTaskOptions) {
           max={500}
           step={0.25}
           largeStep={5}
-          incrementLabel={options.incrementLabel ?? 'Increase session rate'}
-          decrementLabel={options.decrementLabel ?? 'Decrease session rate'}
+          steppers={false}
         />
       </Field>
       <Button

@@ -14,7 +14,7 @@ import {
 
 ## Usage
 
-Use Button for an action or a form submission. Pass `pressed`, `defaultPressed` or `onPressedChange` to make it a two-state toggle. Choose something else when:
+Use Button for an action, a form submission or, with a pressed prop, a two-state toggle. Choose something else when:
 
 - [Link](/docs/link/): navigation. Button cannot render an anchor.
 - [ToggleGroup](/docs/toggle-group/): several related pressed buttons.
@@ -56,9 +56,9 @@ Dialogs, menus and popovers open from their own Trigger.
 
 ## State
 
-Toggle mode turns on when you pass any pressed prop. Use `pressed` with `onPressedChange` for a controlled toggle, or `defaultPressed` for an uncontrolled one; switching owner throws. Call `preventDefault` in `onClick` to refuse a change. Form reset leaves pressed state unchanged.
+Any pressed prop turns on toggle mode. Use `pressed` with `onPressedChange` to control it, or `defaultPressed`; switching owner throws. Call `preventDefault` in `onClick` to refuse a change. Form reset leaves pressed state unchanged.
 
-`type` defaults to `"button"`, not the native `"submit"`. With `type="submit"`, native `name`, `value`, `form` and `formAction` reach the submitter. `pending` cancels the click before your `onClick`, so a pending submit button does not submit and a pending toggle does not flip.
+`type` defaults to `"button"`, not the native `"submit"`. With `type="submit"`, native `name`, `value`, `form` and `formAction` reach the submitter. `pending` cancels the click before your `onClick`, so a pending submit does not submit and a pending toggle does not flip.
 
 ## Accessibility
 
@@ -74,13 +74,15 @@ Give `iconOnly` buttons an `aria-label`. `pending` sets `aria-busy="true"`, keep
 
 ## Motion
 
-Inside a [`MotionProvider`](/docs/foundations/motion/), a spring scales, moves and reshapes the button while it is pressed. Turn it off with `motion="off"` on the button, globally with theme `motion.mode: 'off'`, or through the reduced-motion preference. A caller `scale` style or `scale-*` class replaces the press scale. Under reduced motion the pending spinner hides and the label stays visible.
+Inside a [`MotionProvider`](/docs/foundations/motion/), a spring scales, moves and reshapes the pressed button. Turn it off with `motion="off"`, theme `motion.mode: 'off'` or the reduced-motion preference. A caller `scale` style or `scale-*` class replaces the press scale. Under reduced motion the pending spinner hides.
 
 ## Styling
 
 `className`, `style`, `ref` and native props reach the button. Select it with `[data-slot~="button"]`; your `data-slot` tokens are appended. Style state with `data-variant`, `data-tone`, `data-control-size`, `aria-pressed`, `aria-busy` and `:disabled`. Keep the focus ring and the pressed cue, an inset ring that becomes a double underline in forced colors.
 
-Theme keys live under `components.button`, such as `radius`, `radiusPressed`, `cornerShape`, `shadowPressed` and `pressScale`. Override one in `style`, as in `--rad-button-radius`.
+Theme keys live under `components.button`, such as `radius`, `radiusPressed`, `cornerShape`, `shadowPressed`, `pressScale` and `selectedLayer`. Override one in `style`, as in `--rad-button-radius`.
+
+A pressed button, and a ToggleGroup item, mixes `selectedLayer` (20% by default) of its text color into its fill, so the state stays visible on every variant.
 
 ## API
 
