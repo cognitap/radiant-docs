@@ -39,7 +39,7 @@ export function SetListeningPreferences({ dir, ...props }: SliderTaskOptions) {
           value={volume}
           step={5}
           aria-valuetext={`${volume} percent`}
-          onChange={event => setVolume(event.target.valueAsNumber)}
+          onValueChange={setVolume}
         />
       </Field>
       <Field
@@ -86,7 +86,7 @@ export function ShowTheCurrentValue({ dir, ...props }: SliderTaskOptions) {
           value={brightness}
           step={10}
           aria-valuetext={`${brightness} percent`}
-          onChange={event => setBrightness(event.target.valueAsNumber)}
+          onValueChange={setBrightness}
         />
       </Field>
       <p style={{ margin: 0 }}>Brightness: {brightness}%</p>
@@ -121,7 +121,7 @@ export function LabelSteppedMarks({ dir, ...props }: SliderTaskOptions) {
           step={0.25}
           value={speed}
           aria-valuetext={`${speed}× speed`}
-          onChange={event => setSpeed(event.target.valueAsNumber)}
+          onValueChange={setSpeed}
         />
         <div
           aria-hidden="true"

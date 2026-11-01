@@ -30,6 +30,8 @@ Use NumberField for an exact count, amount or percentage that people type or ste
 
 ### Calculate session budget
 
+An amount people type rarely needs stepper buttons. Pass `steppers={false}` to hide them; the arrow and Page keys still step.
+
 <NumberFieldBudgetDemo />
 
 ### Choose accuracy target
@@ -46,7 +48,7 @@ Parsed edits commit immediately. Incomplete or out-of-range text stays editable 
 
 ## Accessibility
 
-The text input has the spinbutton role. Name it with [Field](/docs/field/), `aria-label` or `aria-labelledby`. Field's description and error IDs come before your own `aria-describedby`. Unparseable or out-of-range text sets `aria-invalid`, as does Field's `error`. Steppers are named by `incrementLabel` and `decrementLabel`, stay out of the Tab order and keep focus in the input.
+The text input has the spinbutton role. Name it with [Field](/docs/field/), `aria-label` or `aria-labelledby`. Field's description and error IDs come before your own `aria-describedby`. Unparseable or out-of-range text sets `aria-invalid`, as does Field's `error`. Steppers, when shown, are named by `incrementLabel` and `decrementLabel`, stay out of the Tab order and keep focus in the input.
 
 | Key                 | Behavior                                    |
 | ------------------- | ------------------------------------------- |
@@ -79,6 +81,7 @@ Percent edits use percent units, so `2.9%` submits `0.029`. Currency accepts the
 | largeStep            | positive number                                               | `step * 10`         |
 | locale               | string                                                        | en-US               |
 | formatOptions        | `NumberFieldFormatOptions`: decimal, percent or currency      | Decimal             |
+| steppers             | boolean; show the increment and decrement buttons             | true                |
 | incrementLabel       | string                                                        | Increase value      |
 | decrementLabel       | string                                                        | Decrease value      |
 | controlSize          | small / medium / large                                        | medium              |

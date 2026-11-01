@@ -134,15 +134,18 @@ function Delivery({ controlSize }: Presentation) {
       >
         <Radio
           value="standard"
-          label="Standard, 3–5 days"
+          label="Standard"
+          description="Arrives in 3 to 5 days."
         />
         <Radio
           value="express"
-          label="Express, next day"
+          label="Express"
+          description="Arrives the next day."
         />
         <Radio
           value="pickup"
           label="Pick up in store"
+          description="Ready within an hour."
         />
       </RadioGroup>
       <div style={{ display: 'flex', gap: '.5rem' }}>

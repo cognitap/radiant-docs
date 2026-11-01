@@ -25,10 +25,12 @@ Use RadioGroup to choose one of a few visible options. It renders a [Field](/doc
   <Radio
     value="standard"
     label="Standard"
+    description="Arrives in 3 to 5 days."
   />
   <Radio
     value="express"
     label="Express"
+    description="Arrives the next day."
   />
 </RadioGroup>
 ```
@@ -49,19 +51,19 @@ Use RadioGroup to choose one of a few visible options. It renders a [Field](/doc
 
 ## State
 
-Use `defaultValue` for browser-owned selection, or `value` with `onValueChange`, not both. `null` means nothing is selected, and `''` is a real option value. People cannot clear a group; set `value` to `null` to clear it.
+Use `defaultValue` for browser-owned selection, or `value` with `onValueChange`, not both. `null` means nothing is selected, and `''` is a real option value. Only `value={null}` clears a group.
 
-The group's `onChange` receives the native change event from the radio that was selected. Write state from `onValueChange` or from `onChange`, not both.
+The group's `onChange` receives the native change event of the selected radio. Write state from `onValueChange` or `onChange`, not both.
 
-`name` is optional. Without it, the group generates one, so arrow keys, `required` and submission still work. Pass `name` when a form reads the value; the generated key is unpredictable. One entry is submitted for the selected radio, and nothing when no radio is selected or the group is disabled.
+`name` is optional. Without it, the group generates one, so arrow keys, `required` and submission still work. Pass `name` when a form reads the value. One entry is submitted for the selected radio, and nothing when none is selected or the group is disabled.
 
 Form reset returns an uncontrolled group to `defaultValue`. A controlled group keeps its value, so reset your state in the form's `onReset`.
 
-Inside a group, Radio throws if given its own `name`, `checked` or `defaultChecked`. A standalone Radio takes `name`, `checked` or `defaultChecked`, and native `onChange`. Radio has no `readOnly`, because native radios ignore it. Use `disabled`, or a controlled group that ignores changes.
+Inside a group, Radio throws if given its own `name`, `checked` or `defaultChecked`. A standalone Radio takes them, and native `onChange`. Radio has no `readOnly`, because native radios ignore it. Use `disabled`, or a controlled group that ignores changes.
 
 ## Accessibility
 
-`label` becomes the required `legend`. `description` and `error` are linked to the group. Every Radio needs a name: `label`, `aria-label` or `aria-labelledby`. `error` marks the group invalid.
+`label` becomes the required `legend`. The group's `description` and `error` are linked to the group, and a Radio's `description` to that radio. Every Radio needs a name: `label`, `aria-label` or `aria-labelledby`. `error` marks the group invalid.
 
 | Key                      | Behavior                                                          |
 | ------------------------ | ----------------------------------------------------------------- |
@@ -79,9 +81,9 @@ The dot changes instantly. The plan example springs it with the public `useSprin
 
 The group's className, style, ref and native props reach the `fieldset` (`data-slot="field radio-group"`, `data-control-size`, `data-invalid`). `parts.options` styles the options grid (`radio-group-options`); set `display: flex` for a row. `parts.label`, `parts.description`, `parts.error` and `parts.required` style the Field parts.
 
-A Radio's className, style, ref and native props reach the `input` (`data-slot="radio"`, `data-control-size`). `parts.wrapper` styles the label row (`radio-wrapper`), `parts.label` the text (`radio-label`) and `parts.indicator` the decorative dot (`radio-indicator`).
+A Radio's className, style, ref and native props reach the `input` (`data-slot="radio"`, `data-control-size`). `parts.wrapper` styles the label and description together (`radio-wrapper`), `parts.label` the text (`radio-label`), `parts.description` the supporting text (`radio-description`) and `parts.indicator` the decorative dot (`radio-indicator`).
 
-Theme the control with `--rad-radio-*` tokens, such as `--rad-radio-group-gap`, `--rad-radio-size` and `--rad-radio-mark`.
+Theme the control with `--rad-radio-*` tokens, such as `--rad-radio-group-gap`, `--rad-radio-size`, `--rad-radio-mark`, `--rad-radio-description-color` and `--rad-radio-description-size`.
 
 ## API
 
@@ -113,12 +115,13 @@ Theme the control with `--rad-radio-*` tokens, such as `--rad-radio-group-gap`, 
 | ------------------------ | --------------------------------------------------- | -------------------- |
 | value                    | string; submitted value, `''` allowed               | Required             |
 | label                    | ReactNode; otherwise name the input with aria-label | None                 |
+| description              | ReactNode; supporting text under the label          | None                 |
 | checked / defaultChecked | boolean; standalone only                            | false                |
 | onChange                 | `(event: ChangeEvent<HTMLInputElement>) => void`    | None                 |
 | name                     | string; standalone only                             | None                 |
 | disabled / required      | boolean                                             | false                |
 | controlSize              | small / medium / large                              | Group's, else medium |
-| parts                    | wrapper / label / indicator                         | None                 |
+| parts                    | wrapper / label / description / indicator           | None                 |
 | className / style        | string / ThemeStyle                                 | None                 |
 | ref                      | `Ref<HTMLInputElement>`                             | None                 |
 | Other props              | Native input props except type and readOnly         | Native               |
