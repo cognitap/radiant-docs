@@ -2,10 +2,11 @@
 
 import {
   Button,
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
   Field,
+  Popover,
+  PopoverContent,
+  PopoverPortal,
+  PopoverTrigger,
   Textarea
 } from '@cognitap/radiant'
 import { pageNames, readCopy, sceneCopy } from './page-copy'
@@ -26,10 +27,21 @@ export function TypographyTools({ view, session, dispatch, disabled }: ToolProps
         Text spacing
       </Button>
       {page && (
-        <Collapsible className="preview-copy-editor">
-          <CollapsibleTrigger>Edit copy</CollapsibleTrigger>
-          <CollapsibleContent>
-            <div className="preview-copy-fields">
+        <Popover>
+          <PopoverTrigger
+            variant="outline"
+            controlSize="small"
+            disabled={disabled}
+          >
+            Edit copy
+          </PopoverTrigger>
+          <PopoverPortal>
+            <PopoverContent
+              // oxlint-disable-next-line jsx-a11y/prefer-tag-over-role
+              role="dialog"
+              aria-label="Edit copy"
+              className="preview-copy-fields"
+            >
               {Object.entries(sceneCopy[page]).map(([key, fallback]) => (
                 <Field
                   key={`${page}:${key}`}
@@ -50,9 +62,9 @@ export function TypographyTools({ view, session, dispatch, disabled }: ToolProps
                   />
                 </Field>
               ))}
-            </div>
-          </CollapsibleContent>
-        </Collapsible>
+            </PopoverContent>
+          </PopoverPortal>
+        </Popover>
       )}
     </div>
   )
