@@ -9,6 +9,7 @@ import {
   CodeBlockCopy,
   CodeBlockViewport
 } from '@cognitap/radiant'
+import { RadiantMark } from '@/components/docs/RadiantMark'
 import { RouteLink } from '@/components/docs/RouteLink'
 import { getNavigation } from '@/lib/navigation'
 import { radiantCandidate, radiantVersion } from '@/lib/radiant'
@@ -47,54 +48,61 @@ export default function HomePage() {
       id="content"
       tabIndex={-1}
     >
-      <p className="eyebrow">React components</p>
-      <h1>
-        Make room for
-        <br />
-        what matters.
-      </h1>
-      <p className="lede">
-        React components with native behavior, shared design tokens, and room for your own
-        expression.
-      </p>
-      <nav
-        aria-label="Start"
-        className="home-links"
-      >
-        <RouteLink
-          href="/docs/getting-started/"
-          variant="solid"
-          controlSize="large"
-        >
-          Get started
-        </RouteLink>
-        <RouteLink
-          href="/workshop/"
-          variant="outline"
-          controlSize="large"
-        >
-          Open the theme workshop
-        </RouteLink>
-      </nav>
-      <CodeBlock
-        code={install}
-        className="home-install"
-      >
-        <CodeBlockViewport
-          aria-label="Install command"
-          orientation="horizontal"
-          className="home-install-code"
-        >
-          <CodeBlockContent />
-        </CodeBlockViewport>
-        <CodeBlockCopy
-          variant="ghost"
-          tone="neutral"
-          controlSize="small"
-        >
-          Copy
-        </CodeBlockCopy>
-      </CodeBlock>
+      <div className="home-hero">
+        <div className="home-intro">
+          <p className="eyebrow">React components</p>
+          <h1>
+            Make room for
+            <br />
+            what matters.
+          </h1>
+          <p className="lede">
+            React components with native behavior, shared design tokens, and room for your own
+            expression.
+          </p>
+          <nav
+            aria-label="Start"
+            className="home-links"
+          >
+            <RouteLink
+              href="/docs/getting-started/"
+              variant="solid"
+              controlSize="large"
+            >
+              Get started
+            </RouteLink>
+            <RouteLink
+              href="/workshop/"
+              variant="outline"
+              controlSize="large"
+            >
+              Open the theme workshop
+            </RouteLink>
+          </nav>
+          <CodeBlock
+            code={install}
+            className="home-install"
+          >
+            <CodeBlockViewport
+              aria-label="Install command"
+              orientation="horizontal"
+              className="home-install-code"
+            >
+              <CodeBlockContent />
+            </CodeBlockViewport>
+            <CodeBlockCopy
+              variant="ghost"
+              tone="neutral"
+              controlSize="small"
+            >
+              Copy
+            </CodeBlockCopy>
+          </CodeBlock>
+        </div>
+        <div className="home-mark">
+          <RadiantMark />
+        </div>
+      </div>
 
       <section
         aria-labelledby="home-foundations"

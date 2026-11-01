@@ -1,46 +1,48 @@
-:root,
-.site-theme {
+@font-face {
+  font-family: 'Geist';
+  src: url('/fonts/site/Geist-Variable.woff2') format('woff2');
+  font-weight: 100 900;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Geist Mono';
+  src: url('/fonts/site/GeistMono-Variable.woff2') format('woff2');
+  font-weight: 100 900;
+  font-display: swap;
+}
+
+:root {
   color-scheme: light dark;
-  --docs-background: #fbfbfa;
-  --docs-foreground: #172121;
-  --docs-muted: #556060;
-  --docs-border: #d9dedd;
-  --docs-surface: #ffffff;
-  --docs-accent: #405953;
-  font-family: ui-sans-serif, system-ui, sans-serif;
-  color: var(--docs-foreground);
-  background: var(--docs-background);
+  background: #faf8f5;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    background: #111217;
+  }
 }
 
 body {
   margin: 0;
+  -webkit-font-smoothing: antialiased;
 }
 
+/* The site theme resolves light and dark, so the chrome reads its tokens. */
 .site-theme {
+  --docs-background: var(--rad-surface-canvas);
+  --docs-foreground: var(--rad-color-foreground);
+  --docs-muted: var(--rad-color-muted-foreground);
+  --docs-border: color-mix(in oklab, var(--rad-color-border) 55%, var(--rad-surface-canvas));
+  --docs-surface: var(--rad-color-surface);
+  --docs-accent: var(--rad-color-accent);
   min-height: 100dvh;
   background: var(--docs-background);
   color: var(--docs-foreground);
-  font-family: ui-sans-serif, system-ui, sans-serif;
 }
 
-.site-theme[data-docs-mode='dark'] {
-  --docs-background: #121a18;
-  --docs-foreground: #e4edeb;
-  --docs-muted: #a7b9b3;
-  --docs-border: #35433e;
-  --docs-surface: #18221f;
-  --docs-accent: #9bd5c3;
-}
-
-@media (prefers-color-scheme: dark) {
-  .site-theme[data-docs-mode='system'] {
-    --docs-background: #121a18;
-    --docs-foreground: #e4edeb;
-    --docs-muted: #a7b9b3;
-    --docs-border: #35433e;
-    --docs-surface: #18221f;
-    --docs-accent: #9bd5c3;
-  }
+.site-theme ::selection {
+  background: color-mix(in oklab, var(--docs-accent) 32%, transparent);
 }
 
 .docs-shell {
@@ -81,12 +83,14 @@ body {
   white-space: nowrap;
 }
 
-.wordmark {
+.site-header .wordmark {
   display: inline-flex;
   align-items: center;
   gap: 0.55rem;
   font-size: 1.25rem;
-  font-weight: 650;
+  font-weight: 500;
+  letter-spacing: -0.035em;
+  color: var(--docs-foreground);
   text-decoration: none;
 }
 
@@ -104,9 +108,9 @@ body {
 }
 
 .preview-label {
-  border: 1px solid var(--docs-border);
-  border-radius: 999px;
-  padding: 0.4rem 0.7rem;
+  font-size: 0.625rem;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
 }
 
 .home,
@@ -125,7 +129,7 @@ body {
   font-size: clamp(2rem, 5vw, 3rem);
   line-height: 1.1;
   letter-spacing: -0.04em;
-  font-weight: 550;
+  font-weight: 430;
   margin-block: 0 1rem;
 }
 
@@ -211,7 +215,7 @@ body {
 .outline-title {
   margin: 0 0 0.5rem;
   font-size: 0.75rem;
-  font-weight: 650;
+  font-weight: 500;
 }
 
 .docs-navigation ul {
@@ -250,7 +254,7 @@ body {
 .outline-desktop a[data-active='true'],
 .outline-mobile a[data-active='true'] {
   color: var(--docs-accent);
-  font-weight: 650;
+  font-weight: 500;
 }
 
 .outline-nested {
@@ -261,8 +265,8 @@ body {
 .docs-page h1 {
   font-size: clamp(2.75rem, 7vw, 5.75rem);
   line-height: 1.05;
-  letter-spacing: -0.055em;
-  font-weight: 550;
+  letter-spacing: -0.045em;
+  font-weight: 430;
   margin-block: 1rem 1.5rem;
 }
 
@@ -271,8 +275,10 @@ body {
 }
 
 .eyebrow {
+  font-size: 0.6875rem;
   text-transform: uppercase;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.16em;
+  color: var(--docs-accent);
 }
 
 .lede {
@@ -314,7 +320,7 @@ body {
   margin: 0;
   margin-inline-end: auto;
   font-size: 0.875rem;
-  font-weight: 600;
+  font-weight: 500;
   letter-spacing: 0;
 }
 
@@ -405,13 +411,11 @@ body {
 .demo-sources-trigger {
   padding: 1rem 1.25rem;
   font-size: 0.875rem;
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .demo-filename {
-  font:
-    0.75rem/1.5 ui-monospace,
-    monospace;
+  font: 0.75rem/1.5 var(--rad-typography-roles-code-family);
   overflow-wrap: anywhere;
   min-width: 0;
 }
@@ -543,6 +547,52 @@ a:not([data-slot~='link']) {
 
 main:focus {
   outline: none;
+}
+
+.home {
+  max-width: 72rem;
+}
+
+.home-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(14rem, 24rem);
+  align-items: center;
+  gap: clamp(2rem, 5vw, 5rem);
+}
+
+/* The mark's light spills into the page, as it does on the logo's stage. */
+.home-mark {
+  position: relative;
+  isolation: isolate;
+  aspect-ratio: 1;
+}
+
+.home-mark::before {
+  content: '';
+  position: absolute;
+  inset: -15%;
+  z-index: -1;
+  background:
+    radial-gradient(closest-side at 35% 45%, rgb(255 142 97 / 0.2), transparent),
+    radial-gradient(closest-side at 68% 42%, rgb(106 114 255 / 0.18), transparent),
+    radial-gradient(closest-side at 52% 72%, rgb(194 92 246 / 0.16), transparent);
+  filter: blur(2.5rem);
+}
+
+.home-mark .radiant-mark {
+  width: 100%;
+  height: 100%;
+}
+
+@media (max-width: 48rem) {
+  .home-hero {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  /* The header already carries the mark on a phone. */
+  .home-mark {
+    display: none;
+  }
 }
 
 .home-links {
