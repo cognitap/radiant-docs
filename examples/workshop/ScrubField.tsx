@@ -60,7 +60,7 @@ export function ScrubField({
       >
         {scrub.label}
       </label>
-      {/* oxlint-disable-next-line react/forbid-elements -- The scrub field shares one border with its drag label; NumberField cannot hide its steppers. */}
+      {/* oxlint-disable-next-line react/forbid-elements -- The scrub field shares one border with its drag label and keeps out-of-range drafts uncommitted; NumberField paints its own group border and commits every parseable draft. */}
       <input
         id={id}
         type="number"

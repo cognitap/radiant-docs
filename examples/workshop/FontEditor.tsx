@@ -10,6 +10,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
   Field,
+  FileInput,
   Input,
   Link,
   NativeSelect,
@@ -103,6 +104,7 @@ export function FontEditor({
   const bytes = useRef<ArrayBuffer | undefined>(undefined)
   const uploadRevision = useRef(0)
   const fileInput = useRef<HTMLInputElement>(null)
+  const [fileKey, setFileKey] = useState(0)
   const seen = useRef<{ version: number; loader: WorkshopFontLoader | null }>({
     version: -1,
     loader: null
@@ -462,16 +464,13 @@ export function FontEditor({
             </Field>
           </div>
           <Field label="Local font file">
-            {control => (
-              // oxlint-disable-next-line react/forbid-elements -- Radiant has no file input yet.
-              <input
-                {...control}
-                ref={fileInput}
-                type="file"
-                accept=".woff2,.woff,.ttf,.otf"
-                onChange={e => void chooseFile(e.target.files?.[0])}
-              />
-            )}
+            <FileInput
+              key={fileKey}
+              controlSize="small"
+              ref={fileInput}
+              accept=".woff2,.woff,.ttf,.otf"
+              onChange={e => void chooseFile(e.target.files?.[0])}
+            />
           </Field>
           <span className="font-file-info">
             {fileInfo || 'WOFF2, WOFF, TTF or OTF up to 10 MiB, kept in memory for this session.'}
@@ -486,6 +485,7 @@ export function FontEditor({
                 bytes.current = undefined
                 setCustom(null)
                 setFileInfo('')
+                setFileKey(value => value + 1)
                 select('inter')
                 setNotice(
                   'Local file removed. A theme referencing it falls back until it is provided again.'

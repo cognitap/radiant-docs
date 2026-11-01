@@ -150,7 +150,7 @@ export function BrandPicker({
           aria-describedby={describedBy}
           aria-valuetext={hueText}
           onKeyDown={onHueKey}
-          onChange={event => apply({ ...hsv, h: Number(event.target.value) })}
+          onValueChange={h => apply({ ...hsv, h })}
         />
       </Field>
     </div>

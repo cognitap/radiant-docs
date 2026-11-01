@@ -107,8 +107,9 @@ fieldset.workshop-options {
   --rad-slider-height: 1.5rem;
   --rad-slider-track-size: 1.5rem;
   --rad-slider-track-color: transparent;
-  --rad-slider-thumb-size: 1.5rem;
-  --rad-slider-thumb-radius: 0.4rem;
+  --rad-slider-thumb-width: 0.75rem;
+  --rad-slider-thumb-height: 1.5rem;
+  --rad-slider-thumb-radius: 0.3rem;
   --rad-slider-thumb-color: transparent;
   --rad-slider-thumb-border-width: 2px;
   --rad-slider-thumb-border-color: #fff;
@@ -186,11 +187,8 @@ fieldset.workshop-options {
   border: 1px solid var(--docs-border);
   background-color: var(--docs-border);
 }
-.color-strip[data-automatic] .color-strip-track input::-webkit-slider-thumb {
-  border-style: dashed;
-}
-.color-strip[data-automatic] .color-strip-track input::-moz-range-thumb {
-  border-style: dashed;
+.color-strip[data-automatic] .color-strip-track {
+  --rad-slider-thumb-border-style: dashed;
 }
 .color-strip-ends {
   display: flex;
