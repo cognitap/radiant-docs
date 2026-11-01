@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useState, type ReactNode } from 'react'
 import { Field, NativeSelect, ThemeScope, type ThemeMode } from '@cognitap/radiant'
-import { radiant } from '@cognitap/radiant/examples'
+import { siteTheme } from '@/lib/site-theme'
 
 const AppearanceContext = createContext<{
   mode: ThemeMode
@@ -14,7 +14,7 @@ export function SiteTheme({ children }: { children: ReactNode }) {
   return (
     <AppearanceContext.Provider value={{ mode, setMode }}>
       <ThemeScope
-        theme={radiant}
+        theme={siteTheme}
         mode={mode}
         className="site-theme"
         data-docs-mode={mode}
