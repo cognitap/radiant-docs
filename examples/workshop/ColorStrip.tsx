@@ -85,7 +85,7 @@ export function ColorStrip({
             aria-describedby={describedBy}
             aria-valuetext={words}
             onKeyDown={onKeyDown}
-            onChange={event => onChange(Number(event.target.value))}
+            onValueChange={onChange}
           />
         </div>
         <div

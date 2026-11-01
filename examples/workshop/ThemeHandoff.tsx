@@ -18,8 +18,8 @@ import {
   CollapsibleTrigger,
   Field,
   Fieldset,
+  FileInput,
   InlineCode,
-  Input,
   Link,
   NativeSelect,
   Radio,
@@ -313,25 +313,12 @@ export function ThemeHandoff({
           <Radio
             key={choice.id}
             value={choice.id}
-            aria-labelledby={`${resultId}-${choice.id}`}
-            aria-describedby={`${resultId}-${choice.id}-hint`}
-            parts={{ wrapper: { className: 'handoff-setup' } }}
-            label={
-              <>
-                <span
-                  id={`${resultId}-${choice.id}`}
-                  className="handoff-setup-label"
-                >
-                  {choice.label}
-                </span>
-                <span
-                  id={`${resultId}-${choice.id}-hint`}
-                  className="handoff-setup-hint"
-                >
-                  {choice.hint}
-                </span>
-              </>
-            }
+            label={choice.label}
+            description={choice.hint}
+            parts={{
+              wrapper: { className: 'handoff-setup' },
+              label: { className: 'handoff-setup-label' }
+            }}
           />
         ))}
       </RadioGroup>
@@ -570,8 +557,7 @@ export function ThemeHandoff({
                   </NativeSelect>
                 </Field>
                 <Field label="Import configuration file">
-                  <Input
-                    type="file"
+                  <FileInput
                     aria-describedby={resultId}
                     accept="application/json,.json"
                     onChange={event => {

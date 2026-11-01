@@ -9,6 +9,7 @@ import {
   CardHeader,
   CardTitle,
   Field,
+  FileInput,
   Input,
   ThemeScope,
   type Theme
@@ -234,8 +235,7 @@ export function StartScreen({
             Open link
           </Button>
           <Field label="Or choose a configuration file">
-            <Input
-              type="file"
+            <FileInput
               controlSize="small"
               accept="application/json,.json"
               disabled={!ready}

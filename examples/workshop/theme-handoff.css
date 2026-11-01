@@ -58,8 +58,11 @@
   gap: 0.75rem;
 }
 .handoff-setup {
-  align-items: start;
-  gap: 0.75rem;
+  --rad-radio-label-gap: 0.75rem;
+  --rad-radio-description-color: var(--docs-muted);
+  --rad-radio-description-size: 1rem;
+  position: relative;
+  gap: 0.25rem;
   padding: 0.875rem 1rem;
   border: 1px solid var(--docs-border);
   border-radius: 0.5rem;
@@ -68,18 +71,14 @@
   border-color: var(--docs-accent);
   box-shadow: inset 0 0 0 1px var(--docs-accent);
 }
-.handoff-setup > span:last-child {
-  display: grid;
-  text-align: start;
-  gap: 0.25rem;
+.handoff-setup label::after {
+  content: '';
+  position: absolute;
+  inset: 0;
 }
 .handoff-setup-label {
   font-size: 1.125rem;
   font-weight: 600;
-}
-.handoff-setup-hint {
-  color: var(--docs-muted);
-  line-height: 1.4;
 }
 @media (width < 560px) {
   .handoff-setup-options {
@@ -121,13 +120,10 @@
 .handoff-format {
   --rad-collapsible-border-width: 0;
   --rad-collapsible-radius: 0;
-  --rad-collapsible-padding: 0rem;
+  --rad-collapsible-trigger-padding: 0.75rem 0;
+  --rad-collapsible-content-padding: 0;
   --rad-collapsible-gap: 0;
   --rad-collapsible-background: transparent;
-}
-.handoff-more > summary,
-.handoff-format > summary {
-  padding-block: 0.75rem;
 }
 .handoff-more > [data-slot~='collapsible-content'],
 .handoff-format > [data-slot~='collapsible-content'] {

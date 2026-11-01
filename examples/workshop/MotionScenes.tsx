@@ -299,7 +299,7 @@ function DragScene({
           max={extent}
           step="any"
           value={Math.min(extent, model.target)}
-          onChange={event => to(Number(event.target.value))}
+          onValueChange={to}
         />
       </Field>
     </div>
@@ -400,7 +400,7 @@ function FollowScene({
           max={extent}
           step="any"
           value={Math.min(extent, model.target)}
-          onChange={event => onChange({ target: Number(event.target.value), running: false })}
+          onValueChange={target => onChange({ target, running: false })}
         />
       </Field>
       <Button
