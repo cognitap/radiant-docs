@@ -555,7 +555,7 @@ main:focus {
 
 .home-hero {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(14rem, 24rem);
+  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
   align-items: center;
   gap: clamp(2rem, 5vw, 5rem);
 }
@@ -564,14 +564,19 @@ main:focus {
 .home-mark {
   position: relative;
   isolation: isolate;
+  justify-self: center;
+  width: 100%;
+  max-width: 24rem;
   aspect-ratio: 1;
 }
 
 .home-mark::before {
   content: '';
   position: absolute;
-  inset: -15%;
+  /* Kept inside the column so the glow never widens the page; the blur still spills. */
+  inset: -15% 0;
   z-index: -1;
+  will-change: transform;
   background:
     radial-gradient(closest-side at 35% 45%, rgb(255 142 97 / 0.2), transparent),
     radial-gradient(closest-side at 68% 42%, rgb(106 114 255 / 0.18), transparent),
