@@ -3,8 +3,11 @@ import test from 'node:test'
 import {
   brandSnapshot,
   defaultRecipe,
+  defaultStart,
   exampleSnapshot,
+  exampleTheme,
   readSharedTheme,
+  startSnapshot,
   startingSnapshot,
   startingThemes
 } from '../examples/workshop/workshop-start.ts'
@@ -109,4 +112,14 @@ test('a share payload is read from a link, a bare payload, or not at all', () =>
   assert.equal(sharePayload('1.abc'), '1.abc')
   assert.equal(sharePayload('https://example.test/workshop/'), null)
   assert.equal(sharePayload(''), null)
+})
+
+test('a starting point builds the snapshot of its example or brand color', () => {
+  assert.deepEqual(startSnapshot(defaultStart), exampleSnapshot(exampleTheme('radiant')))
+  assert.deepEqual(
+    startSnapshot({ kind: 'example', id: 'jelly' }),
+    exampleSnapshot(startingThemes.find(theme => theme.id === 'jelly')!)
+  )
+  assert.deepEqual(startSnapshot({ kind: 'brand', brand: '#166534' }), brandSnapshot('#166534'))
+  assert.throws(() => startSnapshot({ kind: 'example', id: 'missing' }), /missing/)
 })
