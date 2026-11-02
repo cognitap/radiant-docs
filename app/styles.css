@@ -204,7 +204,21 @@ body {
   top: 1.5rem;
   max-height: calc(100dvh - 3rem);
   overflow-y: auto;
-  scrollbar-width: thin;
+}
+
+/* Site scroll boxes draw their bars like Radiant's native scroll boxes. */
+.outline-desktop,
+.workshop-editor-tabs,
+.workshop-preview .preview-body,
+.workshop-preview .preview-inspector,
+.preview-options[data-open],
+.motion-layout-scroll {
+  scrollbar-color: color-mix(
+      in oklch,
+      var(--rad-scroll-area-thumb-color, var(--rad-color-muted-foreground)) 45%,
+      transparent
+    )
+    transparent;
 }
 
 .docs-sidebar-trigger {
