@@ -443,7 +443,6 @@
     overflow: auto;
     overscroll-behavior: contain;
     padding: 0.75rem 1rem;
-    scrollbar-width: thin;
   }
 }
 /* On a phone the collapsed strip zooms out to show more of the scene; Expand shows real size.
