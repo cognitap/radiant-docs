@@ -88,6 +88,28 @@
           }
         ]
       }
+    },
+    {
+      "files": ["examples/**/*.ts", "examples/**/*.tsx"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "group": ["@/components/*", "@/components/**", "**/components/**"],
+                "message": "Copyable examples cannot import site code. Put demo controls in a *Playground.tsx file."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": ["examples/**/*Playground.tsx"],
+      "rules": {
+        "no-restricted-imports": "off"
+      }
     }
   ]
 }
