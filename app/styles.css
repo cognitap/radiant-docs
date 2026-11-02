@@ -634,6 +634,33 @@ main:focus {
   margin-block: 1.5rem;
 }
 
+.home-categories {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
+  gap: 2rem 1.5rem;
+  margin-block: 1.5rem;
+}
+
+.home-category h3 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.home-category p {
+  margin: 0.25rem 0 0.75rem;
+  color: var(--docs-muted);
+  font-size: 0.875rem;
+}
+
+.home-category ul {
+  display: grid;
+  gap: 0.25rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
 .recipe-playground .demo-stage {
   display: block;
   padding: 0;
