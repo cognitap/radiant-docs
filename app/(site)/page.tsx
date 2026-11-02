@@ -11,7 +11,7 @@ import {
 } from '@cognitap/radiant'
 import { RadiantMark } from '@/components/docs/RadiantMark'
 import { RouteLink } from '@/components/docs/RouteLink'
-import { getNavigation } from '@/lib/navigation'
+import { getComponentCategories } from '@/lib/navigation'
 import { radiantCandidate, radiantVersion } from '@/lib/radiant'
 
 const install = 'pnpm add @cognitap/radiant'
@@ -41,7 +41,8 @@ const foundations = [
 ]
 
 export default function HomePage() {
-  const components = getNavigation().find(group => group.title === 'Components')?.pages ?? []
+  const categories = getComponentCategories()
+  const count = categories.reduce((total, category) => total + category.pages.length, 0)
   return (
     <main
       className="home"
@@ -122,11 +123,31 @@ export default function HomePage() {
             </Card>
           ))}
         </div>
-        <p>
-          <RouteLink href={components[0]?.url ?? '/docs/getting-started/'}>
-            Browse all {components.length} components
-          </RouteLink>
-        </p>
+      </section>
+
+      <section
+        aria-labelledby="home-components"
+        className="home-section"
+      >
+        <h2 id="home-components">{count} components</h2>
+        <div className="home-categories">
+          {categories.map(category => (
+            <div
+              key={category.title}
+              className="home-category"
+            >
+              <h3>{category.title}</h3>
+              <p>{category.description}</p>
+              <ul>
+                {category.pages.map(page => (
+                  <li key={page.url}>
+                    <RouteLink href={page.url}>{page.title}</RouteLink>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
       </section>
 
       <p className="source-note">

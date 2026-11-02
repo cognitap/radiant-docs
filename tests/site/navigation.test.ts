@@ -14,6 +14,10 @@ test('sidebar, search, mobile navigation, missing pages and deployment metadata'
           .getByRole('link')
           .evaluateAll(nodes => nodes.map(node => node.getAttribute('href')))
         assert.ok(links.length > 0)
+        const overlays = nav.locator('section', {
+          has: page.getByRole('heading', { name: 'Overlays', exact: true })
+        })
+        assert.ok((await overlays.getByRole('link', { name: 'Dialog', exact: true }).count()) === 1)
         for (const href of links) {
           assert.equal((await page.request.get(`${baseURL}${href}`)).status(), 200, href ?? '')
         }
@@ -24,7 +28,7 @@ test('sidebar, search, mobile navigation, missing pages and deployment metadata'
           .getByRole('combobox', { name: 'Search documentation', exact: true })
           .fill('Button')
         await search
-          .getByRole('group', { name: 'Components', exact: true })
+          .getByRole('group', { name: 'Actions', exact: true })
           .getByRole('option', { name: 'Button', exact: true })
           .click()
         await search.waitFor({ state: 'hidden' })
