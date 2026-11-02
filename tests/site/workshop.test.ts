@@ -27,8 +27,7 @@ test('a workshop journey edits each section and opens the same share link', asyn
 async function journey(page: Page, baseURL: string, width: number) {
   const where = `${width}px`
   await page.goto(`${baseURL}/workshop/`)
-  const frame = page.getByRole('region', { name: 'Shared theme workshop', exact: true })
-  await frame.getByRole('button', { name: /^Start from Radiant:/ }).click()
+  const frame = page.getByRole('main')
 
   const colorBefore = await section(page, 'color')
   const generate = frame.getByRole('button', { name: 'Generate from the accent', exact: true })
@@ -106,6 +105,19 @@ async function journey(page: Page, baseURL: string, width: number) {
   await editCopy.click()
   await copy.waitFor({ state: 'hidden' })
   if (folded) await options.click()
+
+  const edited = document(await exportText(page))
+  const starts = frame.getByRole('navigation', { name: 'Starting point', exact: true })
+  await starts.getByRole('button', { name: 'Jelly', exact: true }).click()
+  const confirm = page.getByRole('dialog', { name: 'Start a new theme?', exact: true })
+  await confirm.getByRole('button', { name: 'Start from Jelly', exact: true }).click()
+  await confirm.waitFor({ state: 'hidden' })
+  assert.notDeepEqual(document(await exportText(page)), edited, `${where} starts from Jelly`)
+  assert.equal(
+    await starts.getByRole('button', { name: 'Jelly', exact: true }).getAttribute('aria-pressed'),
+    'true',
+    `${where} shows Jelly pressed`
+  )
 
   await frame.getByRole('button', { name: 'Share', exact: true }).click()
   const link = await page.getByRole('textbox', { name: 'Share link', exact: true }).inputValue()
