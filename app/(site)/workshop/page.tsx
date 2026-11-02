@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import NextLink from 'next/link'
-import { WorkshopDemo } from '@/components/WorkshopDemo'
+import { RemoteSources } from '@/components/demo/DemoFrame'
+import { ThemeWorkshop } from '@/examples/workshop/ThemeWorkshop'
 
 export const metadata: Metadata = {
   title: 'Theme workshop',
@@ -21,7 +22,8 @@ export default function WorkshopPage() {
           <NextLink href="/docs/workshop/">Read the guide</NextLink>
         </p>
       </header>
-      <WorkshopDemo />
+      <ThemeWorkshop />
+      <RemoteSources url="/demo-sources/workshop.json" />
     </main>
   )
 }
