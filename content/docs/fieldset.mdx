@@ -51,21 +51,21 @@ Provide descriptive legend text and label every control. Group help and errors d
 
 ## Styling
 
-Refs, native attributes, `className` and typed `style` reach the fieldset. `parts.legend`, `description` and `error` style their native parts without replacing IDs. The root retains `field fieldset` identities and Field's `data-disabled` / `data-invalid` states. Part identities remain `field-label`, `field-description` and `field-error`.
+Refs, native attributes, `className` and typed `style` reach the fieldset. `parts.label` styles the legend, as on Field, and `description` and `error` style their native parts, without replacing IDs. The root retains `field fieldset` identities and Field's `data-disabled` / `data-invalid` states. Part identities remain `field-label`, `field-description` and `field-error`.
 
 Set `components.fieldset.gap` or `--rad-fieldset-gap` for legend and field spacing. Field supplies typography and feedback presentation.
 
 ## API
 
-| Fieldset prop              | Type                                     | Default         |
-| -------------------------- | ---------------------------------------- | --------------- |
-| legend                     | ReactNode                                | Required        |
-| description / error        | ReactNode                                | None            |
-| disabled                   | boolean                                  | false           |
-| children                   | ReactNode                                | None            |
-| parts                      | legend / description / error style hooks | None            |
-| className / style          | string / ThemeStyle                      | None            |
-| ref                        | `Ref<HTMLFieldSetElement>`               | None            |
-| Native fieldset attributes | Includes id, name, form and ARIA         | Native defaults |
+| Fieldset prop              | Type                                    | Default         |
+| -------------------------- | --------------------------------------- | --------------- |
+| legend                     | ReactNode                               | Required        |
+| description / error        | ReactNode                               | None            |
+| disabled                   | boolean                                 | false           |
+| children                   | ReactNode                               | None            |
+| parts                      | label / description / error style hooks | None            |
+| className / style          | string / ThemeStyle                     | None            |
+| ref                        | `Ref<HTMLFieldSetElement>`              | None            |
+| Native fieldset attributes | Includes id, name, form and ARIA        | Native defaults |
 
 Exports: `Fieldset`, `FieldsetProps`. Fieldset composes Field's group behavior and owns no value or validation engine.

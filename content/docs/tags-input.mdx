@@ -52,7 +52,7 @@ Each committed value submits under `name` as a repeated field; read it with `For
 
 ## Accessibility
 
-The text input is a native textbox; name it with [Field](/docs/field/) or `aria-label`. Each tag's remove Button is named `Remove <value>`. Rejected input sets `aria-invalid="true"` and shows a polite live message linked by `aria-describedby`.
+The text input is a native textbox; name it with [Field](/docs/field/) or `aria-label`. Each tag's remove Button is named `Remove <value>`; `removeLabel` changes that, for example to translate it. Rejected input sets `aria-invalid="true"` and shows a polite live message linked by `aria-describedby`.
 
 | Key                         | Behavior                                        |
 | --------------------------- | ----------------------------------------------- |
@@ -98,6 +98,7 @@ Nothing animates. Remove Buttons use `motion="off"`.
 | name / form          | string; `form` reaches every hidden input                          | None                |
 | disabled / required  | boolean                                                            | Field's, else false |
 | readOnly             | boolean                                                            | false               |
+| removeLabel          | `(text: string) => string`; names each remove Button               | `Remove ${text}`    |
 | aria-invalid         | Native                                                             | Field's             |
 | parts                | `{ wrapper?, tag?, remove?, error? }`, each `{ className, style }` | None                |
 | Other props          | Input props except value, defaultValue, type and children          | Native              |

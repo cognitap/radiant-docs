@@ -205,7 +205,7 @@ export function GeometryEditor({
       )}
       <Fieldset
         legend="Spacing and surface decisions"
-        parts={{ legend: { className: 'workshop-sr-only' } }}
+        parts={{ label: { className: 'workshop-sr-only' } }}
         hidden={!recipe}
         disabled={disabled}
         className="geometry-settings"

@@ -1851,7 +1851,7 @@ test('Command docs register scoped shortcuts, update project records, focus real
         )
         const lookup = page.getByRole('region', { name: 'Find study report', exact: true })
         await lookup.getByRole('button', { name: 'Find study report', exact: true }).click()
-        const remote = lookup.getByRole('combobox', { name: 'Search commands', exact: true })
+        const remote = lookup.getByRole('combobox', { name: 'Search reports', exact: true })
         await remote.fill('reader')
         await lookup
           .getByRole('option', { name: 'Open reader study report', exact: true })
@@ -1946,7 +1946,7 @@ test('EmptyState docs create real table records, recover an empty Combobox and r
         const recovery = demo.getByRole('region', { name: 'Report recovery', exact: true })
         await recovery.getByRole('button', { name: 'Find a study report', exact: true }).click()
         const dialog = recovery.getByRole('dialog')
-        const search = dialog.getByRole('combobox', { name: 'Search commands', exact: true })
+        const search = dialog.getByRole('combobox', { name: 'Search reports', exact: true })
         await search.fill('Reader')
         await search.press('Tab')
         const retry = dialog.getByRole('button', { name: 'Retry report search', exact: true })
@@ -2562,7 +2562,7 @@ test('Carousel docs navigate real studies, preserve notes and honor controlled r
           .getByRole('combobox', { name: 'Direction', exact: true })
           .selectOption('rtl')
         await page.setViewportSize({ width: 320, height: 850 })
-        await notes.getByRole('group', { name: 'Slides', exact: true }).focus()
+        await notes.getByRole('group', { name: 'Study preparation', exact: true }).focus()
         await page.keyboard.press('ArrowLeft')
         await page.waitForFunction(() =>
           document

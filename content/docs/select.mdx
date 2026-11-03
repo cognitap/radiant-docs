@@ -83,7 +83,7 @@ Inside [MotionProvider](/docs/foundations/motion/), the popup fades in; closing 
 
 ## Styling
 
-Every part except SelectPortal takes `className`, `style` and `ref`.
+Every part except SelectPortal takes `className`, `style` and `ref`, and adds a caller's `data-slot` after its own.
 
 | Part                | Attributes                                                                                                              |
 | ------------------- | ----------------------------------------------------------------------------------------------------------------------- |
@@ -97,7 +97,7 @@ Every part except SelectPortal takes `className`, `style` and `ref`.
 | SelectItemIndicator | `data-slot="select-item-indicator"`; `invisible` when not selected                                                      |
 | SelectGroup         | `data-slot="select-group"`; its heading is `select-label`                                                               |
 
-Theme with `--rad-select-*` tokens, such as `--rad-select-height`, `--rad-select-radius` and `--rad-select-item-background`.
+Theme with `--rad-select-*` tokens, such as `--rad-select-height`, `--rad-select-radius` and `--rad-select-item-background`. `focusColor`, `focusWidth`, `focusOffset` and `focusStyle` set the trigger's focus ring.
 
 ## API
 

@@ -45,7 +45,7 @@ Use Dialog for a short task that needs the user's attention before they return t
 
 Pass `open` with `onOpenChange` to own the state, or `defaultOpen` to let Dialog own it. Mixing them is a type error. `onOpenChange` is a request: a controlled owner can decline it, and the dialog stays open, even after native Escape.
 
-DialogContent is a native `<dialog>`. A `<form method="dialog">` inside it closes the dialog, and Dialog reports `onOpenChange(false)`. Other forms submit normally and stay open; close them yourself after saving. A dialog inside an ancestor form keeps its fields in that form. DialogTrigger and DialogClose default to `type="button"`, so they never submit.
+DialogContent is a native `<dialog>`. A `<form method="dialog">` inside it closes the dialog, and Dialog reports `onOpenChange(false)`. Other forms submit normally and stay open; close them after saving. A dialog inside an ancestor form keeps its fields in that form. DialogTrigger and DialogClose default to `type="button"`, so they never submit.
 
 ## Accessibility
 
@@ -62,15 +62,15 @@ A modal dialog uses `showModal()`. The browser makes the rest of the page inert 
 
 ## Motion
 
-Inside a [`MotionProvider`](/docs/foundations/motion/), DialogContent springs open and closed. Closing and focus return never wait for the exit. Turn it off with `motion="off"` on DialogContent, globally with theme `motion.mode: 'off'`, or through the reduced-motion preference.
+Inside a [`MotionProvider`](/docs/foundations/motion/), DialogContent springs open and closed. Closing and focus return never wait for the exit. Turn it off with `motion="off"` on DialogContent, theme `motion.mode: 'off'` or reduced motion.
 
 ## Styling
 
-`className` and `style` target each part's own element. DialogContent carries `data-state="open"` or `"closed"`. The panel's height is capped at `min(40rem, 100dvh - 2rem)`, and longer content scrolls.
+`className` and `style` target each part's own element; a caller's `data-slot` follows the part's. DialogContent and DialogTrigger carry `data-state="open"` or `"closed"`. The panel's height is capped at `min(40rem, 100dvh - 2rem)`; longer content scrolls.
 
 | Part              | `data-slot`             |
 | ----------------- | ----------------------- |
-| DialogContent     | `dialog`                |
+| DialogContent     | `dialog-content`        |
 | DialogTitle       | `dialog-title`          |
 | DialogDescription | `dialog-description`    |
 | DialogTrigger     | `button dialog-trigger` |

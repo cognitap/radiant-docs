@@ -59,7 +59,7 @@ Pagination keeps no state and submits nothing. Set `current` on exactly one link
 
 ## Accessibility
 
-Pagination is a `nav` landmark named "Pagination". Give each pager on a page a distinct `aria-label`, or `aria-labelledby` for a visible heading. A blank name throws. Pages sit in an ordered list. The current page gets `aria-current="page"`. Label number-only pages, such as "Page 2".
+Pagination is a `nav` landmark that requires a distinct `aria-label`, or `aria-labelledby` for a visible heading; it throws without one. Pages sit in an ordered list. The current page gets `aria-current="page"` and `data-selected`. Label number-only pages, such as "Page 2".
 
 `PaginationUnavailable` renders text with `aria-disabled="true"` and no focus stop, since a link cannot be disabled. Disabled `PaginationButton` boundaries use native `disabled`. The ellipsis is hidden from assistive technology.
 
@@ -85,7 +85,7 @@ Links and buttons use Button's press motion. It stops under reduced motion and w
 | PaginationUnavailable     | `pagination-unavailable`                       |
 | PaginationEllipsis        | `pagination-ellipsis`                          |
 
-Links and buttons also set `data-variant`, `data-tone` and `data-control-size`. `className` and `style` reach each part's host.
+Links and buttons also set `data-variant`, `data-tone` and `data-control-size`. `className` and `style` reach each part's host, and a caller's `data-slot` follows the part's own.
 
 | Variable                          | Default                        |
 | --------------------------------- | ------------------------------ |
@@ -99,11 +99,11 @@ Theme keys are `components.pagination.gap`, `radius` and `itemMinWidth`.
 
 ### Pagination
 
-| Prop            | Type / default                    |
-| --------------- | --------------------------------- |
-| aria-label      | string; "Pagination"              |
-| aria-labelledby | string; replaces the default name |
-| Other props     | Native `nav` props                |
+| Prop            | Type / default                                |
+| --------------- | --------------------------------------------- |
+| aria-label      | string; this or `aria-labelledby` is required |
+| aria-labelledby | string                                        |
+| Other props     | Native `nav` props                            |
 
 `PaginationList` (`ol`) and `PaginationItem` (`li`) take native props.
 

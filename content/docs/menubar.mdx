@@ -64,7 +64,7 @@ Inside [MotionProvider](/docs/foundations/motion/), titles keep Button press fee
 
 ## Styling
 
-Props, refs, classes and styles reach each part's native element. Every part adds a `menubar-*` slot to its `menu-*` slot, such as `menubar-trigger` and `menubar-item`. The bar exposes `data-state="open"` or `"closed"`; each title exposes `data-value`.
+Props, refs, classes and styles reach each part's native element. Every part adds a `menubar-*` slot to its `menu-*` slot, such as `menubar-trigger` and `menubar-item`. The bar and each title expose `data-state="open"` or `"closed"`. Titles also expose `data-value`, and an empty `data-disabled` when disabled.
 
 Use `components.menubar` or `--rad-menubar-gap`, `--rad-menubar-padding`, `--rad-menubar-radius` and `--rad-menubar-background` for the bar. Popups and items follow [Menu](/docs/menu/#styling).
 

@@ -68,7 +68,7 @@ CodeBlock adds no animation. CodeBlockCopy keeps Button's press motion and reduc
 
 ## Styling
 
-className, style and ref reach each part's host. The root carries data-language, data-line-numbers and data-copy-state (idle, pending, success or error). Inner slots are code-block-status, code-block-line-numbers and code-block-code.
+className, style and ref reach each part's host. The root carries data-language, data-copy-state (idle, pending, success or error) and, with line numbers, an empty data-line-numbers. Inner slots are code-block-status, code-block-line-numbers and code-block-code.
 
 `components.codeBlock` sets radius, border, surface, padding, header spacing, maxHeight, font size, line height, number gap and colors, and status color through `--rad-code-block-*`. `components.inlineCode` sets radius, padding, background, color and fontSize through `--rad-inline-code-*`.
 

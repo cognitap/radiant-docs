@@ -54,7 +54,7 @@ The input has the native slider role. Give it a name with [Field](/docs/field/),
 
 ## Styling
 
-Slider renders one native `<input>`, so `className`, `style` and `ref` all target it. It carries `data-slot="slider"`, `data-control-size`, `data-orientation` and `data-invalid` when invalid; style disabled with `:disabled`. Vertical sliders put higher values at the top and default to a 12rem length. Forced colors restore the native slider.
+Slider renders one native `<input>`, so `className`, `style` and `ref` all target it. It carries `data-slot="slider"` followed by a caller's tokens, `data-control-size`, `data-orientation` and `data-invalid` when invalid; style disabled with `:disabled`. Vertical sliders put higher values at the top and default to a 12rem length. Forced colors restore the native slider.
 
 Override `--rad-slider-*` variables in `style` or `components.slider` in a theme:
 

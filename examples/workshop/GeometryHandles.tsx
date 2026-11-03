@@ -25,7 +25,7 @@ interface Rect {
 }
 const controlSelector = '[data-slot~="button"], [data-slot~="input"]'
 const surfaceSelector =
-  '[data-slot~="accordion-item"], [data-slot~="collapsible"], [data-slot~="dialog"], [data-slot~="card"]'
+  '[data-slot~="accordion-item"], [data-slot~="collapsible"], [data-slot~="dialog-content"], [data-slot~="card"]'
 /** The control and the surface the handles sit on: the Inspect pick when it is one, else the first solid button and the first surface in the page. */
 function subjects(
   host: Element,

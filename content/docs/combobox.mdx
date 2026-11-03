@@ -58,11 +58,11 @@ Without children, Combobox renders an input, trigger, clear button and a listbox
 | Search              | `query`    | `defaultQuery` | `onQueryChange(query: string)`         | `''`    |
 | Popup               | `open`     | `defaultOpen`  | `onOpenChange(open: boolean)`          | `false` |
 
-Passing both props of a pair, or changing the owner or `type` during a mount, throws; remount with a new `key`. Prop changes fire no callback.
+Passing both props of a pair, or changing the owner or `type` while mounted, throws; remount with a new `key`. Prop changes fire no callback.
 
 Single mode submits the selected key under `name`, or `''` when empty. Multiple mode submits one `name` entry per key. `required` needs a selection. Native reset restores uncontrolled selection and search silently. `disabled` leaves the value out of the form; `readOnly` keeps it submitted but blocks edits.
 
-For server results, pass `filter={null}`, `loading`, `errorText` and `selectedItem` when the selection is outside the results.
+For server results, pass `filter={null}`, `loading`, `errorText`, and `selectedItem` for a selection outside the results.
 
 ## Accessibility
 
@@ -82,23 +82,23 @@ Focus stays on the input. ComboboxTrigger is not a Tab stop; ComboboxClear is on
 
 ## Motion
 
-Inside [MotionProvider](/docs/foundations/motion/), ComboboxContent fades in; closing is immediate. Set `motion="off"` on ComboboxContent to turn it off. Reduced motion shows it at full opacity.
+Inside [MotionProvider](/docs/foundations/motion/), ComboboxContent fades in; closing is immediate. `motion="off"` on ComboboxContent and reduced motion show it at once.
 
 ## Styling
 
-Every hosted part takes `className`, `style` and `ref`. Multiple mode adds `multi-select-*` to each slot.
+Hosted parts take `className`, `style` and `ref`. Multiple mode adds `multi-select-*` slots, then a caller's `data-slot`.
 
 | Part            | Attributes                                                                                      |
 | --------------- | ----------------------------------------------------------------------------------------------- |
-| ComboboxInput   | `data-slot="combobox-input"`, `data-control-size`, `data-invalid`                               |
-| ComboboxTrigger | `data-slot="button combobox-trigger"`                                                           |
+| ComboboxInput   | `data-slot="combobox-input"`, `data-state`, `data-control-size`, `data-invalid`                 |
+| ComboboxTrigger | `data-slot="button combobox-trigger"`, `data-state="open \| closed"`                            |
 | ComboboxClear   | `data-slot="button combobox-clear"`                                                             |
 | ComboboxContent | `data-slot="combobox-content"`, `data-state="open \| closed"`, `data-motion`                    |
 | ComboboxItem    | `data-slot="combobox-item"`, `data-value`, `data-highlighted`, `data-selected`, `data-disabled` |
 | ComboboxStatus  | `data-slot="combobox-status"`                                                                   |
 | ComboboxTags    | `data-slot="combobox-tags"`                                                                     |
 
-Theme with `--rad-combobox-*` tokens, such as `--rad-combobox-radius` on the input `style`.
+Theme with `--rad-combobox-*` tokens, such as `--rad-combobox-radius` on the input `style`. `focusColor`, `focusWidth`, `focusOffset` and `focusStyle` set the focus ring.
 
 ## API
 
@@ -181,9 +181,10 @@ Renders next to the input; the popup uses the top layer.
 
 ### ComboboxTags
 
-| Prop        | Type                      | Default       |
-| ----------- | ------------------------- | ------------- |
-| Other props | div props except children | Selected Tags |
+| Prop        | Type                                                 | Default          |
+| ----------- | ---------------------------------------------------- | ---------------- |
+| removeLabel | `(text: string) => string`; names each remove button | `Remove ${text}` |
+| Other props | div props except children                            | Selected Tags    |
 
 Throws outside `type="multiple"`.
 
