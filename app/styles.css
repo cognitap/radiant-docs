@@ -142,32 +142,22 @@ body {
   white-space: nowrap;
 }
 
-.workshop-page .demo-frame {
+.workshop-page .theme-workshop,
+.workshop-page .workshop-opening {
   margin-block: 2rem 0;
+  border: 1px solid var(--docs-border);
+  border-radius: 0.75rem;
+  background: var(--docs-surface);
+  overflow: clip;
 }
 
 /* On a phone the workshop runs edge to edge so the preview strip and controls get the width. */
 @media (width < 600px) {
-  .workshop-page .demo-frame {
+  .workshop-page .theme-workshop {
     margin-inline: calc(-1 * clamp(1rem, 3vw, 3rem));
     border-inline: 0;
     border-radius: 0;
   }
-}
-
-/* The page h1 already names the workshop; keep the region name for assistive tech, without
-   the heading band. */
-.workshop-page .demo-heading {
-  padding: 0;
-}
-
-.workshop-page .demo-heading h2 {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip-path: inset(50%);
-  white-space: nowrap;
 }
 
 .docs-app {

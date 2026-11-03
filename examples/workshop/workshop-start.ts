@@ -85,3 +85,25 @@ export function readSharedTheme(text: string): ThemeSnapshot {
     throw new Error('A shared theme needs a full workshop configuration or theme document.')
   return snapshotFromConfiguration(data)
 }
+
+/** Where a workshop session begins. A shared theme carries its own snapshot; the others build one. */
+export type Start =
+  | { kind: 'example'; id: string }
+  | { kind: 'brand'; brand: string }
+  | { kind: 'shared'; source: string }
+export interface StartingPoint {
+  start: Start
+  baseline: ThemeSnapshot
+}
+export const defaultStart = { kind: 'example', id: 'radiant' } as const satisfies Start
+
+export function exampleTheme(id: string): StartingTheme {
+  const theme = startingThemes.find(theme => theme.id === id)
+  if (!theme) throw new Error(`No example theme is called ${id}.`)
+  return theme
+}
+export function startSnapshot(start: Exclude<Start, { kind: 'shared' }>): ThemeSnapshot {
+  return start.kind === 'example'
+    ? exampleSnapshot(exampleTheme(start.id))
+    : brandSnapshot(start.brand)
+}

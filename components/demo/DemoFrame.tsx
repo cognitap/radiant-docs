@@ -166,7 +166,8 @@ type Listing =
   | { status: 'idle' | 'loading' | 'failed' }
   | { status: 'loaded'; sources: readonly DemoSource[] }
 
-function RemoteSources({ url }: { url: string }) {
+/** The source listing of an example that stands outside a frame, such as the workshop. */
+export function RemoteSources({ url }: { url: string }) {
   const [open, setOpen] = useState(false)
   const [listing, setListing] = useState<Listing>({ status: 'idle' })
   const trigger = useRef<HTMLElement>(null)
