@@ -54,7 +54,7 @@ Native scrolling and snap own movement. Touch swipes stay native; mouse and pen 
 
 ## Accessibility
 
-Name the native section. Slides announce their label and position; `slideLabel(index, count)` customizes position text. Previous/next are real Buttons and indicators identify the current slide. `indicatorLabel` names each destination.
+Name the native section; the viewport takes that name unless given its own. Slides announce their label and position; `slideLabel(index, count)` customizes position text. Previous/next are real Buttons and indicators identify the current slide with `aria-current` and `data-selected`. `indicatorLabel` names each destination.
 
 The viewport is keyboard reachable. Left/Right follow direction; Home/End select the first/last slide. Keys inside native controls retain their meaning. Selection leaves action focus in place. Automatic rotation silences position announcements; manual navigation announces changes.
 

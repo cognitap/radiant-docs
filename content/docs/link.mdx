@@ -49,7 +49,7 @@ The anchor's text, or `aria-label`, is its accessible name. Without `href` it is
 
 ## Styling
 
-Link has one part, the anchor. `className`, `style` and `ref` reach it. It sets `data-slot="link"`, `data-variant`, `data-tone` and `data-control-size`.
+Link has one part, the anchor. `className`, `style` and `ref` reach it. It sets `data-slot="link"`, followed by any tokens you pass, plus `data-variant`, `data-tone` and `data-control-size`.
 
 | Variable                                                   | Default                        |
 | ---------------------------------------------------------- | ------------------------------ |
@@ -84,6 +84,6 @@ Takes every Link prop plus `motion`: inherit / off, default inherit.
 
 ### LinkRenderProps
 
-Native anchor props plus `style?: ThemeStyle`, `data-slot: 'link'`, `data-variant`, `data-tone` and `data-control-size`.
+Native anchor props plus `style?: ThemeStyle`, a `data-slot` string starting with `link`, `data-variant`, `data-tone` and `data-control-size`.
 
 Exports: `Link`, `LinkProps`, `LinkRenderProps`, `LinkVariant` from `@cognitap/radiant`; `MotionLink`, `MotionLinkProps` from `@cognitap/radiant/motion/react`.

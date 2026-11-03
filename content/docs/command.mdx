@@ -23,7 +23,7 @@ Use Command when people search for an action and run it. Activating a result cal
   <CommandTrigger>Commands</CommandTrigger>
   <CommandContent>
     <CommandTitle>Commands</CommandTitle>
-    <CommandInput />
+    <CommandInput aria-label="Search commands" />
     <CommandList />
   </CommandContent>
 </Command>
@@ -55,7 +55,7 @@ Choose one owner per pair. Callbacks are requests that a controlled owner may de
 
 ## Accessibility
 
-CommandContent is a native dialog named by CommandTitle and described by CommandDescription. CommandInput is a `combobox` named "Search commands" unless you pass `aria-label` or `aria-labelledby`. Results form a `listbox`; each `group` is named by its heading. Loading, empty and error text sit in a `status` region. Place CommandInput before footer buttons so it takes focus on open.
+CommandContent is a native dialog named by CommandTitle and described by CommandDescription. CommandInput is a `combobox` and requires `aria-label` or `aria-labelledby`; without one it throws. Results form a `listbox`; each `group` is named by its heading. Loading, empty and error text sit in a `status` region. Place CommandInput before footer buttons so it takes focus on open.
 
 | Key             | Behavior                                                                              |
 | --------------- | ------------------------------------------------------------------------------------- |
@@ -73,14 +73,14 @@ Inside a [`MotionProvider`](/docs/foundations/motion/), CommandContent uses [Dia
 
 ## Styling
 
-Each part takes `className`, `style` and `ref` on its own element. Dialog, Combobox and Kbd tokens style the composed parts.
+Each part takes `className`, `style` and `ref` on its own element, and adds a caller's `data-slot` after its own. Dialog, Combobox and Kbd tokens style the composed parts.
 
 | Part               | `data-slot`                                                       |
 | ------------------ | ----------------------------------------------------------------- |
-| CommandContent     | `dialog command`                                                  |
+| CommandContent     | `dialog-content command-content`                                  |
 | CommandTitle       | `dialog-title command-title`                                      |
 | CommandDescription | `dialog-description command-description`                          |
-| CommandTrigger     | `button dialog-trigger command-trigger`                           |
+| CommandTrigger     | `button dialog-trigger command-trigger`; `data-state`             |
 | CommandClose       | `button dialog-close command-close`                               |
 | CommandInput       | `combobox-input command-input`                                    |
 | CommandList        | `combobox-content command-list`                                   |
@@ -124,11 +124,11 @@ Same props as [DialogContent](/docs/dialog/#dialogcontent), DialogTitle and Dial
 
 ### CommandInput
 
-| Prop                         | Type                                                                                            | Default             |
-| ---------------------------- | ----------------------------------------------------------------------------------------------- | ------------------- |
-| aria-label / aria-labelledby | string                                                                                          | `'Search commands'` |
-| style                        | ThemeStyle                                                                                      | None                |
-| Other props                  | Input props except value, defaultValue, name, form, type, role, disabled, required, ARIA wiring | Native              |
+| Prop                         | Type                                                                                            | Default |
+| ---------------------------- | ----------------------------------------------------------------------------------------------- | ------- |
+| aria-label / aria-labelledby | string; one is required                                                                         | None    |
+| style                        | ThemeStyle                                                                                      | None    |
+| Other props                  | Input props except value, defaultValue, name, form, type, role, disabled, required, ARIA wiring | Native  |
 
 ### CommandList
 

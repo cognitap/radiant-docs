@@ -84,7 +84,10 @@ export function CommandSurface({
     >
       <CommandTitle>{title}</CommandTitle>
       <CommandDescription>{description}</CommandDescription>
-      <CommandInput placeholder="Search commands…" />
+      <CommandInput
+        aria-label="Search commands"
+        placeholder="Search commands…"
+      />
       <CommandList />
       <CommandClose
         variant="ghost"
@@ -341,7 +344,10 @@ export function FindStudyReport({ initialOpen = false, ...options }: CommandTask
           <CommandDescription>
             Search the local report catalog, then explicitly open a result.
           </CommandDescription>
-          <CommandInput placeholder="Search reports…" />
+          <CommandInput
+            aria-label="Search reports"
+            placeholder="Search reports…"
+          />
           <CommandList />
           <Button
             variant="outline"

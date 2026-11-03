@@ -32,7 +32,10 @@ export function PauseSync(options: ToastTaskOptions) {
         </Button>
         <output>Sync is {paused ? 'paused' : 'on'}.</output>
       </div>
-      <ToastViewport style={inline}>
+      <ToastViewport
+        aria-label="Notifications"
+        style={inline}
+      >
         <Toast
           {...options}
           open={open}
@@ -56,7 +59,10 @@ export function ConfirmSave(options: ToastTaskOptions) {
   return (
     <ToastProvider duration={5000}>
       <Button onClick={() => setOpen(true)}>Save draft</Button>
-      <ToastViewport style={inline}>
+      <ToastViewport
+        aria-label="Notifications"
+        style={inline}
+      >
         <Toast
           {...options}
           open={open}
@@ -98,7 +104,10 @@ export function UndoDelete(options: ToastTaskOptions) {
           </li>
         ))}
       </ul>
-      <ToastViewport style={inline}>
+      <ToastViewport
+        aria-label="Notifications"
+        style={inline}
+      >
         <Toast
           {...options}
           open={open}
@@ -144,7 +153,10 @@ export function ReportFailedUpload(options: ToastTaskOptions) {
         </Button>
         <output>{uploaded ? 'invoice.pdf uploaded.' : ''}</output>
       </div>
-      <ToastViewport style={inline}>
+      <ToastViewport
+        aria-label="Notifications"
+        style={inline}
+      >
         <Toast
           {...options}
           open={open}

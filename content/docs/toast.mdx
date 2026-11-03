@@ -15,12 +15,12 @@ import {
 
 ## Usage
 
-Use Toast to confirm or report something the user just did. Use [Alert](/docs/alert/) for a message that must stay in the page, and [AlertDialog](/docs/alert-dialog/) for a decision the user must make before continuing.
+Use Toast to confirm or report a user's action. Use [Alert](/docs/alert/) for a message that must stay in the page, and [AlertDialog](/docs/alert-dialog/) for a decision the user must make before continuing.
 
 ```tsx
 <ToastProvider>
   <Button onClick={() => setOpen(true)}>Save draft</Button>
-  <ToastViewport>
+  <ToastViewport aria-label="Notifications">
     <Toast
       open={open}
       onOpenChange={setOpen}
@@ -59,13 +59,13 @@ Use `open` or `defaultOpen`, never both. ToastAction, ToastClose, Escape inside 
 
 Toast `duration` overrides the provider's, in milliseconds. The default `0` keeps the toast until it is dismissed. The timer starts when the toast is visible and pauses while it is hovered or focused, or the document is hidden.
 
-A provider shows one toast at a time. The rest wait hidden and inert, in the order they opened, with `data-queued`. `useToast()` returns `{ open, visible, setOpen }` inside a Toast and `null` outside.
+A provider shows one toast at a time. The rest wait hidden and inert, in the order they opened. `useToast()` returns `{ open, visible, setOpen }` inside a Toast and `null` outside.
 
 ## Accessibility
 
-Opening never moves focus. The provider announces the toast politely, or through `role="alert"` with `announce="assertive"`. It reads ToastTitle, ToastDescription and each ToastAction's `altText`, never ToastClose. `announcement` replaces that text.
+Opening never moves focus. ToastViewport, and a Toast without a ToastTitle, need `aria-label` or `aria-labelledby`, or they throw. The provider announces the toast politely, or through `role="alert"` with `announce="assertive"`. It reads ToastTitle, ToastDescription and each ToastAction's `altText`, never ToastClose. `announcement` replaces that text.
 
-`altText` is required because the user hears the toast from outside it, often after it has closed. Say where the action is: "Undo is available in Notifications, reached with F8." A blank value throws. The button's name stays its visible text. Keep `duration` at `0` when the user must reach an action.
+`altText` is required because the user hears the toast from outside it. Say where the action is: "Undo is available in Notifications, reached with F8." A blank value throws. The button's name stays its visible text. Keep `duration` at `0` when the user must reach an action.
 
 | Key             | Behavior                                     |
 | --------------- | -------------------------------------------- |
@@ -82,9 +82,9 @@ With a `MotionProvider` from `@cognitap/radiant/motion/react`, the toast fades i
 
 ## Styling
 
-Every part takes `className` and has a `toast-*` `data-slot`. Toast has `data-state`, `data-queued`, `data-urgency`, `data-tone` and `data-motion`.
+Every part takes `className` and has a `toast-*` `data-slot`, then a caller's. Toast has `data-state`, `data-urgency`, `data-tone` and `data-motion`, and empty `data-queued` and `data-paused` while waiting or paused.
 
-Pass `--rad-toast-*` tokens through `style`. Toast takes padding, gap, radius, background, color, border and shadow tokens. The viewport takes `--rad-toast-inset`, `--rad-toast-width` and `--rad-toast-z-index`, and is fixed to the bottom right by default.
+Pass `--rad-toast-*` tokens through `style`. Toast takes padding, gap, radius, background, color, border and shadow tokens. The viewport, fixed to the bottom right, takes `--rad-toast-inset`, `--rad-toast-width` and `--rad-toast-z-index`.
 
 ## API
 
@@ -93,12 +93,12 @@ Pass `--rad-toast-*` tokens through `style`. Toast takes padding, gap, radius, b
 | duration           | number    | 0       |
 | children           | ReactNode | None    |
 
-| ToastViewport prop   | Type                                        | Default         |
-| -------------------- | ------------------------------------------- | --------------- |
-| hotkey               | boolean                                     | true            |
-| aria-label           | string                                      | "Notifications" |
-| style                | ThemeStyle                                  | None            |
-| Native section props | Except role, tabIndex and aria-keyshortcuts | Native defaults |
+| ToastViewport prop           | Type                                        | Default         |
+| ---------------------------- | ------------------------------------------- | --------------- |
+| hotkey                       | boolean                                     | true            |
+| aria-label / aria-labelledby | string; one is required                     | None            |
+| style                        | ThemeStyle                                  | None            |
+| Native section props         | Except role, tabIndex and aria-keyshortcuts | Native defaults |
 
 | Toast prop                 | Type                                                  | Default           |
 | -------------------------- | ----------------------------------------------------- | ----------------- |

@@ -51,7 +51,7 @@ Each selected key submits under `name`; read them with `FormData.getAll`. Search
 
 ## Accessibility
 
-Focus stays on the `combobox` input; the popup is a `listbox` with `aria-multiselectable`, and each option's `aria-selected` shows membership. Loading, empty and error text is a polite `status`. Name the input with Field or `aria-label` on MultiSelectInput. Each tag's remove button is named "Remove" plus the item text.
+Focus stays on the `combobox` input; the popup is a `listbox` with `aria-multiselectable`, and each option's `aria-selected` shows membership. Loading, empty and error text is a polite `status`. Name the input with Field or `aria-label` on MultiSelectInput. MultiSelectTags `removeLabel` names each tag's remove button.
 
 | Key                         | Behavior                                      |
 | --------------------------- | --------------------------------------------- |
@@ -69,17 +69,17 @@ Inside [MotionProvider](/docs/foundations/motion/), the popup fades in; closing 
 
 ## Styling
 
-MultiSelect and MultiSelectPortal render no element. Other parts take `className`, `style` and `ref`, and keep their `combobox-*` slot alongside the `multi-select-*` one.
+MultiSelect and MultiSelectPortal render no element. Other parts take `className`, `style` and `ref`, and keep their `combobox-*` slot alongside the `multi-select-*` one, then a caller's.
 
-| Part               | Attributes                                                                                          |
-| ------------------ | --------------------------------------------------------------------------------------------------- |
-| MultiSelectTags    | `data-slot="combobox-tags multi-select-tags"`; each tag is `multi-select-tag`                       |
-| MultiSelectInput   | `multi-select-input`, `data-control-size`, `data-invalid`; wrapper `multi-select-control`           |
-| MultiSelectTrigger | `data-slot="button combobox-trigger multi-select-trigger"`                                          |
-| MultiSelectClear   | `data-slot="button combobox-clear multi-select-clear"`                                              |
-| MultiSelectContent | `multi-select-content`, `data-state="open \| closed"`, `data-motion`; `multi-select-listbox` inside |
-| MultiSelectItem    | `multi-select-item`, `data-value`, `data-highlighted`, `data-selected`, `data-disabled`             |
-| MultiSelectStatus  | `multi-select-status`                                                                               |
+| Part               | Attributes                                                                                              |
+| ------------------ | ------------------------------------------------------------------------------------------------------- |
+| MultiSelectTags    | `data-slot="combobox-tags multi-select-tags"`; each tag is `multi-select-tag`                           |
+| MultiSelectInput   | `multi-select-input`, `data-state`, `data-control-size`, `data-invalid`; wrapper `multi-select-control` |
+| MultiSelectTrigger | `data-slot="button combobox-trigger multi-select-trigger"`, `data-state="open \| closed"`               |
+| MultiSelectClear   | `data-slot="button combobox-clear multi-select-clear"`                                                  |
+| MultiSelectContent | `multi-select-content`, `data-state="open \| closed"`, `data-motion`; `multi-select-listbox` inside     |
+| MultiSelectItem    | `multi-select-item`, `data-value`, `data-highlighted`, `data-selected`, `data-disabled`                 |
+| MultiSelectStatus  | `multi-select-status`                                                                                   |
 
 Hidden form inputs are `multi-select-native` and `multi-select-value`. `--rad-multi-select-gap` spaces the tags; everything else uses the `--rad-combobox-*` tokens.
 
@@ -113,9 +113,10 @@ MultiSelect takes neither `type` nor `multiple`.
 
 ### MultiSelectTags
 
-| Prop        | Type                      | Default |
-| ----------- | ------------------------- | ------- |
-| Other props | div props except children | Native  |
+| Prop        | Type                                                 | Default          |
+| ----------- | ---------------------------------------------------- | ---------------- |
+| removeLabel | `(text: string) => string`; names each remove button | `Remove ${text}` |
+| Other props | div props except children                            | Native           |
 
 ### MultiSelectInput
 

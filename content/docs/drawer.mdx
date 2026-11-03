@@ -74,11 +74,12 @@ Under `MotionProvider`, the drawer slides in and out and settles on a spring aft
 
 ## Styling
 
-| Part     | Slot and attributes                                                                         |
-| -------- | ------------------------------------------------------------------------------------------- |
-| Content  | `dialog drawer`; `data-side`, `data-physical-side` (top/right/bottom/left), `data-dragging` |
-| Viewport | `drawer-viewport`; style with `parts.viewport`                                              |
-| Handle   | contains `drawer-handle` and `button`                                                       |
+| Part     | Slot and attributes                                                                                         |
+| -------- | ----------------------------------------------------------------------------------------------------------- |
+| Trigger  | `button dialog-trigger drawer-trigger`; `data-state` (open/closed)                                          |
+| Content  | `dialog-content drawer-content`; `data-side`, `data-physical-side` (top/right/bottom/left), `data-dragging` |
+| Viewport | `drawer-viewport`; style with `parts.viewport`                                                              |
+| Handle   | contains `drawer-handle` and `button`                                                                       |
 
 Set `--rad-drawer-size` (default `24rem`) for the maximum extent. Surface spacing uses `--rad-dialog-gap` and `--rad-dialog-padding`.
 

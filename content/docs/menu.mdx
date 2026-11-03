@@ -9,7 +9,7 @@ import { MenuDemo, MenuCanvasDemo, MenuExportDemo, MenuFormDemo } from '../../co
 
 ## Usage
 
-Use Menu for a short list of commands behind a button. Items are commands, not toggles: MenuItem takes no `pressed` props. For a command that turns something on or off, use MenuCheckboxItem. Choose something else when:
+Use Menu for a short list of commands behind a button. MenuItem is a command, not a toggle; use MenuCheckboxItem for something that turns on or off. Choose something else when:
 
 - [Select](/docs/select/) or [NativeSelect](/docs/native-select/): people pick a value to submit.
 - NavigationMenu or [Link](/docs/link/): items go to other pages.
@@ -50,13 +50,13 @@ Use Menu for a short list of commands behind a button. Items are commands, not t
 
 ## State
 
-Menu takes `open` or `defaultOpen` with `onOpenChange`. MenuCheckboxItem takes `checked` or `defaultChecked` with `onCheckedChange`. MenuRadioGroup takes `value` or `defaultValue`, a string or `null`, with `onValueChange`. Pick one owner per mount; switching throws. A controlled owner may refuse a request, as "Submit report actions" does while "Keep commands open" is checked.
+Menu takes `open` or `defaultOpen` with `onOpenChange`. MenuCheckboxItem takes `checked` or `defaultChecked` with `onCheckedChange`. MenuRadioGroup takes `value` or `defaultValue`, a string or `null`, with `onValueChange`. Pick one owner per mount; switching throws. A controlled owner may refuse a request.
 
-Items are real buttons. Set `type="submit"` with `form`, `name` and `value` to submit a form, or `type="reset"` to reset it. Checkbox and radio items are `type="button"` and never submit. Call `event.preventDefault()` in `onSelect` to keep the menu open and cancel the native action.
+Items are real buttons: `type="submit"` with `form`, `name` and `value` submits a form, and `type="reset"` resets it. Checkbox and radio items are `type="button"` and never submit. Call `event.preventDefault()` in `onSelect` to keep the menu open and cancel the native action.
 
 ## Accessibility
 
-The trigger is a `button` with `aria-haspopup="menu"`, `aria-expanded` and `aria-controls`; its text names the menu. The content is a vertical `menu`. Items are `menuitem`, `menuitemcheckbox` with `aria-checked` true, false or mixed, or `menuitemradio`. Name a MenuGroup with `aria-labelledby` pointing at a MenuLabel `id`, or with `aria-label`. Disabled items stay focusable with `aria-disabled`.
+The trigger is a `button` with `aria-haspopup="menu"`, `aria-expanded` and `aria-controls`; its text names the menu. The content is a vertical `menu`. Items are `menuitem`, `menuitemcheckbox` with `aria-checked` true, false or mixed, or `menuitemradio`. Name a MenuGroup with `aria-label`, or `aria-labelledby` pointing at a MenuLabel. Disabled items stay focusable with `aria-disabled`.
 
 | Key                                   | Behavior                                      |
 | ------------------------------------- | --------------------------------------------- |
@@ -71,19 +71,19 @@ The trigger is a `button` with `aria-haspopup="menu"`, `aria-expanded` and `aria
 | Escape                                | Close the menu and refocus its opener         |
 | Tab / Shift+Tab                       | Close every menu and move on from the trigger |
 
-Arrow Right and Left swap in right-to-left layouts. Hovering an item focuses it, except on touch; hovering a MenuSubTrigger opens its submenu.
+Arrow Right and Left swap in right-to-left layouts. Hover focuses an item, except on touch, and opens a MenuSubTrigger's submenu.
 
 ## Motion
 
-Inside [MotionProvider](/docs/foundations/motion/), the content fades and scales in. Set `motion="off"` on MenuContent or MenuSubContent to turn it off for that surface. Reduced motion is honored.
+Inside [MotionProvider](/docs/foundations/motion/), the content fades and scales in. `motion="off"` on MenuContent or MenuSubContent, or reduced motion, turns it off.
 
 ## Styling
 
-Every part except Menu, MenuSub and MenuPortal takes `className`, `style` and `ref`. The trigger and items keep Button's slot, and the content keeps Popover's state and placement attributes.
+Every part except Menu, MenuSub and MenuPortal takes `className`, `style` and `ref`. The trigger and items keep Button's slot, and the content keeps Popover's state and placement attributes. Rows carry `data-tone`, plus empty `data-disabled` when disabled and `data-selected` when checked. The focused row takes the accent fill; a `warning` or `danger` tone tints the row and fills it in that tone.
 
 | Part             | Attributes                                             |
 | ---------------- | ------------------------------------------------------ |
-| MenuTrigger      | `data-slot` includes `menu-trigger`                    |
+| MenuTrigger      | `data-slot` includes `menu-trigger`; `data-state`      |
 | MenuContent      | `menu-content`                                         |
 | MenuItem         | `menu-item`, `data-text-value`                         |
 | MenuCheckboxItem | `menu-checkbox-item`                                   |
@@ -96,7 +96,7 @@ Every part except Menu, MenuSub and MenuPortal takes `className`, `style` and `r
 | MenuSubTrigger   | `menu-sub-trigger`                                     |
 | MenuSubContent   | `menu-sub-content`                                     |
 
-Theme with `components.menu` or `--rad-menu-*` tokens, such as `--rad-menu-width`, `--rad-menu-radius` and `--rad-menu-item-focus-background`.
+Theme with `components.menu` or `--rad-menu-*` tokens, such as `--rad-menu-item-focus-background` and the toned rest colors `--rad-menu-item-warning-color` and `--rad-menu-item-danger-color`.
 
 ## API
 
@@ -140,16 +140,17 @@ Renders no host element.
 
 ### MenuItem
 
-| Prop                       | Type                                                                     | Default        |
-| -------------------------- | ------------------------------------------------------------------------ | -------------- |
-| onSelect                   | `(event: MouseEvent<HTMLButtonElement>) => void`                         | None           |
-| closeOnSelect              | boolean                                                                  | true           |
-| textValue                  | string; typeahead text                                                   | Text content   |
-| disabled                   | boolean; stays focusable                                                 | false          |
-| pending                    | boolean; blocks activation                                               | false          |
-| type / form / name / value | Native button attributes                                                 | Button default |
-| render                     | `(props: MenuRenderProps) => ReactElement`                               | None           |
-| Other props                | Button props except `role`, `tabIndex`, `aria-disabled` and toggle props | Native         |
+| Prop                       | Type                                                                                                                        | Default        |
+| -------------------------- | --------------------------------------------------------------------------------------------------------------------------- | -------------- |
+| onSelect                   | `(event: MouseEvent<HTMLButtonElement>) => void`                                                                            | None           |
+| closeOnSelect              | boolean                                                                                                                     | true           |
+| textValue                  | string; typeahead text                                                                                                      | Text content   |
+| disabled                   | boolean; stays focusable                                                                                                    | false          |
+| pending                    | boolean; blocks activation                                                                                                  | false          |
+| tone                       | `MenuItemTone`: neutral / warning / danger                                                                                  | neutral        |
+| type / form / name / value | Native button attributes                                                                                                    | Button default |
+| render                     | `(props: MenuRenderProps) => ReactElement`                                                                                  | None           |
+| Other props                | Button props except `role`, `tabIndex`, `aria-disabled`, toggle props, `variant`, `controlSize`, `iconOnly` and `fullWidth` | Native         |
 
 ### MenuCheckboxItem
 
@@ -224,4 +225,4 @@ Renders no host element.
 
 `useMenu()` returns `{ open, setOpen, contentId }` inside a Menu, else `null`.
 
-Exports each part's `Props` type, plus `MenuState` and `MenuRenderProps`.
+Exports each part's `Props` type, plus `MenuState`, `MenuItemTone` and `MenuRenderProps`.

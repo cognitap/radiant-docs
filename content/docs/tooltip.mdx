@@ -70,7 +70,7 @@ With `MotionProvider` from `@cognitap/radiant/motion/react`, content fades in. C
 
 Tooltip and TooltipPortal render no element. The portal mounts content beside the trigger, keeping theme and modal ancestry, and content shows in the top layer.
 
-TooltipTrigger renders [Button](/docs/button/) with `data-slot="button tooltip-trigger"`. TooltipContent has `data-slot="tooltip-content"`, `data-state`, `data-motion`, and the `data-side` and `data-align` used after flipping. `className`, `style` and `ref` target the span.
+TooltipTrigger renders [Button](/docs/button/) with `data-slot="button tooltip-trigger"`. TooltipContent has `data-slot="tooltip-content"` followed by a caller's tokens, `data-state`, `data-motion`, and the `data-side` and `data-align` used after flipping. `className`, `style` and `ref` target the span.
 
 Use `components.tooltip` or `--rad-tooltip-*` variables: `max-width` (20rem), `padding`, `radius`, `background`, `color`, `border-color`, `border-width`, `border-style`, `shadow`, `font-size` and `font-weight`.
 

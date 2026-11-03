@@ -61,7 +61,7 @@ The optional `MotionProvider` from `@cognitap/radiant/motion/react` supplies Pop
 
 ## Styling
 
-Refs and native props target the trigger's anchor or content's div. `data-slot` retains `link hover-card-trigger` and `popover-content hover-card-content`. Content exposes effective `data-side`, `data-align`, open/closed `data-state` and `data-motion`.
+Refs and native props target the trigger's anchor or content's div. `data-slot` retains `link hover-card-trigger` and `popover-content hover-card-content`. Content exposes effective `data-side`, `data-align`, open/closed `data-state` and `data-motion`; the trigger exposes `data-state` too.
 
 Use `components.hoverCard.width` or `--rad-hover-card-width`; other surface overrides inherit [Popover](/docs/popover/#styling). Caller classes and styles win. A custom trigger `render` forwards all resolved props, ref and children to one compatible anchor.
 
