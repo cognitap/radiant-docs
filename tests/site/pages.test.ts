@@ -3,10 +3,10 @@ import test from 'node:test'
 import { availableParallelism } from 'node:os'
 import { setTimeout as delay } from 'node:timers/promises'
 import { chromium, type Browser, type Locator, type Page } from 'playwright'
-import { capture, docRoutes, exampleSource, track, withSite } from './site.ts'
+import { capture, docRoutes, exampleSource, shard, track, withSite } from './site.ts'
 
 test('every documentation page', async () => {
-  const routes = await docRoutes()
+  const routes = shard(await docRoutes())
   assert.ok(routes.length > 0)
   await withSite(async (baseURL, browser) => {
     // Each headless browser process owns its clipboard, so the copy checks never share one.
