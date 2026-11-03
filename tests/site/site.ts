@@ -14,6 +14,19 @@ export function checkoutRevision() {
   return execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim()
 }
 
+/** `DOCS_SHARD=2/3` keeps every third item starting at the second; unset keeps all. */
+export function shard<T>(items: T[]) {
+  const value = process.env.DOCS_SHARD
+  if (!value) return items
+  const match = /^([1-9]\d*)\/([1-9]\d*)$/.exec(value)
+  if (!match || Number(match[1]) > Number(match[2])) {
+    throw new Error(`DOCS_SHARD must be index/total, got ${value}`)
+  }
+  const index = Number(match[1])
+  const total = Number(match[2])
+  return items.filter((_, position) => position % total === index - 1)
+}
+
 /** Routes follow the MDX files, so a new page does not need a new test. */
 export async function docRoutes() {
   const root = path.resolve('content/docs')
