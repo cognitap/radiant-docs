@@ -184,7 +184,7 @@ export function EditProfileWithTanStack() {
               disabled
             >
               <Input
-                defaultValue="Cognitap"
+                defaultValue="Acme"
                 name="organisation"
               />
             </Field>
