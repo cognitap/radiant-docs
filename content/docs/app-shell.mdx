@@ -66,6 +66,8 @@ An optional MotionProvider enables spring layout alongside Drawer transitions. `
 
 Root props, refs, classes and styles reach the actual div, header, main, nav, anchor or button. Typed `components.appShell` and `components.sidebar` theme overrides control surfaces, widths, padding and labels. Sidebar `parts` styles its label, drawer, viewport and close action.
 
+AppShell and Sidebar carry an empty `data-collapsed` while collapsed, and AppShell an empty `data-mobile` below 40rem. Expanded-only SidebarContent carries `data-expanded-only`. SidebarTrigger's `data-state` is `open` while the sidebar shows: expanded on desktop, open on mobile. Select presence, as in `[data-collapsed]`.
+
 ## API
 
 | Export                        | Purpose                                                            |

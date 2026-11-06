@@ -182,7 +182,7 @@ export function Preview({
       <Fieldset
         className="preview-toolbar"
         legend="Preview"
-        parts={{ legend: { className: 'workshop-sr-only' } }}
+        parts={{ label: { className: 'workshop-sr-only' } }}
         disabled={!ready}
       >
         <div className="preview-choices">

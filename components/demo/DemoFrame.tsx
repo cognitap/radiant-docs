@@ -275,7 +275,7 @@ export function DemoControls({
     <Fieldset
       legend={label}
       className="demo-controls"
-      parts={{ legend: { className: 'demo-controls-legend' } }}
+      parts={{ label: { className: 'demo-controls-legend' } }}
       disabled={!ready}
     >
       {children}

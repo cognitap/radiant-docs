@@ -364,6 +364,7 @@ export function RecoverStudyReports({ level = 3, ...options }: EmptyStateTaskOpt
           <CommandDescription>Search reports and explicitly open a result.</CommandDescription>
           <CommandInput
             ref={input}
+            aria-label="Search reports"
             placeholder="Search reports…"
           />
           <CommandList

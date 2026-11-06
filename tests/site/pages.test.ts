@@ -1,14 +1,39 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
+import { availableParallelism } from 'node:os'
 import { setTimeout as delay } from 'node:timers/promises'
-import type { Browser, Locator, Page } from 'playwright'
-import { capture, docRoutes, exampleSource, track, withSite } from './site.ts'
+import { chromium, type Browser, type Locator, type Page } from 'playwright'
+import { capture, docRoutes, exampleSource, shard, track, withSite } from './site.ts'
 
 test('every documentation page', async () => {
-  const routes = await docRoutes()
+  const routes = shard(await docRoutes())
   assert.ok(routes.length > 0)
   await withSite(async (baseURL, browser) => {
-    for (const route of routes) await checkPage(baseURL, browser, route)
+    // Each headless browser process owns its clipboard, so the copy checks never share one.
+    const extra = Math.min(availableParallelism(), routes.length) - 1
+    const browsers = [
+      browser,
+      ...(await Promise.all(Array.from({ length: extra }, () => chromium.launch())))
+    ]
+    const queue = [...routes]
+    let failure: unknown
+    try {
+      await Promise.all(
+        browsers.map(async worker => {
+          while (queue.length > 0 && failure === undefined) {
+            const route = queue.shift()!
+            try {
+              await checkPage(baseURL, worker, route)
+            } catch (error) {
+              failure ??= error
+            }
+          }
+        })
+      )
+    } finally {
+      await Promise.all(browsers.slice(1).map(worker => worker.close()))
+    }
+    if (failure !== undefined) throw failure
   })
 })
 

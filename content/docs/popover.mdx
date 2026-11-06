@@ -70,7 +70,7 @@ With a `MotionProvider` from `@cognitap/radiant/motion/react`, content fades in.
 
 Content flips and shifts to stay inside the visual viewport. On top and bottom sides, `start` and `end` follow text direction. `data-side` and `data-align` report the placement after flipping.
 
-Content exposes `data-slot="popover-content"`, `data-state`, `data-side`, `data-align` and `data-motion`. The trigger and close add `popover-trigger` and `popover-close` to Button's `data-slot`. Caller `data-slot` values are appended; `className` merges over the defaults.
+Content exposes `data-slot="popover-content"`, `data-state`, `data-side`, `data-align` and `data-motion`. The trigger and close add `popover-trigger` and `popover-close` to Button's `data-slot`, and the trigger exposes `data-state`. Caller `data-slot` values are appended; `className` merges over the defaults.
 
 Use `components.popover` or `--rad-popover-*` variables, such as `--rad-popover-width` (default `20rem`), `padding`, `radius` and `shadow`.
 

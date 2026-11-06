@@ -17,7 +17,7 @@ import {
 Breadcrumb is a named navigation landmark: an ordered list of ancestor links ending in the current page. Your application owns the hierarchy. Use [NavLink](/docs/nav-link/) for site navigation between sections, [Pagination](/docs/pagination/) for moving through pages of one list, and a plain [Link](/docs/link/) for a single "Back to" link.
 
 ```tsx
-<Breadcrumb>
+<Breadcrumb aria-label="Breadcrumb">
   <BreadcrumbList>
     <BreadcrumbItem>
       <BreadcrumbLink href="/projects">Projects</BreadcrumbLink>
@@ -54,9 +54,9 @@ Pass noninteractive content, such as an icon, as BreadcrumbSeparator's children.
 
 ## Accessibility
 
-Breadcrumb renders a `nav` named "Breadcrumb" by default. `aria-label` or `aria-labelledby` replaces that name; give one when a page has two breadcrumbs or another nav with the same name. A blank `aria-label` without `aria-labelledby` throws.
+Breadcrumb renders a `nav` and requires `aria-label` or `aria-labelledby`; it throws without a name. Give each nav on a page a distinct one.
 
-Mark exactly one current page. `BreadcrumbPage` renders a span with `aria-current="page"` that is not focusable. Set `current` on a BreadcrumbLink instead when the current page should stay a link. Neither part accepts `aria-current` directly.
+Mark exactly one current page. `BreadcrumbPage` renders an unfocusable span with `aria-current="page"`. Set `current` on a BreadcrumbLink when the current page should stay a link. Both set `data-selected` on the current item. Neither part accepts `aria-current` directly.
 
 Separators are `aria-hidden="true"` and never focusable, so screen readers hear only destinations. Put each inside a BreadcrumbItem, not directly under the list.
 
@@ -71,7 +71,7 @@ Only BreadcrumbLink's color fades on hover, as in Link. Set `--rad-link-color-du
 
 ## Styling
 
-`className`, `style` and `ref` reach each part's host: `nav`, `ol`, `li`, `a`, `span` and `span`. Each part sets a `data-slot`; BreadcrumbLink also keeps Link's `link` slot, `data-variant`, `data-tone` and `data-control-size`.
+`className`, `style` and `ref` reach each part's host: `nav`, `ol`, `li`, `a`, `span` and `span`. Each part sets a `data-slot`, followed by a caller's; BreadcrumbLink keeps Link's `link` slot, `data-variant`, `data-tone` and `data-control-size`.
 
 | Part                | `data-slot`            |
 | ------------------- | ---------------------- |
@@ -100,10 +100,10 @@ Every part also takes its host's native props and `style?: ThemeStyle`. `role` i
 
 ### Breadcrumb
 
-| Prop            | Type   | Default                                |
-| --------------- | ------ | -------------------------------------- |
-| aria-label      | string | "Breadcrumb" when no `aria-labelledby` |
-| aria-labelledby | string | None; replaces the default label       |
+| Prop            | Type   | Default                                     |
+| --------------- | ------ | ------------------------------------------- |
+| aria-label      | string | None; this or `aria-labelledby` is required |
+| aria-labelledby | string | None                                        |
 
 ### BreadcrumbList and BreadcrumbItem
 

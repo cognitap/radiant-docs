@@ -55,7 +55,7 @@ Native constraints and custom rules share the same error presentation. TanStack 
 
 `onSubmitValues(FormData, { form, submitter, signal })` may return `{ fields, form }` or a promise of that shape. Field errors use native names; the form message appears in FormError. Returning nothing clears errors.
 
-`validate(FormData)` supplies synchronous custom rules. Native constraints remain authoritative. Form owns `noValidate` so messages render through Field instead of browser bubbles. Match each FormField `name` to its real control.
+`validate(FormData)` supplies synchronous custom rules. Native constraints remain authoritative. Form owns `noValidate` so messages render through Field instead of browser bubbles. Match each FormField `name` to its real control's `name`. NumberField, TagsInput and MultiSelect report required and range errors on that FormField too.
 
 Form stores errors and pending status, never values. Use `errors`, `defaultErrors`, `onErrorsChange` for one controlled or uncontrolled error owner. Render callbacks read `errors` and `pending`; `useForm` also exposes `focusInvalid` and returns null outside a form.
 

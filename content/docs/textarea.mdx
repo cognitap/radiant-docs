@@ -67,7 +67,7 @@ Textarea has no transitions or animations.
 
 `className`, `style` and `ref` reach the native textarea. Caller classes merge after the defaults, so `resize-none` or padding classes win. `rows` sets the height, vertical drag resizing is on, and long content scrolls. The minimum height is one control height, so `rows={1}` matches Input.
 
-`data-slot` contains `textarea`; inside InputGroup it adds `input-group-textarea`, so select `[data-slot~="textarea"]`. `data-control-size` names the size, and an empty `data-invalid` marks invalid values. Style `:disabled`, `:read-only`, `:focus-visible` and `::placeholder` natively. Forced colors use `CanvasText`, and `GrayText` when disabled.
+`data-slot` contains `textarea`; inside InputGroup it adds `input-group-textarea`, and a caller's tokens follow, so select `[data-slot~="textarea"]`. `data-control-size` names the size, and an empty `data-invalid` marks invalid values. Style `:disabled`, `:read-only`, `:focus-visible` and `::placeholder` natively. Forced colors use `CanvasText`, and `GrayText` when disabled.
 
 Each `--rad-textarea-*` variable has a camelCase `components.textarea` key, such as `paddingBlock`, and falls back to the shared control token, not to Input's.
 

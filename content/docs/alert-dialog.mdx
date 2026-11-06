@@ -82,13 +82,13 @@ Inside a `MotionProvider`, Content springs open and Trigger, Action and Cancel c
 
 ## Styling
 
-`className`, `style` and `ref` reach each host. Parts keep Dialog's `data-slot` tokens and add their own; match them with `~=`.
+`className`, `style` and `ref` reach each host. Parts keep Dialog's `data-slot` tokens, add their own, then a caller's; match them with `~=`. The trigger and content carry `data-state="open"` or `"closed"`.
 
 | Part                   | Host     | data-slot                                                    |
 | ---------------------- | -------- | ------------------------------------------------------------ |
 | AlertDialog            | None     | None                                                         |
 | AlertDialogTrigger     | `button` | `button dialog-trigger alert-dialog-trigger`                 |
-| AlertDialogContent     | `dialog` | `dialog alert-dialog`; `data-state="open" \| "closed"`       |
+| AlertDialogContent     | `dialog` | `dialog-content alert-dialog-content`                        |
 | AlertDialogTitle       | `h2`     | `dialog-title alert-dialog-title`                            |
 | AlertDialogDescription | `p`      | `dialog-description alert-dialog-description`                |
 | AlertDialogAction      | `button` | `button dialog-close alert-dialog-close alert-dialog-action` |

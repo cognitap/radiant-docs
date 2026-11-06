@@ -55,7 +55,7 @@ Switch has no animation; the thumb jumps between ends when it toggles. During a 
 
 ## Styling
 
-`className`, `style`, `ref` and native props target the input, which draws the track. It carries `data-slot="switch"`, `data-control-size`, `data-invalid` when invalid and `data-dragging` during a drag. Use `:checked` and `:disabled` for those states. Set `--rad-switch-*` variables in `style` or the theme's `components.switch`, such as `width`, `height`, `checkedBackground` and `thumb`. Keep the focus ring visible. See [theming](/docs/foundations/theming/).
+`className`, `style`, `ref` and native props target the input, which draws the track. It carries `data-slot="switch"` followed by a caller's tokens, `data-control-size`, `data-invalid` when invalid and `data-dragging` during a drag. Use `:checked` and `:disabled` for those states. Set `--rad-switch-*` variables in `style` or the theme's `components.switch`, such as `width`, `height`, `checkedBackground` and `thumb`. Keep the focus ring visible. See [theming](/docs/foundations/theming/).
 
 | Part              | Element                                     | `data-slot`        |
 | ----------------- | ------------------------------------------- | ------------------ |

@@ -9,7 +9,7 @@ import { NavLinkDemo, NavLinkProjectsDemo, NavLinkSettingsDemo } from '../../com
 
 ## Usage
 
-Use NavLink for destinations in an application sidebar. The consumer's router chooses active; the current anchor exposes aria-current="page". Use [Link](/docs/link/) for ordinary links and [Menu](/docs/menu/) for action menus.
+Use NavLink for destinations in an application sidebar. The consumer's router chooses active; the current anchor exposes `aria-current="page"` and `data-selected`, which carries the active style. Use [Link](/docs/link/) for ordinary links and [Menu](/docs/menu/) for action menus.
 
 ```tsx
 <nav aria-label="Workspace">
@@ -65,7 +65,7 @@ Group disclosures inherit Collapsible's spring adapter and reduced-motion behavi
 
 Root className, style, events and ref reach the actual anchor, details, summary or content div. Slot tokens retain Link and Collapsible identities and add nav-link, nav-link-group, nav-link-group-trigger and nav-link-group-content.
 
-parts.icon, parts.label and parts.description style visible content. `components.navLink` provides typography, spacing, active, hover, description, focus and nested-indent tokens. Logical borders and indentation follow direction.
+parts.icon, parts.label and parts.description style visible content. `components.navLink` provides typography, spacing, active, hover, description, nested-indent and focus tokens, including `focusStyle`. Logical borders and indentation follow direction.
 
 ## API
 

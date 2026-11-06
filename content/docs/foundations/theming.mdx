@@ -14,8 +14,7 @@ Apply a theme to the subtree that needs it, after the
 Radiant's core entry ships `defaultTheme`. The other presets are examples to
 use or copy, from `@cognitap/radiant/examples`, and the
 [theme workshop](/docs/workshop/) starts from the same ones. Its readonly
-`themes` registry lists all nine. Changing presentation preserves a form's
-state.
+`themes` registry lists all nine.
 
 <FoundationDemo kind="presets" />
 
@@ -71,9 +70,9 @@ its own value.
 ### Semantic tokens and exceptions
 
 Shared token groups are `color`, `typography`, `control`, `surface`, `focus`,
-`motion`, `spacing` and `state`. Prefer these roles for changes across families.
-Components resolve **local component override → shared semantic role → neutral
-baseline**.
+`motion`, `spacing` and `state`. Components resolve **local component override → shared semantic role → neutral
+baseline**. Every focus ring reads the family's `focusColor`, `focusWidth`,
+`focusOffset` and `focusStyle`, then the `focus` tokens.
 
 | Authoring path              | Public CSS variable       | Scope of the change         |
 | --------------------------- | ------------------------- | --------------------------- |

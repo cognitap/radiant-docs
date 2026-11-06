@@ -9,6 +9,8 @@ const config = {
   trailingSlash: true,
   agentRules: false,
   reactStrictMode: true,
+  // `pnpm check` type-checks before the build, so the build skips its own pass.
+  typescript: { ignoreBuildErrors: true },
   env: {
     NEXT_PUBLIC_RADIANT_VERSION: radiantPackage.version,
     NEXT_PUBLIC_RADIANT_CANDIDATE: radiantPackage.candidate

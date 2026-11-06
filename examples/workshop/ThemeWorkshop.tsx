@@ -573,7 +573,7 @@ function WorkshopShell({
             </div>
             <Fieldset
               legend={`${current.label} options`}
-              parts={{ legend: { className: 'workshop-sr-only' } }}
+              parts={{ label: { className: 'workshop-sr-only' } }}
               disabled={!ready}
               className="workshop-options"
             >

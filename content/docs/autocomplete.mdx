@@ -69,18 +69,18 @@ Inside [MotionProvider](/docs/foundations/motion/), the popup fades in; closing 
 
 ## Styling
 
-Autocomplete and AutocompletePortal have no host. Every other part takes `className`, `style` and `ref`. Each slot keeps its `combobox-*` name and adds an `autocomplete-*` one.
+Autocomplete and AutocompletePortal have no host. Every other part takes `className`, `style` and `ref`. Each slot keeps its `combobox-*` name, then `autocomplete-*`, then a caller's.
 
-| Part                | Attributes                                                                                        |
-| ------------------- | ------------------------------------------------------------------------------------------------- |
-| Control wrapper     | `data-slot="combobox-control autocomplete-control"`; default composition only                     |
-| AutocompleteInput   | `data-slot="combobox-input autocomplete-input"`, `data-control-size`, `data-invalid`              |
-| AutocompleteTrigger | `data-slot="button combobox-trigger autocomplete-trigger"`                                        |
-| AutocompleteClear   | `data-slot="button combobox-clear autocomplete-clear"`; renders only for nonempty text            |
-| AutocompleteContent | `data-slot="combobox-content autocomplete-content"`, `data-state="open \| closed"`, `data-motion` |
-| Listbox             | `data-slot="combobox-listbox autocomplete-listbox"` inside the content                            |
-| AutocompleteItem    | `data-slot="combobox-item autocomplete-item"`, `data-value`, `data-highlighted`, `data-disabled`  |
-| AutocompleteStatus  | `data-slot="combobox-status autocomplete-status"`                                                 |
+| Part                | Attributes                                                                                         |
+| ------------------- | -------------------------------------------------------------------------------------------------- |
+| Control wrapper     | `data-slot="combobox-control autocomplete-control"`; default composition only                      |
+| AutocompleteInput   | `data-slot="combobox-input autocomplete-input"`, `data-state`, `data-control-size`, `data-invalid` |
+| AutocompleteTrigger | `data-slot="button combobox-trigger autocomplete-trigger"`, `data-state="open \| closed"`          |
+| AutocompleteClear   | `data-slot="button combobox-clear autocomplete-clear"`; renders only for nonempty text             |
+| AutocompleteContent | `data-slot="combobox-content autocomplete-content"`, `data-state="open \| closed"`, `data-motion`  |
+| Listbox             | `data-slot="combobox-listbox autocomplete-listbox"` inside the content                             |
+| AutocompleteItem    | `data-slot="combobox-item autocomplete-item"`, `data-value`, `data-highlighted`, `data-disabled`   |
+| AutocompleteStatus  | `data-slot="combobox-status autocomplete-status"`                                                  |
 
 Theme with the Combobox tokens, such as `--rad-combobox-height`, `--rad-combobox-radius` and `--rad-combobox-border-color`.
 
