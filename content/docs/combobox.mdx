@@ -60,9 +60,9 @@ Without children, Combobox renders an input, trigger, clear button and a listbox
 
 Passing both props of a pair, or changing the owner or `type` while mounted, throws; remount with a new `key`. Prop changes fire no callback.
 
-Single mode submits the selected key under `name`, or `''` when empty. Multiple mode submits one `name` entry per key. `required` needs a selection. Native reset restores uncontrolled selection and search silently. `disabled` leaves the value out of the form; `readOnly` keeps it submitted but blocks edits.
+Single mode submits the selected key under `name`, or `''` when empty. Multiple mode submits one `name` entry per key. `required` needs a selection. Native reset restores uncontrolled selection and search. `disabled` leaves the value out of the form; `readOnly` keeps it submitted but blocks edits.
 
-For server results, pass `filter={null}`, `loading`, `errorText`, and `selectedItem` for a selection outside the results.
+For server results, pass `filter={null}`, `loading`, `errorText` and `selectedItem`.
 
 ## Accessibility
 
@@ -78,7 +78,7 @@ The input is a `combobox` that controls a `listbox` of `option` items, with `ari
 | Tab                       | Close and move on without committing                                      |
 | Backspace on empty search | Remove the last value in multiple mode                                    |
 
-Focus stays on the input. ComboboxTrigger is not a Tab stop; ComboboxClear is one only in multiple mode.
+Focus stays on the input. Only multiple-mode ComboboxClear is a Tab stop.
 
 ## Motion
 
@@ -151,7 +151,7 @@ ComboboxClear hides when nothing is selected.
 | -------- | --------- | ------- |
 | children | ReactNode | None    |
 
-Renders next to the input; the popup uses the top layer.
+Renders on the top layer. An ancestor dialog or popover hides the list until that ancestor is visible again, while the list stays open.
 
 ### ComboboxContent
 

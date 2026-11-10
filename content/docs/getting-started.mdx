@@ -31,9 +31,12 @@ import '@cognitap/radiant/styles.css'
   `reset.css` export is a separate choice; only add a global reset when it fits your application.
 </Callout>
 
-The stylesheet includes component rules, utilities and a neutral light/dark
-baseline. Components render without a provider. Use `ThemeScope` for a named
-preset or a scoped mode.
+The stylesheet includes component rules, the utilities those components use,
+and a neutral light/dark baseline. It does not define general utilities such as
+`container`, `hidden` or `border`, and it does not set Tailwind's `--spacing`.
+`styles.css` and `reset.css` typecheck without a local CSS module declaration.
+Components render without a provider. Use `ThemeScope` for a named preset or a
+scoped mode.
 
 ### Optional global reset
 

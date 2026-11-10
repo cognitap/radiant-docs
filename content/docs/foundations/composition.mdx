@@ -80,8 +80,10 @@ reduced-motion alternatives in replacement styles.
 
 Use [semantic tokens and local overrides](/docs/foundations/theming/#semantic-tokens-and-exceptions)
 for presentation changes. On the Tailwind route, matching caller utilities
-merge with component defaults; the ordinary CSS cascade still applies. These
-behaviors do not need the optional reset.
+merge with component defaults. A size, width, style or font-family utility that
+reads a token needs a hint, such as `text-(length:--rad-tabs-font-size)`; an
+unhinted `text-(--token)` is a color. The ordinary CSS cascade still applies.
+These behaviors do not need the optional reset.
 
 ## Client and server responsibilities
 

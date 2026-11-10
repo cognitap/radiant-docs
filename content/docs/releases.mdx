@@ -8,8 +8,10 @@ by this site. Keep package JavaScript and CSS on the same version.
 
 ## Latest release
 
-The current release brings the families in line with each other. Several changes break existing code. Breadcrumb, Pagination, ToastViewport and CommandInput need an accessible name. Fieldset styles its legend through `parts.label`. Menu rows drop `variant` and `controlSize`. Dialog content is slotted `dialog-content`. Boolean data attributes are empty instead of `"true"`.
-See the [release notes](https://github.com/cognitap/radiant/releases/tag/v0.0.78).
+The current release changes class merging and the compiled stylesheet. A size, width, style or font-family utility needs a [type hint](/docs/foundations/composition/#functional-css). `styles.css` no longer defines unused utilities such as `container` or `hidden`, and it no longer sets Tailwind's `--spacing`. See [installation](/docs/getting-started/#choose-a-styling-route).
+
+Combobox, Autocomplete and MultiSelect lists hide when an ancestor dialog or popover closes. A timed Toast pauses while a touch is held. A segmented ToggleGroup indicator follows an ancestor `dir` change. Prose list padding, `pre` scrolling and inline code skip `data-rad-not-prose` and `data-slot`.
+See the [release notes](https://github.com/cognitap/radiant/releases/tag/v0.0.79).
 
 ## Upgrade existing themes
 
