@@ -57,7 +57,7 @@ There is no `toast()` function. Render a Toast for each message from your own st
 
 Use `open` or `defaultOpen`, never both. ToastAction, ToastClose, Escape inside the toast and the timeout each call `onOpenChange(false)`. An action's `onClick` runs first; `event.preventDefault()` keeps the toast open.
 
-Toast `duration` overrides the provider's, in milliseconds. The default `0` keeps the toast until it is dismissed. The timer starts when the toast is visible and pauses while it is hovered or focused, or the document is hidden.
+Toast `duration` overrides the provider's, in milliseconds. The default `0` keeps the toast until it is dismissed. The timer starts when visible and pauses while hovered, focused, touch-held, or the document is hidden; a touch hover does not.
 
 A provider shows one toast at a time. The rest wait hidden and inert, in the order they opened. `useToast()` returns `{ open, visible, setOpen }` inside a Toast and `null` outside.
 

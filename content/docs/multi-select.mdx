@@ -45,13 +45,13 @@ Without children, MultiSelect renders the tags, the input with a trigger, and an
 
 Use `defaultValue`, or `value` with `onValueChange`, not both; mixing them throws. Values are distinct strings, and `[]` is empty. `query` and `open` follow the same rule with their own callbacks.
 
-Choosing an item toggles it, clears the search and keeps the popup open. For server results, pass `filter={null}` and set `loading` or `errorText` yourself. `selectedItems` labels selected keys missing from the current `items`.
+Choosing an item toggles it, clears the search and keeps the popup open. Ancestor dialogs and popovers hide and restore the list like [Combobox](/docs/combobox/). For server results, pass `filter={null}` and set `loading` or `errorText` yourself. `selectedItems` labels selected keys missing from the current `items`.
 
 Each selected key submits under `name`; read them with `FormData.getAll`. Search text never submits. `required` needs at least one selection. Form reset restores an uncontrolled selection without calling `onValueChange`; reset controlled state in `onReset`. `disabled` leaves the values out of form data. `readOnly` blocks edits but keeps them submitted. Pass `aria-invalid` to MultiSelect to mark it invalid outside [Field](/docs/field/).
 
 ## Accessibility
 
-Focus stays on the `combobox` input; the popup is a `listbox` with `aria-multiselectable`, and each option's `aria-selected` shows membership. Loading, empty and error text is a polite `status`. Name the input with Field or `aria-label` on MultiSelectInput. MultiSelectTags `removeLabel` names each tag's remove button.
+Focus stays on the `combobox` input; the popup is a `listbox` with `aria-multiselectable`, and each option's `aria-selected` shows membership. Loading, empty and error text is a polite `status`. Name the input with Field or `aria-label` on MultiSelectInput.
 
 | Key                         | Behavior                                      |
 | --------------------------- | --------------------------------------------- |
