@@ -29,7 +29,7 @@
     "@tanstack/react-form": "1.33.5",
     "fumadocs-core": "16.17.8",
     "fumadocs-mdx": "15.4.10",
-    "next": "16.4.3",
+    "next": "16.4.6",
     "react": "19.3.0",
     "react-dom": "19.3.0"
   },
