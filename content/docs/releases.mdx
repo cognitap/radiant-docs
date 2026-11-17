@@ -8,10 +8,10 @@ by this site. Keep package JavaScript and CSS on the same version.
 
 ## Latest release
 
-The current release breaks two APIs. NavigationMenu no longer takes `items`: each trigger and its content share a `value`, and a section is disabled on its trigger. `useResizable()` no longer returns `controlled` or `orientation`.
+The current release breaks three APIs. AppShell drops `useSidebar` and `sidebarId`; use `useAppShell()`. CarouselAutoPlay takes `playLabel` and `pauseLabel` instead of children, and `useCarousel()` no longer returns playback. Charts drop `plotLabel`, and the chart's `label` names its data table.
 
-Form's render callback receives `focusInvalid`, and Resizable handles set `data-disabled`.
-See the [release notes](https://github.com/cognitap/radiant/releases/tag/v0.0.80).
+MultiSelect draws one field around its chips with the new `MultiSelectControl`.
+See the [release notes](https://github.com/cognitap/radiant/releases/tag/v0.0.81).
 
 ## Upgrade existing themes
 

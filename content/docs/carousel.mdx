@@ -1,34 +1,25 @@
 ---
 title: Carousel
-description: Native scrolling slides with accessible navigation and opt-in rotation.
+description: Show one slide at a time from a short sequence, with buttons, keys and optional rotation.
 ---
 
-import {
-  CarouselDemo,
-  CarouselPreparationDemo,
-  CarouselComparisonDemo
-} from '../../components/CarouselDemo'
+import { Demo } from '../../components/demo/Demo'
+import { CarouselDemo } from '../../components/CarouselDemo'
+import { CarouselPlayground } from '../../examples/carousel/CarouselPlayground'
 
 <CarouselDemo />
 
 ## Usage
 
-```tsx
-import {
-  Carousel,
-  CarouselViewport,
-  CarouselPrevious,
-  CarouselNext,
-  CarouselIndicators
-} from '@cognitap/radiant'
+Use Carousel for a short sequence where one item at a time is enough. Use [Tabs](/docs/tabs/) when people pick panels by name, and [ScrollArea](/docs/scroll-area/) when they should see many items at once.
 
-;<Carousel
-  aria-label="Featured studies"
-  items={[
-    { value: 'atlas', label: 'Atlas', children: <p>Atlas onboarding</p> },
-    { value: 'harbor', label: 'Harbor', children: <p>Harbor reading</p> }
-  ]}
->
+```tsx
+const items = [
+  { value: 'atlas', label: 'Atlas', children: <p>Atlas onboarding</p> },
+  { value: 'harbor', label: 'Harbor', children: <p>Harbor reading</p> }
+]
+
+<Carousel aria-label="Featured studies" items={items}>
   <CarouselViewport />
   <CarouselPrevious>Previous</CarouselPrevious>
   <CarouselNext>Next</CarouselNext>
@@ -36,43 +27,139 @@ import {
 </Carousel>
 ```
 
+Keep essential content reachable without waiting for slides to advance.
+
 ## Examples
 
-<CarouselPreparationDemo />
+### Keep drafts in slides
 
-<CarouselComparisonDemo />
+<Demo
+  title="Prepare research notes"
+  files={['carousel/CarouselExample.tsx']}
+>
+  <CarouselPlayground task="notes" />
+</Demo>
 
-Use a carousel for a focused sequence. Keep essential content reachable without waiting for slides to advance.
+### Rotate highlights
+
+<Demo
+  title="Rotate study highlights"
+  files={['carousel/CarouselExample.tsx']}
+>
+  <CarouselPlayground task="highlights" />
+</Demo>
+
+### Refuse a change
+
+<Demo
+  title="Compare research rounds"
+  files={['carousel/CarouselExample.tsx']}
+>
+  <CarouselPlayground task="compare" />
+</Demo>
 
 ## State
 
-`items` supplies unique stable keys, optional labels and slide content. `value`, `defaultValue`, `onValueChange` own the selected key; callbacks receive one string or null. Controlled requests may be refused. Keep the selected key in the collection.
+Pass `defaultValue`, or `value` with `onValueChange(value)`. The value is an item key or null, and starts at the first item. A controlled owner may refuse a request. Unknown values and empty or repeated keys throw.
 
-Native scrolling and snap own movement. Touch swipes stay native; mouse and pen can drag noninteractive content. Inputs and links retain their own gestures. Slide content stays mounted, preserving drafts. Inactive slides are inert until selected.
+Slides scroll natively; mouse and pen can also drag them. Slides stay mounted, so drafts survive, and unselected slides are inert.
 
-`autoPlay` defaults false. `interval` is milliseconds, at least 1000. Hover, contained focus, document visibility and reduced motion pause the timer. Explicit navigation stops playback. Include CarouselAutoPlay when offering automatic rotation.
+Carousel has no form value, and form reset leaves the selection alone. Reset with `setValue` from `useCarousel()`.
+
+`autoPlay` starts rotation, every `interval` milliseconds. Hover, focus inside, a hidden page and reduced motion pause it. Buttons, indicators and keys stop it. Render CarouselAutoPlay whenever slides rotate. Its text names the next action, from `playLabel` and `pauseLabel`.
 
 ## Accessibility
 
-Name the native section; the viewport takes that name unless given its own. Slides announce their label and position; `slideLabel(index, count)` customizes position text. Previous/next are real Buttons and indicators identify the current slide with `aria-current` and `data-selected`. `indicatorLabel` names each destination.
+Carousel is a `section` that requires `aria-label` or `aria-labelledby` and throws without one. The viewport takes that name unless given its own. Each slide announces its label and position; `slideLabel` sets the position text.
 
-The viewport is keyboard reachable. Left/Right follow direction; Home/End select the first/last slide. Keys inside native controls retain their meaning. Selection leaves action focus in place. Automatic rotation silences position announcements; manual navigation announces changes.
+Previous and Next are Buttons, disabled at the ends. `indicatorLabel` names each indicator, and the current one has `aria-current`. CarouselAutoPlay has no `aria-pressed`; its text says what a press does. Position changes are announced, except while rotation is on.
+
+| Key                | Behavior                                            |
+| ------------------ | --------------------------------------------------- |
+| Arrow Left / Right | Select the slide in that direction, also in RTL     |
+| Home / End         | Select the first or last slide                      |
+| Tab                | Reach the viewport, then the controls inside slides |
+
+Keys act only when the viewport itself has focus.
 
 ## Motion
 
-Native smooth scrolling honors reduced motion. No MotionProvider or animation engine is required. Reduced motion also pauses automatic rotation.
+Slides scroll smoothly, and jump instead under reduced motion, which also pauses rotation. Leave `autoPlay` off, or render CarouselAutoPlay, so people can stop it.
 
 ## Styling
 
-Root props and refs reach the section; viewport props reach its native scroll div. Action props reach Button. `components.carousel` controls `gap`, `slideGap` and `radius`. Caller classes and style win at each actual host.
+| Part       | `data-slot` and attributes                                   |
+| ---------- | ------------------------------------------------------------ |
+| Root       | `carousel` section; `data-playing` while rotating            |
+| Viewport   | `carousel-viewport` div; `data-dragging` during a mouse drag |
+| Slide      | `carousel-slide` div; `data-selected`, `inert`               |
+| Previous   | `carousel-previous` Button                                   |
+| Next       | `carousel-next` Button                                       |
+| Indicators | `carousel-indicators` div of Buttons with `data-selected`    |
+| AutoPlay   | `carousel-auto-play` Button                                  |
+| Theme      | `components.carousel`: `gap`, `slideGap`, `radius`           |
+
+`className`, `style` and `ref` reach each part's element. The theme keys set `--rad-carousel-gap` (`1rem`), `--rad-carousel-slide-gap` (`0px`) and `--rad-carousel-radius` (`0.75rem`). Give indicators the `controlSize` of the buttons beside them.
 
 ## API
 
-| Export                          | Purpose                                            |
-| ------------------------------- | -------------------------------------------------- |
-| Carousel                        | Keyed slide collection and optional rotation       |
-| CarouselViewport                | Native scroll-snap viewport and slides             |
-| CarouselPrevious / CarouselNext | Bounded navigation Buttons                         |
-| CarouselIndicators              | Buttons for named slide destinations               |
-| CarouselAutoPlay                | Start/pause action                                 |
-| useCarousel                     | Selection, count and requests; null outside a root |
+### Carousel
+
+| Prop                         | Type / default                                            |
+| ---------------------------- | --------------------------------------------------------- |
+| aria-label / aria-labelledby | string; one is required                                   |
+| items                        | readonly CarouselItem[]; required                         |
+| value / defaultValue         | string \| null; one owner; first item                     |
+| onValueChange                | (value: string \| null) → void                            |
+| autoPlay                     | boolean; false                                            |
+| interval                     | number, at least 1000; 5000                               |
+| slideLabel                   | (index, count) → string; `` `${index + 1} of ${count}` `` |
+| className / style            | string / ThemeStyle                                       |
+| Other props                  | Native section props except `role`                        |
+
+CarouselItem is `{ value: string; label?: string; children: ReactNode }`.
+
+### CarouselViewport
+
+| Prop        | Type / default                                               |
+| ----------- | ------------------------------------------------------------ |
+| Other props | Native div props except `children`, `id`, `role`, `tabIndex` |
+
+### CarouselPrevious / CarouselNext
+
+| Prop        | Type / default                                     |
+| ----------- | -------------------------------------------------- |
+| onClick     | Runs first; `preventDefault()` skips navigation    |
+| Other props | CarouselActionProps: Button props except `pressed` |
+
+### CarouselIndicators
+
+| Prop           | Type / default                                                       |
+| -------------- | -------------------------------------------------------------------- |
+| indicatorLabel | (index, count) → string; `` `Show slide ${index + 1} of ${count}` `` |
+| controlSize    | small / medium / large; medium                                       |
+| Other props    | Native div props except `children`                                   |
+
+### CarouselAutoPlay
+
+| Prop        | Type / default                                                             |
+| ----------- | -------------------------------------------------------------------------- |
+| playLabel   | string; `'Play slides'`                                                    |
+| pauseLabel  | string; `'Pause slides'`                                                   |
+| onClick     | Runs first; `preventDefault()` keeps the current state                     |
+| Other props | Button props except `children`, `aria-label`, `aria-labelledby`, `pressed` |
+
+An empty label throws.
+
+### useCarousel()
+
+Returns `null` outside a Carousel, otherwise CarouselState.
+
+| Member   | Type                                   |
+| -------- | -------------------------------------- |
+| value    | string \| null                         |
+| index    | number; −1 when nothing is selected    |
+| count    | number                                 |
+| setValue | (value: string) → void; stops rotation |
+
+Exports: `Carousel`, `CarouselViewport`, `CarouselPrevious`, `CarouselNext`, `CarouselIndicators`, `CarouselAutoPlay`, `useCarousel`, `CarouselProps`, `CarouselItem`, `CarouselState`, `CarouselViewportProps`, `CarouselActionProps`, `CarouselIndicatorsProps`, `CarouselAutoPlayProps`.

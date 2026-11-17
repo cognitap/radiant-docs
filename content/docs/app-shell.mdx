@@ -1,6 +1,6 @@
 ---
 title: AppShell
-description: Application landmarks with a responsive Sidebar and mobile Drawer.
+description: Lay out an application with a header, main content and a Sidebar that collapses on desktop and becomes a drawer on small screens.
 ---
 
 import { AppShellDemo, AppShellNotesDemo, AppShellSavedDemo } from '../../components/AppShellDemo'
@@ -9,19 +9,10 @@ import { AppShellDemo, AppShellNotesDemo, AppShellSavedDemo } from '../../compon
 
 ## Usage
 
-```tsx
-import {
-  AppShell,
-  AppShellHeader,
-  AppShellMain,
-  AppShellSkipLink,
-  Sidebar,
-  SidebarTrigger,
-  SidebarLabel,
-  NavLink
-} from '@cognitap/radiant'
+Use AppShell for the frame of a whole application. Use [NavigationMenu](/docs/navigation-menu/) for site dropdowns, [Drawer](/docs/drawer/) for a side task and [Resizable](/docs/resizable/) for panes people resize.
 
-;<AppShell>
+```tsx
+<AppShell>
   <AppShellSkipLink>Skip to content</AppShellSkipLink>
   <AppShellHeader>
     <SidebarTrigger>Toggle navigation</SidebarTrigger>
@@ -29,53 +20,132 @@ import {
   <Sidebar label="Projects">
     <NavLink
       href="/atlas"
-      icon={<span aria-hidden="true">A</span>}
+      icon={<FolderIcon />}
     >
       <SidebarLabel>Atlas</SidebarLabel>
     </NavLink>
   </Sidebar>
-  <AppShellMain>
-    <h1>Atlas research</h1>
-  </AppShellMain>
+  <AppShellMain>…</AppShellMain>
 </AppShell>
 ```
 
+Render AppShell once per page. Wrap link text in SidebarLabel so it hides when the Sidebar collapses, and put controls that need the full width in `SidebarContent expandedOnly`.
+
 ## Examples
+
+### Write notes on a small screen
 
 <AppShellNotesDemo />
 
-<AppShellSavedDemo />
+### Restore a saved layout
 
-Use AppShell for application landmarks and responsive navigation. Use [NavigationMenu](/docs/navigation-menu/) for site dropdowns and [Resizable](/docs/resizable/) for adjustable panes.
+<AppShellSavedDemo />
 
 ## State
 
-`collapsed`, `defaultCollapsed`, `onCollapsedChange` own desktop collapse. `open`, `defaultOpen`, `onOpenChange` independently own the mobile drawer. Each callback receives one boolean; controlled requests may be refused. `useAppShell` and `useSidebar` expose the nearest owner, or null outside one.
+AppShell owns two booleans. `collapsed` narrows the desktop Sidebar; `open` shows the mobile drawer. Pass `defaultCollapsed` or `collapsed` with `onCollapsedChange`, and `defaultOpen` or `open` with `onOpenChange`. A controlled owner may refuse a request.
 
-The viewport switches below 40rem. Returning to desktop requests mobile close. Links stay mounted across this change; applications own routes, destination focus and saved layouts. Wrap text in SidebarLabel and use `SidebarContent expandedOnly` for controls hidden by desktop collapse.
+Below 40rem the Sidebar moves into the drawer. Returning to desktop requests `open` false. Links stay mounted across the move, so field values survive.
+
+`useAppShell()` returns `null` outside AppShell, otherwise the state and request methods. The Sidebar does not close on navigation; call `setOpen(false)` when a link routes. AppShell has no form value. Save `collapsed` yourself to restore a layout.
 
 ## Accessibility
 
-Sidebar is a named native nav. Header and main are native landmarks. SkipLink targets the root-owned main ID; explicit `mainId` and `sidebarId` support stable application IDs. Mobile navigation reuses [Drawer](/docs/drawer/) for modal focus, Escape and restoration. Closing preserves field values; avoid duplicate landmarks inside your page shell.
+The header is a banner, the main a focusable main landmark and the Sidebar a `nav` named by its visible `label`. AppShellSkipLink moves to the main; set `mainId` for a stable target. SidebarTrigger sets `aria-expanded` and `aria-controls` for the Sidebar or the drawer, plus `aria-haspopup` on mobile. Give an icon-only trigger an `aria-label`.
+
+The mobile drawer is a modal [Drawer](/docs/drawer/) titled by `label`, with a close button named by `closeLabel`. Collapsing while focus sits in expanded-only content moves focus to the trigger.
+
+| Key           | Behavior                                                           |
+| ------------- | ------------------------------------------------------------------ |
+| Tab           | Normal order; inside the drawer, focus stays there                 |
+| Enter / Space | On the trigger, collapse or expand the Sidebar, or open the drawer |
+| Arrow keys    | Scroll the focused Sidebar                                         |
+| Escape        | Close the mobile drawer and restore focus                          |
 
 ## Motion
 
-An optional MotionProvider enables spring layout alongside Drawer transitions. `motion="off"` snaps locally; reduced motion also disables movement. The core works without a motion provider.
+Under `MotionProvider`, the Sidebar and main spring to their new widths on collapse, and the drawer slides. Set `motion="off"` on AppShell, or rely on reduced motion, to remove both.
 
 ## Styling
 
-Root props, refs, classes and styles reach the actual div, header, main, nav, anchor or button. Typed `components.appShell` and `components.sidebar` theme overrides control surfaces, widths, padding and labels. Sidebar `parts` styles its label, drawer, viewport and close action.
+| Part           | Slot and attributes                                                                                                                                                                                         |
+| -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Root           | `app-shell` div; `data-collapsed`, `data-mobile`, `data-state` (open/closed), `data-motion`                                                                                                                 |
+| Header         | `app-shell-header` header                                                                                                                                                                                   |
+| Main           | `app-shell-main` main                                                                                                                                                                                       |
+| Skip link      | `link app-shell-skip-link` a                                                                                                                                                                                |
+| Sidebar        | `sidebar` nav; `data-collapsed`, `data-state`; label `sidebar-label` h2                                                                                                                                     |
+| Trigger        | `button sidebar-trigger`; `data-state` (open while expanded or while the drawer is open)                                                                                                                    |
+| Label          | `sidebar-item-label` span                                                                                                                                                                                   |
+| Content        | `sidebar-content` div; `data-expanded-only`                                                                                                                                                                 |
+| Theme: shell   | `components.appShell`: `background`, `color`, `headerBackground`, `headerColor`, `headerPadding` (`1rem`), `headerMinHeight` (`3.5rem`), `headerBorderColor`, `headerBorderWidth`, `mainPadding` (`1.5rem`) |
+| Theme: sidebar | `components.sidebar`: `width` (`16rem`), `collapsedWidth` (`5rem`), `background`, `color`, `padding` (`0.5rem`), `gap` (`1rem`), `borderColor`, `borderWidth`, `labelSize` (`1rem`)                         |
 
-AppShell and Sidebar carry an empty `data-collapsed` while collapsed, and AppShell an empty `data-mobile` below 40rem. Expanded-only SidebarContent carries `data-expanded-only`. SidebarTrigger's `data-state` is `open` while the sidebar shows: expanded on desktop, open on mobile. Select presence, as in `[data-collapsed]`.
+`data-collapsed` and `data-mobile` are empty when present, so select `[data-collapsed]`. `className`, `style`, `ref` and native props reach each host. Sidebar `parts` styles its `label`, `drawer`, `viewport` and `close`.
 
 ## API
 
-| Export                        | Purpose                                                            |
-| ----------------------------- | ------------------------------------------------------------------ |
-| AppShell                      | Root with independent collapse/open owners and optional IDs/motion |
-| AppShellHeader / AppShellMain | Native application landmarks                                       |
-| AppShellSkipLink              | Link to the owned main target                                      |
-| Sidebar                       | Navigation with required visible `label` and optional `closeLabel` |
-| SidebarTrigger                | Button requesting desktop collapse or mobile open                  |
-| SidebarLabel / SidebarContent | Collapsible text and optional expanded-only controls               |
-| useAppShell / useSidebar      | Read state and request changes                                     |
+### AppShell
+
+| Prop                         | Type                            | Default   |
+| ---------------------------- | ------------------------------- | --------- |
+| collapsed / defaultCollapsed | boolean; one owner              | false     |
+| onCollapsedChange            | (collapsed: boolean) => void    | None      |
+| open / defaultOpen           | boolean; one owner              | false     |
+| onOpenChange                 | (open: boolean) => void         | None      |
+| mainId                       | string; nonempty, no whitespace | Generated |
+| motion                       | inherit / off                   | inherit   |
+| className / style            | string / ThemeStyle             | None      |
+| ref                          | `Ref<HTMLDivElement>`           | None      |
+| Other props                  | Native div props                | Native    |
+
+### AppShellHeader, AppShellMain
+
+| Prop              | Type                                                                | Default |
+| ----------------- | ------------------------------------------------------------------- | ------- |
+| className / style | string / ThemeStyle                                                 | None    |
+| ref               | `Ref<HTMLElement>`                                                  | None    |
+| Other props       | Native header or main props, except role; main also id and tabIndex | Native  |
+
+### AppShellSkipLink
+
+| Prop        | Type                                                 | Default |
+| ----------- | ---------------------------------------------------- | ------- |
+| render      | (props: AppShellRenderProps) => ReactElement; router | None    |
+| Other props | [Link](/docs/link/) props except href and role       | Native  |
+
+### Sidebar
+
+| Prop              | Type                                                     | Default          |
+| ----------------- | -------------------------------------------------------- | ---------------- |
+| label             | ReactNode; visible, nonempty name                        | Required         |
+| closeLabel        | string; drawer close button text                         | Close navigation |
+| parts             | `{ label, drawer, viewport, close }` of PartStyle        | None             |
+| className / style | string / ThemeStyle                                      | None             |
+| ref               | `Ref<HTMLElement>`                                       | None             |
+| Other props       | Native nav props except id, role, tabIndex and ARIA name | Native           |
+
+### SidebarTrigger, SidebarLabel, SidebarContent
+
+| Part           | Prop           | Type                                               | Default         |
+| -------------- | -------------- | -------------------------------------------------- | --------------- |
+| SidebarTrigger | variant / tone | [Button](/docs/button/) props                      | ghost / neutral |
+| SidebarTrigger | Other props    | Button props except toggle, popover and ARIA state | Native          |
+| SidebarLabel   | Other props    | Native span props                                  | Native          |
+| SidebarContent | expandedOnly   | boolean; hidden and inert while collapsed          | false           |
+| SidebarContent | Other props    | Native div props except hidden and inert           | Native          |
+
+### useAppShell()
+
+| Member       | Type                         |
+| ------------ | ---------------------------- |
+| collapsed    | boolean                      |
+| open         | boolean                      |
+| mobile       | boolean; below 40rem         |
+| mainId       | string                       |
+| setCollapsed | (collapsed: boolean) => void |
+| setOpen      | (open: boolean) => void      |
+
+Parts outside AppShell throw. Invalid labels, `mainId` or non-boolean states throw.
+
+Exports: `AppShell`, `AppShellHeader`, `AppShellMain`, `AppShellSkipLink`, `Sidebar`, `SidebarTrigger`, `SidebarLabel`, `SidebarContent`, `useAppShell`, `AppShellProps`, `AppShellState`, `AppShellHeaderProps`, `AppShellMainProps`, `AppShellSkipLinkProps`, `AppShellRenderProps`, `SidebarProps`, `SidebarTriggerProps`, `SidebarRenderProps`, `SidebarLabelProps`, `SidebarContentProps`.

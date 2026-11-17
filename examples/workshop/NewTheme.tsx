@@ -34,6 +34,7 @@ export function NewThemeDialog({
   const [link, setLink] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
+  const [fileKey, setFileKey] = useState(0)
   const ticket = useRef(0)
   function openShared(text: string, source: string) {
     try {
@@ -69,6 +70,8 @@ export function NewThemeDialog({
     } catch (caught) {
       if (mine === ticket.current) setError(`Configuration file: ${errorMessage(caught)}`)
     }
+    // Remount the picker to clear it; setting input.value = '' leaves the shown name.
+    setFileKey(value => value + 1)
   }
   return (
     <Dialog
@@ -124,12 +127,12 @@ export function NewThemeDialog({
           </Button>
           <Field label="Or choose a configuration file">
             <FileInput
+              key={fileKey}
               controlSize="small"
               accept="application/json,.json"
               aria-describedby={error ? `${id}-message` : undefined}
               onChange={event => {
                 const file = event.target.files?.[0]
-                event.target.value = ''
                 if (file) void openFile(file)
               }}
             />

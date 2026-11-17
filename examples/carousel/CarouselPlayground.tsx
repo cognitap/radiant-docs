@@ -3,8 +3,17 @@ import { Checkbox } from '@cognitap/radiant'
 import { useState } from 'react'
 import { SelectControl } from '@/components/demo/ActionControls'
 import { DemoControls, DemoPreview } from '@/components/demo/DemoFrame'
-import { ReviewStudyLibrary, PrepareStudyNotes, CompareResearchRounds } from './CarouselExample'
-export function CarouselPlayground({ task }: { task: 'review' | 'notes' | 'compare' }) {
+import {
+  ReviewStudyLibrary,
+  PrepareStudyNotes,
+  CompareResearchRounds,
+  RotateStudyHighlights
+} from './CarouselExample'
+export function CarouselPlayground({
+  task
+}: {
+  task: 'review' | 'notes' | 'compare' | 'highlights'
+}) {
   const [dir, setDir] = useState<'ltr' | 'rtl'>('ltr'),
     [autoPlay, setAutoPlay] = useState(false)
   const Example =
@@ -12,7 +21,9 @@ export function CarouselPlayground({ task }: { task: 'review' | 'notes' | 'compa
       ? ReviewStudyLibrary
       : task === 'notes'
         ? PrepareStudyNotes
-        : CompareResearchRounds
+        : task === 'compare'
+          ? CompareResearchRounds
+          : RotateStudyHighlights
   return (
     <>
       <DemoControls>

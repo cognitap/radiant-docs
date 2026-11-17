@@ -1,13 +1,21 @@
 ---
 title: Charts
-description: Line, bar, area and pie figures with native data alternatives and keyboard tooltips.
+description: Plot a few series of numbers as a line, bar, area or pie figure that ships with an exact data table.
 ---
 
+import { Demo } from '../../components/demo/Demo'
 import { ChartsDemo, ChartsEnrollmentDemo, ChartsMixDemo } from '../../components/ChartsDemo'
+import {
+  ReviewSessionLength,
+  WaitForFirstSessions,
+  ShareExactCounts
+} from '../../examples/charts/ChartsExample'
 
 <ChartsDemo />
 
 ## Usage
+
+Use a chart to show a trend or comparison. Use [Meter](/docs/meter/) for one value, [Table](/docs/table/) for records people act on, and ChartDataTable for exact numbers alone.
 
 ```tsx
 import { LineChart } from '@cognitap/radiant/charts'
@@ -22,42 +30,125 @@ import { LineChart } from '@cognitap/radiant/charts'
 />
 ```
 
-Charts share the installed package and stylesheet. The optional entry keeps the SVG renderer outside the core root import.
+The separate entry keeps the renderer out of the root import.
 
 ## Examples
 
+### Switch between line and area
+
 <ChartsEnrollmentDemo />
+
+### Show parts of a whole
 
 <ChartsMixDemo />
 
+### Format values and show gaps
+
+<Demo
+  title="Format values and show gaps"
+  files={['charts/ChartsExample.tsx']}
+>
+  <ReviewSessionLength />
+</Demo>
+
+### Share exact counts without a plot
+
+<Demo
+  title="Share exact counts without a plot"
+  files={['charts/ChartsExample.tsx']}
+>
+  <ShareExactCounts />
+</Demo>
+
 ## State
 
-Applications own data, filters and formatting. Chart rows and series use unique nonempty keys and visible labels. Values are finite numbers or null; missing values leave gaps. Cartesian charts accept one to six series. PieChart accepts one series with nonnegative values. All-zero pies show the empty message while retaining their data table.
+Your app owns the data. Charts keep no value, so there is nothing to reset or submit.
 
-Line and area charts connect category centers; bars compare series within each category. Areas share a zero baseline rather than stacking. `formatValue(value, series)` formats both inspected values and table cells. Short category labels fit the plot; the table retains full records.
+Keys must be unique and labels nonempty. A value is a finite number or `null`, which breaks a line and shows `—` in the table. Line, bar and area charts take one to six series. PieChart takes exactly one, with nonnegative values; colors repeat after six slices. Invalid data throws a TypeError.
+
+Areas overlap rather than stack. `formatValue` formats ticks, tooltips and cells.
+
+With no points to plot, the chart shows `emptyText` and keeps its legend and table.
+
+<Demo
+  title="Wait for the first sessions"
+  files={['charts/ChartsExample.tsx']}
+>
+  <WaitForFirstSessions />
+</Demo>
 
 ## Accessibility
 
-A required visible `label` names each native figure; `description` adds context. Every chart includes a native data-table disclosure with exact values. `tableLabel`, `categoryLabel`, `plotLabel`, `legendLabel` and `emptyText` customize internal text.
+The chart is a native `figure`. Its required visible `label` names the figure, the scrolling plot and the data table; an empty label throws. `description` describes the figure.
 
-Focus the first point to inspect its existing Tooltip. Arrow keys move through values; Home/End reach the first/last point. Horizontal keys follow direction, and Escape dismisses the tooltip. The plot uses [ScrollArea](/docs/scroll-area/) at narrow widths. Series also differ through numbered legends and line patterns.
+Each point is a button named like "Round 1, Completed: 12", with a Tooltip showing that text. Points share one tab stop, ordered by row and then series. Series also differ by numbered legend entries and dash patterns, and stay visible in forced colors.
+
+| Key             | Behavior                              |
+| --------------- | ------------------------------------- |
+| Tab             | Reach the last focused point          |
+| Arrow Right     | Next point; previous in RTL           |
+| Arrow Left      | Previous point; next in RTL           |
+| Arrow Down / Up | Next / previous point                 |
+| Home / End      | First / last point                    |
+| Escape          | Dismiss the tooltip                   |
+| Enter / Space   | Toggle the data table, on its summary |
 
 ## Motion
 
-Charts update immediately. Tooltip follows the motion provider and reduced-motion preference.
+Charts redraw at once and points do not animate. The tooltip follows the motion provider and reduced motion.
 
 ## Styling
 
-Root props, classes, style and ref reach the native figure. Named `parts` target caption, description, plot, legend, actual point Buttons, Tooltip and Table.
+| Part        | Element and `data-slot`                                                                                                  | `parts` key   |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------ | ------------- |
+| Root        | `figure`; `chart line-chart` (or bar, area, pie); `data-kind`                                                            | Root props    |
+| Caption     | `figcaption`; `chart-caption`                                                                                            | `caption`     |
+| Description | `div`; `chart-description`                                                                                               | `description` |
+| Plot        | `div`; `chart-plot`, inside a horizontal ScrollArea                                                                      | `plot`        |
+| Point       | `button`; `tooltip-trigger chart-point`                                                                                  | `point`       |
+| Tooltip     | `span`; `tooltip-content chart-tooltip`                                                                                  | `tooltip`     |
+| Empty       | `p`; `chart-empty`                                                                                                       | None          |
+| Legend      | `ul`; `chart-legend`                                                                                                     | `legend`      |
+| Disclosure  | `details`; `chart-disclosure`                                                                                            | None          |
+| Table       | `table chart-data-table`                                                                                                 | `table`       |
+| Theme       | `components.chart`: `gap`, `height` (`20rem`), `strokeWidth` (`2`), `gridColor`, `series1`–`series6`; or `--rad-chart-*` | None          |
 
-`components.chart` controls gap, height, strokeWidth, gridColor and series1–series6. `chartPalette` maps the existing color recommendation into light/dark component overrides. Apply those through defineTheme or use the example's mode-aware CSS variables.
+`className`, `style`, `ref` and native props reach the figure. The plot is at least 480px wide, or 72px per row, and scrolls when narrower. `chartPalette` turns a color palette into light and dark series colors, as the first demo shows.
 
 ## API
 
-| Export                                | Purpose                                        |
-| ------------------------------------- | ---------------------------------------------- |
-| LineChart / BarChart / AreaChart      | Categorical series figures                     |
-| PieChart                              | One nonnegative series, divided by category    |
-| ChartDataTable                        | Standalone native Table alternative            |
-| chartPalette                          | Existing palette → mode-specific series colors |
-| ChartDatum / ChartSeries / ChartProps | Shared data and presentation types             |
+### LineChart, BarChart, AreaChart and PieChart
+
+| Prop              | Type                                                                                | Default                       |
+| ----------------- | ----------------------------------------------------------------------------------- | ----------------------------- |
+| label             | ReactNode; visible caption and name                                                 | Required                      |
+| description       | ReactNode                                                                           | None                          |
+| data              | readonly ChartDatum[]                                                               | Required                      |
+| series            | readonly ChartSeries[]; PieChart takes `[ChartSeries]`                              | Required                      |
+| formatValue       | (value: number, series: ChartSeries) => string                                      | `String(value)`               |
+| categoryLabel     | string; first table column header                                                   | `'Category'`                  |
+| legendLabel       | string; legend list name                                                            | `'Chart legend'`              |
+| tableLabel        | string; disclosure summary                                                          | `'View chart data'`           |
+| emptyText         | string                                                                              | `'No chart data to display.'` |
+| parts             | caption, description, plot, legend, point, tooltip, table: `{ className?, style? }` | None                          |
+| className / style | string / ThemeStyle                                                                 | None                          |
+| Other props       | Native figure props except `role`, `aria-label` and `aria-labelledby`               | Native                        |
+
+### ChartDataTable
+
+| Prop                       | Type                           | Default       |
+| -------------------------- | ------------------------------ | ------------- |
+| label                      | ReactNode; the table's caption | Required      |
+| data / series              | As on a chart                  | Required      |
+| formatValue, categoryLabel | As on a chart                  | As on a chart |
+| Other props                | Table props                    | Native        |
+
+### Types
+
+| Type           | Shape                                                                              |
+| -------------- | ---------------------------------------------------------------------------------- |
+| ChartDatum     | `{ key: string; label: string; values: Readonly<Record<string, number \| null>> }` |
+| ChartSeries    | `{ key: string; label: string }`                                                   |
+| chartPalette() | `(palette: ColorPalette) => { light, dark }`, each `series1`–`series6`             |
+
+Exports: `LineChart`, `BarChart`, `AreaChart`, `PieChart`, `ChartDataTable`, `chartPalette`, `ChartProps`, `LineChartProps`, `BarChartProps`, `AreaChartProps`, `PieChartProps`, `ChartDataTableProps`, `ChartDatum`, `ChartSeries`.

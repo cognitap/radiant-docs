@@ -2612,9 +2612,7 @@ test('Charts docs filter research data and expose exact tables with real keyboar
         )
         await page.keyboard.press('Escape')
         await recruitment.getByText('View chart data', { exact: true }).click()
-        await recruitment
-          .getByRole('table', { name: 'Atlas recruitment data', exact: true })
-          .waitFor()
+        await recruitment.getByRole('table', { name: 'Atlas recruitment', exact: true }).waitFor()
         assert.equal(await recruitment.getByRole('cell', { name: '16', exact: true }).count(), 1)
         const enrollment = page.getByRole('region', {
           name: 'Enrollment review application',
@@ -2639,7 +2637,7 @@ test('Charts docs filter research data and expose exact tables with real keyboar
         await mix.getByRole('tooltip').filter({ hasText: 'Moderated, Sessions: 12' }).waitFor()
         await page.keyboard.press('Escape')
         await mix.getByText('View chart data', { exact: true }).click()
-        await mix.getByRole('table', { name: 'Session method mix data', exact: true }).waitFor()
+        await mix.getByRole('table', { name: 'Session method mix', exact: true }).waitFor()
         assert.deepEqual(errors, [])
       })
     } finally {
