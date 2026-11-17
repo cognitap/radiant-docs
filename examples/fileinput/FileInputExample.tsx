@@ -46,10 +46,16 @@ export function AttachSessionRecordings({ invalid, required, ...props }: FileInp
         error={invalid ? 'Attach at least one recording.' : undefined}
       >
         <FileInput
+          chooseLabel="Add recordings"
+          emptyText="No recordings yet"
           {...props}
           name="recordings"
           accept="audio/*,video/*"
           multiple
+          parts={{
+            trigger: { style: { minWidth: '9rem' } },
+            files: { style: { fontStyle: 'italic' } }
+          }}
           onChange={event => setFiles(Array.from(event.currentTarget.files ?? []))}
         />
       </Field>
@@ -61,19 +67,20 @@ export function AttachSessionRecordings({ invalid, required, ...props }: FileInp
     </div>
   )
 }
-export function SubmitConsentForm({ invalid, required = true, ...props }: FileInputTaskOptions) {
-  const [message, setMessage] = useState('Attach the signed form to submit.')
+export function UploadConsentForm({ invalid, required = true, ...props }: FileInputTaskOptions) {
+  const [message, setMessage] = useState('Choose the signed form, then upload it.')
   return (
     <form
       aria-label="Participant consent"
       style={layout}
       onSubmit={event => {
         event.preventDefault()
-        const file = new FormData(event.currentTarget).get('consent')
+        const form = event.currentTarget,
+          file = new FormData(form).get('consent')
+        // Reset clears the input and its names; setting input.value would not.
+        form.reset()
         setMessage(
-          file instanceof File && file.name
-            ? `Submitted ${file.name} as consent.`
-            : 'No file was submitted.'
+          file instanceof File && file.name ? `Uploaded ${file.name}.` : 'No file was uploaded.'
         )
       }}
       onReset={() => setMessage('Form cleared.')}
@@ -96,7 +103,7 @@ export function SubmitConsentForm({ invalid, required = true, ...props }: FileIn
           type="submit"
           disabled={props.disabled}
         >
-          Submit consent
+          Upload
         </Button>
         <Button
           type="reset"
@@ -104,7 +111,7 @@ export function SubmitConsentForm({ invalid, required = true, ...props }: FileIn
           tone="neutral"
           disabled={props.disabled}
         >
-          Clear form
+          Clear
         </Button>
       </div>
       <output aria-live="polite">{message}</output>
@@ -124,7 +131,7 @@ export function FileInputExample({
       {task === 'recordings' ? (
         <AttachSessionRecordings {...props} />
       ) : task === 'consent' ? (
-        <SubmitConsentForm {...props} />
+        <UploadConsentForm {...props} />
       ) : (
         <AttachStudyProtocol {...props} />
       )}

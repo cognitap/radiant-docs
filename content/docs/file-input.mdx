@@ -31,13 +31,13 @@ Use FileInput to attach one or more files to a form. The browser's own file inpu
 
 ### Attach several files
 
-Add `multiple`. The names list in the order the browser reports them.
+Add `multiple`. The names list in the order the browser reports them. `chooseLabel` and `emptyText` replace the default text, and `parts` styles the button and names.
 
 <FileInputRecordingsDemo />
 
-### Submit with a form
+### Clear after upload
 
-Read the file from `FormData` on submit. Reset clears the names too.
+Read the file from `FormData` on submit, then call `form.reset()` to clear the input and its names.
 
 <FileInputConsentDemo />
 
@@ -45,11 +45,11 @@ Read the file from `FormData` on submit. Reset clears the names too.
 
 FileInput has no `value` or `defaultValue`, because browsers only let a person choose files. Read them from `event.currentTarget.files` in `onChange`, or from `FormData` on submit. `accept` filters the picker but does not validate, so check the type and size of each file yourself.
 
-The text beside the button follows the chosen files, including after a form reset. Without `name`, the form submits nothing.
+The names beside the button update on change and when the owning form resets, including a form linked with `form`. A reset that a listener cancels keeps them. Setting `input.value = ''` in code clears the files but not the names, so clear with `form.reset()` or remount with a new `key`. Without `name`, the form submits nothing.
 
 ## Accessibility
 
-There is one native control. It carries the label, description, error and required state from [Field](/docs/field/), or from `aria-label` or `aria-labelledby`. The browser announces the chosen files. The visible button and names are decorative and hidden from assistive technology.
+The native input is the only keyboard stop, the form control and the `ref` target. It takes the label, description, error and required state from [Field](/docs/field/), or a name from `aria-label` or `aria-labelledby`. The browser announces the chosen files. The visible button has `aria-hidden` and `tabIndex={-1}`, and the names are hidden too.
 
 | Key             | Behavior                        |
 | --------------- | ------------------------------- |
@@ -64,7 +64,7 @@ The button presses like any [Button](/docs/button/#motion). Nothing else animate
 
 ## Styling
 
-`className`, `style` and `ref` reach the native input, which is invisible; a caller's `data-slot` follows `file-input`. Style what people see through `parts`.
+`className`, `style` and `ref` reach the native input, which is invisible; a caller's `data-slot` follows `file-input`. Style what people see through `parts`. Put width, gap and theme variables on `parts.wrapper`.
 
 | Part    | `data-slot`                 | Part key  |
 | ------- | --------------------------- | --------- |
@@ -73,7 +73,7 @@ The button presses like any [Button](/docs/button/#motion). Nothing else animate
 | Button  | `button file-input-trigger` | `trigger` |
 | Names   | `file-input-files`          | `files`   |
 
-`components.fileInput.gap` or `--rad-file-input-gap` sets the space between the button and the names. The button takes its size from `controlSize`.
+`components.fileInput.gap` or `--rad-file-input-gap` sets the space between the button and the names. The button takes its size from `controlSize`. The input also has `data-control-size`, and an empty `data-invalid` when invalid, which colors the button border.
 
 ## API
 

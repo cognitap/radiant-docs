@@ -1,6 +1,6 @@
 ---
 title: NavigationMenu
-description: Navigate site sections with native links, delayed hover disclosure and one shared spring viewport.
+description: Open site sections from a named navigation bar, with every panel shown in one shared viewport.
 ---
 
 import {
@@ -9,55 +9,151 @@ import {
   NavigationMenuWorkspaceDemo
 } from '../../components/NavigationMenuDemo'
 
-## Usage
-
 <NavigationMenuDemo />
 
-Give the navigation landmark a name. Register each dropdown panel in `items`, then render its trigger and content with that key. Put top-level buttons and links in List and Item parts. One Viewport contains every panel.
+## Usage
+
+Use NavigationMenu for a site header with a few sections of links. Use [Menu](/docs/menu/) for commands and [Tabs](/docs/tabs/) to switch content in place.
+
+```tsx
+<NavigationMenu aria-label="Site">
+  <NavigationMenuList>
+    <NavigationMenuItem>
+      <NavigationMenuTrigger value="learn">Learn</NavigationMenuTrigger>
+    </NavigationMenuItem>
+    <NavigationMenuItem>
+      <NavigationMenuLink href="/about">About</NavigationMenuLink>
+    </NavigationMenuItem>
+  </NavigationMenuList>
+  <NavigationMenuViewport>
+    <NavigationMenuContent value="learn">
+      <NavigationMenuLink href="/guides">Guides</NavigationMenuLink>
+    </NavigationMenuContent>
+  </NavigationMenuViewport>
+</NavigationMenu>
+```
+
+Each trigger and its content share a nonempty string `value`. Values must be unique; a duplicate trigger or content throws once mounted. One Viewport holds every content.
 
 ## Examples
 
+### Disable a section
+
 <NavigationMenuHelpDemo />
+
+Set `disabled` on a trigger. Its panel cannot open and arrow keys skip it.
+
+### Keep a panel open
 
 <NavigationMenuWorkspaceDemo />
 
+While the checkbox is on, the owner refuses `null`, so Escape and outside clicks keep the panel open.
+
 ## State
 
-Use `value` with `onValueChange(value)` or `defaultValue`. A string opens its registered panel; `null` closes navigation. Controlled owners can refuse requests. Prop synchronization emits no callback.
+Use `value` with `onValueChange(value)`, or `defaultValue`. A string opens that section; `null` closes the menu. A controlled owner may refuse a request. Changing `value` yourself emits no callback. Hover opens a section after `openDelay` and closes it after `closeDelay`.
 
-Applications own routing and current destinations. Link's `active` adds `aria-current="page"` and `data-selected`. A cancelled or modified link activation leaves disclosure state unchanged. Router handlers that cancel native navigation explicitly request closure, as the examples show.
+A `value` naming no mounted, enabled trigger shows no panel; a `setValue` request for one is ignored. When an open trigger becomes disabled, its panel closes. Root `disabled` disables every trigger, closes the panel and ignores requests; links in the list stay usable. Both keep the value.
 
-Disabling dropdowns hides the viewport without resetting the owner. Top-level native links remain usable.
+A plain left click on a link closes the menu. Your router owns the current page: `active` sets `aria-current="page"`. A handler that calls `preventDefault()` keeps the menu open, so request `null` yourself, as the examples do.
+
+NavigationMenu has no form value.
 
 ## Accessibility
 
-The root is a named native nav. List and Item retain native list semantics; triggers are Buttons and destinations are Links. This family uses no menu roles.
+The root is a native `nav` and requires `aria-label` or `aria-labelledby`. Triggers are buttons and destinations are links; there are no menu roles.
 
-Tab follows the normal sequence. Left/Right move among enabled triggers physically, respecting direction. Home/End reach the ends. Down/Up open a panel and focus its first/last interactive descendant.
+The viewport is a ScrollArea named by the open trigger, or by the root when closed. Closed panels stay mounted, hidden and inert. Moving focus or clicking outside closes the menu.
 
-Escape closes and returns focus from hidden content to its trigger. Moving focus or clicking outside dismisses. Controlled refusal keeps the accepted panel and focus.
-
-The shared viewport is a native ScrollArea named by the open panel's trigger, or by the root when closed; `aria-label` or `aria-labelledby` overrides that. Closed panels remain mounted, hidden and inert.
+| Key                | Behavior                                                        |
+| ------------------ | --------------------------------------------------------------- |
+| Tab                | Normal tab order                                                |
+| Enter / Space      | Toggle the trigger's panel                                      |
+| Arrow Right / Left | Next or previous enabled trigger in reading direction, wrapping |
+| Home / End         | First or last enabled trigger                                   |
+| Arrow Down / Up    | Open the panel and focus its first or last focusable item       |
+| Escape             | Close and return focus to the trigger                           |
 
 ## Motion
 
-With `MotionProvider`, the shared viewport springs between panel positions and natural sizes. Live content and container changes are measured. Reduced motion and theme motion-off jump immediately. Set Viewport's `motion="off"` to opt out locally.
+Under `MotionProvider`, the viewport springs between panel positions and sizes. Reduced motion and a theme with motion off jump at once. Set Viewport's `motion="off"` to turn it off here.
 
 ## Styling
 
-Native props, styles, classes and refs reach each part's documented host. Button, Link and ScrollArea identities remain available. A disabled root has an empty `data-disabled`.
+Every part takes `className`, `style` and `ref`.
 
-Use `components.navigationMenu` for list gap and surface padding, border, radius, colors and shadow. Keep dropdown panels inside the shared viewport. Ancestors must leave the popup room visible.
+| Part     | Attributes                                                                  |
+| -------- | --------------------------------------------------------------------------- |
+| Root     | `navigation-menu`; `data-state`, `data-control-size`, empty `data-disabled` |
+| List     | `navigation-menu-list`                                                      |
+| Item     | `navigation-menu-item`                                                      |
+| Trigger  | `button navigation-menu-trigger`; `data-state`                              |
+| Link     | `link navigation-menu-link`; empty `data-selected` when active              |
+| Content  | `navigation-menu-content`; `data-state`                                     |
+| Viewport | `scroll-area navigation-menu-viewport`; `data-state`, `data-motion`         |
+
+Theme with `components.navigationMenu` (`gap`, `padding`, `radius`, `borderWidth`, `borderColor`, `background`, `color`, `shadow`) or the matching `--rad-navigation-menu-*` tokens. Ancestors must not clip the viewport.
 
 ## API
 
-| Part                  | Contract                                                                                                       |
-| --------------------- | -------------------------------------------------------------------------------------------------------------- |
-| Root                  | `items`, `value`/`defaultValue`, `onValueChange`, `disabled`, `controlSize`, direction and an accessible name. |
-| List / Item           | Native ul / li hosts.                                                                                          |
-| Trigger               | Registered `value`; inherits size and accepts Button presentation and `render`.                                |
-| Link                  | Required `href`, optional `active`; accepts Link presentation and `render`.                                    |
-| Content               | Registered `value`; native div.                                                                                |
-| Viewport              | Shared ScrollArea; `motion`, nonnegative `sideOffset` (default 8) and an optional accessible name.             |
-| Timing                | `openDelay` defaults to 200ms; `closeDelay` to 150ms. Switching an open panel is immediate.                    |
-| `useNavigationMenu()` | Returns `null` outside its root, otherwise `value`, `controlled`, `disabled` and `setValue(value)`.            |
+### NavigationMenu
+
+| Prop                         | Type                                               | Default   |
+| ---------------------------- | -------------------------------------------------- | --------- |
+| value / defaultValue         | string \| null; one owner                          | null      |
+| onValueChange                | `(value: string \| null) => void`                  | None      |
+| openDelay / closeDelay       | nonnegative ms; switching panels skips `openDelay` | 200 / 150 |
+| disabled                     | boolean                                            | false     |
+| controlSize                  | small / medium / large                             | medium    |
+| aria-label / aria-labelledby | Requires one                                       | None      |
+| Other props                  | nav props except `role` and `onChange`             | Native    |
+
+### NavigationMenuList / NavigationMenuItem
+
+| Prop        | Type                        | Default |
+| ----------- | --------------------------- | ------- |
+| Other props | ul / li props except `role` | Native  |
+
+### NavigationMenuTrigger
+
+| Prop               | Type                                                                                                          | Default         |
+| ------------------ | ------------------------------------------------------------------------------------------------------------- | --------------- |
+| value              | nonempty string                                                                                               | Required        |
+| disabled / pending | boolean                                                                                                       | false           |
+| variant / tone     | Button's                                                                                                      | ghost / neutral |
+| controlSize        | Button's                                                                                                      | Root's          |
+| render             | `(props: NavigationMenuRenderProps) => ReactElement`                                                          | None            |
+| Other props        | Button props except `id`, `role`, `aria-expanded`, `aria-controls`, `aria-haspopup`, popover and toggle props | Native          |
+
+### NavigationMenuLink
+
+| Prop        | Type                                                     | Default  |
+| ----------- | -------------------------------------------------------- | -------- |
+| href        | string                                                   | Required |
+| active      | boolean                                                  | false    |
+| variant     | Link's                                                   | subtle   |
+| controlSize | Link's                                                   | Root's   |
+| render      | `(props: NavigationMenuLinkRenderProps) => ReactElement` | None     |
+| Other props | Link props except `role` and `aria-current`              | Native   |
+
+### NavigationMenuContent
+
+| Prop        | Type                                                                | Default  |
+| ----------- | ------------------------------------------------------------------- | -------- |
+| value       | nonempty string                                                     | Required |
+| Other props | div props except `id`, `role`, `hidden`, `inert`, `aria-labelledby` | Native   |
+
+### NavigationMenuViewport
+
+| Prop                         | Type                                                          | Default                 |
+| ---------------------------- | ------------------------------------------------------------- | ----------------------- |
+| motion                       | inherit / off                                                 | inherit                 |
+| sideOffset                   | nonnegative number                                            | 8                       |
+| aria-label / aria-labelledby | Overrides the automatic name                                  | Open trigger, else root |
+| Other props                  | div props except `role`, `hidden`, `inert`, `contentEditable` | Native                  |
+
+### useNavigationMenu()
+
+Returns `NavigationMenuState` (`value`, `controlled`, `disabled`, `setValue`), or `null` outside NavigationMenu.
+
+Trigger and panel IDs end in the URI-encoded value. Exports each part's `NavigationMenu…Props` type, `NavigationMenuState`, `NavigationMenuRenderProps` and `NavigationMenuLinkRenderProps`.

@@ -1,23 +1,26 @@
 ---
 title: Form
-description: Native forms with accessible validation, pending submission and server errors.
+description: Validate a native form, submit it once and show field and server errors beside the controls.
 ---
 
 import { FormDemo, FormRecoveryDemo, FormProfileDemo } from '../../components/FormDemo'
+import { Demo } from '../../components/demo/Demo'
+import {
+  RetryResultsExport,
+  ResumeSurveyDraft,
+  ReviewStudyNotes
+} from '../../examples/form/FormStateExample'
 
 <FormDemo />
 
 ## Usage
 
-```tsx
-import { Form, FormField, FormError, Input, Button } from '@cognitap/radiant'
+Use Form when a submission can fail and the user must fix it. Use a plain `<form>` with [Field](/docs/field/) when the browser can submit it unaided.
 
-;<Form
+```tsx
+<Form
   aria-label="Join workspace"
-  onSubmitValues={async data => {
-    const response = await invite(data)
-    return response.errors
-  }}
+  onSubmitValues={async data => (await invite(data)).errors}
 >
   {({ pending }) => (
     <>
@@ -45,39 +48,128 @@ import { Form, FormField, FormError, Input, Button } from '@cognitap/radiant'
 
 ## Examples
 
+### Recover from a server rejection
+
 <FormRecoveryDemo />
+
+### Retry a failed request
+
+<Demo
+  title="Retry a failed request"
+  files={['form/FormStateExample.tsx']}
+>
+  <RetryResultsExport />
+</Demo>
+
+### Resume a draft with errors
+
+<Demo
+  title="Resume a draft with errors"
+  files={['form/FormStateExample.tsx']}
+>
+  <ResumeSurveyDraft />
+</Demo>
+
+### Keep values in TanStack Form
 
 <FormProfileDemo />
 
-Native constraints and custom rules share the same error presentation. TanStack can own controlled values while Form coordinates submission; it remains an optional application dependency.
+TanStack owns the values; Form owns submission. Install TanStack yourself.
 
 ## State
 
-`onSubmitValues(FormData, { form, submitter, signal })` may return `{ fields, form }` or a promise of that shape. Field errors use native names; the form message appears in FormError. Returning nothing clears errors.
+Form stores errors and pending status, never values.
 
-`validate(FormData)` supplies synchronous custom rules. Native constraints remain authoritative. Form owns `noValidate` so messages render through Field instead of browser bubbles. Match each FormField `name` to its real control's `name`. NumberField, TagsInput and MultiSelect report required and range errors on that FormField too.
+Errors have one owner: `errors` with `onErrorsChange`, or `defaultErrors`. Mixing them is a type error.
 
-Form stores errors and pending status, never values. Use `errors`, `defaultErrors`, `onErrorsChange` for one controlled or uncontrolled error owner. Render callbacks read `errors` and `pending`; `useForm` also exposes `focusInvalid` and returns null outside a form.
+<Demo
+  title="Load errors from your server"
+  files={['form/FormStateExample.tsx']}
+>
+  <ReviewStudyNotes />
+</Demo>
 
-Reset clears errors, cancels the current request and restores native defaults. Applications reset controlled values. Edits discard stale server errors. Duplicate submissions are blocked while pending; reset and unmount abort the supplied signal. Requests must honor it to cancel network work.
+On submit, Form checks native constraints, then runs `validate(data)`. A native message wins over a custom one for the same field. Any error blocks submission. A submitter with `formNoValidate` skips the native check.
+
+Without `onSubmitValues` the browser submits. With it, Form prevents navigation, sets `pending` and calls `onSubmitValues(data, { form, submitter, signal })`. Return errors, or nothing to clear them. If it throws or rejects, FormError shows `submitErrorText`. Further submits are ignored while pending.
+
+Editing a control clears its error and the form error, and discards a pending result. Reset clears errors and aborts `signal`, as does unmount. Pass `signal` to `fetch` to cancel the request. Reset controlled values yourself.
+
+Children may be a function of `FormState`: `errors`, `pending` and `focusInvalid`.
 
 ## Accessibility
 
-Give the native form an accessible name. FormField composes [Field](/docs/field/) for labels, descriptions and error IDs. Failed submission focuses the first invalid control in document order; form-only errors focus the actual Alert. Consumer submit/reset cancellation wins.
+Form requires `aria-label` or `aria-labelledby` and throws without one. FormField composes [Field](/docs/field/), for labels and error IDs. Match its `name` to the control's `name`. NumberField, TagsInput and Combobox report their errors on that FormField too.
+
+After a failed submit, focus moves to the first invalid enabled control in document order. With only a form error, it moves to FormError, an assertive `role="alert"`. While pending, the form has `aria-busy`.
+
+| Key                     | Behavior                               |
+| ----------------------- | -------------------------------------- |
+| Enter in a text field   | Submits the form (native)              |
+| Enter / Space on submit | Submits the form                       |
+| Enter / Space on reset  | Resets values and clears errors        |
+| Tab / Shift+Tab         | Moves between controls; Form adds none |
 
 ## Motion
 
-Form adds no animation. Button and Alert keep their existing presentation and motion behavior.
+Form does not animate. Button and Alert keep their own motion.
 
 ## Styling
 
-Root classes, style and ref reach the native form. FormField retains Field's native div or fieldset host; FormError retains Alert's div. `components.form.gap` controls spacing.
+| Part      | Element            | `data-slot` and attributes                          |
+| --------- | ------------------ | --------------------------------------------------- |
+| Form      | `form`             | `form`; `data-pending`, `data-invalid`, `aria-busy` |
+| FormField | `div` / `fieldset` | `field form-field`; Field's attributes              |
+| FormError | `div role="alert"` | `alert form-error`; `data-tone`, `data-announce`    |
+
+`className`, `style` and `ref` reach each part's element. Set `--rad-form-gap`, or `components.form.gap` in a theme, for the space between rows.
 
 ## API
 
-| Export    | Purpose                                        |
-| --------- | ---------------------------------------------- |
-| Form      | Native form, validation and submit coordinator |
-| FormField | Field with a matching native control name      |
-| FormError | Form-level Alert                               |
-| useForm   | Errors, pending and invalid-focus action       |
+### Form
+
+| Prop                         | Type / default                                                        |
+| ---------------------------- | --------------------------------------------------------------------- |
+| aria-label / aria-labelledby | string; one is required                                               |
+| errors / defaultErrors       | FormErrors; one owner; `{}`                                           |
+| onErrorsChange               | (errors: FormErrors) → void                                           |
+| validate                     | (data: FormData) → FormErrors \| void                                 |
+| onSubmitValues               | (data, context: FormSubmitContext) → FormErrors \| void, or a promise |
+| submitErrorText              | string; `'Unable to save. Try again.'`                                |
+| children                     | ReactNode \| (state: FormState) → ReactNode                           |
+| className / style            | string / ThemeStyle                                                   |
+| ref                          | HTMLFormElement                                                       |
+| onSubmit / onReset           | Run first; `preventDefault()` skips Form's handling                   |
+| Other props                  | Native form props except `noValidate`, which Form always sets         |
+
+### FormField
+
+| Prop        | Type / default                                   |
+| ----------- | ------------------------------------------------ |
+| name        | Required string; the control's `name`            |
+| error       | ReactNode; overrides the form's error for `name` |
+| Other props | Field props                                      |
+
+### FormError
+
+| Prop        | Type / default                             |
+| ----------- | ------------------------------------------ |
+| tone        | Alert tone; danger                         |
+| announce    | off / polite / assertive; assertive        |
+| Other props | Alert props without children or `tabIndex` |
+
+Renders nothing until there is a form error.
+
+### useForm()
+
+Returns the `FormState` of the enclosing Form, or `null` outside one.
+
+### Types
+
+| Type              | Shape                                                             |
+| ----------------- | ----------------------------------------------------------------- |
+| FormErrors        | `{ fields?: Record<string, string \| undefined>; form?: string }` |
+| FormState         | `{ errors, pending, focusInvalid: () => void }`                   |
+| FormSubmitContext | `{ form, submitter: HTMLElement \| null, signal: AbortSignal }`   |
+
+Each part also exports its `Props` type.

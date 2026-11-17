@@ -98,6 +98,32 @@ function SizingActions({ panel, label }: { panel: string; label: string }) {
     </div>
   )
 }
+const splitItems: ResizableItem[] = [
+  { value: 'start', min: 20, max: 80 },
+  { value: 'end', min: 20, max: 80 }
+]
+export function SplitPanels(options: ResizableTaskOptions) {
+  return (
+    <Resizable
+      {...rootOptions(options)}
+      items={splitItems}
+      defaultValue={[50, 50]}
+      style={{ ...layout, height: '12rem', ...options.style }}
+    >
+      <ResizablePanel value="start">
+        <div style={pane}>Start panel</div>
+      </ResizablePanel>
+      <ResizableHandle
+        value="start"
+        aria-label="Start panel"
+        {...handleOptions(options)}
+      />
+      <ResizablePanel value="end">
+        <div style={pane}>End panel</div>
+      </ResizablePanel>
+    </Resizable>
+  )
+}
 const fileItems: ResizableItem[] = [
   { value: 'files', min: 20, max: 50, collapsible: true },
   { value: 'preview', min: 40, max: 100 }
@@ -191,6 +217,7 @@ const noteItems: ResizableItem[] = [
   { value: 'editor', min: 25, max: 80 },
   { value: 'preview', min: 20, max: 75 }
 ]
+const noteInitial = [55, 45]
 export function EditInterviewNotes({ orientation = 'vertical', ...options }: ResizableTaskOptions) {
   const [notes, setNotes] = useState(
     'The participant compared both reading passages.\n\nLarger text spacing made the second paragraph easier to follow.'
@@ -207,7 +234,7 @@ export function EditInterviewNotes({ orientation = 'vertical', ...options }: Res
         {...rootOptions(options)}
         orientation={orientation}
         items={noteItems}
-        defaultValue={[55, 45]}
+        defaultValue={noteInitial}
         style={{ ...layout, height: '34rem', ...options.style }}
       >
         <ResizablePanel value="editor">
@@ -299,6 +326,24 @@ function NoteSizingActions() {
         onClick={() => group.resizeBy('editor', -5)}
       >
         More preview space
+      </Button>
+      <Button
+        controlSize="small"
+        variant="outline"
+        tone="neutral"
+        disabled={group.disabled}
+        onClick={() => group.resize('editor', 50)}
+      >
+        Even split
+      </Button>
+      <Button
+        controlSize="small"
+        variant="ghost"
+        tone="neutral"
+        disabled={group.disabled}
+        onClick={() => group.setValue(noteInitial)}
+      >
+        Reset split
       </Button>
     </>
   )
@@ -503,14 +548,16 @@ export function RestoreWorkspaceLayout(options: ResizableTaskOptions) {
 
 import { MotionProvider } from '@cognitap/radiant/motion/react'
 import '@cognitap/radiant/styles.css'
-export type ResizableTask = 'files' | 'notes' | 'saved'
+export type ResizableTask = 'files' | 'notes' | 'saved' | 'split'
 export function ResizableExample({
   task = 'files',
   ...options
 }: ResizableTaskOptions & { task?: ResizableTask }) {
   return (
     <MotionProvider>
-      {task === 'notes' ? (
+      {task === 'split' ? (
+        <SplitPanels {...options} />
+      ) : task === 'notes' ? (
         <EditInterviewNotes {...options} />
       ) : task === 'saved' ? (
         <RestoreWorkspaceLayout {...options} />

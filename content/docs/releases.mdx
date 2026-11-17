@@ -8,10 +8,10 @@ by this site. Keep package JavaScript and CSS on the same version.
 
 ## Latest release
 
-The current release changes class merging and the compiled stylesheet. A size, width, style or font-family utility needs a [type hint](/docs/foundations/composition/#functional-css). `styles.css` no longer defines unused utilities such as `container` or `hidden`, and it no longer sets Tailwind's `--spacing`. See [installation](/docs/getting-started/#choose-a-styling-route).
+The current release breaks two APIs. NavigationMenu no longer takes `items`: each trigger and its content share a `value`, and a section is disabled on its trigger. `useResizable()` no longer returns `controlled` or `orientation`.
 
-Combobox, Autocomplete and MultiSelect lists hide when an ancestor dialog or popover closes. A timed Toast pauses while a touch is held. A segmented ToggleGroup indicator follows an ancestor `dir` change. Prose list padding, `pre` scrolling and inline code skip `data-rad-not-prose` and `data-slot`.
-See the [release notes](https://github.com/cognitap/radiant/releases/tag/v0.0.79).
+Form's render callback receives `focusInvalid`, and Resizable handles set `data-disabled`.
+See the [release notes](https://github.com/cognitap/radiant/releases/tag/v0.0.80).
 
 ## Upgrade existing themes
 

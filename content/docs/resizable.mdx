@@ -1,63 +1,153 @@
 ---
 title: Resizable
-description: Resize bounded panels with native separators, keyboard controls and application-owned persistence.
+description: Split a region into panels that people resize by dragging, with the keyboard or with buttons.
 ---
 
+import { Demo } from '../../components/demo/Demo'
 import {
   ResizableDemo,
   ResizableNotesDemo,
   ResizableSavedDemo
 } from '../../components/ResizableDemo'
-
-## Usage
+import { ResizablePlayground } from '../../examples/resizable/ResizablePlayground'
 
 <ResizableDemo />
 
-Configure panels with stable keys and initial percentage sizes totalling 100. Render panels and handles directly in registry order.
+## Usage
+
+Use Resizable when people trade space between neighboring panels. Use [Drawer](/docs/drawer/) for a side task that opens and closes, and [Separator](/docs/separator/) for a divider that does not move.
+
+```tsx
+const items = [
+  { value: 'files', min: 20, max: 50 },
+  { value: 'preview' }
+]
+
+<Resizable items={items} defaultValue={[30, 70]}>
+  <ResizablePanel value="files">…</ResizablePanel>
+  <ResizableHandle value="files" aria-label="Files" />
+  <ResizablePanel value="preview">…</ResizablePanel>
+</Resizable>
+```
+
+Render panels and handles as direct children in `items` order, with a handle after every panel but the last. Any other order throws.
 
 ## Examples
 
+### Split two panels
+
+<Demo
+  title="Split two panels"
+  files={['resizable/ResizableExample.tsx']}
+>
+  <ResizablePlayground task="split" />
+</Demo>
+
+### Resize with buttons
+
 <ResizableNotesDemo />
+
+### Restore a saved layout
 
 <ResizableSavedDemo />
 
 ## State
 
-Choose `value` with `onValueChange(value)` or `defaultValue`. Each handle transfers space between adjacent panels; the others retain their sizes. Both panels' bounds determine the handle's range.
+Pass `defaultValue`, or `value` with `onValueChange(value)`. The layout holds one percentage per item, within its bounds, totalling 100.
 
-Controlled requests may be refused. Prop synchronization fires no callback. Pointer release or cancellation leaves the last accepted layout.
+A request moves space between a panel and its neighbor; other panels keep their sizes. A controlled owner may refuse it, and prop updates fire no callback.
 
-A collapsible panel can reach zero below its minimum when its neighbor has room. Zero-sized panels keep their children mounted, hidden and inert.
+A `collapsible` panel can drop to zero below its `min` when the neighbor has room. It stays mounted, hidden and inert, and `toggle` restores its last size.
 
-Applications own persistence and restored values. Form reset does not reset the layout.
+Resizable has no form value, and form reset leaves the layout alone. Save and restore `value` yourself. Reset with `setValue(initial)` from `useResizable()`.
 
 ## Accessibility
 
-Name each handle after its leading panel. Handles expose that panel's ID, current size and reachable bounds.
+Each handle is a native `hr` with `role="separator"` that controls the panel before it. It requires `aria-label` or `aria-labelledby` and throws without one; name it after that panel. It reports the panel's size and reachable bounds. A disabled group, or a handle with no room to move, sets `aria-disabled` and leaves the tab order.
 
-Arrow keys move the divider physically; horizontal movement respects direction. Shift+Arrow uses the larger step. Home/End reach bounds. Enter collapses or restores where feasible.
+| Key                | Behavior                                                    |
+| ------------------ | ----------------------------------------------------------- |
+| Arrow Left / Right | Move a horizontal group's divider that way, also in RTL     |
+| Arrow Up / Down    | Move a vertical group's divider that way                    |
+| Shift+Arrow        | Move by `largeStep`                                         |
+| Home / End         | Shrink or grow the panel before the handle to its bound     |
+| Enter              | Collapse or restore a `collapsible` panel before the handle |
 
-Include buttons that resize without dragging, as shown in the examples. Native scroll areas keep overflowing content reachable. Collapsing a focused panel moves focus to an adjacent handle.
+Offer buttons that resize without dragging, as the examples do. Panels clip overflow, so put long content in a [ScrollArea](/docs/scroll-area/). Collapsing a panel that holds focus moves focus to an adjacent handle.
 
 ## Motion
 
-Sizes update immediately without layout animation.
+Sizes change at once, without animation; there is nothing to turn off.
 
 ## Styling
 
-Root and Panel use native divs; Handle composes Separator's native hr. `className`, `style`, native props and `ref` reach those hosts.
+| Part   | Slot and attributes                                                                                                                                                                                                    |
+| ------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Root   | `resizable` div; `data-orientation`, `data-disabled`, `data-dragging`                                                                                                                                                  |
+| Panel  | `resizable-panel` div; `data-panel`, `data-size`, `data-collapsed`                                                                                                                                                     |
+| Handle | `separator resizable-handle` hr; `data-panel`, `data-orientation` (the line's), `data-disabled`, `data-dragging`                                                                                                       |
+| Theme  | `components.resizable`: `handleSize` (`0.5rem`), `handleColor`, `handleBackground`, `handleHoverBackground`, `handleActiveBackground`, `focusColor`, `focusWidth`, `focusOffset`, `focusStyle`; or `--rad-resizable-*` |
 
-Use `components.resizable` for handle size, colors and focus cues, including `focusStyle`. Separator retains its line styling. Leave panel flex sizing intact and express constraints through `items`.
+`className`, `style`, `ref` and native props reach each host. Panels size through flex grow, so leave flex sizing alone and set limits in `items`. The handle's line keeps Separator's thickness and style; `handleColor` sets its color.
 
 ## API
 
-| Part                | Contract                                                                                                                    |
-| ------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| `Resizable`         | `items`, one initial layout owner, `onValueChange`, `orientation` and `disabled`.                                           |
-| `items`             | Each entry has `value`, optional `min`/`max` percentages and `collapsible`. Bounds default to `0`/`100`.                    |
-| `ResizablePanel`    | `value` identifies its registry entry.                                                                                      |
-| `ResizableHandle`   | `value` identifies the preceding panel; omit a handle after the last panel. Name it with `aria-label` or `aria-labelledby`. |
-| `step`, `largeStep` | Positive keyboard deltas; default `1` and ten steps.                                                                        |
-| `useResizable()`    | Returns `null` outside a group, otherwise the layout, `controlled`, `orientation`, `disabled` and bounded request methods.  |
-| Hook methods        | `setValue(array)`, `resize(panel, size)`, `resizeBy(panel, amount)` and `toggle(panel)`.                                    |
-| `getPanel(panel)`   | Returns its ID, size, reachable bounds and collapse/restore availability.                                                   |
+### Resizable
+
+| Prop                 | Type                                   | Default    |
+| -------------------- | -------------------------------------- | ---------- |
+| items                | readonly ResizableItem[]; at least two | Required   |
+| value / defaultValue | number[]; one owner                    | Required   |
+| onValueChange        | (value: number[]) => void              | None       |
+| orientation          | `Orientation`: horizontal / vertical   | horizontal |
+| disabled             | boolean; refuses every request         | false      |
+| className / style    | string / ThemeStyle                    | None       |
+| ref                  | `Ref<HTMLDivElement>`                  | None       |
+| Other props          | Native div props                       | Native     |
+
+### ResizableItem
+
+| Field       | Type                                  | Default  |
+| ----------- | ------------------------------------- | -------- |
+| value       | string; unique and nonempty           | Required |
+| min / max   | number; percentage bounds             | 0 / 100  |
+| collapsible | boolean; may drop to zero below `min` | false    |
+
+### ResizablePanel
+
+| Prop              | Type                                      | Default  |
+| ----------------- | ----------------------------------------- | -------- |
+| value             | string; an `items` key                    | Required |
+| className / style | string / ThemeStyle                       | None     |
+| ref               | `Ref<HTMLDivElement>`                     | None     |
+| Other props       | Native div props except id, hidden, inert | Native   |
+
+### ResizableHandle
+
+| Prop                         | Type                                                          | Default   |
+| ---------------------------- | ------------------------------------------------------------- | --------- |
+| value                        | string; the panel before the handle, never the last           | Required  |
+| aria-label / aria-labelledby | string; accessible name                                       | Required  |
+| step                         | number; positive keyboard delta                               | 1         |
+| largeStep                    | number; positive Shift+Arrow delta                            | step × 10 |
+| className / style            | string / ThemeStyle                                           | None      |
+| ref                          | `Ref<HTMLHRElement>`                                          | None      |
+| Other props                  | Separator props except orientation, decorative and ARIA state | Native    |
+
+### useResizable()
+
+Returns `null` outside a group, otherwise the layout, disabled and bounded request methods.
+
+| Member   | Type                                    |
+| -------- | --------------------------------------- |
+| value    | number[]                                |
+| disabled | boolean                                 |
+| setValue | (value: number[]) => void               |
+| resize   | (panel: string, size: number) => void   |
+| resizeBy | (panel: string, amount: number) => void |
+| toggle   | (panel: string) => void                 |
+| getPanel | (panel: string) => ResizablePanelState  |
+
+`resize` and `resizeBy` clamp to the panel's reachable bounds; `setValue` throws on an invalid layout. `getPanel` returns ResizablePanelState: `id`, `size`, reachable `min` and `max`, `collapsed`, `canCollapse` and `canExpand`.
+
+Exports: `Resizable`, `ResizablePanel`, `ResizableHandle`, `useResizable`, `ResizableProps`, `ResizablePanelProps`, `ResizableHandleProps`, `ResizableItem`, `ResizableState`, `ResizablePanelState`.

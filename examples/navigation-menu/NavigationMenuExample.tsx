@@ -19,9 +19,16 @@ export type NavigationMenuTaskOptions = Pick<
   NavigationMenuProps,
   'controlSize' | 'disabled' | 'dir' | 'openDelay' | 'closeDelay' | 'className' | 'style'
 > &
-  Pick<NavigationMenuViewportProps, 'motion' | 'sideOffset'> & { instanceLabel?: string }
+  Pick<NavigationMenuViewportProps, 'motion' | 'sideOffset'> & {
+    instanceLabel?: string
+  }
 type Page = { key: string; title: string; body: string; detail: string }
-type Section = { key: string; title: string; pages: Page[] }
+type Section = {
+  key: string
+  title: string
+  pages: Page[]
+  unavailable?: boolean
+}
 const library: Section[] = [
   {
     key: 'studies',
@@ -114,6 +121,19 @@ const help: Section[] = [
         detail: 'Review before recording'
       }
     ]
+  },
+  {
+    key: 'workshops',
+    title: 'Workshops',
+    unavailable: true,
+    pages: [
+      {
+        key: 'synthesis',
+        title: 'Synthesis workshop',
+        body: 'Practice grouping observations into findings with a facilitator.',
+        detail: 'Registration opens soon'
+      }
+    ]
   }
 ]
 const workspace: Section[] = [
@@ -196,7 +216,12 @@ function SiteNavigator({
   return (
     <section
       aria-label={`${instanceLabel ?? label} application`}
-      style={{ display: 'grid', gap: '1rem', width: 'min(48rem,100%)', minWidth: 0 }}
+      style={{
+        display: 'grid',
+        gap: '1rem',
+        width: 'min(48rem,100%)',
+        minWidth: 0
+      }}
     >
       {filtered && (
         <Field label="Guide audience">
@@ -219,14 +244,18 @@ function SiteNavigator({
       <NavigationMenu
         {...rootOptions}
         aria-label={instanceLabel ?? label}
-        items={sections.map(section => ({ value: section.key }))}
         value={open}
         onValueChange={request}
       >
         <NavigationMenuList>
           {sections.map(section => (
             <NavigationMenuItem key={section.key}>
-              <NavigationMenuTrigger value={section.key}>{section.title}</NavigationMenuTrigger>
+              <NavigationMenuTrigger
+                value={section.key}
+                disabled={section.unavailable}
+              >
+                {section.title}
+              </NavigationMenuTrigger>
             </NavigationMenuItem>
           ))}
           <NavigationMenuItem>
@@ -246,7 +275,9 @@ function SiteNavigator({
             <NavigationMenuContent
               key={section.key}
               value={section.key}
-              style={{ width: section.key === sections[0]!.key ? '24rem' : '19rem' }}
+              style={{
+                width: section.key === sections[0]!.key ? '24rem' : '19rem'
+              }}
             >
               <h3 style={{ margin: '0 0 0.75rem' }}>{section.title}</h3>
               <ul
