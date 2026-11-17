@@ -133,6 +133,7 @@ export function ThemeHandoff({
   const [input, setInput] = useState('')
   const [feedback, setFeedback] = useState('')
   const [busy, setBusy] = useState('')
+  const [fileKey, setFileKey] = useState(0)
   const operation = useRef({ ticket: 0 })
   useEffect(() => {
     const remembered = rememberedSetup()
@@ -209,6 +210,8 @@ export function ThemeHandoff({
       if (ticket === operation.current.ticket)
         onError(`Import: ${errorMessage(error)} Current theme retained.`)
     }
+    // Remount the picker to clear it; setting input.value = '' leaves the shown name.
+    setFileKey(value => value + 1)
   }
   async function copy(text: string, label: string) {
     if (busy) return
@@ -558,11 +561,11 @@ export function ThemeHandoff({
                 </Field>
                 <Field label="Import configuration file">
                   <FileInput
+                    key={fileKey}
                     aria-describedby={resultId}
                     accept="application/json,.json"
                     onChange={event => {
                       const file = event.target.files?.[0]
-                      event.target.value = ''
                       if (file) void importFile(file)
                     }}
                   />

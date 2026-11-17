@@ -103,7 +103,6 @@ export function FontEditor({
   const watchers = useRef(new Set<() => void>())
   const bytes = useRef<ArrayBuffer | undefined>(undefined)
   const uploadRevision = useRef(0)
-  const fileInput = useRef<HTMLInputElement>(null)
   const [fileKey, setFileKey] = useState(0)
   const seen = useRef<{ version: number; loader: WorkshopFontLoader | null }>({
     version: -1,
@@ -217,7 +216,6 @@ export function FontEditor({
       if (revision === uploadRevision.current && loader.current === owner)
         setNotice(error instanceof Error ? error.message : 'Unable to read this font.')
     }
-    if (fileInput.current) fileInput.current.value = ''
   }
   const variation = font.axes
     .filter(axis => !['wght', 'wdth', 'opsz'].includes(axis.tag))
@@ -467,7 +465,6 @@ export function FontEditor({
             <FileInput
               key={fileKey}
               controlSize="small"
-              ref={fileInput}
               accept=".woff2,.woff,.ttf,.otf"
               onChange={e => void chooseFile(e.target.files?.[0])}
             />

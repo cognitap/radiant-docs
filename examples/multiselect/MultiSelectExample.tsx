@@ -5,6 +5,7 @@ import {
   Checkbox,
   Field,
   MultiSelect,
+  MultiSelectControl,
   MultiSelectTags,
   MultiSelectInput,
   MultiSelectTrigger,
@@ -12,6 +13,7 @@ import {
   MultiSelectPortal,
   MultiSelectContent,
   type MultiSelectProps,
+  type MultiSelectControlProps,
   type MultiSelectInputProps,
   type MultiSelectContentProps,
   type MultiSelectOption
@@ -20,7 +22,8 @@ export type MultiTaskOptions = Pick<
   MultiSelectProps,
   'controlSize' | 'disabled' | 'loading' | 'emptyText' | 'loadingText'
 > &
-  Pick<MultiSelectInputProps, 'className' | 'style' | 'readOnly'> &
+  Pick<MultiSelectControlProps, 'className' | 'style'> &
+  Pick<MultiSelectInputProps, 'readOnly'> &
   Pick<MultiSelectContentProps, 'motion' | 'sideOffset' | 'collisionPadding'> & {
     dir?: 'ltr' | 'rtl'
     initialOpen?: boolean
@@ -43,16 +46,15 @@ function Editor({
 }: MultiTaskOptions) {
   return (
     <>
-      <MultiSelectTags />
-      <div style={{ display: 'flex', gap: '0.5rem' }}>
-        <MultiSelectInput
-          className={className}
-          style={style}
-          readOnly={readOnly}
-        />
-        <MultiSelectTrigger />
+      <MultiSelectControl
+        className={className}
+        style={style}
+      >
+        <MultiSelectTags />
+        <MultiSelectInput readOnly={readOnly} />
         <MultiSelectClear />
-      </div>
+        <MultiSelectTrigger />
+      </MultiSelectControl>
       <MultiSelectPortal>
         <MultiSelectContent
           motion={motion}

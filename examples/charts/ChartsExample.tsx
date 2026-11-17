@@ -6,6 +6,7 @@ import {
   BarChart,
   AreaChart,
   PieChart,
+  ChartDataTable,
   chartPalette,
   type ChartProps,
   type ChartDatum
@@ -141,6 +142,81 @@ export function UnderstandSessionMix(options: ChartsTaskOptions) {
           ? '36 sessions across three methods.'
           : '24 sessions across three methods.'}
       </p>
+    </section>
+  )
+}
+const minutes: ChartDatum[] = [
+  { key: 'one', label: 'Round 1', values: { moderated: 42, unmoderated: 18 } },
+  { key: 'two', label: 'Round 2', values: { moderated: 45, unmoderated: null } },
+  { key: 'three', label: 'Round 3', values: { moderated: 38, unmoderated: 21 } },
+  { key: 'four', label: 'Round 4', values: { moderated: 36, unmoderated: 24 } }
+]
+const methods = [
+  { key: 'moderated', label: 'Moderated' },
+  { key: 'unmoderated', label: 'Unmoderated' }
+]
+const formatMinutes = (value: number) => `${value} min`
+export function ReviewSessionLength(options: ChartsTaskOptions) {
+  return (
+    <section
+      className="grid w-full max-w-4xl gap-4"
+      aria-label="Session length application"
+    >
+      <h2>Review session length</h2>
+      <LineChart
+        {...options}
+        label="Average session length"
+        description="Round 2 has no unmoderated sessions, so that line breaks."
+        data={minutes}
+        series={methods}
+        formatValue={formatMinutes}
+        categoryLabel="Research round"
+        legendLabel="Session methods"
+        tableLabel="Show exact minutes"
+        parts={{ table: { className: 'w-full' } }}
+      />
+    </section>
+  )
+}
+export function WaitForFirstSessions(options: ChartsTaskOptions) {
+  const [pilot, setPilot] = useState(false)
+  return (
+    <section
+      className="grid w-full max-w-4xl gap-4"
+      aria-label="New study application"
+    >
+      <h2>Start a new study</h2>
+      <Checkbox
+        label="Include pilot round"
+        checked={pilot}
+        onChange={event => setPilot(event.currentTarget.checked)}
+      />
+      <BarChart
+        {...options}
+        label="Completed sessions"
+        data={pilot ? [{ key: 'pilot', label: 'Pilot', values: { completed: 4 } }] : []}
+        series={[{ key: 'completed', label: 'Completed' }]}
+        emptyText="No sessions completed yet."
+      />
+    </section>
+  )
+}
+export function ShareExactCounts(options: Pick<ChartsTaskOptions, 'className' | 'dir'>) {
+  return (
+    <section
+      className="grid w-full max-w-4xl gap-4"
+      aria-label="Research report application"
+    >
+      <h2>Research report</h2>
+      <p>Session counts for the appendix, without a plot.</p>
+      <ChartDataTable
+        {...options}
+        label="Sessions per round"
+        data={weeks}
+        series={series}
+        categoryLabel="Research round"
+        formatValue={value => `${value} sessions`}
+      />
     </section>
   )
 }
