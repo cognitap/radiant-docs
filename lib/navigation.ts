@@ -24,6 +24,7 @@ export const categories = [
       'textarea',
       'password-input',
       'number-field',
+      'calendar',
       'otp-field',
       'file-input',
       'slider'
