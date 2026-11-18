@@ -72,12 +72,8 @@ change only its mode or reset to Default.
 
 ## Set language and direction
 
-Use the same locale on the server and client. Spread `getLocaleAttributes(locale)`
-on `html` and wrap the body content in `<LocaleProvider locale={locale} scope="document">`.
-Omit `scope` for a subtree wrapper with `lang` and `dir`. Formatting inherits
-the nearest locale, with `en-US` as the fallback. [NumberFormatter](/docs/number-formatter/)
-accepts overrides. Built-in labels default to English. Supply translated labels
-and validation messages.
+Use [LocaleProvider](/docs/locale-provider/) to set language, direction, and
+formatting at the page or subtree level. Apps own their translated content.
 
 ## Read the package contract
 

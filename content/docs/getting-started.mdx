@@ -18,6 +18,15 @@ Use React and React DOM 19.3 or later within React 19. Radiant is experimental:
 pin the package while evaluating it, and read the
 [migration notes](/docs/releases/) before upgrading.
 
+## Browser support
+
+Target modern browsers with native dialog, popover, and `Intl.Segmenter` support.
+Library CI exercises Chromium. Installed examples also receive WebKit checks
+where documented in the release evidence. The
+[accessibility matrix](https://github.com/cognitap/radiant/blob/main/docs/accessibility.md)
+lists manual targets for Safari and VoiceOver, Firefox and NVDA, and mobile
+screen readers. Check the browser and assistive technology pairs your app relies on.
+
 ## Choose a styling route
 
 Import the compiled stylesheet once in your application entry point:
@@ -84,11 +93,8 @@ layout can render it. See [client and server responsibilities](/docs/foundations
 
 ## Use public exports
 
-Import components, types, `defineTheme`, `ThemeScope` and presets from
-`@cognitap/radiant`. The styling entries are `styles.css`, `reset.css` and
-`tailwind.css`. Imports from `src`, `dist` or other internal paths are not part
-of the package contract. The website and Storybook are not installed with the
-library.
+Import components, types, `defineTheme`, and `ThemeScope` from
+`@cognitap/radiant`. Import presets from `@cognitap/radiant/examples`.
 
 ## Build a complete flow
 
