@@ -1,5 +1,6 @@
 'use client'
 
+/* oxlint-disable jsx-a11y/prefer-tag-over-role -- Receipt feedback is managed by React during native form reset. */
 import { useState } from 'react'
 import { Button, Dropzone, Field } from '@cognitap/radiant'
 
@@ -34,7 +35,12 @@ export function SubmitReceipt() {
           Reset
         </Button>
       </div>
-      <output className="text-sm">{receipt && 'Submitted ' + receipt}</output>
+      <div
+        role="status"
+        className="text-sm"
+      >
+        {receipt && 'Submitted ' + receipt}
+      </div>
     </form>
   )
 }
