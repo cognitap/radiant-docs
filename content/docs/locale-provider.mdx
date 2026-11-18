@@ -1,0 +1,80 @@
+---
+title: LocaleProvider
+description: Set the locale for Radiant formatting, matching, and writing direction.
+---
+
+import { Demo } from '../../components/demo/Demo'
+import { DemoControls, DemoPreview } from '../../components/demo/DemoFrame'
+import { CompareRegionalAmounts } from '../../examples/locale-provider/CompareRegionalAmounts'
+import { PublishAPriceList } from '../../examples/locale-provider/PublishAPriceList'
+import { SwitchQuoteLocale } from '../../examples/locale-provider/SwitchQuoteLocale'
+
+<Demo
+  title="Compare amounts in Arabic and French"
+  files={['locale-provider/CompareRegionalAmounts.tsx']}
+>
+  <DemoControls />
+  <DemoPreview>
+    <CompareRegionalAmounts />
+  </DemoPreview>
+</Demo>
+
+## Usage
+
+Wrap a region to set the locale for components such as [NumberField](/docs/number-field/) and [Select](/docs/select/).
+
+```tsx
+import { LocaleProvider, NumberFormatter } from '@cognitap/radiant'
+
+;<LocaleProvider locale="fr-FR">
+  <NumberFormatter value={1234.5} />
+</LocaleProvider>
+```
+
+## Examples
+
+### Localize an existing host
+
+Spread `getLocaleAttributes(locale)` on the host. Use document scope to keep its direct children. In a page layout, apply the helper to `html` and place the provider inside `body`. The helper works in a server component.
+
+<Demo
+  title="Publish a localized price list"
+  files={['locale-provider/PublishAPriceList.tsx']}
+>
+  <DemoControls />
+  <DemoPreview>
+    <PublishAPriceList />
+  </DemoPreview>
+</Demo>
+
+### Switch a quote's language
+
+Change the provider locale and the app's translated text together.
+
+<Demo
+  title="Switch a quote's language"
+  files={['locale-provider/SwitchQuoteLocale.tsx']}
+>
+  <DemoControls />
+  <DemoPreview>
+    <SwitchQuoteLocale />
+  </DemoPreview>
+</Demo>
+
+## State
+
+The app supplies `locale`. Omit it to inherit from the nearest provider. Use the same initial locale on the server and client. Formatting and matching fall back to en-US when the locale is unconfigured or unsupported.
+
+## Accessibility
+
+The subtree wrapper sets native `lang` and script-derived `dir` for an explicit locale. Omitted locale leaves those attributes to surrounding HTML. An inner French scope can read left to right inside Arabic content. The app supplies translations for its content, labels, and errors. Built-in component messages default to English.
+
+## API
+
+| Prop       | Type and default                                                             |
+| ---------- | ---------------------------------------------------------------------------- |
+| `locale`   | Optional BCP 47 tag. Inherits when omitted.                                  |
+| `scope`    | `subtree` (default) renders a div. `document` renders the children directly. |
+| `children` | React content.                                                               |
+
+Exports LocaleProvider and LocaleProviderProps. The `getLocaleAttributes(locale?)` helper returns native `lang` and `dir`. The language omits formatting extensions.

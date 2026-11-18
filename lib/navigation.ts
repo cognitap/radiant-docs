@@ -99,6 +99,11 @@ export const categories = [
     ]
   },
   {
+    title: 'Localization',
+    description: 'Language, writing direction and number formatting.',
+    slugs: ['locale-provider', 'number-formatter']
+  },
+  {
     title: 'Data display',
     description: 'Show records, media, code and charts.',
     slugs: [
@@ -114,7 +119,6 @@ export const categories = [
       'kbd',
       'code-block',
       'highlight',
-      'number-formatter',
       'carousel'
     ]
   },
