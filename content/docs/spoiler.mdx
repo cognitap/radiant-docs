@@ -1,0 +1,99 @@
+---
+title: Spoiler
+description: Preview the beginning of long content and expand it on demand.
+---
+
+import { Demo } from '../../components/demo/Demo'
+import { DemoControls, DemoPreview } from '../../components/demo/DemoFrame'
+import { ReadWorkspaceNotes } from '../../examples/spoiler/ReadWorkspaceNotes'
+import { ReadShippingDetails } from '../../examples/spoiler/ReadShippingDetails'
+import { ReviewReleaseNotes } from '../../examples/spoiler/ReviewReleaseNotes'
+
+<Demo
+  title="Preview workspace notes"
+  files={['spoiler/ReadWorkspaceNotes.tsx']}
+>
+  <DemoControls />
+  <DemoPreview>
+    <ReadWorkspaceNotes />
+  </DemoPreview>
+</Demo>
+
+## Usage
+
+Use Spoiler for a height-limited preview. Use [Collapsible](/docs/collapsible/) for a section that starts entirely hidden.
+
+```tsx
+import { Spoiler } from '@cognitap/radiant'
+
+;<Spoiler maxHeight={96}>
+  <p>Workspace members can subscribe to a weekly report on their open projects.</p>
+  <p>Each report includes changes since the previous review.</p>
+</Spoiler>
+```
+
+## Examples
+
+### Keep short shipping details visible
+
+Content that fits within the preview height is fully visible. The summary appears when there is more to reveal.
+
+<Demo
+  title="Keep short shipping details visible"
+  files={['spoiler/ReadShippingDetails.tsx']}
+>
+  <DemoControls />
+  <DemoPreview>
+    <ReadShippingDetails />
+  </DemoPreview>
+</Demo>
+
+### Review release notes
+
+Own the open state and use the theme spring for a longer list.
+
+<Demo
+  title="Review release notes"
+  files={['spoiler/ReviewReleaseNotes.tsx']}
+>
+  <DemoControls />
+  <DemoPreview>
+    <ReviewReleaseNotes />
+  </DemoPreview>
+</Demo>
+
+## State
+
+When content overflows, an uncontrolled Spoiler starts collapsed unless `defaultOpen` is true. Use `open` with `onOpenChange` to own the state. The preview height includes content padding and is measured again as its content changes size.
+
+## Accessibility
+
+The native summary reports the disclosure state. While clipped, the preview is hidden from assistive technology and its controls are skipped in the tab order. Expand to read and interact with all of the content.
+
+| Key            | Action                                |
+| -------------- | ------------------------------------- |
+| Tab            | Focus the summary when it is present. |
+| Enter or Space | Toggle the disclosure.                |
+
+## Motion
+
+With `MotionProvider`, the [disclosure spring](/docs/foundations/motion/) animates between the preview and full content heights. Spoiler follows reduced motion. Set `motion="off"` to disable the transition.
+
+## Styling
+
+`className`, `style`, and `ref` target the native details element. Use `parts.trigger` and `parts.content` for the summary and measured body.
+
+## API
+
+### Spoiler
+
+| Prop                              | Type and default                                 |
+| --------------------------------- | ------------------------------------------------ |
+| `maxHeight`                       | Preview height in CSS pixels. Defaults to 96.    |
+| `open` / `defaultOpen`            | Boolean. Uncontrolled overflow starts collapsed. |
+| `onOpenChange`                    | Receives the next open state.                    |
+| `showMoreLabel` / `showLessLabel` | Defaults to Show more and Show less.             |
+| `motion`                          | inherit (default) or off.                        |
+| `parts`                           | trigger and content.                             |
+
+Exports Spoiler and SpoilerProps.

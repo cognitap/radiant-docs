@@ -1,0 +1,90 @@
+---
+title: Highlight
+description: Mark matching substrings in search results while keeping the original spelling.
+---
+
+import { Demo } from '../../components/demo/Demo'
+import { DemoControls, DemoPreview } from '../../components/demo/DemoFrame'
+import { FindCafe } from '../../examples/highlight/FindCafe'
+import { MatchDestination } from '../../examples/highlight/MatchDestination'
+import { MatchCommand } from '../../examples/highlight/MatchCommand'
+
+<Demo
+  title="Find a match in venue notes"
+  files={['highlight/FindCafe.tsx']}
+>
+  <DemoControls />
+  <DemoPreview>
+    <FindCafe />
+  </DemoPreview>
+</Demo>
+
+## Usage
+
+Use Highlight for emphasis based on a search query. Use [Badge](/docs/badge/) for a separate status or category label.
+
+```tsx
+import { Highlight } from '@cognitap/radiant'
+
+;<Highlight
+  text="Café near the office"
+  query="cafe"
+  ignoreDiacritics
+/>
+```
+
+## Examples
+
+### Mark a destination in Combobox results
+
+Use custom option children to render Highlight with the current Combobox query.
+
+<Demo
+  title="Mark a destination in Combobox results"
+  files={['highlight/MatchDestination.tsx']}
+>
+  <DemoControls />
+  <DemoPreview>
+    <MatchDestination />
+  </DemoPreview>
+</Demo>
+
+### Mark a command in a workspace palette
+
+Highlight each command label using the query owned by the palette.
+
+<Demo
+  title="Mark a command in a workspace palette"
+  files={['highlight/MatchCommand.tsx']}
+>
+  <DemoControls />
+  <DemoPreview>
+    <MatchCommand />
+  </DemoPreview>
+</Demo>
+
+## State
+
+Pass the search text into `query`. Case is ignored by default. Use `ignoreDiacritics` to match accents such as café with cafe. Highlight preserves the spelling and grapheme boundaries in `text`. An empty query renders the original text without marks.
+
+## Accessibility
+
+Matches use native `mark` elements. The search control or result list owns focus and keyboard navigation. When supplying custom [Combobox](/docs/combobox/) or [Command](/docs/command/) option children, give the option its full label.
+
+## Styling
+
+`className` and `style` target the inline span. Override selection colors or other mark styles with `parts.mark`.
+
+## API
+
+### Highlight
+
+| Prop               | Type and default                                         |
+| ------------------ | -------------------------------------------------------- |
+| `text`             | Original string to display.                              |
+| `query`            | Literal substring to match.                              |
+| `caseSensitive`    | Boolean. Defaults to false and uses locale case mapping. |
+| `ignoreDiacritics` | Boolean. Defaults to false.                              |
+| `parts`            | mark.                                                    |
+
+Exports Highlight and HighlightProps.

@@ -1,0 +1,108 @@
+---
+title: Tour
+description: Walk someone through page controls with non-modal steps anchored to their targets.
+---
+
+import { Demo } from '../../components/demo/Demo'
+import { DemoControls, DemoPreview } from '../../components/demo/DemoFrame'
+import { MeetWorkspace } from '../../examples/tour/MeetWorkspace'
+import { GuideGuests } from '../../examples/tour/GuideGuests'
+import { TrackTourState } from '../../examples/tour/TrackTourState'
+
+<Demo
+  title="Get to know the workspace"
+  files={['tour/MeetWorkspace.tsx']}
+>
+  <DemoControls />
+  <DemoPreview>
+    <MeetWorkspace />
+  </DemoPreview>
+</Demo>
+
+## Usage
+
+Use Tour for a product walkthrough. Use [Popover](/docs/popover/) for a single explanation.
+
+```tsx
+import { Tour, TourTrigger } from '@cognitap/radiant'
+
+;<Tour steps={[{ target: '#project-list', title: 'Find a project' }]}>
+  <TourTrigger>Start tour</TourTrigger>
+  <div id="project-list">Workspace projects</div>
+</Tour>
+```
+
+## Examples
+
+### Guide a guest through available controls
+
+The billing target is unavailable in the guest view. The tour moves between the targets that are present.
+
+<Demo
+  title="Guide a guest through available controls"
+  files={['tour/GuideGuests.tsx']}
+>
+  <DemoControls />
+  <DemoPreview>
+    <GuideGuests />
+  </DemoPreview>
+</Demo>
+
+### Track whether a walkthrough was viewed
+
+Own the open state and let the surrounding interface react when the walkthrough closes.
+
+<Demo
+  title="Track whether a walkthrough was viewed"
+  files={['tour/TrackTourState.tsx']}
+>
+  <DemoControls />
+  <DemoPreview>
+    <TrackTourState />
+  </DemoPreview>
+</Demo>
+
+## State
+
+Use `defaultOpen` for an initially open tour or `open` with `onOpenChange` to own its state. Selectors resolve within the Tour wrapper. Each opening starts at the first available target. A missing or hidden target is skipped, and a tour without targets closes. An off-screen target scrolls into view.
+
+## Accessibility
+
+Each step is a non-modal dialog named by its title. Focus moves into the step. Finishing, skipping, or pressing Escape returns focus to the launcher.
+
+| Key               | Action                                   |
+| ----------------- | ---------------------------------------- |
+| Tab / Shift + Tab | Move between step controls.              |
+| Enter or Space    | Activate Back, Next, Skip tour, or Done. |
+| Escape            | Close the tour and return focus.         |
+
+## Motion
+
+Steps use [Popover motion](/docs/popover/#motion). Set `motion="off"` to disable its transition.
+
+## Styling
+
+`className` and `style` target the wrapper. Use `parts.popup` for the step surface. `data-rad-tour-target` identifies the outlined anchor.
+
+## API
+
+### Tour
+
+| Prop                                                  | Type and default                                                                               |
+| ----------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| `steps`                                               | Array of target selectors and titles, with optional descriptions, side, and align.             |
+| `open` / `defaultOpen`                                | Boolean. Uncontrolled starts closed.                                                           |
+| `onOpenChange`                                        | Receives the next open state.                                                                  |
+| `backLabel` / `nextLabel` / `skipLabel` / `doneLabel` | Defaults to Back, Next, Skip tour, and Done.                                                   |
+| `formatProgress`                                      | Formats the available step position and count. Defaults to “Step 1 of 2” for the first of two. |
+| `motion`                                              | inherit (default) or off.                                                                      |
+| `parts`                                               | popup.                                                                                         |
+
+### TourTrigger
+
+| Prop                                   | Type and default               |
+| -------------------------------------- | ------------------------------ |
+| `children`                             | Visible Button label.          |
+| `variant` / `controlSize` / `disabled` | [Button](/docs/button/) props. |
+
+Exports Tour, TourTrigger, TourProps, TourStep, and TourTriggerProps.
