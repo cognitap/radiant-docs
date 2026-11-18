@@ -1,0 +1,97 @@
+---
+title: CopyButton
+description: Copy text to the clipboard and show the result beside the button.
+---
+
+import { Demo } from '../../components/demo/Demo'
+import { DemoControls, DemoPreview } from '../../components/demo/DemoFrame'
+import { CopyInvite } from '../../examples/copy-button/CopyInvite'
+import { CopyInvoice } from '../../examples/copy-button/CopyInvoice'
+import { CopySupportEmail } from '../../examples/copy-button/CopySupportEmail'
+
+<Demo
+  title="Copy an invitation link"
+  files={['copy-button/CopyInvite.tsx']}
+>
+  <DemoControls />
+  <DemoPreview>
+    <CopyInvite />
+  </DemoPreview>
+</Demo>
+
+## Usage
+
+Use CopyButton for a specific value like an invitation link or reference number. Use [CodeBlock](/docs/code-block/) to show and copy a code sample.
+
+```tsx
+import { CopyButton } from '@cognitap/radiant'
+
+;<CopyButton value="INV-2408">Copy invoice number</CopyButton>
+```
+
+## Examples
+
+### Copy an invoice number
+
+Give the confirmation a longer display time when the reference is important.
+
+<Demo
+  title="Copy an invoice number"
+  files={['copy-button/CopyInvoice.tsx']}
+>
+  <DemoControls />
+  <DemoPreview>
+    <CopyInvoice />
+  </DemoPreview>
+</Demo>
+
+### Copy a support address
+
+Keep the address selectable and give a specific fallback message if clipboard access fails.
+
+<Demo
+  title="Copy a support address"
+  files={['copy-button/CopySupportEmail.tsx']}
+>
+  <DemoControls />
+  <DemoPreview>
+    <CopySupportEmail />
+  </DemoPreview>
+</Demo>
+
+## State
+
+CopyButton writes the supplied value using the browser clipboard API. It keeps focus while the write is pending. Success clears after `resetDelay`. An error remains visible until retry or a value change.
+
+## Accessibility
+
+Use a clear Button label for what will be copied. Provide an accessible name for icon-only children. The status region announces the result politely.
+
+| Key            | Action            |
+| -------------- | ----------------- |
+| Tab            | Focus CopyButton. |
+| Enter or Space | Copy the value.   |
+
+## Motion
+
+CopyButton uses [Button motion](/docs/button/#motion).
+
+## Styling
+
+`className`, `style`, and `ref` target the Button. Use `parts.status` to style the adjacent status region.
+
+## API
+
+### CopyButton
+
+| Prop                                 | Type and default                                |
+| ------------------------------------ | ----------------------------------------------- |
+| `value`                              | Exact string to copy.                           |
+| `children`                           | Visible Button label. Defaults to Copy.         |
+| `resetDelay`                         | Positive milliseconds. Defaults to 2000.        |
+| `copiedText`                         | Successful write message. Defaults to “Copied.” |
+| `errorText`                          | Visible message when the write fails.           |
+| `parts`                              | status.                                         |
+| `variant` / `controlSize` / `render` | [Button](/docs/button/) props.                  |
+
+Exports CopyButton, CopyButtonProps, and CopyButtonRenderProps.

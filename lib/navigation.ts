@@ -13,7 +13,7 @@ export const categories = [
   {
     title: 'Actions',
     description: 'Buttons and the bars that group them.',
-    slugs: ['button', 'button-group', 'toggle-group', 'toolbar']
+    slugs: ['button', 'copy-button', 'button-group', 'toggle-group', 'toolbar']
   },
   {
     title: 'Inputs',
@@ -30,6 +30,7 @@ export const categories = [
       'time-input',
       'otp-field',
       'file-input',
+      'dropzone',
       'color-input',
       'color-picker',
       'slider'
@@ -70,7 +71,7 @@ export const categories = [
   {
     title: 'Overlays',
     description: 'Content that floats above the page.',
-    slugs: ['dialog', 'alert-dialog', 'drawer', 'popover', 'hover-card', 'tooltip']
+    slugs: ['dialog', 'alert-dialog', 'drawer', 'popover', 'tour', 'hover-card', 'tooltip']
   },
   {
     title: 'Feedback',
@@ -91,6 +92,7 @@ export const categories = [
       'tag',
       'kbd',
       'code-block',
+      'highlight',
       'carousel'
     ]
   },
@@ -104,7 +106,8 @@ export const categories = [
       'scroll-area',
       'resizable',
       'accordion',
-      'collapsible'
+      'collapsible',
+      'spoiler'
     ]
   }
 ] as const

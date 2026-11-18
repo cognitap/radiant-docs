@@ -1,0 +1,103 @@
+---
+title: Dropzone
+description: Choose or drop files with a native form control and selection feedback.
+---
+
+import { Demo } from '../../components/demo/Demo'
+import { DemoControls, DemoPreview } from '../../components/demo/DemoFrame'
+import { AttachScreenshots } from '../../examples/dropzone/AttachScreenshots'
+import { SubmitReceipt } from '../../examples/dropzone/SubmitReceipt'
+import { UploadAttachments } from '../../examples/dropzone/UploadAttachments'
+
+<Demo
+  title="Attach screenshots"
+  files={['dropzone/AttachScreenshots.tsx']}
+>
+  <DemoControls />
+  <DemoPreview>
+    <AttachScreenshots />
+  </DemoPreview>
+</Demo>
+
+## Usage
+
+Use Dropzone for a prominent attachment target. Use [FileInput](/docs/file-input/) for a compact file control.
+
+```tsx
+import { Dropzone, Field } from '@cognitap/radiant'
+
+;<Field label="Attachments">
+  <Dropzone
+    name="attachments"
+    accept="image/*"
+    multiple
+    maxFiles={3}
+  />
+</Field>
+```
+
+## Examples
+
+### Submit an expense receipt
+
+A required Field handles validity. Read the accepted PDF from native FormData.
+
+<Demo
+  title="Submit an expense receipt"
+  files={['dropzone/SubmitReceipt.tsx']}
+>
+  <DemoControls />
+  <DemoPreview>
+    <SubmitReceipt />
+  </DemoPreview>
+</Demo>
+
+### Show attachment upload progress
+
+Pass accepted files to the upload process your app owns. This example advances Progress locally.
+
+<Demo
+  title="Show attachment upload progress"
+  files={['dropzone/UploadAttachments.tsx']}
+>
+  <DemoControls />
+  <DemoPreview>
+    <UploadAttachments />
+  </DemoPreview>
+</Demo>
+
+## State
+
+Each pick or drop replaces the current selection. The picker and drop share type, size, and count checks. Accepted files become the native input's files for submission. Native form reset clears the selection and feedback. Validate accepted files on the server as part of uploading.
+
+## Accessibility
+
+Use [Field](/docs/field/) for a visible label. Without Field, the choose prompt names the input. File names and rejection messages appear in a status region.
+
+| Key            | Action                         |
+| -------------- | ------------------------------ |
+| Tab            | Focus the native file control. |
+| Enter or Space | Open the native file chooser.  |
+
+## Styling
+
+`className` and `style` target the drop surface. `ref` targets the native input. Style the prompt, description, and feedback with `parts.label`, `parts.description`, and `parts.status`. The surface exposes `data-state` for idle, drag-over, accepted, and rejected.
+
+## API
+
+### Dropzone
+
+| Prop                          | Type and default                                           |
+| ----------------------------- | ---------------------------------------------------------- |
+| `name` / `form`               | Native field name and form owner.                          |
+| `accept`                      | Comma-separated MIME types, wildcards, or file extensions. |
+| `multiple`                    | Boolean. Defaults to false.                                |
+| `maxFiles`                    | Positive integer, optional with multiple selection.        |
+| `maxSize`                     | Optional per-file limit in bytes.                          |
+| `required` / `disabled`       | Native input flags, default to false.                      |
+| `chooseLabel` / `description` | Optional prompt and instructions.                          |
+| `rejectionText`               | Formats a file and its type, size, or count rejection.     |
+| `onFilesChange`               | Receives accepted files and rejections on a pick or drop.  |
+| `parts`                       | label, description, and status.                            |
+
+Exports Dropzone, DropzoneProps, DropzoneSelection, and DropzoneRejection.
