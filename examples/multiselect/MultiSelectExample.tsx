@@ -161,75 +161,6 @@ export function AssignProjectReviewers({
     </form>
   )
 }
-const labels = [
-  { value: 'design', label: 'Design' },
-  { value: 'research', label: 'Research' },
-  { value: 'delivery', label: 'Delivery' }
-]
-export function FilterReleaseBoard({
-  dir,
-  initialOpen,
-  initialValues = ['design'],
-  disabled,
-  readOnly,
-  loading,
-  controlSize,
-  emptyText,
-  loadingText,
-  ...editor
-}: MultiTaskOptions) {
-  const [applied, setApplied] = useState(initialValues)
-  const projects = [
-    { name: 'Component kit', label: 'design' },
-    { name: 'Reader study', label: 'research' },
-    { name: 'Release checklist', label: 'delivery' }
-  ]
-  return (
-    <form
-      dir={dir}
-      style={{ display: 'grid', gap: '1rem', width: 'min(34rem,100%)' }}
-      onSubmit={event => {
-        event.preventDefault()
-        setApplied(new FormData(event.currentTarget).getAll('labels').map(String))
-      }}
-      onReset={() => setApplied(initialValues)}
-    >
-      <Field
-        label="Board labels"
-        description="Apply one or more labels to the release board."
-      >
-        <MultiSelect
-          items={labels}
-          name="labels"
-          defaultValue={initialValues}
-          defaultOpen={initialOpen}
-          disabled={disabled}
-          readOnly={readOnly}
-          loading={loading}
-          controlSize={controlSize}
-          emptyText={emptyText}
-          loadingText={loadingText}
-        >
-          <Editor {...editor} />
-        </MultiSelect>
-      </Field>
-      <Button type="submit">Apply board filters</Button>
-      <ul>
-        {projects
-          .filter(project => !applied.length || applied.includes(project.label))
-          .map(project => (
-            <li key={project.name}>{project.name}</li>
-          ))}
-      </ul>
-      <Button
-        type="reset"
-        variant="outline"
-      >
-        Reset board filters
-      </Button>
-    </form>
-  )
-}
 export function KeepLeadReviewer({
   dir,
   initialOpen,
@@ -285,7 +216,7 @@ export function KeepLeadReviewer({
 
 import '@cognitap/radiant/styles.css'
 import { MotionProvider } from '@cognitap/radiant/motion/react'
-export type MultiSelectTask = 'reviewers' | 'board' | 'lead'
+export type MultiSelectTask = 'reviewers' | 'lead'
 export function MultiSelectExample({
   task = 'reviewers',
   ...options
@@ -294,8 +225,6 @@ export function MultiSelectExample({
     <MotionProvider>
       {task === 'reviewers' ? (
         <AssignProjectReviewers {...options} />
-      ) : task === 'board' ? (
-        <FilterReleaseBoard {...options} />
       ) : (
         <KeepLeadReviewer {...options} />
       )}

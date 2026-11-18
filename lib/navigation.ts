@@ -21,10 +21,12 @@ export const categories = [
     slugs: [
       'input',
       'input-group',
+      'inline-edit',
       'textarea',
       'password-input',
       'number-field',
       'calendar',
+      'date-field',
       'date-picker',
       'date-range-picker',
       'time-input',
@@ -33,7 +35,8 @@ export const categories = [
       'dropzone',
       'color-input',
       'color-picker',
-      'slider'
+      'slider',
+      'range-slider'
     ]
   },
   {
@@ -47,6 +50,7 @@ export const categories = [
       'switch',
       'select',
       'native-select',
+      'list-box',
       'multi-select',
       'combobox',
       'autocomplete',

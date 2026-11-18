@@ -14,11 +14,7 @@ import {
 
 ## Usage
 
-Use Combobox when people type to find a choice. Search text filters the list but never becomes the value. Choose something else when:
-
-- [Select](/docs/select/): the list is short and needs no typing.
-- [Autocomplete](/docs/autocomplete/): any text is allowed and suggestions only help.
-- [MultiSelect](/docs/multi-select/): people pick several values; it matches `type="multiple"` with its own part names.
+Use Combobox to search known options. [MultiSelect](/docs/multi-select/) is its multiple mode with convenience exports. See the [selection controls recipe](/docs/recipes/selection-controls/) for other patterns.
 
 ```tsx
 <Field label="Destination">
@@ -58,15 +54,15 @@ Without children, Combobox renders an input, trigger, clear button and a listbox
 | Search              | `query`    | `defaultQuery` | `onQueryChange(query: string)`         | `''`    |
 | Popup               | `open`     | `defaultOpen`  | `onOpenChange(open: boolean)`          | `false` |
 
-Passing both props of a pair, or changing the owner or `type` while mounted, throws; remount with a new `key`. Prop changes fire no callback.
+Keep one owner per state pair. Remount with a new `key` to change ownership or mode. Prop changes emit no callbacks.
 
 Single mode submits the selected key under `name`, or `''` when empty. Multiple mode submits one `name` entry per key. `required` needs a selection. Native reset restores uncontrolled selection and search. `disabled` leaves the value out of the form; `readOnly` keeps it submitted but blocks edits.
 
-For server results, pass `filter={null}`, `loading`, `errorText` and `selectedItem`.
+For server results, pass `filter={null}`, `loading` and `errorText`. Use `selectedItem` or `selectedItems` to label selected keys missing from the current results.
 
 ## Accessibility
 
-The input is a `combobox` that controls a `listbox` of `option` items, with `aria-multiselectable` in multiple mode. Loading, empty and error text sit in a `status` region outside the list. Name the input with [Field](/docs/field/) or `aria-label` on ComboboxInput. Pass `aria-invalid` to Combobox to mark it invalid outside Field.
+Name ComboboxInput with [Field](/docs/field/) or `aria-label`. Combobox accepts `aria-invalid`. Multiple mode uses a multiselectable listbox. A status region announces loading, empty results, and errors.
 
 | Key                       | Behavior                                                                  |
 | ------------------------- | ------------------------------------------------------------------------- |
@@ -78,7 +74,7 @@ The input is a `combobox` that controls a `listbox` of `option` items, with `ari
 | Tab                       | Close and move on without committing                                      |
 | Backspace on empty search | Remove the last value in multiple mode                                    |
 
-Focus stays on the input. Only multiple-mode ComboboxClear is a Tab stop.
+Focus stays on the input as the highlight moves. In multiple mode, each tag’s remove button and ComboboxClear are Tab stops.
 
 ## Motion
 
@@ -96,6 +92,7 @@ Hosted parts take `className`, `style` and `ref`. Multiple mode adds `multi-sele
 | ComboboxContent | `data-slot="combobox-content"`, `data-state="open \| closed"`, `data-motion`                    |
 | ComboboxItem    | `data-slot="combobox-item"`, `data-value`, `data-highlighted`, `data-selected`, `data-disabled` |
 | ComboboxStatus  | `data-slot="combobox-status"`                                                                   |
+| ComboboxControl | `combobox-control`, `data-control-size` in multiple mode                                        |
 | ComboboxTags    | `data-slot="combobox-tags"`                                                                     |
 
 Theme with `--rad-combobox-*` tokens, such as `--rad-combobox-radius` on the input `style`. `focusColor`, `focusWidth`, `focusOffset` and `focusStyle` set the focus ring.
@@ -179,6 +176,10 @@ Renders on the top layer. An ancestor dialog or popover hides the list until tha
 | children    | ReactNode             | Root status |
 | Other props | div props except role | Native      |
 
+### ComboboxControl
+
+Wraps tags, input, and buttons in multiple mode. Accepts div props and `ThemeStyle`.
+
 ### ComboboxTags
 
 | Prop        | Type                                                 | Default          |
@@ -190,4 +191,4 @@ Throws outside `type="multiple"`.
 
 `useCombobox()` returns `{ value, query, open, disabled, setValue, setQuery, setOpen }` inside a single Combobox; `useCombobox({ type: 'multiple' })` does the same for a multiple one. Both return `null` elsewhere.
 
-Exports `ComboboxProps`, `ComboboxMultipleProps`, `ComboboxOption`, `ComboboxState`, `ComboboxMultipleState`, `ComboboxRenderProps`, `ComboboxInputProps`, `ComboboxTriggerProps`, `ComboboxClearProps`, `ComboboxContentProps`, `ComboboxItemProps`, `ComboboxStatusProps` and `ComboboxTagsProps`.
+Exports `ComboboxProps`, `ComboboxMultipleProps`, `ComboboxOption`, `ComboboxState`, `ComboboxMultipleState`, `ComboboxRenderProps`, `ComboboxInputProps`, `ComboboxTriggerProps`, `ComboboxClearProps`, `ComboboxContentProps`, `ComboboxItemProps`, `ComboboxStatusProps`, `ComboboxControlProps` and `ComboboxTagsProps`.

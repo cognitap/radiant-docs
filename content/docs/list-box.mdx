@@ -1,0 +1,67 @@
+---
+title: ListBox
+description: Show single or multiple choices in an always-visible list.
+---
+
+import { Demo } from '../../components/demo/Demo'
+import { DemoControls, DemoPreview } from '../../components/demo/DemoFrame'
+import { TemplateChooser } from '../../examples/wave-four/TemplateChooser'
+
+<Demo
+  title="Choose a project template"
+  files={['wave-four/TemplateChooser.tsx']}
+>
+  <DemoControls />
+  <DemoPreview>
+    <TemplateChooser />
+  </DemoPreview>
+</Demo>
+
+## Usage
+
+Use ListBox when the options should stay visible and can benefit from descriptive labels. See the [selection controls recipe](/docs/recipes/selection-controls/) for other presentations.
+
+```tsx
+import { Field, ListBox } from '@cognitap/radiant'
+
+export function ProjectTemplates() {
+  return (
+    <Field label="Project templates">
+      <ListBox
+        type="multiple"
+        name="templates"
+        defaultValue={['research']}
+        items={[
+          { value: 'research', label: 'Research notes' },
+          { value: 'launch', label: 'Product launch' }
+        ]}
+      />
+    </Field>
+  )
+}
+```
+
+## State
+
+Use `value` and `onValueChange` or `defaultValue`. Single mode starts at `null` and submits an empty string until selected. Multiple mode starts at `[]` and submits selected keys as repeated entries in option order. Read them with `FormData.getAll`. Reset restores uncontrolled defaults and retains a controlled owner’s current value.
+
+## Accessibility
+
+Name the list with [Field](/docs/field/), `aria-label`, or `aria-labelledby`. Arrows, Home, End and locale-sensitive typing move the active option. Space or Enter selects it, or toggles it in multiple mode. Navigation skips disabled options and keeps focus separate from selection.
+
+Give rich, display-only labels a readable `textValue` for typeahead. The visible label also names the option.
+
+## Styling
+
+Use `list-box`, `list-box-option`, and `list-box-indicator` slots. Options expose `data-active`, `data-selected`, and `data-disabled`. Style options and indicators through `parts`.
+
+## API
+
+| Prop                                   | Contract                                                     |
+| -------------------------------------- | ------------------------------------------------------------ |
+| `items`                                | `readonly ListBoxOption[]` with unique, nonempty string keys |
+| `type`                                 | `single` (default) or `multiple`, fixed for the mount        |
+| `value`, `defaultValue`                | `string \| null` or `string[]` in multiple mode              |
+| `onValueChange`                        | Receives the value for the current mode                      |
+| `name`, `form`, `required`, `disabled` | Native form behavior                                         |
+| `controlSize`, `parts`                 | Presentation                                                 |
