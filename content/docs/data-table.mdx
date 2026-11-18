@@ -1,0 +1,121 @@
+---
+title: DataTable
+description: Sort and select rows in a table with optional sticky and windowed scrolling.
+---
+
+import { Demo } from '../../components/demo/Demo'
+import { DemoControls, DemoPreview } from '../../components/demo/DemoFrame'
+import { SortInvoices } from '../../examples/data-table/SortInvoices'
+import { SelectInvoices } from '../../examples/data-table/SelectInvoices'
+import { BrowseInvoiceHistory } from '../../examples/data-table/BrowseInvoiceHistory'
+
+<Demo
+  title="Sort an invoice list"
+  files={['data-table/SortInvoices.tsx', 'data-table/invoices.ts']}
+>
+  <DemoControls />
+  <DemoPreview>
+    <SortInvoices />
+  </DemoPreview>
+</Demo>
+
+## Usage
+
+Use DataTable for client-side sorting and selection. Use [Table](/docs/table/) when you own the table markup.
+
+```tsx
+import { DataTable, type DataTableColumn } from '@cognitap/radiant'
+
+type Row = { id: string; total: number }
+const columns: DataTableColumn<Row>[] = [
+  { id: 'total', header: 'Total', cell: row => row.total, compare: (a, b) => a.total - b.total }
+]
+
+export function InvoiceTotals({ rows }: { rows: Row[] }) {
+  return (
+    <DataTable
+      caption="Invoice totals"
+      rows={rows}
+      columns={columns}
+      getRowId={row => row.id}
+    />
+  )
+}
+```
+
+## Examples
+
+### Select open invoices for export
+
+Keep paid rows visible while select-all operates on the open invoices.
+
+<Demo
+  title="Select open invoices for export"
+  files={['data-table/SelectInvoices.tsx', 'data-table/invoices.ts']}
+>
+  <DemoControls />
+  <DemoPreview>
+    <SelectInvoices />
+  </DemoPreview>
+</Demo>
+
+### Browse invoice history
+
+Use a fixed row height when scrolling through a large list.
+
+<Demo
+  title="Browse invoice history"
+  files={['data-table/BrowseInvoiceHistory.tsx', 'data-table/invoices.ts']}
+>
+  <DemoControls />
+  <DemoPreview>
+    <BrowseInvoiceHistory />
+  </DemoPreview>
+</Demo>
+
+## State
+
+Own `sort` with `onSortChange`, or seed `defaultSort`. Selection uses stable row keys and accepts `value` or `defaultValue`. Select-all covers enabled rows across the supplied dataset, including rows outside the virtual window.
+
+## Accessibility
+
+The caption names the native table. Sort buttons expose direction through `aria-sort` on the header. Give selection checkboxes meaningful labels.
+
+| Key                              | Action                                                 |
+| -------------------------------- | ------------------------------------------------------ |
+| Tab                              | Focus the scroll region, sort buttons, and checkboxes. |
+| Enter / Space                    | Activate a sort button.                                |
+| Space                            | Toggle a focused checkbox.                             |
+| Arrow keys / Page Up / Page Down | Scroll the focused region.                             |
+
+## Styling
+
+`className`, `style`, and `ref` target the scroll region. Virtual rows use a fixed height; choose a height that fits cell content. `data-selected` marks picked rows.
+
+## API
+
+### DataTable
+
+| Prop                            | Type and default                                               |
+| ------------------------------- | -------------------------------------------------------------- |
+| `caption`                       | String, required.                                              |
+| `rows` / `columns` / `getRowId` | Rows, column definitions, and unique row key getter, required. |
+| `sort` / `defaultSort`          | Column ID and direction, or null. Defaults to null.            |
+| `onSortChange`                  | Receives the next sort.                                        |
+| `selection`                     | Optional selection configuration.                              |
+| `stickyHeader`                  | Defaults to true with virtual, otherwise false.                |
+| `virtual`                       | Optional height and rowHeight in pixels.                       |
+| `emptyText`                     | Defaults to “No rows”.                                         |
+| `parts`                         | table, caption, header, row, and cell.                         |
+
+### Column and selection definitions
+
+| Prop                                       | Type and default                                     |
+| ------------------------------------------ | ---------------------------------------------------- |
+| `id` / `header` / `cell`                   | Required column ID, label, and cell renderer.        |
+| `compare` / `width` / `rowHeader`          | Optional comparator, CSS width, and row-header flag. |
+| `value` / `defaultValue` / `onValueChange` | Selected keys. Uncontrolled selection starts empty.  |
+| `allLabel` / `labelForRow`                 | Required accessible names for selection controls.    |
+| `isRowDisabled`                            | Optional predicate for unavailable rows.             |
+
+Exports DataTable, DataTableProps, DataTableColumn, DataTableSort, DataTableSelection, and DataTableVirtual.

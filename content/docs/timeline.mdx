@@ -1,0 +1,112 @@
+---
+title: Timeline
+description: Show dated events in a vertical history.
+---
+
+import { Demo } from '../../components/demo/Demo'
+import { DemoControls, DemoPreview } from '../../components/demo/DemoFrame'
+import { TrackShipment } from '../../examples/timeline/TrackShipment'
+import { ReviewIncident } from '../../examples/timeline/ReviewIncident'
+import { FollowDeliveryInHebrew } from '../../examples/timeline/FollowDeliveryInHebrew'
+
+<Demo
+  title="Track a shipment"
+  files={['timeline/TrackShipment.tsx']}
+>
+  <DemoControls />
+  <DemoPreview>
+    <TrackShipment />
+  </DemoPreview>
+</Demo>
+
+## Usage
+
+Use Timeline for event histories. Give each item a machine-readable dateTime and a formatted timestamp.
+
+```tsx
+import { Timeline, TimelineItem } from '@cognitap/radiant'
+
+export function ShipmentHistory() {
+  return (
+    <Timeline aria-label="Shipment history">
+      <TimelineItem
+        label="Packed"
+        dateTime="2026-05-12"
+        time="May 12"
+      />
+    </Timeline>
+  )
+}
+```
+
+## Examples
+
+### Review an incident
+
+Use tones and decorative icons alongside event labels that describe what happened.
+
+<Demo
+  title="Review an incident"
+  files={['timeline/ReviewIncident.tsx']}
+>
+  <DemoControls />
+  <DemoPreview>
+    <ReviewIncident />
+  </DemoPreview>
+</Demo>
+
+### Follow a delivery in Hebrew
+
+A LocaleProvider moves the markers and connector to the inline start.
+
+<Demo
+  title="Follow a delivery in Hebrew"
+  files={['timeline/FollowDeliveryInHebrew.tsx']}
+>
+  <DemoControls />
+  <DemoPreview>
+    <FollowDeliveryInHebrew />
+  </DemoPreview>
+</Demo>
+
+## State
+
+Set `active` on the current event. The application supplies the order and timestamp formats.
+
+## Accessibility
+
+Timeline is an ordered list. Each event is a list item with a native time element. The active event exposes `aria-current`; markers are decorative.
+
+| Key               | Action                                         |
+| ----------------- | ---------------------------------------------- |
+| Tab / Shift + Tab | Move between links and controls inside events. |
+| Enter             | Follow a focused event link.                   |
+
+## Styling
+
+`className` and `style` target the list or list item. Target `timeline-item`, `timeline-indicator`, `timeline-connector`, and `timeline-time` with slot selectors. Active items have `data-active`.
+
+## API
+
+### Timeline
+
+| Prop                             | Type and default                              |
+| -------------------------------- | --------------------------------------------- |
+| `children`                       | TimelineItem elements in chronological order. |
+| `aria-label` / `aria-labelledby` | Optional native name.                         |
+| `className` / `style` / `ref`    | Target the ordered list.                      |
+
+### TimelineItem
+
+| Prop                          | Type and default                                           |
+| ----------------------------- | ---------------------------------------------------------- |
+| `label`                       | React node, required.                                      |
+| `dateTime` / `time`           | Machine-readable string and displayed timestamp, required. |
+| `children`                    | Optional event content.                                    |
+| `active`                      | Boolean, defaults to false.                                |
+| `tone`                        | Radiant tone, defaults to neutral.                         |
+| `icon`                        | Optional decorative node. Defaults to a dot.               |
+| `parts`                       | indicator, connector, label, time, and body.               |
+| `className` / `style` / `ref` | Target the list item.                                      |
+
+Exports Timeline, TimelineItem, TimelineProps, and TimelineItemProps.

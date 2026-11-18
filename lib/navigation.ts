@@ -30,6 +30,8 @@ export const categories = [
       'time-input',
       'otp-field',
       'file-input',
+      'color-input',
+      'color-picker',
       'slider'
     ]
   },
@@ -40,6 +42,7 @@ export const categories = [
       'checkbox',
       'checkbox-group',
       'radio-group',
+      'rating',
       'switch',
       'select',
       'native-select',
@@ -77,7 +80,19 @@ export const categories = [
   {
     title: 'Data display',
     description: 'Show records, media, code and charts.',
-    slugs: ['card', 'table', 'charts', 'avatar', 'badge', 'tag', 'kbd', 'code-block', 'carousel']
+    slugs: [
+      'card',
+      'table',
+      'data-table',
+      'timeline',
+      'charts',
+      'avatar',
+      'badge',
+      'tag',
+      'kbd',
+      'code-block',
+      'carousel'
+    ]
   },
   {
     title: 'Layout',

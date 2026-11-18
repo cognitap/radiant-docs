@@ -1,0 +1,109 @@
+---
+title: ColorInput
+description: Type a color or edit it in a popup and submit the normalized value.
+---
+
+import { Demo } from '../../components/demo/Demo'
+import { DemoControls, DemoPreview } from '../../components/demo/DemoFrame'
+import { EditAccent } from '../../examples/color-input/EditAccent'
+import { SaveAccent } from '../../examples/color-input/SaveAccent'
+import { RestoreOverlayTint } from '../../examples/color-input/RestoreOverlayTint'
+
+<Demo
+  title="Edit an accent color"
+  files={['color-input/EditAccent.tsx']}
+>
+  <DemoControls />
+  <DemoPreview>
+    <EditAccent />
+  </DemoPreview>
+</Demo>
+
+## Usage
+
+Use ColorInput for a color in a form. Use [ColorPicker](/docs/color-picker/) for an always-visible editor.
+
+```tsx
+import { ColorInput, Field } from '@cognitap/radiant'
+
+export function AccentField() {
+  return (
+    <Field label="Accent color">
+      <ColorInput name="accent" />
+    </Field>
+  )
+}
+```
+
+## Examples
+
+### Save a workspace accent
+
+A required Field blocks empty or malformed text. Submit hex, RGB, or OKLCH to see the canonical hex value.
+
+<Demo
+  title="Save a workspace accent"
+  files={['color-input/SaveAccent.tsx']}
+>
+  <DemoControls />
+  <DemoPreview>
+    <SaveAccent />
+  </DemoPreview>
+</Demo>
+
+### Restore the original overlay tint
+
+Own the field text when the application needs to restore a saved color.
+
+<Demo
+  title="Restore the original overlay tint"
+  files={['color-input/RestoreOverlayTint.tsx']}
+>
+  <DemoControls />
+  <DemoPreview>
+    <RestoreOverlayTint />
+  </DemoPreview>
+</Demo>
+
+## State
+
+Uncontrolled input starts empty unless `defaultValue` is provided. `onValueChange` receives typed text during edits and a canonical value after blur or a picker selection. `name` submits the normalized `format`, even when Enter submits before blur. Native reset restores the uncontrolled initial text.
+
+## Accessibility
+
+Name the textbox with Field or native ARIA. `pickerLabel` names the trigger and popup. Invalid text sets native custom validity.
+
+| Key                          | Action                                                     |
+| ---------------------------- | ---------------------------------------------------------- |
+| Tab / Shift + Tab            | Move between the field, trigger, and open picker controls. |
+| Enter / Space on the trigger | Open the picker.                                           |
+| Arrow keys on a slider       | Adjust its color channel.                                  |
+| Escape in the popup          | Close and return focus to the trigger.                     |
+
+## Motion
+
+The popup uses [Popover motion](/docs/popover/#motion) and follows reduced motion.
+
+## Styling
+
+`className` and `style` target the grouped boundary, and `ref` targets the textbox. Use `parts.input`, `parts.trigger`, and `parts.popup`.
+
+## API
+
+### ColorInput
+
+| Prop                                       | Type and default                                |
+| ------------------------------------------ | ----------------------------------------------- |
+| `value` / `defaultValue`                   | Editable string. Uncontrolled starts empty.     |
+| `onValueChange`                            | Receives edits and normalized text.             |
+| `format`                                   | hex (default), rgb, or oklch.                   |
+| `name` / `form`                            | Optional native submission name and form owner. |
+| `required` / `disabled` / `readOnly`       | Native input flags, default to false.           |
+| `pickerLabel`                              | Defaults to “Choose color”.                     |
+| `invalidText`                              | Defaults to “Enter a hex, RGB, or OKLCH color.” |
+| `swatches` / `eyedropper` / `pickerLabels` | Optional ColorPicker options.                   |
+| `controlSize`                              | small, medium (default), or large.              |
+| `parts`                                    | input, trigger, and popup.                      |
+| `className` / `style` / `ref`              | Group styles and textbox ref.                   |
+
+Exports ColorInput and ColorInputProps.
