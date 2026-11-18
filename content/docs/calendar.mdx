@@ -1,0 +1,100 @@
+---
+title: Calendar
+description: Choose a single date or a date range from a localized month grid.
+---
+
+import { CalendarDemo } from '../../components/CalendarDemo'
+import { ReviewDate } from '../../examples/calendar/ReviewDate'
+import { BookingWindow } from '../../examples/calendar/BookingWindow'
+import { StudyPeriod } from '../../examples/calendar/StudyPeriod'
+
+<CalendarDemo
+  title="Reschedule a review"
+  file="calendar/ReviewDate.tsx"
+>
+  <ReviewDate />
+</CalendarDemo>
+
+## Usage
+
+Use Calendar when the month should stay visible as someone chooses a day. Use DatePicker for a compact field with typed entry and native form submission.
+
+```tsx
+import { Calendar } from '@cognitap/radiant'
+
+export function ReviewSchedule() {
+  return <Calendar aria-label="Review date" />
+}
+```
+
+## Examples
+
+### Book an available weekday
+
+Open on a future day with `defaultFocusedDate`. The appointment stays empty until someone chooses a date inside the booking window.
+
+<CalendarDemo
+  title="Book a session"
+  file="calendar/BookingWindow.tsx"
+>
+  <BookingWindow />
+</CalendarDemo>
+
+### Choose a study period
+
+Choose either endpoint first. A range that crosses an unavailable day starts again from the new endpoint.
+
+<CalendarDemo
+  title="Set a study period"
+  file="calendar/StudyPeriod.tsx"
+>
+  <StudyPeriod />
+</CalendarDemo>
+
+## State
+
+Dates use ISO civil strings (`YYYY-MM-DD`) in every display calendar. A range has a `start` and an `end` that stays null until the second selection. After both endpoints are set, selecting another day starts a new range. Pass the same `today` on server and client to keep the marker consistent across midnight.
+
+Use `defaultValue` for an initial selection or own `value` with `onValueChange`. Set a controlled value to null to clear it. Calendar has no native form value. To submit an inline calendar, mirror the selection into named hidden inputs and handle reset in the owner.
+
+## Accessibility
+
+Name the section with `aria-label` or `aria-labelledby`. The month heading announces navigation. The grid has one day in the tab order. Focus can visit a day excluded by `isDateDisabled` to announce its status.
+
+| Key                         | Action on a focused day                             |
+| --------------------------- | --------------------------------------------------- |
+| Left / Right                | Move one day in the visual direction, including RTL |
+| Up / Down                   | Move one week                                       |
+| Home / End                  | Move to the first or last day of the local week     |
+| Page Up / Page Down         | Move one month                                      |
+| Shift + Page Up / Page Down | Move one year                                       |
+| Enter / Space               | Select the focused day if available                 |
+
+## Motion
+
+Months change immediately. Day and navigation buttons use the theme’s [press motion](/docs/foundations/motion/).
+
+## Styling
+
+The section exposes `data-slot="calendar"`. Match the `calendar-day`, `calendar-previous` and `calendar-next` Button slots with `[data-slot~="…"]`. Day buttons expose `data-date` and mark today with `aria-current="date"`. Selected grid cells have `aria-selected="true"`.
+
+## API
+
+### Calendar
+
+| Prop                                | Type and default                                                                                        |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| aria-label / aria-labelledby        | string, one required                                                                                    |
+| type                                | `single` (default) or `range`                                                                           |
+| value / defaultValue                | ISO date or `CalendarRange` according to type, initially null                                           |
+| onValueChange                       | Receives the next selection, optional                                                                   |
+| today                               | ISO date, defaults to the UTC date at mount                                                             |
+| defaultFocusedDate                  | Initial grid tab stop, defaults to selection start or today and stays within bounds                     |
+| min / max                           | Inclusive ISO bounds, `0001-01-01` / `9999-12-31`                                                       |
+| isDateDisabled                      | `(iso: string) => boolean`, optional                                                                    |
+| locale                              | Locale override, inherits LocaleProvider or defaults to `en-US`                                         |
+| calendar                            | `gregory` or `buddhist`, follows locale preference when supported                                       |
+| firstDayOfWeek                      | 1 (Monday) through 7 (Sunday), defaults to locale week start                                            |
+| previousMonthLabel / nextMonthLabel | Accessible names, default to the localized target month and year                                        |
+| controlSize                         | `small`, `medium` (default) or `large`                                                                  |
+| Other props                         | Native section props including `ref`, `className` and `style`, except `children`, `onChange` and `role` |
