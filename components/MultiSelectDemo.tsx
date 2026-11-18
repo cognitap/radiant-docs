@@ -10,16 +10,6 @@ export function MultiSelectDemo() {
     </Demo>
   )
 }
-export function MultiSelectBoardDemo() {
-  return (
-    <Demo
-      title="Filter the release board"
-      files={['multiselect/MultiSelectExample.tsx']}
-    >
-      <MultiSelectPlayground task="board" />
-    </Demo>
-  )
-}
 export function MultiSelectLeadDemo() {
   return (
     <Demo

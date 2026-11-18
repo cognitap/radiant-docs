@@ -1,0 +1,59 @@
+---
+title: InlineEdit
+description: Edit a short label in place with a draft and explicit save or cancel.
+---
+
+import { Demo } from '../../components/demo/Demo'
+import { DemoControls, DemoPreview } from '../../components/demo/DemoFrame'
+import { RenameProject } from '../../examples/wave-four/RenameProject'
+
+<Demo
+  title="Rename a project"
+  files={['wave-four/RenameProject.tsx']}
+>
+  <DemoControls />
+  <DemoPreview>
+    <RenameProject />
+  </DemoPreview>
+</Demo>
+
+## Usage
+
+Use InlineEdit for short names and labels. The project example refuses an empty name or one already in use.
+
+```tsx
+import { InlineEdit } from '@cognitap/radiant'
+
+export function RenameProject() {
+  return (
+    <InlineEdit
+      defaultValue="Spring launch"
+      inputLabel="Project name"
+      editLabel="Rename project"
+    />
+  )
+}
+```
+
+## State
+
+Use `defaultValue` for local storage or `value` with `onValueChange` for app ownership. The edit starts from the committed value. Cancel discards the draft. Return a string from `validate` to show a field error and keep the draft. A controlled editor closes after the owner accepts the requested value.
+
+## Accessibility
+
+The edit trigger uses its visible label. Opening the editor focuses and selects the text. Enter saves, Escape cancels, and both return focus to the edit trigger on close. A failed validation returns focus to the input with the error attached to its description.
+
+## Styling
+
+InlineEdit uses [Field](/docs/field/), [Input](/docs/input/), and [Button](/docs/button/) styles. Target `inline-edit`, `inline-edit-value`, `inline-edit-trigger`, `inline-edit-input`, `inline-edit-save`, and `inline-edit-cancel` slots.
+
+## API
+
+| Prop                                     | Contract                               |
+| ---------------------------------------- | -------------------------------------- |
+| `value`, `defaultValue`                  | String. Defaults to empty.             |
+| `onValueChange`                          | Receives the submitted draft           |
+| `validate`                               | Returns an error string or `undefined` |
+| `inputLabel`                             | Required text input name               |
+| `editLabel`, `saveLabel`, `cancelLabel`  | Visible action labels                  |
+| `placeholder`, `disabled`, `controlSize` | Prompt, availability and sizing        |

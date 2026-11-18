@@ -1,0 +1,63 @@
+---
+title: DateField
+description: Type a localized calendar date into a compact segmented field.
+---
+
+import { Demo } from '../../components/demo/Demo'
+import { DemoControls, DemoPreview } from '../../components/demo/DemoFrame'
+import { InvoiceDate } from '../../examples/wave-four/InvoiceDate'
+
+<Demo
+  title="Enter an invoice date"
+  files={['wave-four/InvoiceDate.tsx']}
+>
+  <DemoControls />
+  <DemoPreview>
+    <InvoiceDate />
+  </DemoPreview>
+</Demo>
+
+## Usage
+
+Use DateField when people can type the date directly. [DatePicker](/docs/date-picker/) offers the same editor with a calendar popover.
+
+```tsx
+import { DateField, Field } from '@cognitap/radiant'
+
+export function InvoiceDate() {
+  return (
+    <Field
+      label="Invoice date"
+      required
+    >
+      <DateField
+        name="invoiceDate"
+        defaultValue="2028-02-29"
+      />
+    </Field>
+  )
+}
+```
+
+## State
+
+Use `defaultValue` for local state or `value` with `onValueChange` for app state. The value is an ISO civil date (`YYYY-MM-DD`) or `null`. A named field submits one ISO string. Empty or invalid entry yields an empty form value. A partial, invalid or unavailable date blocks submission. Reset restores the uncontrolled default and clears a partial edit.
+
+## Accessibility
+
+Use [Field](/docs/field/), `aria-label`, or `aria-labelledby` to name the group. Segment order, names and visible digits follow [LocaleProvider](/docs/locale-provider/) or the explicit `locale`. Tab moves between segments. Completing a segment advances to the next one.
+
+## Styling
+
+Target the `date-field` slot to style the surrounding [InputGroup](/docs/input-group/). The ref targets the first segment, including when the order changes with locale.
+
+## API
+
+| Prop                                               | Contract                                  |
+| -------------------------------------------------- | ----------------------------------------- |
+| `value`, `defaultValue`                            | ISO civil date or `null`                  |
+| `onValueChange`                                    | Receives the next complete date or `null` |
+| `locale`, `calendar`                               | Locale override and display calendar      |
+| `min`, `max`, `isDateDisabled`                     | ISO bounds and a date predicate           |
+| `name`, `form`, `required`, `disabled`, `readOnly` | Native form behavior                      |
+| `controlSize`, `className`                         | Presentation                              |

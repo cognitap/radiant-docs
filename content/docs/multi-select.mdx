@@ -1,210 +1,43 @@
 ---
 title: MultiSelect
-description: Search a list and choose several values, shown as removable tags and submitted as repeated form fields.
+description: Search a list and choose several values with the Combobox multiple-mode contract.
 ---
 
-import {
-  MultiSelectDemo,
-  MultiSelectBoardDemo,
-  MultiSelectLeadDemo
-} from '../../components/MultiSelectDemo'
+import { MultiSelectDemo, MultiSelectLeadDemo } from '../../components/MultiSelectDemo'
 
 <MultiSelectDemo />
 
 ## Usage
 
-Use MultiSelect to search a known list and keep several keys. It is [Combobox](/docs/combobox/) with `type="multiple"` under its own part names. Choose something else when:
-
-- [Combobox](/docs/combobox/) or [Select](/docs/select/): people choose one value.
-- [TagsInput](/docs/tags-input/): people type values that aren't in a list.
-- [CheckboxGroup](/docs/checkbox-group/): a few options should stay visible.
+MultiSelect is the convenience export for [Combobox in multiple mode](/docs/combobox/#state). Use the [selection controls recipe](/docs/recipes/selection-controls/) to compare an always-visible list, searchable options, and free entry.
 
 ```tsx
-<Field label="Reviewers">
-  <MultiSelect
-    items={people}
-    name="reviewers"
-    defaultValue={['ana']}
-  />
-</Field>
-```
+import { Field, MultiSelect } from '@cognitap/radiant'
 
-Without children, MultiSelect renders a MultiSelectControl with tags, input and trigger, then the list. Compose your own the same way:
-
-```tsx
-<MultiSelect
-  items={people}
-  name="reviewers"
->
-  <MultiSelectControl>
-    <MultiSelectTags />
-    <MultiSelectInput />
-    <MultiSelectClear />
-    <MultiSelectTrigger />
-  </MultiSelectControl>
-  <MultiSelectPortal>
-    <MultiSelectContent />
-  </MultiSelectPortal>
-</MultiSelect>
+export function Reviewers() {
+  return (
+    <Field label="Reviewers">
+      <MultiSelect
+        name="reviewers"
+        items={[
+          { value: 'ana', label: 'Ana Petrescu' },
+          { value: 'sam', label: 'Sam Novak' }
+        ]}
+        defaultValue={['ana']}
+      />
+    </Field>
+  )
+}
 ```
 
 ## Examples
 
-### Filter the release board
-
-<MultiSelectBoardDemo />
-
 ### Keep the lead reviewer
+
+The owner can decline requests to remove the lead. Other reviewers remain editable.
 
 <MultiSelectLeadDemo />
 
-## State
-
-Use `defaultValue`, or `value` with `onValueChange`; mixing them throws. Values are distinct strings. `query` and `open` follow the same rule.
-
-Choosing an item toggles it, clears the search and keeps the popup open. For server results, pass `filter={null}` and set `loading` or `errorText` yourself. `selectedItems` labels selected keys missing from the current `items`.
-
-Each selected key submits under `name`; read them with `FormData.getAll`. Search text never submits. `required` needs at least one selection. Form reset restores an uncontrolled selection without calling `onValueChange`; reset controlled state in `onReset`. `disabled` leaves the values out of form data. `readOnly` blocks edits but keeps them submitted.
-
-## Accessibility
-
-Focus stays on the `combobox` input; the popup is a `listbox` with `aria-multiselectable`, and each option's `aria-selected` shows membership. Loading, empty and error text is a polite `status`. Name the input with Field or `aria-label` on MultiSelectInput. Pressing the field's empty area focuses the input.
-
-| Key                         | Behavior                                      |
-| --------------------------- | --------------------------------------------- |
-| Typing                      | Filter and open; never selects                |
-| Arrow Down / Up             | Open and highlight enabled items              |
-| Alt+Arrow Down / Up         | Open or close without moving the highlight    |
-| Enter                       | Toggle the highlighted item; stay open        |
-| Backspace with empty search | Remove the last selection                     |
-| Escape                      | Close and discard the search; keep selections |
-| Tab                         | Close; tag remove buttons and Clear are stops |
-
-## Motion
-
-Inside [MotionProvider](/docs/foundations/motion/), the popup fades in; closing is immediate. Set `motion="off"` on MultiSelectContent to turn it off. Reduced motion shows it at full opacity.
-
-## Styling
-
-MultiSelect and MultiSelectPortal render no element. Other parts take `className`, `style` and `ref`, and keep their `combobox-*` slot alongside the `multi-select-*` one, then a caller's.
-
-| Part               | Attributes                                                                                          |
-| ------------------ | --------------------------------------------------------------------------------------------------- |
-| MultiSelectControl | `data-slot="combobox-control multi-select-control"`, `data-control-size`                            |
-| MultiSelectTags    | `data-slot="combobox-tags multi-select-tags"`; each tag is `multi-select-tag`                       |
-| MultiSelectInput   | `multi-select-input`, `data-state`, `data-control-size`, `data-invalid`                             |
-| MultiSelectTrigger | `data-slot="button combobox-trigger multi-select-trigger"`, `data-state="open \| closed"`           |
-| MultiSelectClear   | `data-slot="button combobox-clear multi-select-clear"`                                              |
-| MultiSelectContent | `multi-select-content`, `data-state="open \| closed"`, `data-motion`; `multi-select-listbox` inside |
-| MultiSelectItem    | `multi-select-item`, `data-value`, `data-highlighted`, `data-selected`, `data-disabled`             |
-| MultiSelectStatus  | `multi-select-status`                                                                               |
-| Theme              | `control.field` background, border color, shadow and backdrop filter; control radius and border     |
-| Tokens             | `--rad-combobox-*` win over the theme; `--rad-multi-select-gap` spaces chips and input              |
-
-MultiSelectControl is the field's boundary, so style the box there. The input inside it draws no box; the focus ring, invalid border and list position follow the control. Hidden form inputs are `multi-select-native` and `multi-select-value`.
-
 ## API
 
-### MultiSelect
-
-| Prop                 | Type                                          | Default                                 |
-| -------------------- | --------------------------------------------- | --------------------------------------- |
-| items                | `readonly MultiSelectOption[]`; unique values | Required                                |
-| value / defaultValue | `string[]`                                    | None / `[]`                             |
-| onValueChange        | `(value: string[]) => void`                   | None                                    |
-| selectedItems        | `readonly MultiSelectOption[]`                | None                                    |
-| query / defaultQuery | string                                        | None / `''`                             |
-| onQueryChange        | `(query: string) => void`                     | None                                    |
-| open / defaultOpen   | boolean                                       | None / false                            |
-| onOpenChange         | `(open: boolean) => void`                     | None                                    |
-| filter               | `((item, query) => boolean) \| null`          | Case-insensitive text match             |
-| loading              | boolean; hides results                        | false                                   |
-| loadingText          | string                                        | `'Loading results…'`                    |
-| emptyText            | ReactNode                                     | `'No results found.'`                   |
-| errorText            | ReactNode; hides results                      | None                                    |
-| name / form          | string                                        | None                                    |
-| disabled / required  | boolean                                       | Field's, else false                     |
-| readOnly             | boolean                                       | false                                   |
-| aria-invalid         | Native; marks it invalid outside Field        | Field's                                 |
-| controlSize          | small / medium / large                        | medium                                  |
-| children             | ReactNode                                     | Control (tags, input, trigger), content |
-
-MultiSelect takes neither `type` nor `multiple`.
-
-### MultiSelectControl
-
-| Prop        | Type       | Default |
-| ----------- | ---------- | ------- |
-| style       | ThemeStyle | None    |
-| Other props | div props  | Native  |
-
-### MultiSelectTags
-
-| Prop        | Type                                                 | Default          |
-| ----------- | ---------------------------------------------------- | ---------------- |
-| removeLabel | `(text: string) => string`; names each remove button | `Remove ${text}` |
-| Other props | div props except children                            | Native           |
-
-### MultiSelectInput
-
-| Prop         | Type                                                                                                 | Default |
-| ------------ | ---------------------------------------------------------------------------------------------------- | ------- |
-| aria-invalid | Native; overrides the root's                                                                         | Root's  |
-| style        | ThemeStyle                                                                                           | None    |
-| Other props  | input props except value, defaultValue, name, form, type, role, disabled, required and combobox ARIA | Native  |
-
-### MultiSelectTrigger
-
-| Prop        | Type                                                                                                                             | Default          |
-| ----------- | -------------------------------------------------------------------------------------------------------------------------------- | ---------------- |
-| render      | `(props: MultiSelectRenderProps) => ReactElement`                                                                                | None             |
-| children    | ReactNode                                                                                                                        | Chevron icon     |
-| aria-label  | string                                                                                                                           | `'Show options'` |
-| Other props | Button props except type, disabled, pending, variant, tone, controlSize, iconOnly, fullWidth, motion, tabIndex and pressed props | Native           |
-
-### MultiSelectClear
-
-| Prop        | Type                                              | Default             |
-| ----------- | ------------------------------------------------- | ------------------- |
-| render      | `(props: MultiSelectRenderProps) => ReactElement` | None                |
-| children    | ReactNode                                         | Clear icon          |
-| aria-label  | string                                            | `'Clear selection'` |
-| Other props | As MultiSelectTrigger                             | Native              |
-
-Renders only when something is selected.
-
-### MultiSelectPortal
-
-| Prop     | Type      | Default |
-| -------- | --------- | ------- |
-| children | ReactNode | None    |
-
-### MultiSelectContent
-
-| Prop             | Type                               | Default       |
-| ---------------- | ---------------------------------- | ------------- |
-| sideOffset       | number                             | 4             |
-| collisionPadding | number                             | 8             |
-| motion           | inherit / off                      | inherit       |
-| aria-label       | string                             | Input's label |
-| children         | ReactNode                          | Visible items |
-| Other props      | div props except popover, role, id | Native        |
-
-### MultiSelectItem
-
-| Prop        | Type                                | Default         |
-| ----------- | ----------------------------------- | --------------- |
-| value       | string; must exist in `items`       | Required        |
-| children    | ReactNode                           | Label and check |
-| Other props | div props except id, role, tabIndex | Native          |
-
-### MultiSelectStatus
-
-| Prop        | Type                  | Default     |
-| ----------- | --------------------- | ----------- |
-| children    | ReactNode             | Root status |
-| Other props | div props except role | Native      |
-
-Parts throw outside MultiSelect or a `type="multiple"` Combobox. `useMultiSelect()` returns `{ value, query, open, disabled, setValue, setQuery, setOpen }` there, else `null`.
-
-Exports `MultiSelectProps`, `MultiSelectOption`, `MultiSelectState`, `MultiSelectRenderProps`, `MultiSelectControlProps`, `MultiSelectTagsProps`, `MultiSelectInputProps`, `MultiSelectTriggerProps`, `MultiSelectClearProps`, `MultiSelectPortalProps`, `MultiSelectContentProps`, `MultiSelectItemProps` and `MultiSelectStatusProps`.
+MultiSelect accepts the [Combobox multiple-mode props](/docs/combobox/#api) with the mode fixed. Its public parts and `multi-select-*` slots remain available. Use the Combobox guide for [form behavior](/docs/combobox/#state), [keyboard behavior](/docs/combobox/#accessibility), and [part styling](/docs/combobox/#styling).

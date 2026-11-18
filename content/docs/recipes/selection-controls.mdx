@@ -1,0 +1,48 @@
+---
+title: Choose a selection control
+description: Pick a control by where its options appear and what value the form needs.
+---
+
+import { Demo } from '../../../components/demo/Demo'
+import { DemoControls, DemoPreview } from '../../../components/demo/DemoFrame'
+import { TemplateChooser } from '../../../examples/wave-four/TemplateChooser'
+import { ReviewTeam } from '../../../examples/wave-four/ReviewTeam'
+
+| Use                                                              | Options appear                  | Value                                                                   |
+| ---------------------------------------------------------------- | ------------------------------- | ----------------------------------------------------------------------- |
+| [NativeSelect](/docs/native-select/)                             | In the browser or OS picker     | One known key                                                           |
+| [Select](/docs/select/)                                          | In a styled popup               | One known key                                                           |
+| [ListBox](/docs/list-box/)                                       | On the page                     | One or several known keys                                               |
+| [Combobox](/docs/combobox/) / [MultiSelect](/docs/multi-select/) | In a searchable popup           | One key in single Combobox, several in multiple Combobox or MultiSelect |
+| [Autocomplete](/docs/autocomplete/)                              | In suggestions while typing     | One text string                                                         |
+| [TagsInput](/docs/tags-input/)                                   | As editable tags                | Several user-entered strings                                            |
+| [TreeSelect](/docs/tree-select/)                                 | In an expandable tree popup     | A node key or node keys                                                 |
+| [Cascader](/docs/cascader/)                                      | In successive levels of a popup | One path of keys                                                        |
+
+## Keep templates visible
+
+ListBox displays each template’s title and description. Use template submits one key under `template`. Arrow keys move focus, and Enter or Space commits the active option.
+
+<Demo
+  title="Choose a project template"
+  files={['wave-four/TemplateChooser.tsx']}
+>
+  <DemoControls />
+  <DemoPreview>
+    <TemplateChooser />
+  </DemoPreview>
+</Demo>
+
+## Search for several reviewers
+
+MultiSelect lets people search by name. Save review team submits a separate `reviewers` entry for each selected person. Read them with `FormData.getAll('reviewers')`.
+
+<Demo
+  title="Choose a review team"
+  files={['wave-four/ReviewTeam.tsx']}
+>
+  <DemoControls />
+  <DemoPreview>
+    <ReviewTeam />
+  </DemoPreview>
+</Demo>
