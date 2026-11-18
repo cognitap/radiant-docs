@@ -1,0 +1,118 @@
+---
+title: DatePicker
+description: Type a localized date or choose one from a calendar popover.
+---
+
+import { Demo } from '../../components/demo/Demo'
+import { DemoControls, DemoPreview } from '../../components/demo/DemoFrame'
+import { ReviewDate } from '../../examples/date-picker/ReviewDate'
+import { InspectionDate } from '../../examples/date-picker/InspectionDate'
+import { ArrivalForm } from '../../examples/date-picker/ArrivalForm'
+
+<Demo
+  title="Reschedule a review"
+  files={['date-picker/ReviewDate.tsx']}
+>
+  <DemoControls />
+  <DemoPreview>
+    <ReviewDate />
+  </DemoPreview>
+</Demo>
+
+## Usage
+
+Use DatePicker for a single date in a form. Use [Calendar](/docs/calendar/) for an always-visible month or [DateRangePicker](/docs/date-range-picker/) for two endpoints.
+
+```tsx
+import { DatePicker, Field } from '@cognitap/radiant'
+
+export function ReviewSchedule() {
+  return (
+    <Field label="Review date">
+      <DatePicker name="reviewDate" />
+    </Field>
+  )
+}
+```
+
+## Examples
+
+### Book an available inspection
+
+An empty picker opens on `defaultFocusedDate`. The focus hint leaves the field empty and keeps the `today` marker independent. After selection, reopening focuses the selected date.
+
+<Demo
+  title="Book an inspection"
+  files={['date-picker/InspectionDate.tsx']}
+>
+  <DemoControls />
+  <DemoPreview>
+    <InspectionDate />
+  </DemoPreview>
+</Demo>
+
+### Enter and submit an arrival date
+
+French entry puts the day before the month. Submit a date to see its ISO value, then reset the form to restore the initial date.
+
+<Demo
+  title="Confirm an arrival"
+  files={['date-picker/ArrivalForm.tsx']}
+>
+  <DemoControls />
+  <DemoPreview>
+    <ArrivalForm />
+  </DemoPreview>
+</Demo>
+
+## State
+
+Use `defaultValue` for an initial date or own `value` with `onValueChange`. Submit an ISO civil date (`YYYY-MM-DD`) through `name`, regardless of the display locale. Incomplete or unavailable dates prevent submission. `form` connects a picker outside its form. Native reset clears edits and restores the uncontrolled initial date. A controlled value comes from its owner.
+
+## Accessibility
+
+Give the group a [Field](/docs/field/) label, `aria-label`, or `aria-labelledby`. Each textbox has a localized segment name. `calendarLabel` names the trigger and its dialog.
+
+| Key                             | Action                                                            |
+| ------------------------------- | ----------------------------------------------------------------- |
+| Tab / Shift + Tab               | Move between date segments and the trigger                        |
+| Digits                          | Edit the focused segment. A complete segment advances to the next |
+| Enter / Space on the trigger    | Open the calendar and focus a day                                 |
+| Arrow keys in the grid          | Move by day or week                                               |
+| Home / End in the grid          | Move to the start or end of the week                              |
+| Page Up / Page Down in the grid | Move by month. Hold Shift to move by year                         |
+| Enter / Space in the grid       | Choose an available date and return to the first segment          |
+| Escape in the dialog            | Close and return to the first segment                             |
+
+## Motion
+
+The calendar uses [Popover motion](/docs/popover/#motion), including the reduced-motion preference.
+
+## Styling
+
+`className` styles the `date-picker` wrapper. Target `date-picker-trigger` with `[data-slot~="date-picker-trigger"]` and inputs with `data-segment="day"`, `"month"`, or `"year"`. The popup uses the [Calendar slots](/docs/calendar/#styling).
+
+## API
+
+| Prop                                | Type and default                                                                     |
+| ----------------------------------- | ------------------------------------------------------------------------------------ |
+| value / defaultValue                | ISO date or `null`. Uncontrolled starts at `null`                                    |
+| onValueChange                       | `(date: string \| null) => void`, optional                                           |
+| locale                              | Locale string. Inherits LocaleProvider, then `en-US`                                 |
+| calendar                            | `gregory` or `buddhist`. Defaults to the supported locale preference, then `gregory` |
+| firstDayOfWeek                      | `1` (Monday) through `7` (Sunday). Defaults to the locale’s first day                |
+| today                               | ISO date. Defaults to today in UTC                                                   |
+| defaultFocusedDate                  | ISO date for the empty picker. Defaults to `today`, clamped to the bounds            |
+| min / max                           | Inclusive ISO dates. Defaults to `0001-01-01` / `9999-12-31`                         |
+| isDateDisabled                      | `(iso: string) => boolean`, optional                                                 |
+| calendarLabel                       | string, defaults to `"Choose date"`                                                  |
+| previousMonthLabel / nextMonthLabel | string. Defaults to the localized target month and year                              |
+| controlSize                         | `small`, `medium` (default), or `large`                                              |
+| name / form                         | string, optional. Form defaults to the containing form                               |
+| id / ref                            | string / React input ref, optional. Target the first segment                         |
+| required / disabled / readOnly      | boolean, defaults to false. Field can supply required and disabled                   |
+| aria-label / aria-labelledby        | string, optional when a Field provides the name                                      |
+| aria-describedby / aria-invalid     | Native ARIA props, optional. Field feedback and date validation apply                |
+| className                           | string, optional. Styles the group                                                   |
+
+Exports `DatePicker` and `DatePickerProps`.

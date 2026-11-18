@@ -1,0 +1,101 @@
+---
+title: TimeInput
+description: Enter a local time with hours, minutes and optional seconds.
+---
+
+import { TimeInputDemo } from '../../components/TimeInputDemo'
+import { AppointmentTime } from '../../examples/time-input/AppointmentTime'
+import { OvernightCapture } from '../../examples/time-input/OvernightCapture'
+import { ReviewShift } from '../../examples/time-input/ReviewShift'
+
+<TimeInputDemo
+  title="Book an appointment time"
+  file="time-input/AppointmentTime.tsx"
+>
+  <AppointmentTime />
+</TimeInputDemo>
+
+## Usage
+
+Use TimeInput to collect a wall-clock time. Pair it with [DatePicker](/docs/date-picker/) when the user also needs to choose a day.
+
+```tsx
+import { Field, TimeInput } from '@cognitap/radiant'
+
+export function StartTime() {
+  return (
+    <Field label="Start time">
+      <TimeInput name="start" />
+    </Field>
+  )
+}
+```
+
+## Examples
+
+### Schedule a recording across midnight
+
+Set overnight bounds with a maximum earlier than the minimum. The 15-second step lets the recording start just before or after midnight.
+
+<TimeInputDemo
+  title="Schedule an overnight recording"
+  file="time-input/OvernightCapture.tsx"
+>
+  <OvernightCapture />
+</TimeInputDemo>
+
+### Include a scheduled shift time
+
+Use `form` to submit a time from elsewhere on the page. A read-only time submits its value. Disable the field to omit it.
+
+<TimeInputDemo
+  title="Review a scheduled shift"
+  file="time-input/ReviewShift.tsx"
+>
+  <ReviewShift />
+</TimeInputDemo>
+
+## State
+
+Pass `defaultValue` for an initial time or control `value` with `onValueChange`. A native form reset restores the uncontrolled default and clears drafts. Reset a controlled value in the form owner.
+
+A named field submits a 24-hour ISO time as `HH:mm` or `HH:mm:ss`. Clearing every segment gives null. Partial or invalid entry blocks form submission. Values represent local clock times without a time-zone offset.
+
+## Accessibility
+
+Use a named [Field](/docs/field/) or supply `aria-label` or `aria-labelledby`. The group contains spinbuttons for the numeric segments and, in 12-hour display, a button that shows the current period.
+
+| Key                                      | Action                                                                    |
+| ---------------------------------------- | ------------------------------------------------------------------------- |
+| Tab / Shift + Tab                        | Move among segments and the period button                                 |
+| Digits                                   | Edit the focused segment. Two digits move focus to the next segment       |
+| Up / Down on digits                      | Increase or decrease the time by the focused unit, within bounds and step |
+| Enter / Space or Up / Down on the period | Switch between AM and PM                                                  |
+
+## Styling
+
+`className` and `style` target `[data-slot~="time-input"]`. Override `--rad-time-input-period-color` and `--rad-time-input-period-indicator-color` in `style` to change the text and underline of `[data-slot~="time-input-period"]`.
+
+## API
+
+### TimeInput
+
+| Prop                            | Type and default                                                                                   |
+| ------------------------------- | -------------------------------------------------------------------------------------------------- |
+| value / defaultValue            | ISO wall-clock string or null, initially null                                                      |
+| onValueChange                   | Receives the next committed ISO time or null, optional                                             |
+| name / form                     | Native field name and form ID, optional                                                            |
+| min / max                       | Inclusive ISO bounds, midnight through the last second of the day by default                       |
+| step                            | Positive integer seconds from `min` or midnight, defaults to 60 without seconds and 1 with seconds |
+| locale                          | Locale override, inherits LocaleProvider or defaults to `en-US`                                    |
+| hourCycle                       | `h11`, `h12`, `h23` or `h24`, defaults to the locale’s cycle                                       |
+| showSeconds                     | Boolean, false. Second-precision values and bounds or steps not divisible by 60 also show seconds  |
+| required / disabled             | Booleans, false unless Field supplies them                                                         |
+| readOnly                        | Boolean, false                                                                                     |
+| aria-label / aria-labelledby    | Group name, required when Field has no label                                                       |
+| aria-describedby / aria-invalid | Native description IDs and invalid state, optional                                                 |
+| id / ref                        | ID and ref for the hour input, optional. Field supplies an ID when present                         |
+| controlSize                     | `small`, `medium` or `large`, defaults to `medium`                                                 |
+| className / style               | Wrapper class string and `ThemeStyle`, optional                                                    |
+
+`TimeInputProps` is the exported props type.

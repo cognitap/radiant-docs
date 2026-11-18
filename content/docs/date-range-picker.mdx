@@ -1,0 +1,130 @@
+---
+title: DateRangePicker
+description: Enter or select a start and end date and submit them as ISO dates.
+---
+
+import { Demo } from '../../components/demo/Demo'
+import { DemoControls, DemoPreview } from '../../components/demo/DemoFrame'
+import { BookAStay } from '../../examples/date-range-picker/BookAStay'
+import { ReserveFestivalPass } from '../../examples/date-range-picker/ReserveFestivalPass'
+import { EditSavedReport } from '../../examples/date-range-picker/EditSavedReport'
+
+<Demo
+  title="Book a stay"
+  files={['date-range-picker/BookAStay.tsx']}
+>
+  <DemoControls />
+  <DemoPreview>
+    <BookAStay />
+  </DemoPreview>
+</Demo>
+
+## Usage
+
+Use DateRangePicker for two related dates in a form. For one date, use [DatePicker](/docs/date-picker/). For an always-visible month grid, use [Calendar](/docs/calendar/).
+
+```tsx
+import { DateRangePicker } from '@cognitap/radiant'
+
+export function StayDates() {
+  return (
+    <DateRangePicker
+      startLabel="Arrival"
+      endLabel="Departure"
+    />
+  )
+}
+```
+
+Set `defaultFocusedDate` to open an empty picker on the booking month. If the departure date is already known, type it first and choose the arrival in the calendar. The entered date anchors the calendar and the earlier date becomes the start.
+
+## Examples
+
+### Plan around a closure
+
+Use `min`, `max`, and `isDateDisabled` to limit availability. A preset spanning the closure is disabled even when its endpoints are available.
+
+<Demo
+  title="Reserve a festival pass"
+  files={['date-range-picker/ReserveFestivalPass.tsx']}
+>
+  <DemoControls />
+  <DemoPreview>
+    <ReserveFestivalPass />
+  </DemoPreview>
+</Demo>
+
+### Edit a saved report period
+
+Use `form` when the editor sits outside the form. This report uses day-first entry and resets to the saved dates.
+
+<Demo
+  title="Edit a saved report period"
+  files={['date-range-picker/EditSavedReport.tsx']}
+>
+  <DemoControls />
+  <DemoPreview>
+    <EditSavedReport />
+  </DemoPreview>
+</Demo>
+
+## State
+
+Dates are ISO civil strings (`YYYY-MM-DD`). Either endpoint can be null while editing. Once one date is entered, the other becomes required. Calendar selection sorts the endpoints and starts a new range if the interval crosses an unavailable date.
+
+Use `defaultValue` for initial dates. For controlled state, pass `value` and `onValueChange`. Native reset clears drafts and restores uncontrolled defaults. Reset controlled dates in the owner. Named endpoints submit separately, and disabled fields are omitted.
+
+## Accessibility
+
+Provide a visible label for each editor. A surrounding Field group supplies shared descriptions and errors. The calendar button and dialog take their name from `calendarLabel`.
+
+| Key                                  | Action                                                      |
+| ------------------------------------ | ----------------------------------------------------------- |
+| Tab / Shift + Tab                    | Move between segments and the calendar button.              |
+| Digits                               | Edit a segment. When full, focus moves to the next segment. |
+| Enter / Space on the calendar button | Open the calendar and focus a date.                         |
+| Enter / Space on a calendar day      | Select the focused day if available.                        |
+| Escape in the calendar               | Close and return focus to the first segment.                |
+
+The [Calendar keyboard reference](/docs/calendar/#accessibility) covers day and month navigation.
+
+## Motion
+
+The calendar uses [Popover motion](/docs/popover/#motion) and follows reduced-motion preferences.
+
+## Styling
+
+`className` styles the root `date-range-picker` slot. Target `date-range-start`, `date-range-end`, and `date-picker-trigger` with `[data-slot~="…"]`.
+
+## API
+
+### DateRangePicker
+
+| Prop                                | Type and default                                                           |
+| ----------------------------------- | -------------------------------------------------------------------------- |
+| startLabel / endLabel               | ReactNode, both required                                                   |
+| startName / endName                 | Optional field names for form submission                                   |
+| value / defaultValue                | `DateRangeValue`, defaults to `{ start: null, end: null }`                 |
+| onValueChange                       | `(range: DateRangeValue) => void`, optional                                |
+| presets                             | `readonly DateRangePreset[]`, defaults to no presets                       |
+| form                                | Optional ID of the owning form, defaults to the nearest form               |
+| required / disabled / readOnly      | boolean, false by default. A Field group can supply required and disabled. |
+| min / max                           | Inclusive ISO bounds, `0001-01-01` / `9999-12-31`                          |
+| isDateDisabled                      | `(iso: string) => boolean`, optional                                       |
+| today                               | ISO date, defaults to the UTC date when the calendar opens                 |
+| defaultFocusedDate                  | ISO focus date for an empty range, defaults to today within bounds         |
+| locale                              | Locale override, inherits LocaleProvider or defaults to `en-US`            |
+| calendar                            | `gregory` or `buddhist`, follows locale preference when supported          |
+| firstDayOfWeek                      | 1 (Monday) through 7 (Sunday), defaults to the locale week start           |
+| calendarLabel                       | string, defaults to `Choose date range`                                    |
+| previousMonthLabel / nextMonthLabel | strings, default to the localized target month and year                    |
+| controlSize                         | `small`, `medium` (default), or `large`                                    |
+| aria-describedby / aria-invalid     | Optional native attributes forwarded to both editors                       |
+| className                           | Optional root class                                                        |
+
+Exports `DateRangePickerProps`, `DateRangeValue`, and `DateRangePreset`.
+
+```ts
+type DateRangeValue = { start: string | null; end: string | null }
+type DateRangePreset = { label: string; start: string; end: string }
+```

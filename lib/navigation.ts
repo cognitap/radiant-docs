@@ -25,6 +25,9 @@ export const categories = [
       'password-input',
       'number-field',
       'calendar',
+      'date-picker',
+      'date-range-picker',
+      'time-input',
       'otp-field',
       'file-input',
       'slider'
