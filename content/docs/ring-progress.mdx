@@ -1,0 +1,95 @@
+---
+title: RingProgress
+description: Show task progress or a bounded reading as a circular ring.
+---
+
+import { Demo } from '../../components/demo/Demo'
+import { DemoControls, DemoPreview } from '../../components/demo/DemoFrame'
+import { TrackExport } from '../../examples/ring-progress/TrackExport'
+import { ReviewStorage } from '../../examples/ring-progress/ReviewStorage'
+import { WaitForSync } from '../../examples/ring-progress/WaitForSync'
+
+<Demo
+  title="Track a file export"
+  files={['ring-progress/TrackExport.tsx']}
+>
+  <DemoControls />
+  <DemoPreview>
+    <TrackExport />
+  </DemoPreview>
+</Demo>
+
+## Usage
+
+Use RingProgress for a compact circular display. Use [Progress](/docs/progress/) or [Meter](/docs/meter/) for a horizontal display.
+
+```tsx
+import { RingProgress } from '@cognitap/radiant'
+
+;<RingProgress
+  aria-label="Export progress"
+  value={60}
+  label="60%"
+/>
+```
+
+## Examples
+
+### Review storage by category
+
+Segments contribute to one native meter reading. Use labels alongside the ring to explain the categories.
+
+<Demo
+  title="Review storage by category"
+  files={['ring-progress/ReviewStorage.tsx']}
+>
+  <DemoControls />
+  <DemoPreview>
+    <ReviewStorage />
+  </DemoPreview>
+</Demo>
+
+### Show an unknown sync duration
+
+Omit the value when there is no measured progress.
+
+<Demo
+  title="Show an unknown sync duration"
+  files={['ring-progress/WaitForSync.tsx']}
+>
+  <DemoControls />
+  <DemoPreview>
+    <WaitForSync />
+  </DemoPreview>
+</Demo>
+
+## State
+
+Pass a value or segments. Each segment contributes its value above the minimum. The native element reports the combined total. Omit the value for indeterminate progress. Meter mode requires a reading.
+
+## Accessibility
+
+Provide a native accessible name for the progressbar or meter. The SVG and center label are decorative. If segments convey categories, explain them in adjacent text.
+
+## Motion
+
+With `MotionProvider`, changes follow the theme’s [follow spring](/docs/foundations/motion/). The native value updates immediately. Reduced motion or `motion="off"` applies the visual value immediately.
+
+## Styling
+
+`className`, `style`, and `ref` target the wrapper. Set `--rad-ring-progress-size` to change the diameter. Use `parts.track`, `parts.segment`, and `parts.label` for local styling.
+
+## API
+
+| Prop          | Type and default                                               |
+| ------------- | -------------------------------------------------------------- |
+| `kind`        | progress (default) or meter.                                   |
+| `value`       | Reading. Null or omitted means indeterminate in progress mode. |
+| `segments`    | Array of nonnegative contributions with optional tones.        |
+| `min` / `max` | Minimum 0. Meter can override min. Maximum defaults to 100.    |
+| `label`       | Optional visual center text.                                   |
+| `tone`        | Default arc tone. Defaults to accent.                          |
+| `motion`      | inherit (default) or off.                                      |
+| `parts`       | track, segment, and label.                                     |
+
+Exports RingProgress, RingProgressProps, and RingProgressSegment.

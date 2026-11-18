@@ -1,0 +1,97 @@
+---
+title: Stepper
+description: Navigate an ordered workflow and show the current step, completion, and errors.
+---
+
+import { Demo } from '../../components/demo/Demo'
+import { DemoControls, DemoPreview } from '../../components/demo/DemoFrame'
+import { ReviewShipping } from '../../examples/stepper/ReviewShipping'
+import { ReviewApplication } from '../../examples/stepper/ReviewApplication'
+import { InspectWorkspaceChecks } from '../../examples/stepper/InspectWorkspaceChecks'
+
+<Demo
+  title="Move through shipping steps"
+  files={['stepper/ReviewShipping.tsx']}
+>
+  <DemoControls />
+  <DemoPreview>
+    <ReviewShipping />
+  </DemoPreview>
+</Demo>
+
+## Usage
+
+Use Stepper for a workflow with progress and status. Use [Tabs](/docs/tabs/) for peer views.
+
+```tsx
+import { Stepper } from '@cognitap/radiant'
+
+;<Stepper
+  aria-label="Setup"
+  steps={[
+    { value: 'profile', label: 'Profile' },
+    { value: 'review', label: 'Review' }
+  ]}
+/>
+```
+
+## Examples
+
+### Show what an application still needs
+
+Use a vertical layout when step details and error messages need more room.
+
+<Demo
+  title="Show what an application still needs"
+  files={['stepper/ReviewApplication.tsx']}
+>
+  <DemoControls />
+  <DemoPreview>
+    <ReviewApplication />
+  </DemoPreview>
+</Demo>
+
+### Review workspace checks in any order
+
+Free navigation lets people jump to any available step. Own the current value to show its content.
+
+<Demo
+  title="Review workspace checks in any order"
+  files={['stepper/InspectWorkspaceChecks.tsx']}
+>
+  <DemoControls />
+  <DemoPreview>
+    <InspectWorkspaceChecks />
+  </DemoPreview>
+</Demo>
+
+## State
+
+Use `defaultValue` to start on a step. An uncontrolled workflow starts on the first enabled step by default. Use `value` and `onValueChange` to decide when navigation is allowed. Linear navigation permits earlier steps and the next enabled step. Free navigation permits any enabled step.
+
+## Accessibility
+
+Name the navigation landmark. The current step uses `aria-current="step"`. Status text identifies completion and errors.
+
+| Key               | Action                               |
+| ----------------- | ------------------------------------ |
+| Tab / Shift + Tab | Move between available step buttons. |
+| Enter or Space    | Activate a step.                     |
+
+## Styling
+
+`className`, `style`, and `ref` target the navigation. Horizontal layouts scroll if the steps need more space. Parts style the list, step controls, and text.
+
+## API
+
+| Prop                                       | Type and default                                                         |
+| ------------------------------------------ | ------------------------------------------------------------------------ |
+| `steps`                                    | Ordered StepperStep array with unique keys and labels.                   |
+| `value` / `defaultValue` / `onValueChange` | Current key and change handler.                                          |
+| `navigation`                               | linear (default) or free.                                                |
+| `orientation`                              | horizontal (default) or vertical.                                        |
+| `controlSize`                              | small, medium (default), or large.                                       |
+| `statusLabels`                             | Localize current, completed, upcoming, and error labels.                 |
+| `parts`                                    | list, step, indicator, label, description, status, error, and connector. |
+
+Exports Stepper, StepperProps, and StepperStep.

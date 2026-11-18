@@ -1,0 +1,87 @@
+---
+title: NumberFormatter
+description: Display localized numbers, currency, percentages, and units in inline text.
+---
+
+import { Demo } from '../../components/demo/Demo'
+import { DemoControls, DemoPreview } from '../../components/demo/DemoFrame'
+import { ReadInvoiceTotal } from '../../examples/number-formatter/ReadInvoiceTotal'
+import { CompareShipping } from '../../examples/number-formatter/CompareShipping'
+import { ReadExactCount } from '../../examples/number-formatter/ReadExactCount'
+
+<Demo
+  title="Read an invoice total in another locale"
+  files={['number-formatter/ReadInvoiceTotal.tsx']}
+>
+  <DemoControls />
+  <DemoPreview>
+    <ReadInvoiceTotal />
+  </DemoPreview>
+</Demo>
+
+## Usage
+
+Use NumberFormatter for display and [NumberField](/docs/number-field/) for editable numbers.
+
+```tsx
+import { NumberFormatter } from '@cognitap/radiant'
+
+;<NumberFormatter
+  value={1299.95}
+  options={{ style: 'currency', currency: 'EUR' }}
+/>
+```
+
+## Examples
+
+### Read rate and distance on a delivery report
+
+Use percent and unit formatting with the same inherited locale.
+
+<Demo
+  title="Read rate and distance on a delivery report"
+  files={['number-formatter/CompareShipping.tsx']}
+>
+  <DemoControls />
+  <DemoPreview>
+    <CompareShipping />
+  </DemoPreview>
+</Demo>
+
+### Show a large exact count
+
+Pass a bigint for an integer beyond the precise range of number.
+
+<Demo
+  title="Show a large exact count"
+  files={['number-formatter/ReadExactCount.tsx']}
+>
+  <DemoControls />
+  <DemoPreview>
+    <ReadExactCount />
+  </DemoPreview>
+</Demo>
+
+## State
+
+Pass a value and formatting options. Locale comes from the nearest LocaleProvider unless `locale` is provided. Radiant falls back to en-US for unsupported locales. Use the same locale on server and client. The server text stays in place during hydration when engine data differs. Changed values use the browser’s locale data.
+
+## Accessibility
+
+The native bidi isolation element keeps the number together in surrounding text. Group labels and descriptions belong to the surrounding content.
+
+## Styling
+
+`className`, `style`, and `ref` target the inline element. It inherits text color and typography.
+
+## API
+
+| Prop                          | Type and default                                      |
+| ----------------------------- | ----------------------------------------------------- |
+| `value`                       | Number or bigint.                                     |
+| `options`                     | Intl.NumberFormatOptions. Default decimal formatting. |
+| `locale`                      | Optional BCP 47 locale.                               |
+| `lang`                        | Override the formatted language on the element.       |
+| `className` / `style` / `ref` | Native inline host.                                   |
+
+Exports NumberFormatter and NumberFormatterProps.

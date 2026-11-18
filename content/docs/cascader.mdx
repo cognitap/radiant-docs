@@ -1,0 +1,100 @@
+---
+title: Cascader
+description: Choose an end point by following a hierarchy across columns.
+---
+
+import { Demo } from '../../components/demo/Demo'
+import { DemoControls, DemoPreview } from '../../components/demo/DemoFrame'
+import { ChooseDeliveryCity } from '../../examples/cascader/ChooseDeliveryCity'
+import { SavePickupPoint } from '../../examples/cascader/SavePickupPoint'
+import { LocateWarehouse } from '../../examples/cascader/LocateWarehouse'
+
+<Demo
+  title="Choose a delivery city"
+  files={['cascader/ChooseDeliveryCity.tsx']}
+>
+  <DemoControls />
+  <DemoPreview>
+    <ChooseDeliveryCity />
+  </DemoPreview>
+</Demo>
+
+## Usage
+
+Use Cascader when a person chooses through each level to reach one leaf. Use [TreeSelect](/docs/tree-select/) for a single expanding tree or multiple selection.
+
+```tsx
+import { Cascader, Field } from '@cognitap/radiant'
+
+;<Field label="City">
+  <Cascader
+    name="city"
+    items={[{ value: 'paris', label: 'Paris' }]}
+  />
+</Field>
+```
+
+## Examples
+
+### Submit a pickup point
+
+The Button shows the path and the form submits the final key.
+
+<Demo
+  title="Submit a pickup point"
+  files={['cascader/SavePickupPoint.tsx']}
+>
+  <DemoControls />
+  <DemoPreview>
+    <SavePickupPoint />
+  </DemoPreview>
+</Demo>
+
+### Load depots when a region opens
+
+A loader can fetch the next level when someone chooses a branch.
+
+<Demo
+  title="Load depots when a region opens"
+  files={['cascader/LocateWarehouse.tsx']}
+>
+  <DemoControls />
+  <DemoPreview>
+    <LocateWarehouse />
+  </DemoPreview>
+</Demo>
+
+## State
+
+Value is the committed leaf key or null. A branch opens its next column. Use `defaultValue` for initial selection or `value` with `onValueChange` to own it. A native form submits the leaf key. Reset restores the uncontrolled initial selection.
+
+## Accessibility
+
+Name the trigger with Field or native ARIA. Give `columnLabels` in hierarchy order when the levels have distinct names.
+
+| Key                   | Action                                             |
+| --------------------- | -------------------------------------------------- |
+| Up / Down             | Move within the current column.                    |
+| Home / End            | Move to the first or last option.                  |
+| Inline forward / back | Advance a branch or return to the previous column. |
+| Enter / Space         | Open a branch or commit a leaf.                    |
+| Escape                | Close and return focus to the trigger.             |
+
+## Styling
+
+`className`, `style`, and `ref` target the trigger. Style the popup and listboxes with `parts.content` and `parts.column`.
+
+## API
+
+| Prop                                       | Type and default                              |
+| ------------------------------------------ | --------------------------------------------- |
+| `items`                                    | TreeItem array.                               |
+| `value` / `defaultValue` / `onValueChange` | Leaf key or null.                             |
+| `columnLabels`                             | Optional column labels, starting at the root. |
+| `placeholder`                              | Defaults to Select an item.                   |
+| `name` / `form` / `required` / `disabled`  | Native form ownership and validation.         |
+| `loadingText` / `errorText` / `emptyText`  | Override column feedback.                     |
+| `controlSize`                              | small, medium (default), or large.            |
+| `parts`                                    | content and column.                           |
+
+Exports Cascader and CascaderProps.

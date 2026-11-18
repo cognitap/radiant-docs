@@ -70,6 +70,15 @@ change only its mode or reset to Default.
   semantic role of a control.
 </Callout>
 
+## Set language and direction
+
+Use the same locale on the server and client. Spread `getLocaleAttributes(locale)`
+on `html` and wrap the body content in `<LocaleProvider locale={locale} scope="document">`.
+Omit `scope` for a subtree wrapper with `lang` and `dir`. Formatting inherits
+the nearest locale, with `en-US` as the fallback. [NumberFormatter](/docs/number-formatter/)
+accepts overrides. Built-in labels default to English. Supply translated labels
+and validation messages.
+
 ## Read the package contract
 
 Continue with [theming](/docs/foundations/theming/) for semantic tokens, fonts
