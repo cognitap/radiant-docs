@@ -1,0 +1,104 @@
+---
+title: Rating
+description: Collect a whole-number score or display an existing rating.
+---
+
+import { Demo } from '../../components/demo/Demo'
+import { DemoControls, DemoPreview } from '../../components/demo/DemoFrame'
+import { RateDelivery } from '../../examples/rating/RateDelivery'
+import { SubmitFeedback } from '../../examples/rating/SubmitFeedback'
+import { ShowStoreRating } from '../../examples/rating/ShowStoreRating'
+
+<Demo
+  title="Rate a delivery"
+  files={['rating/RateDelivery.tsx']}
+>
+  <DemoControls />
+  <DemoPreview>
+    <RateDelivery />
+  </DemoPreview>
+</Demo>
+
+## Usage
+
+Use Rating for whole-number scores. Use [RadioGroup](/docs/radio-group/) for named choices.
+
+```tsx
+import { Rating } from '@cognitap/radiant'
+
+export function DeliveryRating() {
+  return (
+    <Rating
+      label="Delivery experience"
+      name="score"
+    />
+  )
+}
+```
+
+## Examples
+
+### Submit a service rating
+
+Require a score before sending feedback. Reset returns to the initial value.
+
+<Demo
+  title="Submit a service rating"
+  files={['rating/SubmitFeedback.tsx']}
+>
+  <DemoControls />
+  <DemoPreview>
+    <SubmitFeedback />
+  </DemoPreview>
+</Demo>
+
+### Show an average store rating
+
+Display the same scale as a read-only score.
+
+<Demo
+  title="Show an average store rating"
+  files={['rating/ShowStoreRating.tsx']}
+>
+  <DemoControls />
+  <DemoPreview>
+    <ShowStoreRating />
+  </DemoPreview>
+</Demo>
+
+## State
+
+Use `value` and `onValueChange` to own the score. `defaultValue` seeds the uncontrolled value. The interactive group submits the chosen integer through `name`; native reset restores the uncontrolled initial value.
+
+## Accessibility
+
+Provide a group label. The input uses native radios. `formatValue` names each option and supplies the spoken score for read-only display.
+
+| Key               | Action                                               |
+| ----------------- | ---------------------------------------------------- |
+| Tab / Shift + Tab | Enter or leave the radio group.                      |
+| Arrow keys        | Move and select. Horizontal arrows follow direction. |
+| Space             | Select the focused score.                            |
+
+## Styling
+
+`className`, `style`, and `ref` target the fieldset. Use `parts.item` for the radio label and `parts.icon` for the mark. Filled marks have `data-filled`.
+
+## API
+
+### Rating
+
+| Prop                                      | Type and default                                           |
+| ----------------------------------------- | ---------------------------------------------------------- |
+| `label`                                   | Group label, required.                                     |
+| `max`                                     | Positive integer, defaults to 5.                           |
+| `value` / `defaultValue`                  | Integer in the scale or null. Uncontrolled starts at null. |
+| `onValueChange`                           | Receives the selected number.                              |
+| `readOnly`                                | Boolean, defaults to false.                                |
+| `formatValue`                             | Defaults to “n out of m”.                                  |
+| `icon`                                    | Optional filled and empty marks. Defaults to stars.        |
+| `name` / `form` / `required` / `disabled` | Native interactive group props.                            |
+| `controlSize`                             | small, medium (default), or large.                         |
+| `parts`                                   | Grouped Field parts plus options, item, and icon.          |
+
+Exports Rating and RatingProps.

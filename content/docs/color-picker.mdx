@@ -1,0 +1,105 @@
+---
+title: ColorPicker
+description: Adjust color channels and choose a color in hex, RGB, or OKLCH.
+---
+
+import { Demo } from '../../components/demo/Demo'
+import { DemoControls, DemoPreview } from '../../components/demo/DemoFrame'
+import { ChooseAccent } from '../../examples/color-picker/ChooseAccent'
+import { ChooseBrandSwatch } from '../../examples/color-picker/ChooseBrandSwatch'
+import { TintOverlay } from '../../examples/color-picker/TintOverlay'
+
+<Demo
+  title="Choose an accent color"
+  files={['color-picker/ChooseAccent.tsx']}
+>
+  <DemoControls />
+  <DemoPreview>
+    <ChooseAccent />
+  </DemoPreview>
+</Demo>
+
+## Usage
+
+Use ColorPicker for an always-visible color editor. Use [ColorInput](/docs/color-input/) when a field needs typed colors or form submission.
+
+```tsx
+import { ColorPicker } from '@cognitap/radiant'
+
+export function AccentPicker() {
+  return (
+    <ColorPicker
+      label="Accent color"
+      defaultValue="#405CE0"
+    />
+  )
+}
+```
+
+## Examples
+
+### Choose from brand swatches
+
+Swatches can mix supported input formats. The picker emits OKLCH here.
+
+<Demo
+  title="Choose from brand swatches"
+  files={['color-picker/ChooseBrandSwatch.tsx']}
+>
+  <DemoControls />
+  <DemoPreview>
+    <ChooseBrandSwatch />
+  </DemoPreview>
+</Demo>
+
+### Tint a map overlay
+
+Control the color from the application and use Opacity to retain the context beneath the overlay.
+
+<Demo
+  title="Tint a map overlay"
+  files={['color-picker/TintOverlay.tsx']}
+>
+  <DemoControls />
+  <DemoPreview>
+    <TintOverlay />
+  </DemoPreview>
+</Demo>
+
+## State
+
+Use `defaultValue` to seed the editor, or pass `value` and `onValueChange`. The picker accepts hex, RGB, or OKLCH and emits the selected `format`. Hex and RGB output use sRGB.
+
+## Accessibility
+
+Give the fieldset a label. Lightness and Chroma are keyboard controls for the pointer color area. Hue and Opacity expose their numeric values as text. Swatches have accessible labels.
+
+| Key               | Action                                                  |
+| ----------------- | ------------------------------------------------------- |
+| Tab / Shift + Tab | Move through the four sliders and optional buttons.     |
+| Arrow keys        | Adjust the focused slider.                              |
+| Home / End        | Move to the slider bounds.                              |
+| Enter / Space     | Choose a swatch or start browser sampling when offered. |
+
+## Styling
+
+Target the fieldset with `className` and `style`. Use `parts.area`, `parts.slider`, `parts.swatch`, and `parts.output` for their respective slots.
+
+## API
+
+### ColorPicker
+
+| Prop                     | Type and default                                                                               |
+| ------------------------ | ---------------------------------------------------------------------------------------------- |
+| `label`                  | Group label, required.                                                                         |
+| `value` / `defaultValue` | Hex, RGB, or OKLCH string. Defaults to #456BE4.                                                |
+| `onValueChange`          | Receives a color string in the requested format.                                               |
+| `format`                 | hex (default), rgb, or oklch.                                                                  |
+| `swatches`               | Optional color and label pairs.                                                                |
+| `eyedropper`             | Boolean, defaults to false. Available in supporting browsers.                                  |
+| `disabled`               | Boolean, defaults to false.                                                                    |
+| `controlSize`            | small, medium (default), or large.                                                             |
+| `labels`                 | Optional area, lightness, chroma, hue, alpha, swatches, eyedropper, and samplingError strings. |
+| `parts`                  | area, slider, swatch, and output.                                                              |
+
+Exports ColorPicker, ColorPickerProps, ColorPickerSwatch, and ColorFormat.
