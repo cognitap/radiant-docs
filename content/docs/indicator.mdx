@@ -1,0 +1,90 @@
+---
+title: Indicator
+description: Attach a dot or count to a target and include its status in the target name.
+---
+
+import { Demo } from '../../components/demo/Demo'
+import { DemoControls, DemoPreview } from '../../components/demo/DemoFrame'
+import { ShowUnread } from '../../examples/indicator/ShowUnread'
+import { ShowAvailability } from '../../examples/indicator/ShowAvailability'
+import { FlagNewOrders } from '../../examples/indicator/FlagNewOrders'
+
+<Demo
+  title="Show an unread inbox count"
+  files={['indicator/ShowUnread.tsx']}
+>
+  <DemoControls />
+  <DemoPreview>
+    <ShowUnread />
+  </DemoPreview>
+</Demo>
+
+## Usage
+
+Use Indicator for status attached to a specific target. Use [Badge](/docs/badge/) for status text that stands on its own.
+
+```tsx
+import { Button, Indicator } from '@cognitap/radiant'
+
+;<Indicator
+  label="Inbox"
+  statusText="12 unread messages"
+  count={12}
+>
+  {target => <Button {...target}>Inbox</Button>}
+</Indicator>
+```
+
+## Examples
+
+### Show teammate availability
+
+Pass the generated name to Avatar’s alt text when the target is an image.
+
+<Demo
+  title="Show teammate availability"
+  files={['indicator/ShowAvailability.tsx']}
+>
+  <DemoControls />
+  <DemoPreview>
+    <ShowAvailability />
+  </DemoPreview>
+</Demo>
+
+### Cap the count on an orders link
+
+Use a shorter marker for a narrow navigation row and keep the full count in the link’s name.
+
+<Demo
+  title="Cap the count on an orders link"
+  files={['indicator/FlagNewOrders.tsx']}
+>
+  <DemoControls />
+  <DemoPreview>
+    <FlagNewOrders />
+  </DemoPreview>
+</Demo>
+
+## Accessibility
+
+Use the target’s visible label as `label` and the full status as `statusText`. Apply the supplied accessible name directly to the Button, Link, or image. The visual marker is hidden from assistive technology. The target owns focus and keyboard behavior.
+
+## Styling
+
+`className`, `style`, and `ref` target the wrapper. `parts.marker` styles the marker. Logical corners mirror with text direction.
+
+## API
+
+| Prop         | Type and default                                           |
+| ------------ | ---------------------------------------------------------- |
+| `label`      | Required base name.                                        |
+| `statusText` | Required full status.                                      |
+| `children`   | Render function receiving the target’s `aria-label`.       |
+| `count`      | Nonnegative integer. Omit for a dot.                       |
+| `maxCount`   | Maximum displayed count. Defaults to 99.                   |
+| `position`   | top-end (default), top-start, bottom-end, or bottom-start. |
+| `offset`     | CSS pixels outward from the corner. Defaults to 0.         |
+| `tone`       | Badge palette. Defaults to accent.                         |
+| `parts`      | marker.                                                    |
+
+Exports Indicator, IndicatorProps, IndicatorPosition, and IndicatorTargetProps.

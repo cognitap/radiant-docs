@@ -1,0 +1,98 @@
+---
+title: TreeSelect
+description: Choose one or more values from a hierarchy in a popup form field.
+---
+
+import { Demo } from '../../components/demo/Demo'
+import { DemoControls, DemoPreview } from '../../components/demo/DemoFrame'
+import { ChooseProjectFolder } from '../../examples/tree-select/ChooseProjectFolder'
+import { SendLibrarySelection } from '../../examples/tree-select/SendLibrarySelection'
+import { ChooseArchiveRecord } from '../../examples/tree-select/ChooseArchiveRecord'
+
+<Demo
+  title="Choose a project folder"
+  files={['tree-select/ChooseProjectFolder.tsx']}
+>
+  <DemoControls />
+  <DemoPreview>
+    <ChooseProjectFolder />
+  </DemoPreview>
+</Demo>
+
+## Usage
+
+Use TreeSelect to choose hierarchical values. Use [Tree](/docs/tree/) for a persistent browser or [Cascader](/docs/cascader/) to choose a terminal path in columns.
+
+```tsx
+import { Field, TreeSelect } from '@cognitap/radiant'
+
+;<Field label="Folder">
+  <TreeSelect
+    name="folder"
+    items={[{ value: 'inbox', label: 'Inbox' }]}
+  />
+</Field>
+```
+
+## Examples
+
+### Submit library sections
+
+Multiple mode submits each selected key under the same field name.
+
+<Demo
+  title="Submit library sections"
+  files={['tree-select/SendLibrarySelection.tsx']}
+>
+  <DemoControls />
+  <DemoPreview>
+    <SendLibrarySelection />
+  </DemoPreview>
+</Demo>
+
+### Browse a large archive
+
+Use a fixed row height to show only the portion of a large tree that fits in the popup.
+
+<Demo
+  title="Browse a large archive"
+  files={['tree-select/ChooseArchiveRecord.tsx']}
+>
+  <DemoControls />
+  <DemoPreview>
+    <ChooseArchiveRecord />
+  </DemoPreview>
+</Demo>
+
+## State
+
+Use `value` with `onValueChange` to own selection, or `defaultValue` to seed it. The native form submits selected keys. Reset restores the uncontrolled selection. `defaultExpanded` seeds open branches. Selected ancestors are expanded by default.
+
+## Accessibility
+
+Name the Button with Field or native ARIA. Opening moves focus to the tree. Use [Tree keyboard navigation](/docs/tree/#accessibility) inside the popup.
+
+| Key                                 | Action                                 |
+| ----------------------------------- | -------------------------------------- |
+| Enter / Space / Down on the trigger | Open the tree.                         |
+| Escape                              | Close and return focus to the trigger. |
+
+## Styling
+
+`className`, `style`, and `ref` target the trigger. Use `parts.content` and `parts.tree` for the popup and tree.
+
+## API
+
+| Prop                                       | Type and default                             |
+| ------------------------------------------ | -------------------------------------------- |
+| `items`                                    | TreeItem array.                              |
+| `type` / `checkboxes`                      | single (default) or multiple.                |
+| `value` / `defaultValue` / `onValueChange` | Selected key, null, or key array by mode.    |
+| `defaultExpanded`                          | Optional initially expanded keys.            |
+| `virtual`                                  | Optional height and rowHeight in CSS pixels. |
+| `name` / `form` / `required` / `disabled`  | Native form ownership and validation.        |
+| `placeholder`                              | Defaults to Select an item.                  |
+| `controlSize`                              | small, medium (default), or large.           |
+| `parts`                                    | content and tree.                            |
+
+Exports TreeSelect and TreeSelectProps.

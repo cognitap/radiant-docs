@@ -1,0 +1,96 @@
+---
+title: Tree
+description: Browse, expand, and select items in a hierarchy.
+---
+
+import { Demo } from '../../components/demo/Demo'
+import { DemoControls, DemoPreview } from '../../components/demo/DemoFrame'
+import { BrowseProjectFiles } from '../../examples/tree/BrowseProjectFiles'
+import { ChooseExports } from '../../examples/tree/ChooseExports'
+import { LoadArchive } from '../../examples/tree/LoadArchive'
+
+<Demo
+  title="Browse project files"
+  files={['tree/BrowseProjectFiles.tsx']}
+>
+  <DemoControls />
+  <DemoPreview>
+    <BrowseProjectFiles />
+  </DemoPreview>
+</Demo>
+
+## Usage
+
+Use Tree for a persistent hierarchy. Use [TreeSelect](/docs/tree-select/) when the value belongs in a field.
+
+```tsx
+import { Tree } from '@cognitap/radiant'
+
+;<Tree
+  aria-label="Folders"
+  items={[{ value: 'inbox', label: 'Inbox' }]}
+/>
+```
+
+## Examples
+
+### Choose reports to export
+
+Use checkboxes and own the selected keys when the surrounding interface needs them.
+
+<Demo
+  title="Choose reports to export"
+  files={['tree/ChooseExports.tsx']}
+>
+  <DemoControls />
+  <DemoPreview>
+    <ChooseExports />
+  </DemoPreview>
+</Demo>
+
+### Load an archive when opened
+
+Give the archive a loader. This example resolves a local list when the branch opens.
+
+<Demo
+  title="Load an archive when opened"
+  files={['tree/LoadArchive.tsx']}
+>
+  <DemoControls />
+  <DemoPreview>
+    <LoadArchive />
+  </DemoPreview>
+</Demo>
+
+## State
+
+Selection and expansion have independent owners. Use `value` and `expanded` for controlled state or the corresponding defaults. Multiple selection uses an array of keys. A branch can provide nested children or a loader that receives an AbortSignal.
+
+## Accessibility
+
+Name the tree with native ARIA. Focus stays on the tree while the active item changes.
+
+| Key                   | Action                                                            |
+| --------------------- | ----------------------------------------------------------------- |
+| Up / Down             | Move through visible rows.                                        |
+| Home / End            | Move to the first or last visible row.                            |
+| Inline forward / back | Expand or enter a branch, or collapse it or return to its parent. |
+| Enter                 | Toggle a branch, select a leaf, or retry a failed load.           |
+| Space                 | Select the active row.                                            |
+
+## Styling
+
+`className`, `style`, and `ref` target the tree. Use `tree-item` and `tree-disclosure` slots for rows and expansion controls.
+
+## API
+
+| Prop                                                | Type and default                                                         |
+| --------------------------------------------------- | ------------------------------------------------------------------------ |
+| `items`                                             | TreeItem array with unique values and readable labels.                   |
+| `type` / `checkboxes`                               | single (default) or multiple. Checkboxes are available in multiple mode. |
+| `value` / `defaultValue` / `onValueChange`          | Key, null, or key array by mode.                                         |
+| `expanded` / `defaultExpanded` / `onExpandedChange` | Expanded key array.                                                      |
+| `loadingText` / `errorText`                         | Override branch feedback.                                                |
+| `virtual`                                           | Optional viewport height and fixed rowHeight in CSS pixels.              |
+
+Exports Tree, TreeProps, TreeItem, and TreeVirtual.

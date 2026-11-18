@@ -50,7 +50,9 @@ export const categories = [
       'multi-select',
       'combobox',
       'autocomplete',
-      'tags-input'
+      'tags-input',
+      'tree-select',
+      'cascader'
     ]
   },
   {
@@ -61,7 +63,16 @@ export const categories = [
   {
     title: 'Navigation',
     description: 'Move between pages and views.',
-    slugs: ['link', 'nav-link', 'navigation-menu', 'breadcrumb', 'pagination', 'tabs']
+    slugs: [
+      'link',
+      'nav-link',
+      'navigation-menu',
+      'breadcrumb',
+      'pagination',
+      'tabs',
+      'tree',
+      'stepper'
+    ]
   },
   {
     title: 'Menus',
@@ -76,7 +87,16 @@ export const categories = [
   {
     title: 'Feedback',
     description: 'Status, progress and loading states.',
-    slugs: ['alert', 'toast', 'progress', 'meter', 'spinner', 'skeleton', 'empty-state']
+    slugs: [
+      'alert',
+      'toast',
+      'progress',
+      'meter',
+      'ring-progress',
+      'spinner',
+      'skeleton',
+      'empty-state'
+    ]
   },
   {
     title: 'Data display',
@@ -89,10 +109,12 @@ export const categories = [
       'charts',
       'avatar',
       'badge',
+      'indicator',
       'tag',
       'kbd',
       'code-block',
       'highlight',
+      'number-formatter',
       'carousel'
     ]
   },
