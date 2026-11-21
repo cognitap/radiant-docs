@@ -8,10 +8,9 @@ by this site. Keep package JavaScript and CSS on the same version.
 
 ## Latest release
 
-[Stack](/docs/stack/) lays out children in one direction with spacing from the theme scale.
-The agent catalog now tells models when to use each component, published as [llms.txt](/llms.txt). Generated A2UI surfaces gain icons, images, video, audio, date and time inputs, and the basic-catalog check functions such as `required` and `email`.
-Catalog entries added with `extendCatalog` must now include `guidance`.
-[Release notes](https://github.com/cognitap/radiant/releases/tag/v0.0.93)
+Generated A2UI surfaces now cover the whole basic catalog, including layout and containers, and a conformance suite checks every component in every theme. A Radiant extension catalog adds Select, Combobox, RadioGroup, Switch and Textarea, and apps can register their own components, drawn with the [public theme tokens](https://github.com/cognitap/radiant/blob/v0.0.94/docs/theming.md#public-tokens).
+The A2UI Column gap now reads `--rad-spacing-normal`, and its `data-slot` gained `stack`.
+[Release notes](https://github.com/cognitap/radiant/releases/tag/v0.0.94)
 
 ## Upgrade existing themes
 
