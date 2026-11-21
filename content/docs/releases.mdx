@@ -8,9 +8,10 @@ by this site. Keep package JavaScript and CSS on the same version.
 
 ## Latest release
 
-Radiant now renders model-generated interfaces. `@cognitap/radiant/catalog` defines the components a model may compose, and `@cognitap/radiant/a2ui` renders A2UI 1.0 surfaces with Radiant components: it streams them in progressively, coerces bad props, keeps user state through patches, reports errors to the host and checks accessibility.
-Themes gain a `tight`, `normal` and `airy` spacing scale, used by [Card](/docs/card/) `padding` and [Table](/docs/table/) `density`.
-[Release notes](https://github.com/cognitap/radiant/releases/tag/v0.0.92)
+[Stack](/docs/stack/) lays out children in one direction with spacing from the theme scale.
+The agent catalog now tells models when to use each component, published as [llms.txt](/llms.txt). Generated A2UI surfaces gain icons, images, video, audio, date and time inputs, and the basic-catalog check functions such as `required` and `email`.
+Catalog entries added with `extendCatalog` must now include `guidance`.
+[Release notes](https://github.com/cognitap/radiant/releases/tag/v0.0.93)
 
 ## Upgrade existing themes
 
