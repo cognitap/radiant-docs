@@ -11,7 +11,7 @@ import { SelectControl } from '@/components/demo/ActionControls'
 import { DemoControls, DemoPreview } from '@/components/demo/DemoFrame'
 import { StackExample, type StackTask } from './StackExample'
 export function StackPlayground({ task = 'actions' }: { task?: StackTask }) {
-  const [direction, setDirection] = useState<Orientation>('vertical'),
+  const [orientation, setOrientation] = useState<Orientation>('vertical'),
     [gap, setGap] = useState<Spacing>('normal'),
     [align, setAlign] = useState<StackAlign>('stretch'),
     [justify, setJustify] = useState<StackJustify>('start'),
@@ -31,7 +31,7 @@ export function StackPlayground({ task = 'actions' }: { task?: StackTask }) {
         <div className="action-options">
           <SelectControl
             label="Direction"
-            value={direction}
+            value={orientation}
             options={['vertical', 'horizontal']}
             onChange={setDirection}
           />
@@ -64,7 +64,7 @@ export function StackPlayground({ task = 'actions' }: { task?: StackTask }) {
       </DemoControls>
       <DemoPreview>
         <StackExample
-          direction={direction}
+          orientation={orientation}
           gap={gap}
           align={align}
           justify={justify}

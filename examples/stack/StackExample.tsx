@@ -5,7 +5,7 @@ export function StackExample({ task = 'actions', ...props }: StackProps & { task
   if (task === 'tags')
     return (
       <Stack
-        direction="horizontal"
+        orientation="horizontal"
         gap="tight"
         wrap
         style={{ maxWidth: '20rem' }}
