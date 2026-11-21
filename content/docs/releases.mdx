@@ -8,9 +8,9 @@ by this site. Keep package JavaScript and CSS on the same version.
 
 ## Latest release
 
-Right-to-left layout and keyboard direction now cover the full catalog. [Toast](/docs/toast/) anchors to logical inline-end, [Collapsible](/docs/collapsible/) disclosures mirror their chevron, [TimeInput](/docs/time-input/) keeps numeric clock digits left-to-right, and direct `dir` overrides flow through wrapped controls.
-The [LocaleProvider guide](/docs/locale-provider/) shows scoped formatting and direction.
-[Release notes](https://github.com/cognitap/radiant/releases/tag/v0.0.91)
+Radiant now renders model-generated interfaces. `@cognitap/radiant/catalog` defines the components a model may compose, and `@cognitap/radiant/a2ui` renders A2UI 1.0 surfaces with Radiant components: it streams them in progressively, coerces bad props, keeps user state through patches, reports errors to the host and checks accessibility.
+Themes gain a `tight`, `normal` and `airy` spacing scale, used by [Card](/docs/card/) `padding` and [Table](/docs/table/) `density`.
+[Release notes](https://github.com/cognitap/radiant/releases/tag/v0.0.92)
 
 ## Upgrade existing themes
 
