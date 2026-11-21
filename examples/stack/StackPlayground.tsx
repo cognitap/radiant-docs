@@ -30,10 +30,10 @@ export function StackPlayground({ task = 'actions' }: { task?: StackTask }) {
       <DemoControls>
         <div className="action-options">
           <SelectControl
-            label="Direction"
+            label="Orientation"
             value={orientation}
             options={['vertical', 'horizontal']}
-            onChange={setDirection}
+            onChange={setOrientation}
           />
           <SelectControl
             label="Gap"
