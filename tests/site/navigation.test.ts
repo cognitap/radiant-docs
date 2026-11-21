@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import { capture, checkoutRevision, radiantPackage, track, withSite } from './site.ts'
 
-test('sidebar, search, mobile navigation, missing pages and deployment metadata', async () => {
+test('sidebar, search, mobile navigation, missing pages, deployment metadata and llms.txt', async () => {
   await withSite(async (baseURL, browser) => {
     const page = await browser.newPage({ viewport: { width: 1280, height: 800 } })
     const errors = track(page)
@@ -54,6 +54,10 @@ test('sidebar, search, mobile navigation, missing pages and deployment metadata'
         assert.equal(deployment.schemaVersion, 1)
         assert.equal(deployment.candidate, radiantPackage.candidate)
         assert.equal(deployment.experimental, true)
+
+        const llms = await (await page.request.get(`${baseURL}/llms.txt`)).text()
+        assert.match(llms, /^# Radiant\n/)
+        assert.match(llms, /## Design rules\n[\s\S]*### Button\n[\s\S]*- Avoid: /)
 
         assert.equal(errors.length, 0)
         const missing = await page.goto(`${baseURL}/docs/missing/`)
