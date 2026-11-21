@@ -1,0 +1,52 @@
+---
+title: Stack
+description: Lays out children in one direction with spacing from the theme.
+---
+
+import { StackDemo, StackTagsDemo } from '../../components/StackDemo'
+
+<StackDemo />
+
+## Usage
+
+Use `Stack` to place content in a row or column with consistent spacing. Pick a `gap` step instead of a length, so a theme changes spacing everywhere at once. Use [Card](/docs/card/) for a bordered surface and [ButtonGroup](/docs/button-group/) for joined buttons.
+
+```tsx
+<Stack
+  direction="horizontal"
+  justify="between"
+  align="center"
+>
+  <Button variant="ghost">Skip</Button>
+  <Button>Start</Button>
+</Stack>
+```
+
+## Examples
+
+### Wrap tags
+
+<StackTagsDemo />
+
+## Accessibility
+
+The div adds no role or focus stop. Reading and focus order follow the source order, so keep the children in a meaningful order rather than reordering them with CSS.
+
+## Styling
+
+`className`, typed `style`, native attributes and ref reach the div, identified by `data-slot="stack"`. `gap` reads `--rad-spacing-tight`, `--rad-spacing-normal` or `--rad-spacing-airy`; override the token in a theme or a `style` to change it. Alignment uses logical start and end, so rows follow the reading direction.
+
+## API
+
+| Stack prop            | Type                                                                             | Default         |
+| --------------------- | -------------------------------------------------------------------------------- | --------------- |
+| direction             | `'vertical' \| 'horizontal'`                                                     | `'vertical'`    |
+| gap                   | `'tight' \| 'normal' \| 'airy'`                                                  | `'normal'`      |
+| align                 | `'start' \| 'center' \| 'end' \| 'stretch'`                                      | `'stretch'`     |
+| justify               | `'start' \| 'center' \| 'end' \| 'between' \| 'around' \| 'evenly' \| 'stretch'` | `'start'`       |
+| wrap                  | boolean                                                                          | false           |
+| className / style     | string / ThemeStyle                                                              | None            |
+| ref                   | `Ref<HTMLDivElement>`                                                            | None            |
+| Native div attributes | Includes id, ARIA and events                                                     | Native defaults |
+
+`justify="stretch"` grows every child equally along the main axis. Exports: `Stack`, `StackProps`, `StackAlign`, `StackJustify`.

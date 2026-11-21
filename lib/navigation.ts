@@ -132,6 +132,7 @@ export const categories = [
     slugs: [
       'app-shell',
       'aspect-ratio',
+      'stack',
       'separator',
       'scroll-area',
       'resizable',
