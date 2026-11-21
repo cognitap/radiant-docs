@@ -74,7 +74,7 @@ Native table semantics stay intact: no part accepts `role`. `TableCaption` is th
 
 Each part sets `data-slot` on its host: `table`, `table-caption`, `table-head`, `table-body`, `table-foot`, `table-row`, `table-header`, `table-cell` and `table-container`. A caller's `data-slot` is appended. `className` merges with the caller winning, and `ref` reaches the native element.
 
-Cells align to the start and wrap long words; the caption sits on top. `components.table` in `defineTheme` sets background, color, headerBackground, headerColor, captionColor, borderColor, borderWidth, radius, paddingInline, paddingBlock and fontSize. Override one table with `--rad-table-*` properties on its `style`.
+Cells align to the start and wrap long words; the caption sits on top. `components.table` in `defineTheme` sets background, color, headerBackground, headerColor, captionColor, borderColor, borderWidth, radius, paddingInline, paddingBlock and fontSize. `density` scales cell padding; set paddingInlineTight, paddingBlockAiry and the other step keys to override a step. Override one table with `--rad-table-*` properties on its `style`.
 
 ## API
 
@@ -82,10 +82,11 @@ Every part also takes its host's native props except `role`, plus `className`, `
 
 ### Table
 
-| Prop     | Type      | Default |
-| -------- | --------- | ------- |
-| children | ReactNode | None    |
-| Host     | `table`   |         |
+| Prop     | Type                  | Default |
+| -------- | --------------------- | ------- |
+| children | ReactNode             | None    |
+| density  | tight / normal / airy | normal  |
+| Host     | `table`               |         |
 
 ### TableCaption
 

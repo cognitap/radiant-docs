@@ -71,7 +71,7 @@ Every part transitions color, background and border over `--rad-motion-color-dur
 | CardContent     | `div`                | `card-content`     |
 | CardFooter      | `div`, wrapping row  | `card-footer`      |
 
-Parts can appear in any order. Caller classes win, and a caller `data-slot` adds tokens after the part's own. `components.card` or `--rad-card-*` variables set radius, corner-shape, background, color, border, padding, gap, header-gap, footer-gap, shadow, title-size, title-weight, description-color and description-size. Forced colors use system canvas and text colors and drop the shadow.
+Parts can appear in any order. Caller classes win, and a caller `data-slot` adds tokens after the part's own. `components.card` or `--rad-card-*` variables set radius, corner-shape, background, color, border, padding (with padding-tight and padding-airy for the `padding` steps), gap, header-gap, footer-gap, shadow, title-size, title-weight, description-color and description-size. Forced colors use system canvas and text colors and drop the shadow.
 
 ## API
 
@@ -79,6 +79,7 @@ Every part takes the native props of its element, `className`, `style` as ThemeS
 
 | Card prop | Type                  | Default |
 | --------- | --------------------- | ------- |
+| padding   | tight / normal / airy | normal  |
 | style     | ThemeStyle            | None    |
 | data-slot | string                | card    |
 | ref       | `Ref<HTMLDivElement>` | None    |
