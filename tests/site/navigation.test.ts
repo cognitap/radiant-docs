@@ -56,7 +56,7 @@ test('sidebar, search, mobile navigation, missing pages, deployment metadata and
         assert.equal(deployment.experimental, true)
 
         const llms = await (await page.request.get(`${baseURL}/llms.txt`)).text()
-        assert.match(llms, /^# Radiant\n/)
+        assert.match(llms, /^# Radiant agent catalog\n\n> [^\n]*not React exports/)
         assert.match(llms, /## Design rules\n[\s\S]*### Button\n[\s\S]*- Avoid: /)
 
         assert.equal(errors.length, 0)
