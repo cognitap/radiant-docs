@@ -1,0 +1,79 @@
+---
+title: Build with agents
+description: Render, check and extend the interfaces your agent composes from Radiant.
+---
+
+import { AgentsDemo, AgentsExtensionDemo } from '@/components/AgentsDemo'
+
+Your agent describes an interface as [A2UI](https://a2ui.org) messages, and
+Radiant renders them with its own components. Radiant never calls a model and
+needs no API key: your app owns the prompt, the model call, storage and what
+each action does.
+
+<AgentsDemo />
+
+## Tell the agent what it can use
+
+Send the A2UI catalog of the registry you render with. Its component
+descriptions and `instructions` carry Radiant's guidance in A2UI names.
+
+```ts
+import { radiantA2uiExtensionRegistry } from '@cognitap/radiant/a2ui'
+
+const catalog = radiantA2uiExtensionRegistry.toCatalogJson()
+```
+
+`renderCatalogGuidance(radiantCatalog)` from `@cognitap/radiant/catalog`, served
+here as [/llms.txt](/llms.txt), is the protocol-independent catalog. Its names
+differ from A2UI's, so use it only for an adapter to another protocol.
+
+## Render a surface
+
+Pass the messages for one surface to `A2uiSurface` in a client component.
+Append messages as they stream in: missing components show as skeletons, text
+still on its way reserves a line, and controls keep their state and focus. The
+surface ignores the agent's theme hints, so the nearest
+[ThemeScope](/docs/foundations/theming/) decides how it looks.
+
+## Check accessibility on the server
+
+Run the accessibility check before you store a surface, so a user never meets a
+control without a name. `validateA2uiAccessibility` needs no DOM. With
+`fix: true` it returns a fixed copy where a safe fix exists. Props are coerced
+to the schema when the surface renders, or earlier with `coerceA2uiMessages`.
+
+```ts
+import { validateA2uiAccessibility } from '@cognitap/radiant/a2ui'
+
+const { errors, messages: fixed } = validateA2uiAccessibility(messages, { fix: true })
+if (errors.some(error => !error.fixable)) return askAgentToRetry(errors)
+await saveSurface(fixed)
+```
+
+## Handle actions and diagnostics
+
+A Button's named action reaches `onAction` with its `action` name, the
+`context` it asked for and a snapshot of the surface `state`. Send it back to
+your agent or run it yourself. The surface never throws on bad output: it
+coerces or drops invalid props, shows unknown components as text and reports
+each change to `onDiagnostic`. Errors carry a `code`; log them to improve your
+prompt.
+
+## Media and links
+
+Wrap surfaces in `A2uiMediaProvider` to map icon names to components (`lucideA2uiIcons` from
+`@cognitap/radiant/a2ui/lucide` maps Lucide) and to approve media URLs with
+`urlPolicy`. Unmapped icons and rejected URLs report a diagnostic instead of
+loading. Buttons never navigate: give a link a named action and navigate in
+`onAction`.
+
+## Add your own component
+
+Add an entry with `extendCatalog`, map it to your component with
+`createA2uiExtensionEntry` and an accessibility rule, and register it under your
+own catalog ID. Render, check and describe the catalog with that registry.
+Style the component with
+[public tokens](https://github.com/cognitap/radiant/blob/main/docs/theming.md#public-tokens)
+so it follows every theme.
+
+<AgentsExtensionDemo />

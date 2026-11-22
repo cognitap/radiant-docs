@@ -3,7 +3,7 @@ import { radiantCatalog, renderCatalogGuidance } from '@cognitap/radiant/catalog
 export const dynamic = 'force-static'
 
 const summary =
-  "Radiant's model-facing catalog: the components an agent can place on a generated UI surface. Entries are catalog components, not React exports. For the React API, read the [component guides](/docs/); React apps navigate with Link, not Button."
+  "Radiant's model-facing catalog: the components an agent can place on a generated UI surface. Entries are catalog components, not React exports. To render, validate and extend surfaces, read the [agent guide](/docs/agents/); for the React API, the [component guides](/docs/). React apps navigate with Link, not Button."
 
 export function GET() {
   return new Response(
