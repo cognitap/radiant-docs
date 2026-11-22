@@ -1,0 +1,43 @@
+---
+title: Grid
+description: Lays out equal items in as many columns as fit, up to a maximum you set.
+---
+
+import { GridDemo } from '../../components/GridDemo'
+
+<GridDemo />
+
+## Usage
+
+Use `Grid` for equal items such as cards or tiles. Set the most columns you want; Grid fits as many as its width holds. Use [Stack](/docs/stack/) for one line of items and [Split](/docs/split/) for areas of different weight.
+
+```tsx
+<Grid maxColumns={3}>
+  {courses.map(course => (
+    <CourseCard
+      key={course.id}
+      course={course}
+    />
+  ))}
+</Grid>
+```
+
+## Accessibility
+
+The div adds no role or focus stop. Items keep source order in every layout, reading row by row. For list semantics, pass `role="list"` and give each item `role="listitem"`.
+
+## Styling
+
+Each column is at least `components.grid.minItemWidth` (`--rad-grid-min-item-width`, 12rem) and at most the Grid's own width, so a narrow Grid shows one column. Grid is an inline-size container, so columns follow its width, not the viewport; in a box that sizes to its content, it takes 20rem. Set spacing with `gap`, not a gap class: the column count reads it. `gap` reads `--rad-spacing-tight`, `--rad-spacing-normal` or `--rad-spacing-airy`. The root is a `div` with `data-slot="grid"`.
+
+## API
+
+| Grid prop             | Type                            | Default         |
+| --------------------- | ------------------------------- | --------------- |
+| maxColumns            | `1 \| 2 \| 3 \| 4 \| 5 \| 6`    | `3`             |
+| gap                   | `'tight' \| 'normal' \| 'airy'` | `'normal'`      |
+| className / style     | string / ThemeStyle             | None            |
+| ref                   | `Ref<HTMLDivElement>`           | None            |
+| Native div attributes | Includes id, ARIA and events    | Native defaults |
+
+Other `maxColumns` values throw. Exports: `Grid`, `GridProps`, `GridColumns`.

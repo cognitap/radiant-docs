@@ -1,0 +1,48 @@
+---
+title: Split
+description: Places a main area beside a secondary area, stacking them when the container is narrow.
+---
+
+import { SplitDemo } from '../../components/SplitDemo'
+
+<SplitDemo />
+
+## Usage
+
+Use `Split` for main content with supporting content, such as results with their filters. Say how the width is shared; Split decides the geometry. To show the secondary area at the start, put it first. Use [Grid](/docs/grid/) for equal items and [Compare](/docs/compare/) for options weighed against each other.
+
+```tsx
+<Split>
+  <SplitSecondary>
+    <Filters />
+  </SplitSecondary>
+  <SplitMain>
+    <Results />
+  </SplitMain>
+</Split>
+```
+
+## Accessibility
+
+The divs add no role or focus stop. Stacked or side by side, the parts keep source order, so reading and focus order always match what people see.
+
+## Styling
+
+Split is an inline-size container, so it follows its own width, not the viewport. Below 40rem each part takes the full width; from 40rem they share a row. In a box that sizes to its content, Split takes 20rem. `gap` reads `--rad-spacing-tight`, `--rad-spacing-normal` or `--rad-spacing-airy`.
+
+| Part           | Element                                | data-slot         |
+| -------------- | -------------------------------------- | ----------------- |
+| Split          | `div`, wrapping row, container `split` | `split`           |
+| SplitMain      | `div`                                  | `split-main`      |
+| SplitSecondary | `div`                                  | `split-secondary` |
+
+## API
+
+Every part takes the native props of a div, `className`, `style` as ThemeStyle, additive `data-slot` and a ref.
+
+| Split prop | Type                            | Default    |
+| ---------- | ------------------------------- | ---------- |
+| ratio      | `'balanced' \| 'main'`          | `'main'`   |
+| gap        | `'tight' \| 'normal' \| 'airy'` | `'normal'` |
+
+`ratio="main"` gives the main area two thirds of the row; `balanced` halves it. Other values throw. Exports: `Split`, `SplitMain`, `SplitSecondary`, `SplitProps`, `SplitMainProps`, `SplitSecondaryProps`, `SplitRatio`.
