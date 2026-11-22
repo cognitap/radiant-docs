@@ -1,0 +1,52 @@
+---
+title: Compare
+description: Shows two to four options side by side with aligned rows, stacking when the container is narrow.
+---
+
+import { CompareDemo } from '../../components/CompareDemo'
+
+<CompareDemo />
+
+## Usage
+
+Use `Compare` when people weigh two to four options, such as plans. Each CompareItem puts its name in CompareItemHeader, its details in CompareItemBody and its action in CompareItemFooter; the parts line up across items even when their text differs in length. Use [Table](/docs/table/) for many records with shared fields and [Grid](/docs/grid/) for equal items.
+
+```tsx
+<Compare>
+  {plans.map(plan => (
+    <CompareItem key={plan.id}>
+      <CompareItemHeader>{plan.name}</CompareItemHeader>
+      <CompareItemBody>{plan.summary}</CompareItemBody>
+      <CompareItemFooter>
+        <Button>Choose {plan.name}</Button>
+      </CompareItemFooter>
+    </CompareItem>
+  ))}
+</Compare>
+```
+
+## Accessibility
+
+Compare is a `<ul>` and each CompareItem an `<li>`, so screen readers announce the number of options. Put a heading or strong name in each header. Reading and focus order follow source order at every width.
+
+## Styling
+
+Compare is an inline-size container. Items stack until it is 32rem wide, or 48rem for four items, then share a row; each item spans three rows of a subgrid, so headers, bodies and footers align. In a box that sizes to its content, Compare takes 20rem. `gap` sets the space between items from the spacing scale; rows inside an item use `--rad-spacing-tight`. Items have no border; add one with `className`.
+
+| Part              | Element               | data-slot             |
+| ----------------- | --------------------- | --------------------- |
+| Compare           | `ul`, grid, container | `compare`             |
+| CompareItem       | `li`, subgrid         | `compare-item`        |
+| CompareItemHeader | `div`, first row      | `compare-item-header` |
+| CompareItemBody   | `div`, second row     | `compare-item-body`   |
+| CompareItemFooter | `div`, last row       | `compare-item-footer` |
+
+## API
+
+Every part takes the native props of its element, `className`, `style` as ThemeStyle, additive `data-slot` and a ref.
+
+| Compare prop | Type                            | Default    |
+| ------------ | ------------------------------- | ---------- |
+| gap          | `'tight' \| 'normal' \| 'airy'` | `'normal'` |
+
+Exports: `Compare`, `CompareItem`, `CompareItemHeader`, `CompareItemBody`, `CompareItemFooter` and their `Props` types.
