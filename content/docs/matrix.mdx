@@ -1,0 +1,127 @@
+---
+title: Matrix
+description: An interactive grid of cells under column and row headers, with optional selection, markers and labelled regions.
+---
+
+import { PickSeatsDemo, ShowRoomBookingsDemo, MarkDeploysDemo } from '../../components/MatrixDemo'
+
+<PickSeatsDemo />
+
+## Usage
+
+Use Matrix when position in two dimensions is the content, such as a seat map, a schedule or a heatmap. Use [Table](/docs/table/) or [DataTable](/docs/data-table/) for records and [Grid](/docs/grid/) to lay out equal items.
+
+```tsx
+<Matrix
+  aria-label="Seats"
+  type="multiple"
+  columns={2}
+  defaultValue={['A1']}
+>
+  <MatrixRow>
+    <MatrixCorner />
+    <MatrixColumnHeader>1</MatrixColumnHeader>
+    <MatrixColumnHeader>2</MatrixColumnHeader>
+  </MatrixRow>
+  <MatrixRow>
+    <MatrixRowHeader>Row A</MatrixRowHeader>
+    <MatrixCell value="A1">A1</MatrixCell>
+    <MatrixCell
+      value="A2"
+      disabled
+    >
+      A2
+    </MatrixCell>
+  </MatrixRow>
+</Matrix>
+```
+
+## Examples
+
+### Show room bookings
+
+Without `value`, cells only display. `series` tells bookings apart, `active` marks the current one, `highlighted` draws attention and `muted` steps back. A region outlines a block of cells.
+
+<ShowRoomBookingsDemo />
+
+### Mark deploys per day
+
+Markers are solid dots or outlined rings in the cell's series. `altText` names a cell that only holds a marker.
+
+<MarkDeploysDemo />
+
+## State
+
+Cells with a `value` are selectable. `type="single"` holds one string or `null`, and choosing the selected cell clears it; `type="multiple"` holds a string array. Use `defaultValue`, or `value` with `onValueChange`, not both; owner and type stay fixed per mount. `disabled` on the Matrix or a cell stops selection but keeps cells navigable. Matrix does not submit with a form.
+
+Region `row` and `column` count cell rows and columns from 1, not headers. Spans stop at the last row and column; a region that starts outside the grid is hidden.
+
+## Accessibility
+
+Matrix is an ARIA grid; name it with `aria-label` or `aria-labelledby`. One cell holds the tab stop: the last focused cell, else the first selected cell, else the first cell. If that cell is removed, focus moves to a neighbour. Selectable cells set `aria-selected`, and cells inside a region are described by its label.
+
+| Key                  | Behavior                                  |
+| -------------------- | ----------------------------------------- |
+| Arrow keys           | Next cell; edges keep focus; follows dir  |
+| Home / End           | First or last cell in the row             |
+| Ctrl+Home / Ctrl+End | First or last cell in the Matrix          |
+| Space / Enter        | Select or clear a cell that has a `value` |
+
+## Motion
+
+Nothing animates.
+
+## Styling
+
+Rows share the Matrix's tracks: a row header column sized to its content, then `columns` equal tracks of at least `cellSize`. When they do not fit, the Matrix scrolls sideways.
+
+| Part               | Role                             | Attributes                                                              |
+| ------------------ | -------------------------------- | ----------------------------------------------------------------------- |
+| Matrix             | `grid`                           | `data-slot="matrix"`, `data-type`, `data-disabled`                      |
+| MatrixRow          | `row`                            | `data-slot="matrix-row"`                                                |
+| MatrixColumnHeader | `columnheader`                   | `data-slot="matrix-column-header"`                                      |
+| MatrixRowHeader    | `rowheader`                      | `data-slot="matrix-row-header"`                                         |
+| MatrixCorner       | `columnheader`, empty `gridcell` | `data-slot="matrix-corner"`                                             |
+| MatrixCell         | `gridcell`                       | `data-slot="matrix-cell"`, `data-state`, `data-series`, `data-selected` |
+| MatrixMarker       | None                             | `data-slot="matrix-marker"`, `data-variant`                             |
+| MatrixRegion       | Hidden                           | `data-slot="matrix-region"`; label `matrix-region-label`                |
+
+`components.matrix` sets `cellSize`, `gap`, `radius`, `cellTextSize`, `headerSize` and `regionBorderWidth`, or use `--rad-matrix-*` variables. Forced colors use system colors.
+
+## API
+
+Every part takes the native props of a div (MatrixMarker a span) except `role`, plus `className`, `style` as ThemeStyle and additive `data-slot`.
+
+| Matrix prop                  | Type                                                | Default   |
+| ---------------------------- | --------------------------------------------------- | --------- |
+| aria-label / aria-labelledby | string                                              | Required  |
+| columns                      | positive integer; cell columns, without row headers | Required  |
+| type                         | single / multiple; fixed per mount                  | single    |
+| value / defaultValue         | `string \| null` (single) / `string[]` (multiple)   | null / [] |
+| onValueChange                | `(value) => void`, matching `type`                  | None      |
+| disabled                     | boolean                                             | false     |
+
+| MatrixCell prop | Type                                        | Default |
+| --------------- | ------------------------------------------- | ------- |
+| value           | string; distinct, makes the cell selectable | None    |
+| state           | active / muted / highlighted                | None    |
+| series          | `'1'` to `'8'`                              | None    |
+| disabled        | boolean                                     | false   |
+| altText         | string; replaces the announced contents     | None    |
+
+| MatrixMarker prop | Type            | Default |
+| ----------------- | --------------- | ------- |
+| variant           | solid / outline | solid   |
+| series            | `'1'` to `'8'`  | Cell's  |
+
+| MatrixRegion prop    | Type                    | Default  |
+| -------------------- | ----------------------- | -------- |
+| row / column         | positive integer        | Required |
+| rowSpan / columnSpan | positive integer        | 1        |
+| label                | ReactNode               | Required |
+| series               | `'1'` to `'8'`          | None     |
+| parts                | `{ label?: PartStyle }` | None     |
+
+MatrixRegion is a direct child of Matrix. Invalid `columns`, spans, states, series or variants throw a `TypeError`.
+
+Exports `Matrix`, `MatrixRow`, `MatrixColumnHeader`, `MatrixRowHeader`, `MatrixCorner`, `MatrixCell`, `MatrixMarker`, `MatrixRegion`, their `Props` types, `MatrixCellState` and `MatrixValue`.

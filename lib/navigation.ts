@@ -37,7 +37,8 @@ export const categories = [
       'color-input',
       'color-picker',
       'slider',
-      'range-slider'
+      'range-slider',
+      'sortable-list'
     ]
   },
   {
@@ -115,6 +116,7 @@ export const categories = [
       'card',
       'table',
       'data-table',
+      'matrix',
       'timeline',
       'charts',
       'avatar',
@@ -124,6 +126,7 @@ export const categories = [
       'kbd',
       'code-block',
       'highlight',
+      'annotated-text',
       'carousel'
     ]
   },
