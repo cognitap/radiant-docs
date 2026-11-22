@@ -1,0 +1,93 @@
+---
+title: Typography
+description: Set text roles, reading width, rhythm and heading levels for mixed text and components.
+---
+
+```tsx
+'use client'
+
+import {
+  HeadingLevelProvider,
+  Stage,
+  StageBody,
+  StageHeader,
+  StageTitle,
+  useHeadingLevel
+} from '@cognitap/radiant'
+import { A2uiSurface, type A2uiMessage } from '@cognitap/radiant/a2ui'
+
+export function Lesson({ messages }: { messages: readonly A2uiMessage[] }) {
+  return (
+    <article
+      data-rad-prose=""
+      data-rad-type-container=""
+    >
+      <h2>Fractions</h2>
+      <p>Each step below comes from the tutor.</p>
+      <HeadingLevelProvider level={3}>
+        <Exercise />
+      </HeadingLevelProvider>
+      <A2uiSurface
+        surfaceId="lesson"
+        messages={messages}
+        headingLevel={3}
+        prose
+      />
+    </article>
+  )
+}
+
+function Exercise() {
+  return (
+    <Stage>
+      <StageHeader>
+        <StageTitle level={useHeadingLevel()}>Try one</StageTitle>
+      </StageHeader>
+      <StageBody aspectRatio={2}>{/* widget */}</StageBody>
+    </Stage>
+  )
+}
+```
+
+## Text roles
+
+`data-rad-text="<role>"` gives any element one of 16 text roles without changing
+its semantics. `data-rad-type-container` makes heading sizes follow the
+container's width, so a narrow column on a wide screen gets smaller headings.
+Themes compile roles from a typesetting preset; see
+[theming](/docs/foundations/theming/).
+
+## Prose layer
+
+`data-rad-prose` turns its direct children into one reading flow. Headings,
+paragraphs, lists, quotes and code get prose roles. Elements with `data-slot`,
+such as Radiant components, and elements with `data-rad-not-prose` keep their own
+styles.
+
+- **Reading width:** text keeps its role's measure, about 64 characters for body
+  text. Components span the full container.
+- **Rhythm:** tokens set the space above each child. Text to text uses
+  `--rad-typography-flow-paragraph`. Text next to a component uses
+  `--rad-typography-flow-component`, and two components use
+  `--rad-typography-flow-component-gap`. Headings add
+  `heading-before` and `heading-after`. Themes override them at
+  `tokens.typography.flow`.
+
+## Heading levels
+
+Headings must fit the page outline. `HeadingLevelProvider` sets the level at
+which a subtree's headings start, and `useHeadingLevel(depth)` reads it, adding
+`depth` and stopping at 6. Outside a provider it returns `undefined`, so a
+title falls back to its default.
+
+`AccordionTrigger` reads the level itself. Card, Stage, Alert and Empty State
+titles stay server-safe, so pass `level={useHeadingLevel()}` from a client
+component.
+
+## Generated surfaces
+
+`A2uiSurface` `headingLevel` sets where the surface's Stage, Alert and
+Accordion headings start; headings inside a Stage go one level deeper. Without
+it, the surface follows an enclosing provider. `prose` makes the root Column a
+prose flow: its top-level Text uses prose roles and the rhythm tokens replace
+the column gap.
