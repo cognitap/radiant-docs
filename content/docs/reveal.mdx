@@ -1,9 +1,9 @@
 ---
 title: Reveal
-description: Shows content one step at a time with previous and next buttons.
+description: Shows content one step at a time with previous and next buttons, and optional playback.
 ---
 
-import { RevealDemo } from '../../components/RevealDemo'
+import { PlayNoticesDemo, RevealDemo } from '../../components/RevealDemo'
 
 <RevealDemo />
 
@@ -20,17 +20,31 @@ Use `Reveal` for content read one part at a time, such as recipe steps. Pass the
 />
 ```
 
+## Examples
+
+### Play lobby notices
+
+With `playback`, a toggle named `playLabel` or `pauseLabel` moves to the next step every `interval` milliseconds, from 1000 to 60000; the default is 5000. A step's own `interval` overrides it. Here the last notice stays longer, and `loop` returns to the first.
+
+<PlayNoticesDemo />
+
 ## State
 
 Pass `value` to control the shown step or `defaultValue` to seed it; the first item is the default, and an uncontrolled Reveal returns to it when the shown item is removed. `onValueChange(value)` receives the next item's `value`. Hidden steps stay mounted with the `hidden` attribute, so form input and component state survive moving away and back.
 
+Playback starts only when pressed. After the last step it stops, unless `loop` is set; Play on the last step starts over. Previous, Next and a declined step stop it. It waits while the pointer or focus is inside the Reveal, except on the toggle, and while the page is hidden.
+
 ## Accessibility
 
-The buttons are native and point at the steps with `aria-controls`. Previous is disabled on the first step and Next on the last; when a button disables itself, focus moves to the other button. Each step is a group named by `positionLabel`, and the steps form a polite live region, so a newly shown step is announced once.
+The buttons are native and point at the steps with `aria-controls`. Previous is disabled on the first step and Next on the last; when a button disables itself, focus moves to the other button. Each step is a group named by `positionLabel`, and the steps form a polite live region, so a newly shown step is announced once. Timed steps are not announced, except the last. In A2UI, `A2uiSurface` `labels.revealPlay` and `revealPause` add playback.
+
+## Motion
+
+Under reduced motion, or a theme with motion off, the toggle is absent and nothing plays. Server markup has no toggle.
 
 ## Styling
 
-`className`, typed `style`, native attributes and ref reach the root div. `gap` sets the space between the step and its controls. `parts.controls` and `parts.position` style the control row and position text.
+`className`, typed `style`, native attributes and ref reach the root div. `gap` sets the space between the step and its controls. The root has `data-playing` while playback runs. `parts.controls` and `parts.position` style the control row and position text.
 
 | Part     | Element                 | data-slot                        |
 | -------- | ----------------------- | -------------------------------- |
@@ -38,18 +52,23 @@ The buttons are native and point at the steps with `aria-controls`. Previous is 
 | Steps    | `div` holding each step | `reveal-steps`, `reveal-step`    |
 | Controls | `div`, wrapping row     | `reveal-controls`                |
 | Buttons  | Button                  | `reveal-previous`, `reveal-next` |
+| Playback | `div` with the toggle   | `reveal-playback`, `reveal-play` |
 | Position | `output`                | `reveal-position`                |
 
 ## API
 
-| Reveal prop               | Type                                       | Default    |
-| ------------------------- | ------------------------------------------ | ---------- |
-| items                     | `{ value: string; children: ReactNode }[]` | Required   |
-| value / defaultValue      | string                                     | First item |
-| onValueChange             | `(value: string) => void`                  | None       |
-| previousLabel / nextLabel | string                                     | Required   |
-| positionLabel             | `(index: number, count: number) => string` | Required   |
-| gap                       | `'tight' \| 'normal' \| 'airy'`            | `'normal'` |
-| controlSize               | `'small' \| 'medium' \| 'large'`           | `'medium'` |
+| Reveal prop               | Type                                             | Default              |
+| ------------------------- | ------------------------------------------------ | -------------------- |
+| items                     | `RevealItem[]`: `{ value, children, interval? }` | Required             |
+| value / defaultValue      | string                                           | First item           |
+| onValueChange             | `(value: string) => void`                        | None                 |
+| previousLabel / nextLabel | string                                           | Required             |
+| positionLabel             | `(index: number, count: number) => string`       | Required             |
+| playback                  | boolean                                          | false                |
+| playLabel / pauseLabel    | string                                           | Required by playback |
+| interval                  | number, 1000 to 60000 ms                         | 5000                 |
+| loop                      | boolean                                          | false                |
+| gap                       | `'tight' \| 'normal' \| 'airy'`                  | `'normal'`           |
+| controlSize               | `'small' \| 'medium' \| 'large'`                 | `'medium'`           |
 
-Empty labels, duplicate values or an unknown controlled `value` throw. Exports: `Reveal`, `RevealProps`, `RevealItem`.
+Empty labels, duplicate values, an interval out of range or an unknown controlled `value` throw. Exports: `Reveal`, `RevealProps`, `RevealItem`, `RevealPlayback`.
