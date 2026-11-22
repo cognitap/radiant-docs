@@ -1,0 +1,114 @@
+---
+title: RegionStage
+description: Pan and zoom an SVG drawing with named regions to select and pins that open callouts.
+---
+
+import { PickRoomDemo, WatchSiteMapDemo } from '../../components/RegionStageDemo'
+
+<PickRoomDemo />
+
+## Usage
+
+Use RegionStage to pick places on a drawing, such as rooms on a floor plan. Use [Matrix](/docs/matrix/) when places form rows and columns, and [Stage](/docs/stage/) for a titled frame.
+
+RegionStage has no built-in text: pass the three zoom labels and name every region and pin.
+
+```tsx
+<RegionStage
+  aria-label="Second floor"
+  defaultValue="Kitchen"
+>
+  <RegionStageControls
+    zoomInLabel="Zoom in"
+    zoomOutLabel="Zoom out"
+    zoomResetLabel="Reset view"
+  />
+  <RegionStageViewport viewBox="0 0 400 240">
+    <RegionStageRegion
+      value="Kitchen"
+      aria-label="Kitchen"
+      series={2}
+      d="M160 10h110v100H160z"
+    />
+    <RegionStagePin
+      x={150}
+      y={60}
+      aria-label="Fire exit"
+    >
+      Leads to the north stairwell.
+    </RegionStagePin>
+  </RegionStageViewport>
+</RegionStage>
+```
+
+## Examples
+
+### Watch zones on a site map
+
+`type="multiple"` selects several regions. A pin's children form its callout, a [Popover](/docs/popover/) anchored to the pin; a pin without children is an image that keyboard users can still reach.
+
+<WatchSiteMapDemo />
+
+## State
+
+`type="single"` holds one region value or `null`, and choosing the selected region clears it; `type="multiple"` holds a string array. Use `defaultValue`, or `value` with `onValueChange`, not both; `type` stays fixed per mount. A callout closes when its pin leaves the view.
+
+The viewport draws its children in the `viewBox` coordinates: a backdrop such as an `<image>` or paths, then regions and pins. A region draws `d`, or SVG shape children that must not set their own fill or stroke. Pins keep their screen size as the view zooms.
+
+## Accessibility
+
+Name the RegionStage, each region and each pin with `aria-label` or `aria-labelledby`. Regions are toggle buttons. Regions and pins share one tab stop, and focusing one that is offscreen pans it into view. The shortcuts are not discoverable, so describe them with `aria-describedby`, as the first demo does. Without regions or pins, the viewport is one focusable image that plain arrow keys pan.
+
+| Key                | Behavior                                    |
+| ------------------ | ------------------------------------------- |
+| Arrow keys         | Previous or next region or pin; follows dir |
+| Home / End         | First or last region or pin                 |
+| Space / Enter      | Select a region or toggle a pin's callout   |
+| + / -              | Zoom in or out                              |
+| 0                  | Reset the view                              |
+| Shift + arrow keys | Pan                                         |
+
+A pointer drag pans and a two-finger pinch zooms. The wheel zooms with Ctrl or Meta held and pans once zoomed. Touch scrolls the page until the view is zoomed. At a zoom limit, its button stays focusable with `aria-disabled`.
+
+## Motion
+
+Buttons and keys glide the view over 200ms; pointer moves follow the pointer. Reduced motion and themes with motion off jump.
+
+## Styling
+
+| Part                | Attributes                                                                      |
+| ------------------- | ------------------------------------------------------------------------------- |
+| RegionStage         | `data-slot="region-stage"`                                                      |
+| RegionStageControls | `data-slot="region-stage-controls"`                                             |
+| RegionStageViewport | `data-slot="region-stage-viewport"`, `data-zoomed`, `data-panning`              |
+| RegionStageRegion   | `data-slot="region-stage-region"`, `data-value`, `data-series`, `data-selected` |
+| RegionStagePin      | `data-slot="region-stage-pin"`, `data-state`                                    |
+| Callout             | `data-slot="region-stage-callout"`                                              |
+
+Regions take the theme's series colors. `components.regionStage` sets `gap`, `radius`, `borderWidth`, `borderColor`, `background`, `regionFill`, `regionStroke`, `selectedFill`, `pinColor` and `pinRing`, or use `--rad-region-stage-*` variables. Forced colors use system colors.
+
+## API
+
+| RegionStage prop             | Type                                              | Default   |
+| ---------------------------- | ------------------------------------------------- | --------- |
+| aria-label / aria-labelledby | string                                            | Required  |
+| type                         | single / multiple; fixed per mount                | single    |
+| value / defaultValue         | `string \| null` (single) / `string[]` (multiple) | null / [] |
+| onValueChange                | `(value) => void`, matching `type`                | None      |
+| maxZoom                      | number of at least 1                              | 8         |
+
+| Part prop                  | Type                                                    | Default  |
+| -------------------------- | ------------------------------------------------------- | -------- |
+| Controls labels            | `zoomInLabel`, `zoomOutLabel`, `zoomResetLabel`: string | Required |
+| Controls size              | `controlSize`                                           | small    |
+| Viewport `viewBox`         | four numbers, positive width and height                 | Required |
+| Region `value`             | nonempty string                                         | Required |
+| Region `d`                 | SVG path data, or shape children                        | None     |
+| Region `series`            | `SeriesNumber`, 1 to 8                                  | None     |
+| Pin `x` / `y`              | finite numbers in `viewBox` units                       | Required |
+| Pin `open` / `defaultOpen` | boolean, with `onOpenChange`                            | false    |
+| Pin `callout`              | PopoverContent props; role defaults to `dialog`         | None     |
+
+Each part also takes its host's native props, `style` as ThemeStyle and additive `data-slot`. A missing name or label, a bad `viewBox`, `maxZoom` or series, a repeated value or a changed `type` throw a `TypeError`.
+
+Exports `RegionStage`, `RegionStageControls`, `RegionStageViewport`, `RegionStageRegion`, `RegionStagePin` and their `Props` types.

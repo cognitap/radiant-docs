@@ -1,0 +1,92 @@
+---
+title: AudioPlayer
+description: Play a short audio clip with a play button, a scrubber and the elapsed and total time.
+---
+
+import { PlayVoiceNoteDemo, PreviewEpisodesDemo } from '../../components/AudioPlayerDemo'
+
+<PlayVoiceNoteDemo />
+
+## Usage
+
+Use AudioPlayer for a short clip people play on the page, such as a voice note or a podcast preview. It wraps one native `<audio>` element, which owns playback. Use [Carousel](/docs/carousel/) for a set of images.
+
+AudioPlayer has no built-in text: pass `playLabel`, `pauseLabel` and `seekLabel` in the page's language.
+
+```tsx
+<AudioPlayer
+  src="/audio/voice-note.wav"
+  aria-label="Voice note from Priya"
+  playLabel="Play"
+  pauseLabel="Pause"
+  seekLabel="Seek"
+  errorText="This voice note cannot be played."
+/>
+```
+
+## Examples
+
+### Preview podcast episodes
+
+`compact` keeps only the play button, so it needs `aria-label` or `aria-labelledby`. Inside an `AudioPlayerGroup`, starting one player pauses the one playing.
+
+<PreviewEpisodesDemo />
+
+## State
+
+The media element owns playback; `onPlayingChange` reports it, and `mediaRef` reaches the element for volume or rate. The scrubber is disabled until a positive length is known; a stream of unknown length shows `--:--` as its total. A pointer drag seeks on release.
+
+The button is disabled without `src` or children. Pass `<source>` and `<track>` elements as children for alternatives and captions; give the player a new `key` to load changed sources. When the media or every source fails, the root gets `data-state="error"`, the controls are disabled and `errorText` is announced. Without `errorText` the failure has no text.
+
+## Accessibility
+
+AudioPlayer is a group, named by `aria-label` or `aria-labelledby`. The button's name switches between `playLabel` and `pauseLabel`, so the change is announced. The scrubber is a [Slider](/docs/slider/) named by `seekLabel` that reads the position as spoken time in the locale. While the clip plays, a focused scrubber keeps its value until it seeks, pauses or ends, so time updates do not interrupt a screen reader. The root sets `aria-busy` while loading or buffering.
+
+| Key                 | Behavior                        |
+| ------------------- | ------------------------------- |
+| Space / Enter       | Play or pause, on the button    |
+| Arrow keys          | Seek 1%, following the text dir |
+| Page Up / Page Down | Seek 10%                        |
+| Home / End          | Seek to the start or end        |
+
+## Motion
+
+Nothing animates; the scrubber moves with the time without a transition.
+
+## Styling
+
+| Part     | Attributes                                                                    |
+| -------- | ----------------------------------------------------------------------------- |
+| Root     | `data-slot="audio-player"`, `data-state`, `data-compact`, `data-control-size` |
+| Media    | `data-slot="audio-player-media"`, `<audio>`                                   |
+| Button   | `data-slot="audio-player-toggle"`                                             |
+| Scrubber | `data-slot="audio-player-scrubber"`                                           |
+| Time     | `data-slot="audio-player-time"`                                               |
+| Error    | `data-slot="audio-player-error"`, `<output>`                                  |
+
+`components.audioPlayer` sets `gap`, `padding`, `radius`, `background`, `borderWidth`, `borderColor`, `timeColor` and `timeSize`, or use `--rad-audio-player-*` variables. A compact player has no frame. `parts` styles `toggle`, `scrubber`, `time` and `error`.
+
+## API
+
+| Prop                         | Type                              | Default  |
+| ---------------------------- | --------------------------------- | -------- |
+| playLabel / pauseLabel       | string                            | Required |
+| seekLabel                    | string; omitted when `compact`    | Required |
+| aria-label / aria-labelledby | string; required when `compact`   | None     |
+| src                          | string                            | None     |
+| compact                      | boolean                           | false    |
+| errorText                    | ReactNode                         | None     |
+| preload                      | none / metadata / auto            | metadata |
+| loop / muted                 | boolean                           | false    |
+| crossOrigin                  | native `crossOrigin`              | None     |
+| locale                       | string; formats the time          | Nearest  |
+| controlSize                  | small / medium / large            | medium   |
+| onPlayingChange              | `(playing: boolean) => void`      | None     |
+| mediaRef                     | `Ref<HTMLAudioElement>`           | None     |
+| children                     | `<source>` and `<track>` elements | None     |
+| style                        | ThemeStyle                        | None     |
+| Other props                  | Native div props except role      | Native   |
+
+Empty labels, a missing name on a compact player or an unknown `preload` throw a `TypeError`. `locale` defaults to the nearest [LocaleProvider](/docs/locale-provider/).
+
+Exports `AudioPlayer`, `AudioPlayerGroup` and the types `AudioPlayerProps`, `AudioPlayerGroupProps` and `AudioPlayerState`.

@@ -9,7 +9,7 @@ import { StageDemo, StageStreamingDemo } from '../../components/StageDemo'
 
 ## Usage
 
-Use Stage around a widget your app builds, such as a map or a canvas, so it gets the frame Radiant's own surfaces use. Stage gives the actions, body and footer no meaning. Use [Card](/docs/card/) for static content about one subject and [AspectRatio](/docs/aspect-ratio/) for media without a frame.
+Use Stage around a widget your app builds, such as a canvas, so it gets Radiant's surface frame; for a pan-and-zoom drawing, put a [RegionStage](/docs/region-stage/) inside. Its actions, body and footer carry no meaning. Use [Card](/docs/card/) for static content and [AspectRatio](/docs/aspect-ratio/) for media without a frame.
 
 ```tsx
 <Stage>

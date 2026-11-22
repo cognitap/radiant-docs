@@ -9,7 +9,7 @@ import { PickSeatsDemo, ShowRoomBookingsDemo, MarkDeploysDemo } from '../../comp
 
 ## Usage
 
-Use Matrix when position in two dimensions is the content, such as a seat map, a schedule or a heatmap. Use [Table](/docs/table/) or [DataTable](/docs/data-table/) for records and [Grid](/docs/grid/) to lay out equal items.
+Use Matrix when position in two dimensions is the content, such as a seat map, a schedule or a heatmap. Use [Table](/docs/table/) or [DataTable](/docs/data-table/) for records, [Grid](/docs/grid/) to lay out equal items and [RegionStage](/docs/region-stage/) for places on a drawing.
 
 ```tsx
 <Matrix
@@ -105,23 +105,23 @@ Every part takes the native props of a div (MatrixMarker a span) except `role`, 
 | --------------- | ------------------------------------------- | ------- |
 | value           | string; distinct, makes the cell selectable | None    |
 | state           | active / muted / highlighted                | None    |
-| series          | `'1'` to `'8'`                              | None    |
+| series          | `SeriesNumber`, 1 to 8                      | None    |
 | disabled        | boolean                                     | false   |
 | altText         | string; replaces the announced contents     | None    |
 
-| MatrixMarker prop | Type            | Default |
-| ----------------- | --------------- | ------- |
-| variant           | solid / outline | solid   |
-| series            | `'1'` to `'8'`  | Cell's  |
+| MatrixMarker prop | Type                   | Default |
+| ----------------- | ---------------------- | ------- |
+| variant           | solid / outline        | solid   |
+| series            | `SeriesNumber`, 1 to 8 | Cell's  |
 
 | MatrixRegion prop    | Type                    | Default  |
 | -------------------- | ----------------------- | -------- |
 | row / column         | positive integer        | Required |
 | rowSpan / columnSpan | positive integer        | 1        |
 | label                | ReactNode               | Required |
-| series               | `'1'` to `'8'`          | None     |
+| series               | `SeriesNumber`, 1 to 8  | None     |
 | parts                | `{ label?: PartStyle }` | None     |
 
-MatrixRegion is a direct child of Matrix. Invalid `columns`, spans, states, series or variants throw a `TypeError`.
+MatrixRegion is a direct child of Matrix. Invalid `columns`, spans, states, series or variants throw a `TypeError`, as does a string series such as `"3"`.
 
 Exports `Matrix`, `MatrixRow`, `MatrixColumnHeader`, `MatrixRowHeader`, `MatrixCorner`, `MatrixCell`, `MatrixMarker`, `MatrixRegion`, their `Props` types, `MatrixCellState` and `MatrixValue`.

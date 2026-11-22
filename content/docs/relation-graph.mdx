@@ -1,0 +1,111 @@
+---
+title: RelationGraph
+description: Show nodes joined by directed, labelled edges, laid out from the data as a tree, layers or a circle.
+---
+
+import {
+  ShowOrgChartDemo,
+  ShowDependenciesDemo,
+  PickStateDemo
+} from '../../components/RelationGraphDemo'
+
+<ShowOrgChartDemo />
+
+## Usage
+
+Use RelationGraph to show how a few dozen things connect, such as an org chart, service dependencies or a state machine. Use [Tree](/docs/tree/) to browse a hierarchy and [Timeline](/docs/timeline/) for events in order.
+
+Pass `connectionText` in the page's language; the built-in text uses `→` and `←` symbols.
+
+```tsx
+<RelationGraph
+  aria-label="Company organization"
+  layout="tree"
+  connectionText={({ direction, node }) =>
+    `${direction === 'outgoing' ? 'To' : 'From'} ${node.label}`
+  }
+  nodes={[
+    { id: 'ceo', label: 'Chief executive', series: 1 },
+    { id: 'eng', label: 'Engineering', series: 3 }
+  ]}
+  edges={[{ from: 'ceo', to: 'eng', label: 'leads' }]}
+/>
+```
+
+## Examples
+
+### Show service dependencies
+
+`layered` places nodes in layers along edge direction. `highlighted` draws a node or edge stronger and `muted` fainter; neither is announced, so say it in `description`.
+
+<ShowDependenciesDemo />
+
+### Pick a state in a state machine
+
+`circular` keeps data order clockwise from the top, and a loop returns to its node. With `type`, nodes become options that Enter, Space or a click selects.
+
+<PickStateDemo />
+
+## State
+
+Without `type`, RelationGraph only displays. `type="single"` holds one node id or `null`; `type="multiple"` holds a string array. Use `defaultValue`, or `value` with `onValueChange`, not both; `type` stays fixed per mount.
+
+`tree` puts each node under its first parent, and separate trees wrap onto new rows. Cycles and loops are drawn in every layout. The graph is sized in em. A graph larger than its host keeps its size and scrolls; drag the empty canvas to pan. In right-to-left text the layout mirrors.
+
+## Accessibility
+
+Name the graph with `aria-label` or `aria-labelledby`. Without `type` it is a group of list items; with it, a listbox of options in data order. Each node is named by its label and described by its connections, each followed by its edge's `description`, then its own `description`. Keep `connectionText` stable.
+
+One node holds the tab stop, and focusing a node scrolls it into view.
+
+| Key                 | Behavior                                                         |
+| ------------------- | ---------------------------------------------------------------- |
+| Left / Right arrows | Previous or next node in the row, or around the ring; follow dir |
+| Up / Down arrows    | Nearest node in the row above or below, preferring a linked one  |
+| Home / End          | First or last node in data order                                 |
+| Space / Enter       | Select or clear the node, with `type`                            |
+
+## Motion
+
+Nothing animates.
+
+## Styling
+
+| Part       | Attributes                                                                                               |
+| ---------- | -------------------------------------------------------------------------------------------------------- |
+| Root       | `data-slot="relation-graph"`, `data-layout`                                                              |
+| Viewport   | `data-slot="relation-graph-viewport"`, `data-panning`                                                    |
+| Edge layer | `data-slot="relation-graph-edges"`, SVG                                                                  |
+| Edge       | `data-slot="relation-graph-edge"`, `data-from`, `data-to`, `data-series`, `data-emphasis`, `data-active` |
+| Edge label | `data-slot="relation-graph-edge-label"`                                                                  |
+| Node list  | `data-slot="relation-graph-nodes"`                                                                       |
+| Node       | `data-slot="relation-graph-node"`, `data-id`, `data-series`, `data-emphasis`, `data-selected`            |
+
+Nodes and edges take the theme's series colors. `components.relationGraph` sets `maxHeight` (32rem), `background`, `nodeRadius`, `nodeBackground`, `nodeBorderColor`, `labelWeight`, `labelSize`, `edgeColor`, `selectedColor` and `mutedOpacity`, or use `--rad-relation-graph-*` variables. Forced colors use system colors.
+
+## API
+
+| Prop                         | Type                                              | Default         |
+| ---------------------------- | ------------------------------------------------- | --------------- |
+| aria-label / aria-labelledby | string                                            | Required        |
+| layout                       | tree / layered / circular                         | Required        |
+| nodes                        | `RelationGraphNode[]`, at least one               | Required        |
+| edges                        | `RelationGraphEdge[]`                             | `[]`            |
+| connectionText               | `({ direction, node, edge }) => string`           | `→ node: label` |
+| type                         | single / multiple; fixed per mount                | None            |
+| value / defaultValue         | `string \| null` (single) / `string[]` (multiple) | null / []       |
+| onValueChange                | `(value) => void`, matching `type`                | None            |
+| style                        | ThemeStyle                                        | None            |
+| Other props                  | Native div props except role and children         | Native          |
+
+| Field       | Node                   | Edge                        |
+| ----------- | ---------------------- | --------------------------- |
+| Identity    | `id`, unique; `label`  | `from`, `to` node ids       |
+| label       | Required               | Optional, drawn on the edge |
+| series      | `SeriesNumber`, 1 to 8 | `SeriesNumber`, 1 to 8      |
+| emphasis    | highlighted / muted    | highlighted / muted         |
+| description | Announced after links  | Announced after the link    |
+
+`direction` is `outgoing` or `incoming`; `node` is the other end. An edge from a node to itself is a loop. Blank ids or labels, repeated ids, edges to unknown ids, or a bad layout, series or emphasis throw a `TypeError`.
+
+Exports `RelationGraph` and the types `RelationGraphProps`, `RelationGraphNode`, `RelationGraphEdge`, `RelationGraphConnection`, `RelationGraphConnectionText`, `RelationGraphLayout` and `RelationGraphEmphasis`.

@@ -127,7 +127,10 @@ export const categories = [
       'code-block',
       'highlight',
       'annotated-text',
-      'carousel'
+      'carousel',
+      'audio-player',
+      'region-stage',
+      'relation-graph'
     ]
   },
   {
