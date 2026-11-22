@@ -39,6 +39,22 @@ Use Tooltip for a brief description of a button. Use [Popover](/docs/popover/) f
 
 <TooltipControlledDemo />
 
+### Point at an SVG shape
+
+`anchor` works as on [Popover](/docs/popover/#anchor-to-an-svg-shape-or-a-rect). Without a trigger, own `open` from the shape's hover and focus, and point its `aria-describedby` at `useTooltip()` `contentId`.
+
+```tsx
+<Tooltip
+  open={!!seat}
+  anchor={seat}
+>
+  <SeatMap onSeat={setSeat} />
+  <TooltipPortal>
+    <TooltipContent>Window seat, extra legroom.</TooltipContent>
+  </TooltipPortal>
+</Tooltip>
+```
+
 ## State
 
 Use `open` with `onOpenChange`, or `defaultOpen`, never both. A controlled owner may refuse a change: the tooltip stays open after Escape while `open` stays true. Prop changes do not call `onOpenChange`. `useTooltip()` returns `{ open, setOpen, contentId }`, or `null` outside a Tooltip.
@@ -49,9 +65,9 @@ Tooltip takes no part in forms. TooltipTrigger defaults to `type="button"`.
 
 A tooltip only describes. It never holds essential information, because touch never opens it. Content is a `span` with `role="tooltip"` that cannot take focus and must contain no interactive elements. The trigger gets `aria-describedby` pointing at it, after any description IDs you pass. The tooltip never names the button, so an icon-only trigger needs `aria-label`.
 
-A natively `disabled` button cannot take focus, so keyboard and touch users never see its tooltip. Put the reason a control is disabled in visible text.
+A natively `disabled` button cannot take focus, so keyboard users never see its tooltip; put the reason in visible text.
 
-TooltipTrigger keeps `pressed` for toolbar toggles. It opens nothing on click, so it has no `aria-expanded` or `aria-haspopup`; clicking runs the button's action and closes the tooltip.
+TooltipTrigger keeps `pressed` for toolbar toggles. It has no `aria-expanded` or `aria-haspopup`; clicking runs the button's action and closes the tooltip.
 
 | Key           | Behavior                                                           |
 | ------------- | ------------------------------------------------------------------ |
@@ -60,15 +76,15 @@ TooltipTrigger keeps `pressed` for toolbar toggles. It opens nothing on click, s
 | Escape        | Close without moving focus until focus or hover leaves and returns |
 | Enter / Space | Run the button's action and close the tooltip                      |
 
-Hover opens after `openDelay`; the pointer can cross the gap to the content. Inside a Popover, the tooltip gets Escape first.
+Hover opens after `openDelay`; the pointer can cross to the content. Inside a Popover, the tooltip gets Escape first.
 
 ## Motion
 
-With `MotionProvider` from `@cognitap/radiant/motion/react`, content fades in. Closing never waits for an animation. `motion="off"` on TooltipContent or reduced motion shows it at full opacity.
+With `MotionProvider` from `@cognitap/radiant/motion/react`, content fades in. Closing never waits. `motion="off"` on TooltipContent or reduced motion shows it at full opacity.
 
 ## Styling
 
-Tooltip and TooltipPortal render no element. The portal mounts content beside the trigger, keeping theme and modal ancestry, and content shows in the top layer.
+Tooltip and TooltipPortal render no element. The portal mounts content beside the trigger or anchor element, keeping theme and modal ancestry, in the top layer.
 
 TooltipTrigger renders [Button](/docs/button/) with `data-slot="button tooltip-trigger"`. TooltipContent has `data-slot="tooltip-content"` followed by a caller's tokens, `data-state`, `data-motion`, and the `data-side` and `data-align` used after flipping. `className`, `style` and `ref` target the span.
 
@@ -82,6 +98,7 @@ Use `components.tooltip` or `--rad-tooltip-*` variables: `max-width` (20rem), `p
 | onOpenChange       | (open: boolean) => void                 | None    |
 | openDelay          | Finite nonnegative ms; focus ignores it | 500     |
 | closeDelay         | Finite nonnegative ms                   | 150     |
+| anchor             | `PopoverAnchor \| null`                 | Trigger |
 | children           | ReactNode                               | None    |
 
 | TooltipTrigger prop | Type                                                         | Default         |
@@ -100,6 +117,6 @@ Use `components.tooltip` or `--rad-tooltip-*` variables: `max-width` (20rem), `p
 | ref                           | `Ref<HTMLSpanElement>`                         | None            |
 | Native span attributes        | Except id, role, popover and tabIndex          | Native defaults |
 
-`TooltipPortal` accepts children and has no host. Tooltip composes the trigger's focus, blur, pointer and click handlers with yours.
+Tooltip composes the trigger's focus, blur, pointer and click handlers with yours.
 
 Exports: `Tooltip`, `TooltipTrigger`, `TooltipContent`, `TooltipPortal`, `useTooltip`; types `TooltipProps`, `TooltipState`, `TooltipTriggerProps`, `TooltipContentProps`, `TooltipPortalProps`, `TooltipRenderProps`.

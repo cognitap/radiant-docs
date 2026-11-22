@@ -1,6 +1,6 @@
 ---
 title: Popover
-description: Nonmodal content anchored to a button, for details or a small form opened on demand.
+description: Nonmodal details or a small form, anchored to a button, SVG shape or rect.
 ---
 
 import {
@@ -14,7 +14,7 @@ import {
 
 ## Usage
 
-Use Popover for details or a small form the reader opens on demand. Use [Tooltip](/docs/tooltip/) to describe a control, [HoverCard](/docs/hover-card/) for a link preview, [Menu](/docs/menu/) for a list of actions and [Dialog](/docs/dialog/) for a modal task.
+Use Popover for details or a small form opened on demand. Use [Tooltip](/docs/tooltip/) to describe a control, [HoverCard](/docs/hover-card/) for a link preview, [Menu](/docs/menu/) for a list of actions and [Dialog](/docs/dialog/) for a modal task.
 
 ```tsx
 <Popover>
@@ -42,17 +42,34 @@ Use Popover for details or a small form the reader opens on demand. Use [Tooltip
 
 <PopoverPlacementDemo />
 
+### Anchor to an SVG shape or a rect
+
+`anchor` takes an element, such as an SVG region, or a viewport rect. A rect getter is re-read on each render, scroll and resize.
+
+```tsx
+const [region, setRegion] = useState<SVGPathElement | null>(null)
+
+<svg>
+  <path ref={setRegion} tabIndex={0} d={north} onClick={() => setOpen(true)} />
+</svg>
+<Popover open={open} onOpenChange={setOpen} anchor={region}>
+  <PopoverPortal>
+    <PopoverContent role="dialog" aria-label="North depot">…</PopoverContent>
+  </PopoverPortal>
+</Popover>
+```
+
 ## State
 
-Use `open` with `onOpenChange`, or `defaultOpen`, never both. `onOpenChange` fires once per request: trigger, Close, Escape, outside pointer or focus leaving. A controlled owner refuses a close by not updating `open`. Closing an ancestor Popover or Dialog still hides descendants. `usePopover()` returns `{ open, setOpen, contentId }`, or `null` outside a Popover.
+Use `open` with `onOpenChange`, or `defaultOpen`, never both. `onOpenChange` fires once per request: trigger, Close, Escape, outside pointer or focus leaving. A controlled owner refuses a close by not updating `open`. Closing an ancestor Popover or Dialog hides descendants. `usePopover()` returns `{ open, setOpen, contentId }`, or `null` outside a Popover.
 
-Popover adds no form value. `PopoverPortal` mounts content in the trigger's nearest block container, so a surrounding `<form>`, theme and modal ancestry still apply.
+Popover adds no form value. `PopoverPortal` mounts content in the nearest block container of the trigger or anchor element, so a surrounding `<form>`, theme and modal ancestry apply; a rect anchor renders it in place.
 
 ## Accessibility
 
-The trigger is a native button with `aria-expanded` and `aria-controls`. Content is a plain `div`: give it the role and name it needs, such as `role="dialog"` with `aria-label` for a form. Popover adds no menu or listbox behavior.
+The trigger is a native button with `aria-expanded` and `aria-controls`. Content is a plain `div`: give it a role and name, such as `role="dialog"` with `aria-label`. Popover adds no menu or listbox behavior.
 
-Opening keeps focus on the trigger unless `initialFocusRef` names a descendant. Content follows the trigger in Tab order, without a focus trap. Escape and Close return focus to the trigger when focus was inside; outside dismissal leaves focus where it landed.
+Opening keeps focus on the trigger unless `initialFocusRef` names a descendant. Content follows the trigger in Tab order, without a focus trap. Escape and Close return inside focus to `returnFocusRef`, else the trigger, a focusable anchor or the prior focus; outside dismissal leaves focus where it landed.
 
 | Key             | Where              | Behavior                              |
 | --------------- | ------------------ | ------------------------------------- |
@@ -68,19 +85,20 @@ With a `MotionProvider` from `@cognitap/radiant/motion/react`, content fades in.
 
 ## Styling
 
-Content flips and shifts to stay inside the visual viewport. On top and bottom sides, `start` and `end` follow text direction. `data-side` and `data-align` report the placement after flipping.
+Content flips and shifts to stay inside the visual viewport. On top and bottom sides, `start` and `end` follow text direction.
 
-Content exposes `data-slot="popover-content"`, `data-state`, `data-side`, `data-align` and `data-motion`. The trigger and close add `popover-trigger` and `popover-close` to Button's `data-slot`, and the trigger exposes `data-state`. Caller `data-slot` values are appended; `className` merges over the defaults.
+Content exposes `data-slot="popover-content"`, `data-state`, `data-motion`, and the `data-side` and `data-align` used after flipping. The trigger and close add `popover-trigger` and `popover-close` to Button's `data-slot`, and the trigger exposes `data-state`. Caller `data-slot` values are appended; `className` merges over the defaults.
 
 Use `components.popover` or `--rad-popover-*` variables, such as `--rad-popover-width` (default `20rem`), `padding`, `radius` and `shadow`.
 
 ## API
 
-| Popover prop       | Type                     | Default |
-| ------------------ | ------------------------ | ------- |
-| open / defaultOpen | boolean; exclusive owner | false   |
-| onOpenChange       | (open: boolean) => void  | None    |
-| children           | ReactNode                | None    |
+| Popover prop       | Type                                                            | Default |
+| ------------------ | --------------------------------------------------------------- | ------- |
+| open / defaultOpen | boolean; exclusive owner                                        | false   |
+| onOpenChange       | (open: boolean) => void                                         | None    |
+| anchor             | Element, `{ x, y, width, height }` viewport rect or rect getter | Trigger |
+| children           | ReactNode                                                       | None    |
 
 | PopoverTrigger prop          | Type                                                           | Default                 |
 | ---------------------------- | -------------------------------------------------------------- | ----------------------- |
@@ -91,16 +109,17 @@ Use `components.popover` or `--rad-popover-*` variables, such as `--rad-popover-
 | Native button props          | `aria-controls`, `aria-expanded` and `popoverTarget` are owned | Native defaults         |
 | ref                          | `Ref<HTMLButtonElement>`                                       | None                    |
 
-| PopoverContent prop           | Type                                        | Default         |
-| ----------------------------- | ------------------------------------------- | --------------- |
-| side                          | top / right / bottom / left                 | bottom          |
-| align                         | start / center / end                        | start           |
-| sideOffset / collisionPadding | Finite nonnegative pixels                   | 8 / 8           |
-| initialFocusRef               | `RefObject<HTMLElement \| null>`            | Trigger focus   |
-| motion                        | inherit / off                               | inherit         |
-| className / style             | string / ThemeStyle                         | None            |
-| Native div props              | Includes role and naming; not id or popover | Native defaults |
-| ref                           | `Ref<HTMLDivElement>`                       | None            |
+| PopoverContent prop           | Type                                           | Default           |
+| ----------------------------- | ---------------------------------------------- | ----------------- |
+| side                          | top / right / bottom / left                    | bottom            |
+| align                         | start / center / end                           | start             |
+| sideOffset / collisionPadding | Finite nonnegative pixels                      | 8 / 8             |
+| initialFocusRef               | `RefObject<HTMLElement \| null>`               | Trigger focus     |
+| returnFocusRef                | `RefObject<HTMLElement \| SVGElement \| null>` | See Accessibility |
+| motion                        | inherit / off                                  | inherit           |
+| className / style             | string / ThemeStyle                            | None              |
+| Native div props              | Includes role and naming; not id or popover    | Native defaults   |
+| ref                           | `Ref<HTMLDivElement>`                          | None              |
 
 | PopoverClose prop            | Type                                             | Default                 |
 | ---------------------------- | ------------------------------------------------ | ----------------------- |
@@ -111,4 +130,4 @@ Use `components.popover` or `--rad-popover-*` variables, such as `--rad-popover-
 
 `PopoverPortal` accepts children, has no host and renders nothing until the trigger mounts.
 
-Exports: `Popover`, `PopoverTrigger`, `PopoverPortal`, `PopoverContent`, `PopoverClose`, `usePopover`; types `PopoverProps`, `PopoverState`, `PopoverTriggerProps`, `PopoverContentProps`, `PopoverCloseProps`, `PopoverPortalProps`, `PopoverRenderProps`, `PopoverSide`, `PopoverAlign`.
+Exports: `Popover`, `PopoverTrigger`, `PopoverPortal`, `PopoverContent`, `PopoverClose`, `usePopover`; types `PopoverProps`, `PopoverState`, `PopoverTriggerProps`, `PopoverContentProps`, `PopoverCloseProps`, `PopoverPortalProps`, `PopoverRenderProps`, `PopoverSide`, `PopoverAlign`, `PopoverAnchor`, `PopoverAnchorRect`.
