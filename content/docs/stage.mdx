@@ -1,0 +1,85 @@
+---
+title: Stage
+description: Frame a custom interactive widget with a header, actions, a body and a footer.
+---
+
+import { StageDemo, StageStreamingDemo } from '../../components/StageDemo'
+
+<StageDemo />
+
+## Usage
+
+Use Stage around a widget your app builds, such as a map or a canvas, so it gets the frame Radiant's own surfaces use. Stage gives the actions, body and footer no meaning. Use [Card](/docs/card/) for static content about one subject and [AspectRatio](/docs/aspect-ratio/) for media without a frame.
+
+```tsx
+<Stage>
+  <StageHeader>
+    <StageTitle>Route map</StageTitle>
+    <StageDescription>Station to lake.</StageDescription>
+    <StageActions>
+      <Button onClick={zoomIn}>Zoom in</Button>
+    </StageActions>
+  </StageHeader>
+  <StageBody aspectRatio={3 / 2}>
+    <RouteMap />
+  </StageBody>
+  <StageFooter>
+    <Button onClick={share}>Share route</Button>
+  </StageFooter>
+</Stage>
+```
+
+## Examples
+
+### Hold the body while content streams
+
+With `aspectRatio`, StageBody keeps its size while a [Skeleton](/docs/skeleton/) swaps for content, so the page does not shift. Content taller than the box is clipped; put it in a [ScrollArea](/docs/scroll-area/) to scroll. The box leaves room for the focus ring of a control that fills it.
+
+<StageStreamingDemo />
+
+## Accessibility
+
+Stage is a `<div>` with no role. To name it, pass `role="group"` (or `role="region"` for a landmark) and `aria-labelledby` with the StageTitle `id`; the A2UI Stage does this for you. StageTitle renders a heading, `h2` by default; choose `level` to fit the page outline. Set `aria-busy` on StageBody while its content loads. Focus follows source order at every width.
+
+## Motion
+
+Stage, StageTitle and StageDescription transition color, background and border over `--rad-motion-color-duration`. Reduced motion removes the transition.
+
+## Styling
+
+Stage is an inline-size container, so its parts follow the Stage's width, not the viewport. In a box that sizes to its content, Stage takes 20rem. Below 30rem, the actions sit under the description and footer items stack at full width. From 30rem, the actions sit beside the title and footer items share a wrapping row.
+
+| Part             | Element                                     | data-slot                               |
+| ---------------- | ------------------------------------------- | --------------------------------------- |
+| Stage            | `div`, grid, inline-size container `stage`  | `stage`                                 |
+| StageHeader      | `div`, grid                                 | `stage-header`                          |
+| StageTitle       | `h1`–`h6` by `level`                        | `stage-title`                           |
+| StageDescription | `p`                                         | `stage-description`                     |
+| StageActions     | `div`, wrapping row                         | `stage-actions`                         |
+| StageBody        | `div`, grid; AspectRatio with `aspectRatio` | `stage-body`, `aspect-ratio stage-body` |
+| StageFooter      | `div`, column, then wrapping row            | `stage-footer`                          |
+
+Caller classes win, and a caller `data-slot` adds tokens after the part's own. `components.stage` or `--rad-stage-*` variables set radius, corner-shape, background, color, border, shadow, padding, gap, header-gap, actions-gap, footer-gap, title-size, title-weight, description-color and description-size. Padding and gap fall back to the surface padding and gap; the header, actions and footer gaps fall back to the spacing scale. Forced colors use system canvas and text colors and drop the shadow.
+
+## API
+
+Every part takes the native props of its element, `className`, `style` as ThemeStyle, additive `data-slot` and a ref.
+
+| Stage prop | Type                  | Default |
+| ---------- | --------------------- | ------- |
+| padding    | tight / normal / airy | normal  |
+| ref        | `Ref<HTMLDivElement>` | None    |
+
+| StageTitle prop | Type                      | Default |
+| --------------- | ------------------------- | ------- |
+| level           | 1 / 2 / 3 / 4 / 5 / 6     | 2       |
+| ref             | `Ref<HTMLHeadingElement>` | None    |
+
+| StageBody prop | Type                   | Default |
+| -------------- | ---------------------- | ------- |
+| aspectRatio    | number, width ÷ height | None    |
+| ref            | `Ref<HTMLDivElement>`  | None    |
+
+StageHeader, StageActions and StageFooter take `Ref<HTMLDivElement>`; StageDescription takes `Ref<HTMLParagraphElement>`. StageBody passes `aspectRatio` to [AspectRatio](/docs/aspect-ratio/) as `ratio`, so it must be finite and greater than zero.
+
+Exports: `Stage`, `StageHeader`, `StageTitle`, `StageDescription`, `StageActions`, `StageBody`, `StageFooter`; types `StageProps`, `StageHeaderProps`, `StageTitleProps`, `StageDescriptionProps`, `StageActionsProps`, `StageBodyProps`, `StageFooterProps`, `StageHeadingLevel`.

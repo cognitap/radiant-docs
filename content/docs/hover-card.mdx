@@ -39,6 +39,22 @@ Use HoverCard for supplementary link previews. Keep the destination useful witho
 
 <HoverCardRelatedDemo />
 
+### Preview a diagram node
+
+`anchor` places the card beside an element or rect instead of the link, as on [Popover](/docs/popover/#anchor-to-an-svg-shape-or-a-rect). Without a trigger, `openDelay` and `closeDelay` do nothing; own `open` from the node's hover and focus. Focus returns as on [Popover](/docs/popover/#accessibility).
+
+```tsx
+<HoverCard
+  open={!!node}
+  onOpenChange={next => !next && setNode(null)}
+  anchor={node}
+>
+  <HoverCardPortal>
+    <HoverCardContent>Build stage: 4 jobs.</HoverCardContent>
+  </HoverCardPortal>
+</HoverCard>
+```
+
 ## State
 
 Use `open` or `defaultOpen`, never both; ownership stays fixed per mount. `onOpenChange` requests changes and a controlled owner may refuse. Prop synchronization emits no callback. `useHoverCard()` returns open state, `setOpen` and the content ID, or `null` outside an owner.
@@ -67,12 +83,13 @@ Use `components.hoverCard.width` or `--rad-hover-card-width`; other surface over
 
 ## API
 
-| HoverCard prop         | Type                            | Default   |
-| ---------------------- | ------------------------------- | --------- |
-| open / defaultOpen     | boolean; exclusive owner        | false     |
-| onOpenChange           | (open: boolean) => void         | None      |
-| openDelay / closeDelay | Finite nonnegative milliseconds | 500 / 150 |
-| children               | ReactNode                       | None      |
+| HoverCard prop         | Type                                          | Default   |
+| ---------------------- | --------------------------------------------- | --------- |
+| open / defaultOpen     | boolean; exclusive owner                      | false     |
+| onOpenChange           | (open: boolean) => void                       | None      |
+| openDelay / closeDelay | Finite nonnegative milliseconds               | 500 / 150 |
+| anchor                 | [`PopoverAnchor`](/docs/popover/#api) or null | Trigger   |
+| children               | ReactNode                                     | None      |
 
 | HoverCardTrigger prop            | Type                                                          | Default       |
 | -------------------------------- | ------------------------------------------------------------- | ------------- |
@@ -81,15 +98,16 @@ Use `components.hoverCard.width` or `--rad-hover-card-width`; other surface over
 | Link props and native attributes | Includes external, variant, tone, className, style and events | Link defaults |
 | ref                              | `Ref<HTMLAnchorElement>`                                      | None          |
 
-| HoverCardContent prop            | Type                                | Default         |
-| -------------------------------- | ----------------------------------- | --------------- |
-| side                             | top / right / bottom / left         | bottom          |
-| align                            | start / center / end                | start           |
-| sideOffset / collisionPadding    | Finite nonnegative pixels           | 8 / 8           |
-| motion                           | inherit / off                       | inherit         |
-| className / style                | string / ThemeStyle                 | None            |
-| ref                              | `Ref<HTMLDivElement>`               | None            |
-| Native div attributes and events | Includes role and accessible naming | Native defaults |
+| HoverCardContent prop            | Type                                           | Default         |
+| -------------------------------- | ---------------------------------------------- | --------------- |
+| side                             | top / right / bottom / left                    | bottom          |
+| align                            | start / center / end                           | start           |
+| sideOffset / collisionPadding    | Finite nonnegative pixels                      | 8 / 8           |
+| returnFocusRef                   | `RefObject<HTMLElement \| SVGElement \| null>` | See Examples    |
+| motion                           | inherit / off                                  | inherit         |
+| className / style                | string / ThemeStyle                            | None            |
+| ref                              | `Ref<HTMLDivElement>`                          | None            |
+| Native div attributes and events | Includes role and accessible naming            | Native defaults |
 
 `HoverCardPortal` accepts children and has no host.
 
