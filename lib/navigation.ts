@@ -133,6 +133,7 @@ export const categories = [
       'app-shell',
       'aspect-ratio',
       'stack',
+      'stage',
       'separator',
       'scroll-area',
       'resizable',
