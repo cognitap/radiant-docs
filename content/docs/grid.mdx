@@ -28,7 +28,7 @@ The div adds no role or focus stop. Items keep source order in every layout, rea
 
 ## Styling
 
-Each column is at least `components.grid.minItemWidth` (`--rad-grid-min-item-width`, 12rem) and at most the Grid's own width, so a narrow Grid shows one column. Columns follow the Grid's width, not the viewport. `gap` reads `--rad-spacing-tight`, `--rad-spacing-normal` or `--rad-spacing-airy`. The root is a `div` with `data-slot="grid"`.
+Each column is at least `components.grid.minItemWidth` (`--rad-grid-min-item-width`, 12rem) and at most the Grid's own width, so a narrow Grid shows one column. Grid is an inline-size container, so columns follow its width, not the viewport; in a box that sizes to its content, it takes 20rem. Set spacing with `gap`, not a gap class: the column count reads it. `gap` reads `--rad-spacing-tight`, `--rad-spacing-normal` or `--rad-spacing-airy`. The root is a `div` with `data-slot="grid"`.
 
 ## API
 

@@ -9,22 +9,22 @@ import { SplitDemo } from '../../components/SplitDemo'
 
 ## Usage
 
-Use `Split` for main content with supporting content, such as results with their filters. Say which side the secondary area takes and how the width is shared; Split decides the geometry. Use [Grid](/docs/grid/) for equal items and [Compare](/docs/compare/) for options weighed against each other.
+Use `Split` for main content with supporting content, such as results with their filters. Say how the width is shared; Split decides the geometry. To show the secondary area at the start, put it first. Use [Grid](/docs/grid/) for equal items and [Compare](/docs/compare/) for options weighed against each other.
 
 ```tsx
-<Split side="start">
-  <SplitMain>
-    <Results />
-  </SplitMain>
+<Split>
   <SplitSecondary>
     <Filters />
   </SplitSecondary>
+  <SplitMain>
+    <Results />
+  </SplitMain>
 </Split>
 ```
 
 ## Accessibility
 
-The divs add no role or focus stop. Below 40rem the parts stack in source order; wider, `side` places the secondary area. Write the parts in reading order and pick a `side` that keeps that order, so focus and reading order match what people see.
+The divs add no role or focus stop. Stacked or side by side, the parts keep source order, so reading and focus order always match what people see.
 
 ## Styling
 
@@ -42,8 +42,7 @@ Every part takes the native props of a div, `className`, `style` as ThemeStyle, 
 
 | Split prop | Type                            | Default    |
 | ---------- | ------------------------------- | ---------- |
-| side       | `'start' \| 'end'`              | `'end'`    |
 | ratio      | `'balanced' \| 'main'`          | `'main'`   |
 | gap        | `'tight' \| 'normal' \| 'airy'` | `'normal'` |
 
-`ratio="main"` gives the main area two thirds of the row; `balanced` halves it. Other values throw. Exports: `Split`, `SplitMain`, `SplitSecondary`, `SplitProps`, `SplitMainProps`, `SplitSecondaryProps`, `SplitSide`, `SplitRatio`.
+`ratio="main"` gives the main area two thirds of the row; `balanced` halves it. Other values throw. Exports: `Split`, `SplitMain`, `SplitSecondary`, `SplitProps`, `SplitMainProps`, `SplitSecondaryProps`, `SplitRatio`.

@@ -22,11 +22,11 @@ Use `Reveal` for content read one part at a time, such as recipe steps. Pass the
 
 ## State
 
-Pass `value` to control the shown step or `defaultValue` to seed it; the first item is the default. `onValueChange(value)` receives the next item's `value`. Hidden steps stay mounted with the `hidden` attribute, so form input and component state survive moving away and back.
+Pass `value` to control the shown step or `defaultValue` to seed it; the first item is the default, and an uncontrolled Reveal returns to it when the shown item is removed. `onValueChange(value)` receives the next item's `value`. Hidden steps stay mounted with the `hidden` attribute, so form input and component state survive moving away and back.
 
 ## Accessibility
 
-The buttons are native and point at the steps with `aria-controls`. Previous is disabled on the first step and Next on the last; when a button disables itself, focus moves to the other button. The position text is a polite live region, announced on each change.
+The buttons are native and point at the steps with `aria-controls`. Previous is disabled on the first step and Next on the last; when a button disables itself, focus moves to the other button. Each step is a group named by `positionLabel`, and the steps form a polite live region, so a newly shown step is announced once.
 
 ## Styling
 
@@ -52,4 +52,4 @@ The buttons are native and point at the steps with `aria-controls`. Previous is 
 | gap                       | `'tight' \| 'normal' \| 'airy'`            | `'normal'` |
 | controlSize               | `'small' \| 'medium' \| 'large'`           | `'medium'` |
 
-Empty labels, duplicate values or an unknown `value` throw. Exports: `Reveal`, `RevealProps`, `RevealItem`.
+Empty labels, duplicate values or an unknown controlled `value` throw. Exports: `Reveal`, `RevealProps`, `RevealItem`.

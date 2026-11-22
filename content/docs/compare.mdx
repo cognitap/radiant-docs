@@ -27,7 +27,7 @@ Use `Compare` when people weigh two to four options, such as plans. Each Compare
 
 ## Accessibility
 
-Compare is a `<ul>` and each CompareItem an `<li>`, so screen readers announce the number of options. Put a heading or strong name in each header. Reading and focus order follow source order at every width.
+Compare is a `<ul role="list">`, kept a list in Safari, and each CompareItem an `<li>`, so screen readers announce the number of options. Put a heading or strong name in each header. Reading and focus order follow source order at every width.
 
 ## Styling
 
@@ -49,4 +49,4 @@ Every part takes the native props of its element, `className`, `style` as ThemeS
 | ------------ | ------------------------------- | ---------- |
 | gap          | `'tight' \| 'normal' \| 'airy'` | `'normal'` |
 
-Exports: `Compare`, `CompareItem`, `CompareItemHeader`, `CompareItemBody`, `CompareItemFooter` and their `Props` types.
+Fewer than two or more than four items throw. Exports: `Compare`, `CompareItem`, `CompareItemHeader`, `CompareItemBody`, `CompareItemFooter` and their `Props` types.
