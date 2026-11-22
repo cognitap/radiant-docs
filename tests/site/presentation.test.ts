@@ -2595,9 +2595,6 @@ test('Charts docs filter research data and expose exact tables with real keyboar
           .getByRole('combobox', { name: 'Research project', exact: true })
           .selectOption('atlas')
         await recruitment
-          .getByRole('checkbox', { name: 'Use generated chart palette', exact: true })
-          .check()
-        await recruitment
           .getByRole('button', { name: 'Round 1, Completed: 6', exact: true })
           .focus()
         await recruitment
