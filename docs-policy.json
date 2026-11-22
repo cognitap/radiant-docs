@@ -12,6 +12,7 @@
     "headings": ["Usage", "Examples", "State", "Accessibility", "Motion", "Styling", "API"],
     "required": ["Usage", "API"],
     "exempt": [
+      "content/docs/agents.mdx",
       "content/docs/foundations.mdx",
       "content/docs/getting-started.mdx",
       "content/docs/releases.mdx",

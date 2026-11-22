@@ -2,6 +2,7 @@ import { source } from './source'
 
 export const sections = [
   { id: 'getting-started', title: 'Getting started' },
+  { id: 'agents', title: 'Agents' },
   { id: 'foundations', title: 'Foundations' },
   { id: 'workshop', title: 'Workshop' },
   { id: 'components', title: 'Components' },

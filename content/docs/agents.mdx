@@ -1,0 +1,128 @@
+---
+title: Build with agents
+description: Render, validate and extend the interfaces your agent composes from Radiant.
+---
+
+import { AgentsDemo } from '../../components/AgentsDemo'
+
+Your agent describes an interface as [A2UI](https://a2ui.org) messages, and
+Radiant renders them with its own components. Radiant never calls a model and
+needs no API key: your app owns the prompt, the model call, storage and what
+each action does.
+
+<AgentsDemo />
+
+## Render a surface
+
+Pass the messages for one surface to `A2uiSurface` in a client component.
+Append messages as they stream in: missing components show as skeletons, and
+controls keep their state and focus across updates. The surface ignores the
+agent's theme hints, so the nearest [ThemeScope](/docs/foundations/theming/)
+decides how it looks. Switch the theme in the example above to see it.
+
+## Validate on the server
+
+Check a surface before you store it, so a user never meets a control without
+a name. `validateA2uiAccessibility` needs no DOM. With `fix: true` it returns a
+fixed copy where a safe fix exists.
+
+```ts
+import { validateA2uiAccessibility } from '@cognitap/radiant/a2ui'
+
+const { errors, messages: fixed } = validateA2uiAccessibility(messages, { fix: true })
+if (errors.some(error => !error.fixable)) return askAgentToRetry(errors)
+await saveSurface(fixed)
+```
+
+## Handle actions and diagnostics
+
+A Button's named action reaches `onAction` with its `action` name, the
+`context` it asked for and a snapshot of the surface `state`. Send it back to
+your agent or run it yourself. The surface never throws on bad output: it
+coerces or drops invalid props, shows unknown components as text and reports
+each change to `onDiagnostic`. Errors carry a `code`; log them to improve your
+prompt.
+
+## Tell the agent what it can use
+
+`renderCatalogGuidance` from `@cognitap/radiant/catalog` turns the catalog into
+prompt text: each component with when to use it, when not to, and examples.
+This site serves it as [/llms.txt](/llms.txt). Send `toCatalogJson()` of the
+registry you render with as the A2UI catalog.
+
+```ts
+import { radiantCatalog, renderCatalogGuidance } from '@cognitap/radiant/catalog'
+import { radiantA2uiExtensionRegistry } from '@cognitap/radiant/a2ui'
+
+const guidance = renderCatalogGuidance(radiantCatalog)
+const catalog = radiantA2uiExtensionRegistry.toCatalogJson()
+```
+
+## Add your own component
+
+Add an entry to the catalog with `extendCatalog`, then map it to your component
+with `createA2uiExtensionEntry` and register it under your own catalog ID.
+Style it with [public tokens](https://github.com/cognitap/radiant/blob/main/docs/theming.md#public-tokens)
+so it follows every theme.
+
+```tsx
+import { extendCatalog, radiantCatalog } from '@cognitap/radiant/catalog'
+import {
+  A2uiSurface,
+  createA2uiExtensionEntry,
+  createA2uiExtensionRegistry,
+  readA2uiValue
+} from '@cognitap/radiant/a2ui'
+
+const catalog = extendCatalog(radiantCatalog, {
+  id: 'example/sparkline',
+  version: '1.0.0',
+  description: 'Radiant plus a trend line.',
+  entries: {
+    Sparkline: {
+      name: 'Sparkline',
+      category: 'data',
+      description: 'Compact trend line for a short series.',
+      guidance: {
+        whenToUse: 'A trend beside a metric.',
+        whenNotToUse: 'Exact values or comparisons.',
+        examples: ['weekly signups', 'error rate']
+      },
+      propsSchema: {
+        type: 'object',
+        additionalProperties: false,
+        required: ['label', 'values'],
+        properties: {
+          label: { type: 'string', minLength: 1 },
+          values: { type: 'array', minItems: 2, items: { type: 'number' } }
+        }
+      },
+      slots: {},
+      bindings: {},
+      actions: {}
+    }
+  }
+})
+
+const sparkline = createA2uiExtensionEntry(catalog, {
+  name: 'Sparkline',
+  component: Sparkline,
+  accessibility: [],
+  adapter: props => (
+    <Sparkline
+      label={String(readA2uiValue(props.label) ?? '')}
+      values={(readA2uiValue(props.values) as number[]) ?? []}
+    />
+  )
+})
+
+const registry = createA2uiExtensionRegistry(catalog, {
+  catalogId: 'https://example.com/a2ui/catalog.json',
+  entries: [sparkline]
+})
+
+<A2uiSurface surfaceId="trends" messages={messages} registry={registry} />
+```
+
+Pass the same registry to `validateA2uiAccessibility`, and give the agent
+`renderCatalogGuidance(catalog)` and `registry.toCatalogJson()`.
