@@ -9,7 +9,7 @@ import { StageDemo, StageStreamingDemo } from '../../components/StageDemo'
 
 ## Usage
 
-Use Stage around a widget your app builds, such as a map or a canvas, so it gets the frame Radiant's own surfaces use. Use [Card](/docs/card/) for static content about one subject and [AspectRatio](/docs/aspect-ratio/) for media without a frame.
+Use Stage around a widget your app builds, such as a map or a canvas, so it gets the frame Radiant's own surfaces use. Stage gives the actions, body and footer no meaning. Use [Card](/docs/card/) for static content about one subject and [AspectRatio](/docs/aspect-ratio/) for media without a frame.
 
 ```tsx
 <Stage>
@@ -37,9 +37,9 @@ With `aspectRatio`, StageBody keeps its size while a [Skeleton](/docs/skeleton/)
 
 <StageStreamingDemo />
 
-## State
+### Expand into a dialog or panel
 
-With `expandTo`, StageExpand moves the Stage into a modal `dialog` or docked `panel` without remounting its parts, so widget state, focus and scroll survive.
+With `expandTo`, StageExpand moves the Stage into a modal `dialog` or docked `panel` without remounting its parts, so widget state, focus and scroll survive. An IntersectionObserver rooted outside the Stage sees the parts leave when expanded.
 
 ```tsx
 <Stage expandTo="panel">
@@ -62,11 +62,11 @@ With `expandTo`, StageExpand moves the Stage into a modal `dialog` or docked `pa
 
 ## Accessibility
 
-Stage is a `<div>` with no role. To name it, pass `role="group"` (or `role="region"` for a landmark) and `aria-labelledby` with the StageTitle `id`; the A2UI Stage does this for you. StageTitle renders a heading, `h2` by default; choose `level` to fit the page outline. Set `aria-busy` on StageBody while its content loads. Focus follows source order at every width. Expanded, it is a modal `<dialog>` named by StageTitle; Escape or a backdrop click collapses it.
+Stage is a `<div>` with no role. To name it, pass `role="group"` (or `role="region"` for a landmark) and `aria-labelledby` with the StageTitle `id`; the A2UI Stage does this for you. StageTitle renders a heading, `h2` by default; choose `level` to fit the page outline. Set `aria-busy` on StageBody while its content loads. Focus follows source order at every width. An expandable Stage wraps its parts in a `<dialog>`: role `generic` while collapsed, modal and named by StageTitle when expanded. Escape or a backdrop click collapses it.
 
 ## Motion
 
-Stage, StageTitle and StageDescription transition colors over `--rad-motion-color-duration`. Under MotionProvider, the expanded view springs open. Reduced motion removes both.
+Stage parts transition colors over `--rad-motion-color-duration`; under MotionProvider, the expanded view springs open. Reduced motion removes both.
 
 ## Styling
 
@@ -84,7 +84,17 @@ Stage is an inline-size container, so its parts follow its width, not the viewpo
 | Expanded view    | `dialog`, container `stage` while open      | `stage-expanded`                        |
 | StageExpand      | [Button](/docs/button/)                     | `button stage-expand`                   |
 
-Caller classes win, and a caller `data-slot` adds tokens after the part's own. `components.stage` or `--rad-stage-*` variables set the frame, spacing, title, description and `expanded-width`; spacing falls back to the surface and spacing scales. Forced colors use system canvas and text colors and drop the shadow.
+`components.stage` or `--rad-stage-*` variables style it; spacing falls back to surface and spacing scales.
+
+| Variables                                                             | Sets                 |
+| --------------------------------------------------------------------- | -------------------- |
+| `radius`, `corner-shape`, `background`, `color`, `shadow`             | Frame                |
+| `border-width`, `border-style`, `border-color`                        | Border               |
+| `padding`, `gap`, `header-gap`, `actions-gap`, `footer-gap`           | Spacing              |
+| `title-size`, `title-weight`, `description-color`, `description-size` | Title, description   |
+| `expanded-width`, `panel-width`                                       | Expanded view widths |
+
+Forced colors use system colors and drop the shadow.
 
 ## API
 
@@ -115,6 +125,6 @@ Every part takes the native props of its element, `className`, `style` as ThemeS
 | aspectRatio    | number, width ÷ height | None    |
 | ref            | `Ref<HTMLDivElement>`  | None    |
 
-StageHeader, StageActions and StageFooter take `Ref<HTMLDivElement>`; StageDescription takes `Ref<HTMLParagraphElement>`. StageBody passes `aspectRatio` to [AspectRatio](/docs/aspect-ratio/) as `ratio`, so it must be finite and greater than zero.
+StageHeader, StageActions and StageFooter take `Ref<HTMLDivElement>`; StageDescription takes `Ref<HTMLParagraphElement>`. `aspectRatio` must be finite and positive.
 
 Exports: `Stage`, `StageHeader`, `StageTitle`, `StageDescription`, `StageActions`, `StageExpand`, `StageBody`, `StageFooter`; types `StageProps`, `StageHeaderProps`, `StageTitleProps`, `StageDescriptionProps`, `StageActionsProps`, `StageExpandProps`, `StageBodyProps`, `StageFooterProps`, `StageHeadingLevel`.
