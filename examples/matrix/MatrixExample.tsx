@@ -10,7 +10,7 @@ import {
   MatrixRow,
   MatrixRowHeader,
   type MatrixCellState,
-  type SeriesIndex
+  type SeriesNumber
 } from '@cognitap/radiant'
 import '@cognitap/radiant/styles.css'
 const rows = ['A', 'B', 'C', 'D']
@@ -56,7 +56,7 @@ export function PickSeats() {
           rowSpan={2}
           columnSpan={2}
           label="Quiet"
-          series="3"
+          series={3}
         />
       </Matrix>
       <output>Seats: {chosen.length ? chosen.join(', ') : 'none'}</output>
@@ -64,16 +64,16 @@ export function PickSeats() {
   )
 }
 const hours = ['9', '10', '11', '12', '13', '14']
-type Slot = null | { label: string; state?: MatrixCellState; series?: SeriesIndex }
+type Slot = null | { label: string; state?: MatrixCellState; series?: SeriesNumber }
 const rooms: { name: string; slots: Slot[] }[] = [
   {
     name: 'Atlas',
     slots: [
-      { label: 'Standup', series: '1' },
-      { label: 'Standup', series: '1' },
+      { label: 'Standup', series: 1 },
+      { label: 'Standup', series: 1 },
       null,
       null,
-      { label: 'Review', series: '2' },
+      { label: 'Review', series: 2 },
       null
     ]
   },
@@ -81,8 +81,8 @@ const rooms: { name: string; slots: Slot[] }[] = [
     name: 'Birch',
     slots: [
       null,
-      { label: 'Interview', series: '3', state: 'active' },
-      { label: 'Interview', series: '3' },
+      { label: 'Interview', series: 3, state: 'active' },
+      { label: 'Interview', series: 3 },
       null,
       null,
       null
@@ -164,7 +164,7 @@ export function MarkDeploys() {
             {counts.map((count, day) => (
               <MatrixCell
                 key={day}
-                series={count >= 4 ? '2' : undefined}
+                series={count >= 4 ? 2 : undefined}
                 altText={count === 1 ? '1 deploy' : `${count || 'No'} deploys`}
               >
                 <MatrixMarker variant={count ? 'solid' : 'outline'}>{count || ''}</MatrixMarker>

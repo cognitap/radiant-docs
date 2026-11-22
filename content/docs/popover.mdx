@@ -44,7 +44,7 @@ Use Popover for details or a small form. Use [Tooltip](/docs/tooltip/) to descri
 
 ### Anchor to an SVG shape or a rect
 
-`anchor` takes an element or a viewport rect; a getter is re-read on render, scroll and resize. Without a trigger, the anchor owns its role, `aria-expanded`, `aria-controls` and keyboard activation. Give a non-focusable anchor a `returnFocusRef`.
+`anchor` takes an element or a viewport rect; a getter is re-read on render, scroll and resize. Without a trigger, the anchor owns its role, `aria-expanded`, `aria-controls` and keyboard activation. Give a non-focusable anchor a `returnFocusRef`. [RegionStage](/docs/region-stage/) pins open callouts this way.
 
 ```tsx
 function Region({ setRegion, open, setOpen }) {
@@ -115,7 +115,7 @@ With a `MotionProvider` from `@cognitap/radiant/motion/react`, content fades in.
 
 Content flips and shifts to stay inside the visual viewport. On top and bottom sides, `start` and `end` follow text direction.
 
-Content exposes `data-slot="popover-content"`, `data-state`, `data-motion`, and the `data-side` and `data-align` used after flipping. The trigger and close add `popover-trigger` and `popover-close` to Button's `data-slot`, and the trigger exposes `data-state`. Caller `data-slot` values are appended; `className` merges over the defaults.
+Content exposes `data-slot="popover-content"`, `data-state`, `data-motion`, and the `data-side` and `data-align` used after flipping. The trigger and close add `popover-trigger` and `popover-close` to Button's `data-slot`, and the trigger exposes `data-state`. Caller `data-slot` values are appended.
 
 Use `components.popover` or `--rad-popover-*` variables, such as `--rad-popover-width` (default `20rem`), `padding`, `radius` and `shadow`.
 

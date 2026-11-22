@@ -8,8 +8,9 @@ by this site. Keep package JavaScript and CSS on the same version.
 
 ## Latest release
 
-Three new families for generated and hand-built interfaces: [AnnotatedText](/docs/annotated-text/) tags spans, labels and arcs over tokens, [Matrix](/docs/matrix/) is an interactive grid with cell states and labelled regions, and [SortableList](/docs/sortable-list/) reorders a list by pointer, touch or keyboard with announced moves. Each has a catalog entry and an A2UI extension component.
-[Release notes](https://github.com/cognitap/radiant/releases/tag/v0.0.99)
+Three more families: [AudioPlayer](/docs/audio-player/) plays short clips with keyboard controls and one-at-a-time groups, [RegionStage](/docs/region-stage/) pans and zooms an SVG with selectable regions and pins, and [RelationGraph](/docs/relation-graph/) lays out nodes and labelled edges as a tree, layers or a circle. The A2UI AudioPlayer uses the new player when the host passes its labels.
+Breaking: every `series` prop takes `SeriesNumber`, a number from 1 to 8, so [Matrix](/docs/matrix/) moves from `series="3"` to `series={3}`.
+[Release notes](https://github.com/cognitap/radiant/releases/tag/v0.0.100)
 
 ## Upgrade existing themes
 
