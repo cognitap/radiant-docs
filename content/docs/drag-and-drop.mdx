@@ -1,0 +1,133 @@
+---
+title: DragAndDrop
+description: Move items between named containers by dragging, tapping or the keyboard, and submit where each item sits.
+---
+
+import { PlanTheWeekDemo, SortFilesDemo, SubmitSeatingDemo } from '../../components/DragAndDropDemo'
+
+<PlanTheWeekDemo />
+
+## Usage
+
+Use DragAndDrop to sort items into a few named groups, such as tasks by status. Use [SortableList](/docs/sortable-list/) to order one list.
+
+Declare the containers in order, then the items. DragAndDrop has no built-in text: pass `instructionsText` and the announcement functions in the page's language.
+
+```tsx
+<DragAndDrop
+  aria-label="Task board"
+  defaultValue={{ todo: ['invoice'], done: [] }}
+  instructionsText="Press Space to pick up, arrows to move, Space to drop, Escape to cancel."
+  pickUpText={({ item, from }) => `Picked up ${item} in ${from}.`}
+  moveText={({ item, to, index, count }) => `${item}, ${to}, ${index + 1} of ${count}.`}
+  dropText={({ item, from, to }) => `Moved ${item} from ${from} to ${to}.`}
+  cancelText={({ item, to }) => `${item} is back in ${to}.`}
+>
+  <DragAndDropContainer
+    value="todo"
+    label="To do"
+  />
+  <DragAndDropContainer
+    value="done"
+    label="Done"
+  />
+  <DragAndDropItem value="invoice">Send the invoice</DragAndDropItem>
+</DragAndDrop>
+```
+
+## Examples
+
+### Sort files into folders
+
+When an item holds more than plain text, set `textValue` for announcements; `handleLabel` names each handle from it.
+
+<SortFilesDemo />
+
+### Submit a seating plan
+
+With `name`, the value submits as one JSON object; read it with `JSON.parse(formData.get(name))`.
+
+<SubmitSeatingDemo />
+
+## State
+
+The value maps each container to its item values in order. Use `defaultValue`, or `value` with `onValueChange`, not both. A controlled owner can decline a drop, and the item returns. Unlisted items join the first container. An item moved to another container mounts again, so its state resets.
+
+`capacity` caps how many items people may move in. It requires `fullText`, announced and shown in the full container. Form reset restores an uncontrolled value. `disabled`, or a disabled [Field](/docs/field/), blocks moves and submits nothing. Duplicate or empty values and other children throw.
+
+Containers stack in a narrow board and sit side by side from 30rem.
+
+## Accessibility
+
+Name the board with `aria-label`, `aria-labelledby` or a group Field label. Each container is a group named by its label. Each handle is a pressed-state Button named by its item and described by `instructionsText`. Announcements are polite and name both containers; a drop in place says nothing.
+
+| Key                       | Behavior                                               |
+| ------------------------- | ------------------------------------------------------ |
+| Space / Enter on a handle | Pick the item up, or drop it                           |
+| Left / Right arrows       | Previous or next container, in order; follow direction |
+| Up / Down arrows          | Move within the container                              |
+| Home / End                | Move to its start or end                               |
+| Escape                    | Cancel the move or drag                                |
+| Tab away                  | Drop the item where it is                              |
+
+A pointer or touch drags from the handle, and the nearest scroller scrolls near its edges. Or tap a handle, then a container, or an item to place it before. In A2UI, `A2uiSurface` `labels.dragDrop*` supply the text; without them the containers do not move.
+
+## Motion
+
+Inside `MotionProvider`, items spring to their new places, and a released item glides into its slot. Reduced motion and themes with motion off snap them; `motion="off"` also skips the glide.
+
+## Styling
+
+| Host           | Attributes                                                                          |
+| -------------- | ----------------------------------------------------------------------------------- |
+| Board          | `data-slot="drag-and-drop"`, `data-dragging`, `data-grabbing`, `data-disabled`      |
+| Container      | `data-slot="drag-and-drop-container"`, `data-droppable`, `data-target`, `data-full` |
+| Label and list | `drag-and-drop-container-label`, `drag-and-drop-list` (`ul`, `data-drop`)           |
+| Full message   | `drag-and-drop-full`                                                                |
+| Item           | `data-slot="drag-and-drop-item"`, `data-grabbed`, `data-dragging`                   |
+| Handle         | `data-slot="button drag-and-drop-handle"`, `aria-pressed`                           |
+| Item content   | `drag-and-drop-item-content`                                                        |
+
+`parts` styles every `label`, `list`, `handle` and `content`. Themes set `components.dragAndDrop`; `--rad-drag-and-drop-*` variables set `container-background`, `container-border-color`, `item-radius`, `item-background`, `marker-color`, `target-border-color`, `full-color` and more.
+
+## API
+
+### DragAndDrop
+
+| Prop                                          | Type                                                      | Default              |
+| --------------------------------------------- | --------------------------------------------------------- | -------------------- |
+| value / defaultValue                          | `DragAndDropValue`: `Record<string, string[]>`; one owner | None                 |
+| onValueChange                                 | `(value: DragAndDropValue) => void`                       | None                 |
+| instructionsText                              | string                                                    | Required             |
+| pickUpText / moveText / dropText / cancelText | `DragAndDropText`: `(move: DragAndDropMove) => string`    | Required             |
+| fullText                                      | `DragAndDropText`                                         | Required by capacity |
+| handleLabel                                   | `(item: string) => string`                                | Item content         |
+| name / form                                   | string                                                    | None                 |
+| disabled                                      | boolean                                                   | Field's, else false  |
+| gap                                           | tight / normal / airy                                     | normal               |
+| controlSize                                   | small / medium / large                                    | medium               |
+| motion                                        | inherit / off                                             | inherit              |
+| parts                                         | `{ label?, list?, handle?, content? }`, each `PartStyle`  | None                 |
+| Other props                                   | Native div props                                          | Native               |
+
+`DragAndDropMove` is `{ item, from, to, index, count }`: names, a zero-based index in `to` and its item count.
+
+### DragAndDropContainer
+
+| Prop        | Type                          | Default    |
+| ----------- | ----------------------------- | ---------- |
+| value       | string; unique, nonempty      | Required   |
+| label       | ReactNode; visible name       | Required   |
+| textValue   | string; name in announcements | Label text |
+| capacity    | whole number                  | None       |
+| Other props | Native div props              | Native     |
+
+### DragAndDropItem
+
+| Prop        | Type                          | Default   |
+| ----------- | ----------------------------- | --------- |
+| value       | string; unique, nonempty      | Required  |
+| textValue   | string; name in announcements | Item text |
+| Other props | Native div props              | Native    |
+
+Exports the three components and `DragAndDropProps`, `DragAndDropContainerProps`, `DragAndDropItemProps`, `DragAndDropValue`, `DragAndDropMove` and `DragAndDropText`.

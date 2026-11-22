@@ -38,7 +38,8 @@ export const categories = [
       'color-picker',
       'slider',
       'range-slider',
-      'sortable-list'
+      'sortable-list',
+      'drag-and-drop'
     ]
   },
   {

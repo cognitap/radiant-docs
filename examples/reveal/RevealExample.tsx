@@ -17,3 +17,28 @@ export function RevealExample() {
     />
   )
 }
+const notices = [
+  { value: 'lift', children: 'The east lift is closed for repairs until Friday.' },
+  { value: 'lunch', children: 'Team lunch is on the roof terrace at noon.' },
+  {
+    value: 'wifi',
+    children: 'The guest Wi-Fi network is Lobby, and the password is on the front desk.',
+    interval: 8000
+  }
+]
+export function PlayNotices() {
+  return (
+    <Reveal
+      items={notices}
+      previousLabel="Previous"
+      nextLabel="Next"
+      positionLabel={(index, count) => `Notice ${index + 1} of ${count}`}
+      playback
+      playLabel="Play"
+      pauseLabel="Pause"
+      interval={4000}
+      loop
+      style={{ maxWidth: '24rem' }}
+    />
+  )
+}
