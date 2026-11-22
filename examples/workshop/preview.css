@@ -250,6 +250,7 @@
   overflow-wrap: anywhere;
 }
 .scene-prose {
+  max-inline-size: var(--rad-typography-roles-prose-body-measure, 64ch);
   margin-inline: auto;
 }
 .scene-prose > header + p {
