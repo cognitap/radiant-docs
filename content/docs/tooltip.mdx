@@ -41,14 +41,25 @@ Use Tooltip for a brief description of a button. Use [Popover](/docs/popover/) f
 
 ### Point at an SVG shape
 
-`anchor` works as on [Popover](/docs/popover/#anchor-to-an-svg-shape-or-a-rect). Without a trigger, own `open` from the shape's hover and focus, and point its `aria-describedby` at `useTooltip()` `contentId`.
+`anchor` works as on [Popover](/docs/popover/#anchor-to-an-svg-shape-or-a-rect). Without a trigger, spread `useTooltip()` `anchorProps` on the anchor for `aria-describedby`, delays and dismissal, as with a trigger.
 
 ```tsx
-<Tooltip
-  open={!!seat}
-  anchor={seat}
->
-  <SeatMap onSeat={setSeat} />
+function Seat({ setSeat }) {
+  const { anchorProps } = useTooltip()!
+  return (
+    <rect
+      ref={setSeat}
+      tabIndex={0}
+      aria-label="A1"
+      {...anchorProps}
+    />
+  )
+}
+
+;<Tooltip anchor={seat}>
+  <svg>
+    <Seat setSeat={setSeat} />
+  </svg>
   <TooltipPortal>
     <TooltipContent>Window seat, extra legroom.</TooltipContent>
   </TooltipPortal>
@@ -57,7 +68,7 @@ Use Tooltip for a brief description of a button. Use [Popover](/docs/popover/) f
 
 ## State
 
-Use `open` with `onOpenChange`, or `defaultOpen`, never both. A controlled owner may refuse a change: the tooltip stays open after Escape while `open` stays true. Prop changes do not call `onOpenChange`. `useTooltip()` returns `{ open, setOpen, contentId }`, or `null` outside a Tooltip.
+Use `open` with `onOpenChange`, or `defaultOpen`, never both. A controlled owner may refuse a change: the tooltip stays open after Escape while `open` stays true. Prop changes do not call `onOpenChange`. `useTooltip()` returns `{ open, setOpen, contentId, anchorProps }`, or `null` outside a Tooltip.
 
 Tooltip takes no part in forms. TooltipTrigger defaults to `type="button"`.
 
@@ -92,14 +103,14 @@ Use `components.tooltip` or `--rad-tooltip-*` variables: `max-width` (20rem), `p
 
 ## API
 
-| Tooltip prop       | Type                                    | Default |
-| ------------------ | --------------------------------------- | ------- |
-| open / defaultOpen | boolean; exclusive owner                | false   |
-| onOpenChange       | (open: boolean) => void                 | None    |
-| openDelay          | Finite nonnegative ms; focus ignores it | 500     |
-| closeDelay         | Finite nonnegative ms                   | 150     |
-| anchor             | `PopoverAnchor \| null`                 | Trigger |
-| children           | ReactNode                               | None    |
+| Tooltip prop       | Type                                          | Default |
+| ------------------ | --------------------------------------------- | ------- |
+| open / defaultOpen | boolean; exclusive owner                      | false   |
+| onOpenChange       | (open: boolean) => void                       | None    |
+| openDelay          | Finite nonnegative ms; focus ignores it       | 500     |
+| closeDelay         | Finite nonnegative ms                         | 150     |
+| anchor             | [`PopoverAnchor`](/docs/popover/#api) or null | Trigger |
+| children           | ReactNode                                     | None    |
 
 | TooltipTrigger prop | Type                                                         | Default         |
 | ------------------- | ------------------------------------------------------------ | --------------- |
@@ -119,4 +130,4 @@ Use `components.tooltip` or `--rad-tooltip-*` variables: `max-width` (20rem), `p
 
 Tooltip composes the trigger's focus, blur, pointer and click handlers with yours.
 
-Exports: `Tooltip`, `TooltipTrigger`, `TooltipContent`, `TooltipPortal`, `useTooltip`; types `TooltipProps`, `TooltipState`, `TooltipTriggerProps`, `TooltipContentProps`, `TooltipPortalProps`, `TooltipRenderProps`.
+Exports: `Tooltip`, `TooltipTrigger`, `TooltipContent`, `TooltipPortal`, `useTooltip`; types `TooltipProps`, `TooltipState`, `TooltipTriggerProps`, `TooltipContentProps`, `TooltipPortalProps`, `TooltipRenderProps`, `TooltipAnchorProps`.

@@ -14,7 +14,7 @@ import {
 
 ## Usage
 
-Use Popover for details or a small form opened on demand. Use [Tooltip](/docs/tooltip/) to describe a control, [HoverCard](/docs/hover-card/) for a link preview, [Menu](/docs/menu/) for a list of actions and [Dialog](/docs/dialog/) for a modal task.
+Use Popover for details or a small form. Use [Tooltip](/docs/tooltip/) to describe a control, [HoverCard](/docs/hover-card/) for a link preview, [Menu](/docs/menu/) for actions and [Dialog](/docs/dialog/) for a modal task.
 
 ```tsx
 <Popover>
@@ -44,17 +44,45 @@ Use Popover for details or a small form opened on demand. Use [Tooltip](/docs/to
 
 ### Anchor to an SVG shape or a rect
 
-`anchor` takes an element, such as an SVG region, or a viewport rect. A rect getter is re-read on each render, scroll and resize.
+`anchor` takes an element or a viewport rect; a getter is re-read on render, scroll and resize. Without a trigger, the anchor owns its role, `aria-expanded`, `aria-controls` and keyboard activation. Give a non-focusable anchor a `returnFocusRef`.
 
 ```tsx
-const [region, setRegion] = useState<SVGPathElement | null>(null)
+function Region({ setRegion, open, setOpen }) {
+  const { contentId } = usePopover()!
+  return (
+    <path
+      ref={setRegion}
+      d={north}
+      role="button"
+      tabIndex={0}
+      aria-label="North depot"
+      aria-expanded={open}
+      aria-controls={contentId}
+      onClick={() => setOpen(!open)}
+      onKeyDown={event => event.key === 'Enter' && setOpen(!open)}
+    />
+  )
+}
 
-<svg>
-  <path ref={setRegion} tabIndex={0} d={north} onClick={() => setOpen(true)} />
-</svg>
-<Popover open={open} onOpenChange={setOpen} anchor={region}>
+;<Popover
+  open={open}
+  onOpenChange={setOpen}
+  anchor={region}
+>
+  <svg>
+    <Region
+      setRegion={setRegion}
+      open={open}
+      setOpen={setOpen}
+    />
+  </svg>
   <PopoverPortal>
-    <PopoverContent role="dialog" aria-label="North depot">…</PopoverContent>
+    <PopoverContent
+      role="dialog"
+      aria-label="North depot"
+    >
+      …
+    </PopoverContent>
   </PopoverPortal>
 </Popover>
 ```
@@ -63,11 +91,11 @@ const [region, setRegion] = useState<SVGPathElement | null>(null)
 
 Use `open` with `onOpenChange`, or `defaultOpen`, never both. `onOpenChange` fires once per request: trigger, Close, Escape, outside pointer or focus leaving. A controlled owner refuses a close by not updating `open`. Closing an ancestor Popover or Dialog hides descendants. `usePopover()` returns `{ open, setOpen, contentId }`, or `null` outside a Popover.
 
-Popover adds no form value. `PopoverPortal` mounts content in the nearest block container of the trigger or anchor element, so a surrounding `<form>`, theme and modal ancestry apply; a rect anchor renders it in place.
+Popover adds no form value. `PopoverPortal` mounts content in the nearest block container of the trigger or anchor element, so a surrounding `<form>`, theme and modal ancestry apply; a rect anchor uses the portal's nearest HTML ancestor.
 
 ## Accessibility
 
-The trigger is a native button with `aria-expanded` and `aria-controls`. Content is a plain `div`: give it a role and name, such as `role="dialog"` with `aria-label`. Popover adds no menu or listbox behavior.
+The trigger is a native button with `aria-expanded` and `aria-controls`. Content is a plain `div`: give it a role and name, such as `role="dialog"` with `aria-label`.
 
 Opening keeps focus on the trigger unless `initialFocusRef` names a descendant. Content follows the trigger in Tab order, without a focus trap. Escape and Close return inside focus to `returnFocusRef`, else the trigger, a focusable anchor or the prior focus; outside dismissal leaves focus where it landed.
 
@@ -128,6 +156,6 @@ Use `components.popover` or `--rad-popover-*` variables, such as `--rad-popover-
 | onClick                      | Runs first; `preventDefault()` cancels the close | None                    |
 | Button and native props, ref | `Ref<HTMLButtonElement>`                         | Button defaults         |
 
-`PopoverPortal` accepts children, has no host and renders nothing until the trigger mounts.
+`PopoverPortal` has no host and renders nothing until it finds its container.
 
 Exports: `Popover`, `PopoverTrigger`, `PopoverPortal`, `PopoverContent`, `PopoverClose`, `usePopover`; types `PopoverProps`, `PopoverState`, `PopoverTriggerProps`, `PopoverContentProps`, `PopoverCloseProps`, `PopoverPortalProps`, `PopoverRenderProps`, `PopoverSide`, `PopoverAlign`, `PopoverAnchor`, `PopoverAnchorRect`.

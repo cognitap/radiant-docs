@@ -41,7 +41,7 @@ Use HoverCard for supplementary link previews. Keep the destination useful witho
 
 ### Preview a diagram node
 
-`anchor` places the card beside an element or rect instead of the link, as on [Popover](/docs/popover/#anchor-to-an-svg-shape-or-a-rect). Without a trigger, own `open` from the node's hover and focus. Focus returns as on [Popover](/docs/popover/#accessibility).
+`anchor` places the card beside an element or rect instead of the link, as on [Popover](/docs/popover/#anchor-to-an-svg-shape-or-a-rect). Without a trigger, `openDelay` and `closeDelay` do nothing; own `open` from the node's hover and focus. Focus returns as on [Popover](/docs/popover/#accessibility).
 
 ```tsx
 <HoverCard
@@ -83,13 +83,13 @@ Use `components.hoverCard.width` or `--rad-hover-card-width`; other surface over
 
 ## API
 
-| HoverCard prop         | Type                            | Default   |
-| ---------------------- | ------------------------------- | --------- |
-| open / defaultOpen     | boolean; exclusive owner        | false     |
-| onOpenChange           | (open: boolean) => void         | None      |
-| openDelay / closeDelay | Finite nonnegative milliseconds | 500 / 150 |
-| anchor                 | `PopoverAnchor \| null`         | Trigger   |
-| children               | ReactNode                       | None      |
+| HoverCard prop         | Type                                          | Default   |
+| ---------------------- | --------------------------------------------- | --------- |
+| open / defaultOpen     | boolean; exclusive owner                      | false     |
+| onOpenChange           | (open: boolean) => void                       | None      |
+| openDelay / closeDelay | Finite nonnegative milliseconds               | 500 / 150 |
+| anchor                 | [`PopoverAnchor`](/docs/popover/#api) or null | Trigger   |
+| children               | ReactNode                                     | None      |
 
 | HoverCardTrigger prop            | Type                                                          | Default       |
 | -------------------------------- | ------------------------------------------------------------- | ------------- |
