@@ -58,7 +58,7 @@ export function ShowDependencies() {
         { from: 'web', to: 'gateway', label: 'calls' },
         { from: 'gateway', to: 'orders' },
         { from: 'gateway', to: 'billing' },
-        { from: 'orders', to: 'queue' },
+        { from: 'orders', to: 'queue', label: 'enqueues' },
         { from: 'billing', to: 'queue', label: 'publishes', series: 4 },
         { from: 'orders', to: 'db' },
         { from: 'billing', to: 'db' },
