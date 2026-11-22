@@ -1,0 +1,90 @@
+---
+title: AnnotatedText
+description: Show text split into tokens with stacked labels, tagged spans and arcs between tokens.
+---
+
+import {
+  ReviewRetryCallDemo,
+  TagEntitiesDemo,
+  ReadLogLineDemo
+} from '../../components/AnnotatedTextDemo'
+
+<ReviewRetryCallDemo />
+
+## Usage
+
+Use AnnotatedText to show what parts of a text mean, such as code review notes, named entities or parsed fields. Use [Highlight](/docs/highlight/) to mark matches in running text and [Tag](/docs/tag/) for labels that stand alone.
+
+```tsx
+<AnnotatedText
+  aria-label="Review of the retry call"
+  arcText={({ from, to, label }) => `${from} to ${to}: ${label}`}
+  tokens={[{ text: 'delay', labels: ['binding'] }, { text: '=' }, { text: 'retry()' }]}
+  spans={[{ start: 0, end: 2, label: 'Statement', series: 1 }]}
+  arcs={[{ from: 0, to: 2, label: 'assigned from' }]}
+/>
+```
+
+## Examples
+
+### Tag entities in a sentence
+
+Spans may overlap and nest. Each span takes its own lane under the tokens, with nested spans nearer the text. Arcs that overlap stack higher.
+
+<TagEntitiesDemo />
+
+### Read a log line
+
+<ReadLogLineDemo />
+
+## State
+
+AnnotatedText holds no state; it renders the `tokens`, `spans` and `arcs` you pass. Indexes count tokens from 0, and a span includes both `start` and `end`. AnnotatedText throws a `TypeError` for an empty token list, blank text or span labels, an index outside the tokens, a span that ends before it starts, an arc from a token to itself, or a series outside 1 to 8.
+
+## Accessibility
+
+AnnotatedText is a group, so name it with `aria-label` or `aria-labelledby`. Tokens are list items. Each token is named by its text and described by hidden text inside it that lists its labels, spans and arcs, so browse mode reads them too. The visible labels, spans and arcs are hidden from screen readers.
+
+`arcText` writes what an arc announces on both of its tokens. Pass it in the page's language; the built-in text joins the token texts with an arrow symbol.
+
+| Key                 | Behavior                       |
+| ------------------- | ------------------------------ |
+| Tab                 | Enter or leave at one token    |
+| Left / Right arrows | Previous or next token, by dir |
+| Home / End          | First or last token            |
+
+## Motion
+
+Nothing animates. Arcs are measured from the token boxes and redrawn when the text wraps, resizes, loads fonts or changes direction. An arc across a wrap leaves toward the line end and enters from the next line start; ends three or more lines apart draw only the two end pieces. Arcs of the focused token draw thicker.
+
+## Styling
+
+| Host       | Attributes                                                                 |
+| ---------- | -------------------------------------------------------------------------- |
+| Root       | `data-slot="annotated-text"`, `role="group"`                               |
+| Token list | `data-slot="annotated-text-tokens"`                                        |
+| Token      | `data-slot="annotated-text-token"`, `data-index`                           |
+| Token text | `data-slot="annotated-text-token-text"`                                    |
+| Label      | `data-slot="annotated-text-label"`                                         |
+| Span       | `data-slot="annotated-text-span"`, `data-series`, `data-start`, `data-end` |
+| Arc layer  | `data-slot="annotated-text-arcs"`, SVG                                     |
+| Arc        | `data-slot="annotated-text-arc"`, `data-from`, `data-to`, `data-active`    |
+| Arc label  | `data-slot="annotated-text-arc-label"`                                     |
+
+Spans and arcs take the theme's series colors. `components.annotatedText` sets `gap`, `rowGap`, `arcStep`, `arcColor`, `background` (behind arc labels), `tokenRadius`, `textWeight`, `labelColor`, `labelSize` and `spanRadius`, or use `--rad-annotated-text-*` variables. Forced colors use system colors.
+
+## API
+
+| Prop                         | Type                                                 | Default            |
+| ---------------------------- | ---------------------------------------------------- | ------------------ |
+| aria-label / aria-labelledby | string                                               | Required           |
+| tokens                       | `{ text: string; labels?: string[] }[]`              | Required           |
+| spans                        | `{ start; end; label: string; series: 1–8 }[]`       | `[]`               |
+| arcs                         | `{ from; to; label?: string; series?: 1–8 }[]`       | `[]`               |
+| arcText                      | `(arc: { from; to; label? }) => string`; token texts | `from → to: label` |
+| style                        | ThemeStyle                                           | None               |
+| Other props                  | Native div props except role and children            | Native             |
+
+Span and arc `series` are numbers. An arc's arrowhead points at `to`.
+
+Exports `AnnotatedText` and the types `AnnotatedTextProps`, `AnnotatedTextToken`, `AnnotatedTextSpan`, `AnnotatedTextArc`, `AnnotatedTextArcText` and `AnnotatedTextSeries`.
