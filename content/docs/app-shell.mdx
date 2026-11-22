@@ -1,6 +1,6 @@
 ---
 title: AppShell
-description: Lay out an application with a header, main content and a Sidebar that collapses on desktop and becomes a drawer on small screens.
+description: Lay out an application with a header, main content and a Sidebar that collapses on desktop and becomes a drawer when the shell is narrow.
 ---
 
 import { AppShellDemo, AppShellNotesDemo, AppShellSavedDemo } from '../../components/AppShellDemo'
@@ -45,7 +45,7 @@ Render AppShell once per page. Wrap link text in SidebarLabel so it hides when t
 
 AppShell owns two booleans. `collapsed` narrows the desktop Sidebar; `open` shows the mobile drawer. Pass `defaultCollapsed` or `collapsed` with `onCollapsedChange`, and `defaultOpen` or `open` with `onOpenChange`. A controlled owner may refuse a request.
 
-Below 40rem the Sidebar moves into the drawer. Returning to desktop requests `open` false. Links stay mounted across the move, so field values survive.
+Below 40rem of shell width, not viewport width, the Sidebar moves into the drawer. A content-sized shell is 64rem wide, capped at the viewport. Returning to desktop requests `open` false. Links stay mounted across the move, so field values survive.
 
 `useAppShell()` returns `null` outside AppShell, otherwise the state and request methods. The Sidebar does not close on navigation; call `setOpen(false)` when a link routes. AppShell has no form value. Save `collapsed` yourself to restore a layout.
 
@@ -141,7 +141,7 @@ Under `MotionProvider`, the Sidebar and main spring to their new widths on colla
 | ------------ | ---------------------------- |
 | collapsed    | boolean                      |
 | open         | boolean                      |
-| mobile       | boolean; below 40rem         |
+| mobile       | boolean; shell below 40rem   |
 | mainId       | string                       |
 | setCollapsed | (collapsed: boolean) => void |
 | setOpen      | (open: boolean) => void      |

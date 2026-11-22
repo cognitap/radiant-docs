@@ -8,8 +8,9 @@ by this site. Keep package JavaScript and CSS on the same version.
 
 ## Latest release
 
-Validation errors in a [RadioGroup](/docs/radio-group/), CheckboxGroup or other group are now announced on each control, while the group keeps its help text. Catalog families stay inside narrow columns: buttons wrap long labels, Stage actions wrap below the title, and A2UI rows keep labels and badges together. The [agent guide](/docs/agents/) explains how to render, check and extend generated surfaces.
-[Release notes](https://github.com/cognitap/radiant/releases/tag/v0.0.97)
+Catalog families now follow their own width instead of the viewport: an [AppShell](/docs/app-shell/) in a narrow pane uses its drawer, and [Cascader](/docs/cascader/) columns size to the popup. A [Tabs](/docs/tabs/) list that overflows fades the edge hiding more tabs and keeps the active tab in view. The A2UI extension Row can wrap, and a filterable ChoicePicker puts its filter inside the group.
+Breaking: a filterable A2UI ChoicePicker shows its filter only when `A2uiSurface` receives `labels.filter`.
+[Release notes](https://github.com/cognitap/radiant/releases/tag/v0.0.98)
 
 ## Upgrade existing themes
 
