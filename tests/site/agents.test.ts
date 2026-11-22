@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import { capture, track, withSite } from './site.ts'
 
-test('an agent surface binds its controls and sends named actions with their context', async () => {
+test('agent surfaces bind controls, send named actions and render app components', async () => {
   await withSite(async (baseURL, browser) => {
     const page = await browser.newPage(),
       errors = track(page)
@@ -10,7 +10,10 @@ test('an agent surface binds its controls and sends named actions with their con
       await capture(page, 'agent-surface', async () => {
         await page.goto(`${baseURL}/docs/agents/`)
         const demo = page.getByRole('region', { name: "Render an agent's reply", exact: true })
-        await demo.getByRole('button', { name: 'Decimals', exact: true }).click()
+        const decimals = demo.getByRole('button', { name: 'Decimals', exact: true })
+        assert.equal(await decimals.getAttribute('aria-pressed'), 'false')
+        await decimals.click()
+        assert.equal(await decimals.getAttribute('aria-pressed'), 'true')
         await demo.getByRole('radio', { name: '10 minutes', exact: true }).check()
         await demo.getByRole('button', { name: 'Start review', exact: true }).click()
         await demo
@@ -19,6 +22,17 @@ test('an agent surface binds its controls and sends named actions with their con
             { exact: true }
           )
           .waitFor()
+        assert.equal(
+          await demo.getByRole('status', { name: 'Diagnostics', exact: true }).innerText(),
+          ''
+        )
+
+        const extension = page.getByRole('region', {
+          name: 'Add a trend line to the catalog',
+          exact: true
+        })
+        await extension.getByRole('img', { name: 'Signups', exact: true }).waitFor()
+        await extension.getByText('Accessibility check passed.', { exact: true }).waitFor()
         assert.deepEqual(errors, [])
       })
     } finally {
