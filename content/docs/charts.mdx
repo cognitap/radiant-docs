@@ -111,9 +111,9 @@ Charts redraw at once and points do not animate. The tooltip follows the motion 
 | Legend      | `ul`; `chart-legend`                                                                                                     | `legend`      |
 | Disclosure  | `details`; `chart-disclosure`                                                                                            | None          |
 | Table       | `table chart-data-table`                                                                                                 | `table`       |
-| Theme       | `components.chart`: `gap`, `height` (`20rem`), `strokeWidth` (`2`), `gridColor`, `series1`–`series6`; or `--rad-chart-*` | None          |
+| Theme       | `components.chart`: `gap`, `height` (`20rem`), `strokeWidth` (`2`), `gridColor`, `series1`–`series8`; or `--rad-chart-*` | None          |
 
-`className`, `style`, `ref` and native props reach the figure. The plot is at least 480px wide, or 72px per row, and scrolls when narrower. `chartPalette` turns a color palette into light and dark series colors, as the first demo shows.
+`className`, `style`, `ref` and native props reach the figure. The plot is at least 480px wide, or 72px per row, and scrolls when narrower. Series colors come from the theme's `--rad-series-N-solid` tokens; `seriesPalette` from `@cognitap/radiant/color` derives them from a color palette.
 
 ## API
 
@@ -149,6 +149,6 @@ Charts redraw at once and points do not animate. The tooltip follows the motion 
 | -------------- | ---------------------------------------------------------------------------------- |
 | ChartDatum     | `{ key: string; label: string; values: Readonly<Record<string, number \| null>> }` |
 | ChartSeries    | `{ key: string; label: string }`                                                   |
-| chartPalette() | `(palette: ColorPalette) => { light, dark }`, each `series1`–`series6`             |
+| chartPalette() | Deprecated; use `tokens.series` from `seriesPalette`                               |
 
 Exports: `LineChart`, `BarChart`, `AreaChart`, `PieChart`, `ChartDataTable`, `chartPalette`, `ChartProps`, `LineChartProps`, `BarChartProps`, `AreaChartProps`, `PieChartProps`, `ChartDataTableProps`, `ChartDatum`, `ChartSeries`.

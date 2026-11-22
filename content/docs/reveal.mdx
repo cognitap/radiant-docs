@@ -1,0 +1,55 @@
+---
+title: Reveal
+description: Shows content one step at a time with previous and next buttons.
+---
+
+import { RevealDemo } from '../../components/RevealDemo'
+
+<RevealDemo />
+
+## Usage
+
+Use `Reveal` for content read one part at a time, such as recipe steps. Pass the steps as `items` and write the button and position text yourself; Reveal has no built-in wording. Use [Accordion](/docs/accordion/) for sections opened in any order and [Carousel](/docs/carousel/) for browsing media.
+
+```tsx
+<Reveal
+  items={steps}
+  previousLabel="Previous"
+  nextLabel="Next"
+  positionLabel={(index, count) => `Step ${index + 1} of ${count}`}
+/>
+```
+
+## State
+
+Pass `value` to control the shown step or `defaultValue` to seed it; the first item is the default, and an uncontrolled Reveal returns to it when the shown item is removed. `onValueChange(value)` receives the next item's `value`. Hidden steps stay mounted with the `hidden` attribute, so form input and component state survive moving away and back.
+
+## Accessibility
+
+The buttons are native and point at the steps with `aria-controls`. Previous is disabled on the first step and Next on the last; when a button disables itself, focus moves to the other button. Each step is a group named by `positionLabel`, and the steps form a polite live region, so a newly shown step is announced once.
+
+## Styling
+
+`className`, typed `style`, native attributes and ref reach the root div. `gap` sets the space between the step and its controls. `parts.controls` and `parts.position` style the control row and position text.
+
+| Part     | Element                 | data-slot                        |
+| -------- | ----------------------- | -------------------------------- |
+| Root     | `div`, grid             | `reveal`                         |
+| Steps    | `div` holding each step | `reveal-steps`, `reveal-step`    |
+| Controls | `div`, wrapping row     | `reveal-controls`                |
+| Buttons  | Button                  | `reveal-previous`, `reveal-next` |
+| Position | `output`                | `reveal-position`                |
+
+## API
+
+| Reveal prop               | Type                                       | Default    |
+| ------------------------- | ------------------------------------------ | ---------- |
+| items                     | `{ value: string; children: ReactNode }[]` | Required   |
+| value / defaultValue      | string                                     | First item |
+| onValueChange             | `(value: string) => void`                  | None       |
+| previousLabel / nextLabel | string                                     | Required   |
+| positionLabel             | `(index: number, count: number) => string` | Required   |
+| gap                       | `'tight' \| 'normal' \| 'airy'`            | `'normal'` |
+| controlSize               | `'small' \| 'medium' \| 'large'`           | `'medium'` |
+
+Empty labels, duplicate values or an unknown controlled `value` throw. Exports: `Reveal`, `RevealProps`, `RevealItem`.

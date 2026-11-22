@@ -1,17 +1,15 @@
 'use client'
 import { useState } from 'react'
-import { NativeSelect, Field, Checkbox, type ThemeStyle } from '@cognitap/radiant'
+import { NativeSelect, Field, Checkbox } from '@cognitap/radiant'
 import {
   LineChart,
   BarChart,
   AreaChart,
   PieChart,
   ChartDataTable,
-  chartPalette,
   type ChartProps,
   type ChartDatum
 } from '@cognitap/radiant/charts'
-import { generateColorWall, recommendColorPalette } from '@cognitap/radiant/color'
 export type ChartsTaskOptions = Pick<ChartProps, 'className' | 'style' | 'dir'>
 const series = [
   { key: 'completed', label: 'Completed' },
@@ -23,20 +21,8 @@ const weeks: ChartDatum[] = [
   { key: 'three', label: 'Round 3', values: { completed: 26, scheduled: 30 } },
   { key: 'four', label: 'Round 4', values: { completed: 32, scheduled: 36 } }
 ]
-const colors = chartPalette(
-  recommendColorPalette(generateColorWall({ brand: '#7c3aed' }), { working: { support: 'teal' } })
-)
-const generatedStyle: ThemeStyle = {
-  '--rad-chart-series1': `light-dark(${colors.light.series1},${colors.dark.series1})`,
-  '--rad-chart-series2': `light-dark(${colors.light.series2},${colors.dark.series2})`,
-  '--rad-chart-series3': `light-dark(${colors.light.series3},${colors.dark.series3})`,
-  '--rad-chart-series4': `light-dark(${colors.light.series4},${colors.dark.series4})`,
-  '--rad-chart-series5': `light-dark(${colors.light.series5},${colors.dark.series5})`,
-  '--rad-chart-series6': `light-dark(${colors.light.series6},${colors.dark.series6})`
-}
 export function ReviewRecruitment(options: ChartsTaskOptions) {
-  const [project, setProject] = useState('all'),
-    [palette, setPalette] = useState(false)
+  const [project, setProject] = useState('all')
   const data = weeks.map(row => ({
     ...row,
     values:
@@ -59,18 +45,13 @@ export function ReviewRecruitment(options: ChartsTaskOptions) {
           <option value="atlas">Atlas onboarding</option>
         </NativeSelect>
       </Field>
-      <Checkbox
-        label="Use generated chart palette"
-        checked={palette}
-        onChange={event => setPalette(event.currentTarget.checked)}
-      />
       <BarChart
         {...options}
         label={project === 'all' ? 'Study recruitment' : 'Atlas recruitment'}
         description="Compare completed sessions with scheduled sessions in each research round."
         data={data}
         series={series}
-        style={{ ...options.style, ...(palette ? generatedStyle : {}) }}
+        style={options.style}
       />
       <p>
         {project === 'all'
