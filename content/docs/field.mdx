@@ -79,7 +79,7 @@ Use [Fieldset](/docs/fieldset/) for a bare form section, [RadioGroup](/docs/radi
 
 Field holds no value. You own values, validation, focus and the error text. An `error` with content marks the Field invalid; `''`, `null` or `false` clears it.
 
-When the message lives elsewhere, such as an error summary, set `aria-invalid` and `aria-describedby` on Field. In control layout both reach the labelled control, after Field's own description and error IDs. Group layout keeps them on the `fieldset`.
+For an external error summary, set `aria-invalid` and `aria-describedby` on Field. In control layout both reach the control, with caller IDs last. Groups keep caller IDs on the `fieldset`.
 
 A child cannot undo its Field's `required` or `disabled`. Field submits nothing. Control layout rejects `name` and `form`; in group layout they are native fieldset attributes. A required group does not require every checkbox.
 
@@ -87,7 +87,7 @@ A child cannot undo its Field's `required` or `disabled`. Field submits nothing.
 
 ## Accessibility
 
-In control layout the `label` names the control, whose `aria-describedby` lists the description, then the error. In group layout the `legend` names the `fieldset`, which carries those descriptions and `aria-invalid`. The error has `role="alert"`. The required indicator is `aria-hidden`; `required` and `aria-required` carry the state.
+A `label` names the control, and `aria-describedby` lists help then error. A `legend` names the `fieldset`, which carries group help. The fieldset also carries the invalid state and inline error unless every focusable control carries both. Inline errors use `role="alert"`. Required indicators are `aria-hidden`.
 
 | Key         | Behavior                                        |
 | ----------- | ----------------------------------------------- |
