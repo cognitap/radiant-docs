@@ -1,96 +1,58 @@
 ---
 title: Input
-description: Collect a single line of text in a native input with shared sizing and Field relationships.
+description: Collect a single line of text.
 ---
 
-import {
-  InputDemo,
-  InputProjectDemo,
-  InputSubmittedDemo,
-  InputSizesDemo
-} from '../../components/InputDemo'
+import { InputDemo } from '../../components/InputDemo'
 
 <InputDemo />
 
 ## Usage
 
-Use [InlineEdit](/docs/inline-edit/) for a short label with save and cancel actions.
+Wrap Input in [Field](/docs/field/) for a label, help text and errors.
 
-Use Input for one line of text, such as a name, email, URL or number. Use [Textarea](/docs/textarea/) for multiple lines, [PasswordInput](/docs/password-input/) for passwords with a reveal action, and [InputGroup](/docs/input-group/) to add icons, buttons or prefixes.
-
-```tsx
-<Field label="Work email">
-  <Input
-    name="email"
-    type="email"
-    autoComplete="email"
-  />
-</Field>
-```
-
-For codes, tokens or suggestions, use [OTPField](/docs/otp-field/), [TagsInput](/docs/tags-input/) or [Combobox](/docs/combobox/). Choice types belong to Checkbox, RadioGroup and Switch.
+Use [Textarea](/docs/textarea/) for multiple lines, [PasswordInput](/docs/password-input/) to reveal passwords, or [InputGroup](/docs/input-group/) for icons and actions.
 
 ## Examples
 
-### Name a project
+### Controlled input
 
-<InputProjectDemo />
+```tsx
+function NameInput() {
+  const [name, setName] = useState('')
 
-### Confirm what a form submits
-
-<InputSubmittedDemo />
-
-### Match nearby control sizes
-
-<InputSizesDemo />
+  return (
+    <Field label="Name">
+      <Input
+        name="name"
+        value={name}
+        onChange={event => setName(event.currentTarget.value)}
+      />
+    </Field>
+  )
+}
+```
 
 ## State
 
-Choose one value owner per mount: `value` with `onChange`, or `defaultValue`. Passing both, switching owners or passing `null` throws a TypeError. Use `''` for an empty value, and remount with a new `key` to change owners.
-
-The value submits natively under `name`, and `form` associates an input outside its form. Reset restores `defaultValue`; controlled owners reset their own state in `onReset`.
-
-`disabled` blocks editing and focus and leaves the value out of form data. `readOnly` keeps the value focusable and submitted but not editable. Field's `required` and `disabled` apply to its control, and the control cannot undo them.
+Use `defaultValue` or `value` with `onChange`. Keep that choice until remount. Form reset restores `defaultValue`. Reset controlled values in `onReset`.
 
 ## Accessibility
 
-Every control needs an accessible name. Wrap it in [Field](/docs/field/) for a label, description and error, or pass `aria-label` or `aria-labelledby`. A placeholder is not a name. The native input keeps the implicit role for its `type`, such as textbox or searchbox.
-
-Field joins its description and error IDs before the caller's `aria-describedby`. Set `aria-invalid`, or pass `error` to Field, to mark the value invalid.
-
-| Key             | Behavior                           |
-| --------------- | ---------------------------------- |
-| Tab / Shift+Tab | Move focus in and out              |
-| Typing, arrows  | Native editing, selection and IME  |
-| Enter           | Submit the enclosing form natively |
-
-## Motion
-
-Input does not animate. Focus and invalid styles change immediately. Animate surrounding content with the hooks in [motion setup](/docs/foundations/motion/).
+Give each input a label, `aria-label` or `aria-labelledby`. For an error outside Field, set `aria-invalid` and link the message with `aria-describedby`.
 
 ## Styling
 
-Input renders one native `<input>`, so `className`, `style` and `ref` all target it. It carries `data-slot="input"` followed by a caller's tokens, `data-control-size`, and `data-invalid` when invalid. Hosted inputs in InputGroup, PasswordInput, OTPField and TagsInput add their own slot tokens.
-
-Set `--rad-input-*` variables in `style` to tune size, typography, surface and placeholder. For example, `--rad-input-radius` changes the corner radius. See [focus outlines](/docs/foundations/theming/#focus-outlines) for error and focus colors.
+Set `--rad-input-radius` in `style` to change the corners. See [focus outlines](/docs/foundations/theming/#focus-outlines) for focus and error colors.
 
 ## API
 
-### Input
+Input accepts native input props and events.
 
-| Prop                 | Type                                   | Default             |
-| -------------------- | -------------------------------------- | ------------------- |
-| value / defaultValue | string / number / readonly string[]    | None; one owner     |
-| onChange             | `ChangeEventHandler<HTMLInputElement>` | None                |
-| type                 | Native input type                      | text                |
-| controlSize          | small / medium / large                 | medium              |
-| size                 | number; native width in characters     | None                |
-| name / form          | string                                 | None                |
-| required / disabled  | boolean                                | Field's, else false |
-| readOnly             | boolean                                | false               |
-| aria-invalid         | Native; mirrored as `data-invalid`     | Field's             |
-| className / style    | string / ThemeStyle                    | None                |
-| ref                  | `Ref<HTMLInputElement>`                | None                |
-| Other props          | Native input attributes and events     | Native defaults     |
-
-Exports `Input` and `InputProps`.
+| Prop                        | Purpose                                                          |
+| --------------------------- | ---------------------------------------------------------------- |
+| `controlSize`               | `small`, `medium` (default), or `large`                          |
+| `size`                      | Native width hint in characters                                  |
+| `required`, `disabled`      | Inherit from Field. Disabled inputs skip focus and submission.   |
+| `readOnly`                  | Prevents edits. The input stays focusable and submits its value. |
+| `className`, `style`, `ref` | Target the native input, which has `data-slot="input"`           |
