@@ -23,7 +23,7 @@ export function BreadcrumbExample({
       <Breadcrumb aria-label="Documentation location">
         <BreadcrumbList>
           <BreadcrumbItem>
-            <BreadcrumbLink href="/docs/installation/">Documentation</BreadcrumbLink>
+            <BreadcrumbLink href="/docs/getting-started/">Installation</BreadcrumbLink>
             <BreadcrumbSeparator />
           </BreadcrumbItem>
           <BreadcrumbItem>

@@ -10,7 +10,7 @@ const languages: Partial<Record<string, 'tsx' | 'ts' | 'css' | 'json'>> = {
   '.css': 'css',
   '.json': 'json'
 }
-const themes = { light: 'github-light', dark: 'github-dark' } as const
+const themes = { light: 'github-light-high-contrast', dark: 'github-dark' } as const
 
 /** File reads and syntax highlighting stay on the server. `html` is the highlighted lines. */
 export async function highlightSource(file: string): Promise<DemoSource> {

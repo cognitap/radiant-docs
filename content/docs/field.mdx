@@ -1,20 +1,19 @@
 ---
 title: Field
-description: Give a control, or a group of controls, a visible label, help text and a validation error.
+description: Add a label, help text and validation errors to form controls.
 ---
 
-import { FieldDemo, FieldRemindersDemo, FieldUsernameDemo } from '../../components/FieldDemo'
+import { FieldDemo } from '../../components/FieldDemo'
 
 <FieldDemo />
 
 ## Usage
 
-Field has two layouts. The default control layout wraps one control in a `div` and points a `label` at it. Radiant controls such as [Input](/docs/input/) connect automatically.
+Wrap an [Input](/docs/input/) or another Radiant control in Field to connect its label, help and errors.
 
 ```tsx
 <Field
   label="Email"
-  description="Your work address"
   error={error}
   required
 >
@@ -25,29 +24,11 @@ Field has two layouts. The default control layout wraps one control in a `div` a
 </Field>
 ```
 
-The group layout wraps several controls in a native `fieldset` and names it with a `legend`. Each child keeps its own label.
+## Examples
 
-```tsx
-<Field
-  layout="group"
-  label="Channels"
-  error={channelError}
-  required
->
-  <Checkbox
-    label="Email"
-    name="channels"
-    value="email"
-  />
-  <Checkbox
-    label="Team feed"
-    name="channels"
-    value="feed"
-  />
-</Field>
-```
+### Native input
 
-For a native control, pass a function child and spread every prop it receives. A plain element child stays unlabelled.
+Pass a function child and spread its props on the native input.
 
 ```tsx
 <Field
@@ -63,72 +44,46 @@ For a native control, pass a function child and spread every prop it receives. A
 </Field>
 ```
 
-Use [Fieldset](/docs/fieldset/) for a bare form section, [RadioGroup](/docs/radio-group/) for one choice among options, and `aria-label` on the control when there is no visible label.
+### Group
 
-## Examples
+`layout="group"` gives related choices a shared legend. Label each option. Use [Fieldset](/docs/fieldset/) to group independently labeled fields.
 
-### Flag a field from a server response
-
-<FieldUsernameDemo />
-
-### Group related choices
-
-<FieldRemindersDemo />
+```tsx
+<Field
+  layout="group"
+  label="Channels"
+>
+  <Checkbox label="Email" />
+  <Checkbox label="SMS" />
+</Field>
+```
 
 ## State
 
-Field holds no value. You own values, validation, focus and the error text. An `error` with content marks the Field invalid; `''`, `null` or `false` clears it.
-
-For an external error summary, set `aria-invalid` and `aria-describedby` on Field. In control layout both reach the control, with caller IDs last. Groups keep caller IDs on the `fieldset`.
-
-A child cannot undo its Field's `required` or `disabled`. Field submits nothing. Control layout rejects `name` and `form`; in group layout they are native fieldset attributes. A required group does not require every checkbox.
-
-`useField()` returns the nearest `FieldState`, or `null` outside Field. Its `controlProps` is `null` in group layout.
+Set `error` when validation fails. Clear it when the value passes. Group `required` marks the legend. The form checks which options are selected.
 
 ## Accessibility
 
-A `label` names the control, and `aria-describedby` lists help then error. A `legend` names the `fieldset`, which carries group help. The fieldset also carries the invalid state and inline error unless every focusable control carries both. Inline errors use `role="alert"`. Required indicators are `aria-hidden`.
-
-| Key         | Behavior                                        |
-| ----------- | ----------------------------------------------- |
-| Click label | Focuses or toggles the control (native `label`) |
-| Any other   | Handled by the control; Field adds no keys      |
+Field links help and errors with `aria-describedby` and announces inline errors as alerts. For an error rendered elsewhere, set `aria-invalid` and pass the message ID in `aria-describedby`. Group help and caller IDs stay on the fieldset.
 
 ## Motion
 
-Field does not animate; errors appear immediately. To move surrounding layout, wrap the Field in an element animated with `useSpringLayout`, as the first example does. It follows the theme's `motion.mode` and reduced motion. See [layout motion](/docs/foundations/motion/#animate-layout).
+Errors appear immediately. The demo uses [layout motion](/docs/foundations/motion/#animate-layout) to move the surrounding fields.
 
 ## Styling
 
-Root `className`, `style`, native props and `ref` reach the `div` or `fieldset`. Disabled dims all but the description and error.
-
-| Part          | Element              | `data-slot`         |
-| ------------- | -------------------- | ------------------- |
-| Root          | `div` / `fieldset`   | `field`             |
-| `label`       | `label` / `legend`   | `field-label`       |
-| `description` | `div`                | `field-description` |
-| `error`       | `div role="alert"`   | `field-error`       |
-| `required`    | `span` (aria-hidden) | `field-required`    |
-
-The root carries `data-layout="control|group"` and the presence attributes `data-invalid`, `data-disabled` and `data-required`. A caller `data-slot` is appended to `field`. Theme variables: `--rad-field-gap`, `--rad-field-label-color|size|weight`, `--rad-field-description-color|size`, `--rad-field-error-color|size`, `--rad-field-required-color` and `--rad-field-disabled-opacity`.
+Use `parts` to style the label, description, error or required indicator. The control draws the [focus outline](/docs/foundations/theming/#focus-outlines).
 
 ## API
 
-### Field
-
-| Prop                | Type / default                                                              |
-| ------------------- | --------------------------------------------------------------------------- |
-| label               | Required ReactNode; control label or group legend                           |
-| layout              | `'control' \| 'group'`; `'control'`                                         |
-| description / error | ReactNode; error content marks the Field invalid                            |
-| required / disabled | boolean; false                                                              |
-| requiredIndicator   | ReactNode; `'*'`; `null` hides it                                           |
-| controlId           | string; generated; control layout only                                      |
-| children            | ReactNode, or `(control: FieldControlProps) => ReactNode` in control layout |
-| parts               | label / description / error / required `PartStyle`                          |
-| aria-invalid        | Forwarded to the control in control layout                                  |
-| aria-describedby    | Appended to the control's descriptions in control layout                    |
-| className / style   | string / ThemeStyle; root                                                   |
-| ref                 | HTMLDivElement, or HTMLFieldSetElement in group layout                      |
-
-`FieldControlProps` holds `id`, `required`, `disabled`, `aria-invalid`, `aria-required` and `aria-describedby`. Exports `Field`, `useField`, `FieldProps`, `FieldControlProps`, `FieldState` and `FieldLayout`.
+| Prop                        | Purpose                                                                |
+| --------------------------- | ---------------------------------------------------------------------- |
+| `label`                     | Required label or legend                                               |
+| `layout`                    | `'control'` (default) or `'group'`                                     |
+| `description`, `error`      | Help text and validation message                                       |
+| `required`, `disabled`      | Both default to `false`                                                |
+| `requiredIndicator`         | Defaults to `'*'`. Pass `null` to hide it                              |
+| `controlId`                 | Input ID in control layout. Generated by default                       |
+| `children`                  | Controls or a function receiving `FieldControlProps` in control layout |
+| `parts`                     | Part style overrides                                                   |
+| `className`, `style`, `ref` | Target the root `div` or `fieldset`                                    |

@@ -63,16 +63,11 @@ runtime. CSS values must be nonempty strings, numeric effects finite,
 and opacity between 0 and 1. You own CSS grammar
 and contrast.
 
-Each mode resolves **library mode defaults → common theme values → mode
-overrides**. A common accent overrides both modes unless the dark mode sets
-its own value.
+Modes resolve **library defaults → common theme values → mode overrides**.
 
 ### Semantic tokens and exceptions
 
-Shared groups are `color`, `typography`, `control`, `surface`, `focus`,
-`motion`, `spacing` and `state`. Components use **family override → shared role → baseline**.
-The focus outline matches the border at 50% opacity. Family `focusColor`, `focusWidth`,
-`focusOffset` and `focusStyle` override shared `focus` tokens.
+Tokens resolve **family override → shared role → baseline**.
 
 | Authoring path              | Public CSS variable       | Scope of the change         |
 | --------------------------- | ------------------------- | --------------------------- |
@@ -87,6 +82,13 @@ use `ThemeStyle`, with typed CSS and custom properties.
 `radio.labelGap` spaces an option's label; `radioGroup.gap` spaces the options.
 Checkbox caps inherited rounding to stay a box, and Radio stays circular unless
 overridden. Variables beginning `--_` are private.
+
+### Focus outlines
+
+The solid outline touches the accent border and uses the same color at 50% opacity.
+Invalid text fields and checkboxes use the error border color. Forced colors use
+the system focus color. Family `focusColor`, `focusWidth`, `focusOffset` and
+`focusStyle` override defaults.
 
 ### Roles
 
