@@ -55,11 +55,11 @@ Checkbox renders a native `input type="checkbox"`. The browser reports `aria-che
 
 ## Motion
 
-Checkbox has no animation; the mark swaps instantly. The permissions example's `CheckboxFeedback` adapter springs `parts.indicator` with `useSpring`. Theme motion `mode: 'off'` and reduced motion settle it. See [motion setup](/docs/foundations/motion/).
+The mark changes immediately. The checkbox scales slightly on press when reduced motion is off. The permissions example animates the mark with `useSpring`. See [motion setup](/docs/foundations/motion/).
 
 ## Styling
 
-`className`, `style`, `ref` and native props target the input. It carries `data-slot="checkbox"` followed by a caller's tokens, `data-control-size`, and `data-invalid` when invalid. Set `--rad-checkbox-*` variables in `style` or a theme. Keep the focus ring visible.
+`className`, `style`, `ref` and native props target the input. Its styling hooks are `data-slot="checkbox"`, `data-control-size` and `data-invalid`. Set `radius` and `cornerShape` in `components.checkbox` to tune its corners. See [focus outlines](/docs/foundations/theming/#focus-outlines) for error and focus colors.
 
 | Part              | Element                                     | `data-slot`          |
 | ----------------- | ------------------------------------------- | -------------------- |

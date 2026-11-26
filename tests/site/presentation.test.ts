@@ -148,10 +148,10 @@ test('Breadcrumb keeps ordered hierarchy, decorative separators and one current 
         const nav = demo.getByRole('navigation', { name: 'Documentation location', exact: true })
         assert.equal(await nav.getByRole('list').count(), 1)
         assert.equal(await nav.getByRole('listitem').count(), 2)
-        assert.equal(
-          await nav.getByRole('link', { name: 'Documentation', exact: true }).getAttribute('href'),
-          '/docs/installation/'
-        )
+        const installation = nav.getByRole('link', { name: 'Installation', exact: true })
+        const href = await installation.getAttribute('href')
+        assert.equal(href, '/docs/getting-started/')
+        assert.equal((await page.request.get(new URL(href, baseURL).href)).status(), 200)
         assert.equal(await nav.locator('[aria-current="page"]').count(), 1)
         assert.equal(
           await nav.locator('[data-slot~="breadcrumb-separator"]').getAttribute('aria-hidden'),

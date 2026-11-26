@@ -72,7 +72,7 @@ Input does not animate. Focus and invalid styles change immediately. Animate sur
 
 Input renders one native `<input>`, so `className`, `style` and `ref` all target it. It carries `data-slot="input"` followed by a caller's tokens, `data-control-size`, and `data-invalid` when invalid. Hosted inputs in InputGroup, PasswordInput, OTPField and TagsInput add their own slot tokens.
 
-Override `--rad-input-*` variables in `style`, for example `{ '--rad-input-radius': '999px' }`. Variables cover height, padding, font, color, background, border, radius, corner shape, shadow, placeholder, focus, invalid border and disabled background.
+Set `--rad-input-*` variables in `style` to tune size, typography, surface and placeholder. For example, `--rad-input-radius` changes the corner radius. See [focus outlines](/docs/foundations/theming/#focus-outlines) for error and focus colors.
 
 ## API
 
