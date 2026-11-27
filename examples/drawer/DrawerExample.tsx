@@ -312,13 +312,16 @@ export function ControlledFilters({
             disabled={disabled}
             pending={pending}
           />
+          <DrawerClose
+            aria-label="Close filters"
+            style={{ justifySelf: 'end' }}
+          />
           <DrawerTitle>Filters</DrawerTitle>
           <DrawerDescription>Narrow the study list by status.</DrawerDescription>
           <Checkbox
             label="Show archived studies"
             name="archived"
           />
-          <DrawerClose variant="outline">Close filters</DrawerClose>
         </DrawerContent>
       </Drawer>
     </div>

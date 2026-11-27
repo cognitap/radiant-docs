@@ -39,6 +39,10 @@ export function ReviewShortcuts({
     >
       <DialogTrigger>Keyboard shortcuts</DialogTrigger>
       <DialogContent {...surface}>
+        <DialogClose
+          aria-label="Close shortcuts"
+          style={{ justifySelf: 'end' }}
+        />
         <DialogTitle>Keyboard shortcuts</DialogTitle>
         <DialogDescription>Work faster without leaving the keyboard.</DialogDescription>
         <dl style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: '.5rem 1rem' }}>

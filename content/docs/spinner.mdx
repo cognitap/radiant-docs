@@ -54,7 +54,7 @@ The SVG rotates once per `--rad-spinner-duration`, `1s` by default. System reduc
 
 ## Styling
 
-The root SVG has `data-slot="spinner"`, `data-control-size` and `data-motion`, and takes `className`, `style` and `ref`. `parts.track` and `parts.indicator` style the `spinner-track` circle and `spinner-indicator` arc. Forced colors draw both with `CanvasText`.
+The root SVG has `data-slot="spinner"`, `data-control-size` and `data-motion`, and takes `className`, `style` and `ref`. `parts.track` and `parts.indicator` style the `spinner-track` circle and `spinner-indicator` arc of the built-in drawing. A `spinner` icon from [IconProvider](/docs/icon-provider/) replaces that drawing and keeps the size, color and motion, including the stop under reduced motion. Forced colors draw both with `CanvasText`.
 
 `components.spinner` or local variables set `--rad-spinner-size` (with `-small` and `-large`), `-stroke-width`, `-color`, `-duration` and `-track-opacity`.
 

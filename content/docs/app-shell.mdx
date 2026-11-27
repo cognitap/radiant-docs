@@ -9,7 +9,7 @@ import { AppShellDemo, AppShellNotesDemo, AppShellSavedDemo } from '../../compon
 
 ## Usage
 
-Use AppShell for the frame of a whole application. Use [NavigationMenu](/docs/navigation-menu/) for site dropdowns, [Drawer](/docs/drawer/) for a side task and [Resizable](/docs/resizable/) for panes people resize.
+Use AppShell to frame a whole application. Use [NavigationMenu](/docs/navigation-menu/) for site dropdowns, [Drawer](/docs/drawer/) for a side task and [Resizable](/docs/resizable/) for panes people resize.
 
 ```tsx
 <AppShell>
@@ -45,15 +45,15 @@ Render AppShell once per page. Wrap link text in SidebarLabel so it hides when t
 
 AppShell owns two booleans. `collapsed` narrows the desktop Sidebar; `open` shows the mobile drawer. Pass `defaultCollapsed` or `collapsed` with `onCollapsedChange`, and `defaultOpen` or `open` with `onOpenChange`. A controlled owner may refuse a request.
 
-Below 40rem of shell width, not viewport width, the Sidebar moves into the drawer. A content-sized shell is 64rem wide, capped at the viewport. Returning to desktop requests `open` false. Links stay mounted across the move, so field values survive.
+Below 40rem of shell width, not viewport width, the Sidebar moves into the drawer. A content-sized shell is 64rem wide, up to the viewport. Returning to desktop requests `open` false. Links stay mounted across the move, so field values survive.
 
-`useAppShell()` returns `null` outside AppShell, otherwise the state and request methods. The Sidebar does not close on navigation; call `setOpen(false)` when a link routes. AppShell has no form value. Save `collapsed` yourself to restore a layout.
+`useAppShell()` returns `null` outside AppShell, otherwise the state and request methods. The Sidebar does not close on navigation; call `setOpen(false)` when a link routes. AppShell has no form value; save `collapsed` to restore a layout.
 
 ## Accessibility
 
 The header is a banner, the main a focusable main landmark and the Sidebar a `nav` named by its visible `label`. AppShellSkipLink moves to the main; set `mainId` for a stable target. SidebarTrigger sets `aria-expanded` and `aria-controls` for the Sidebar or the drawer, plus `aria-haspopup` on mobile. Give an icon-only trigger an `aria-label`.
 
-The mobile drawer is a modal [Drawer](/docs/drawer/) titled by `label`, with a close button named by `closeLabel`. Collapsing while focus sits in expanded-only content moves focus to the trigger.
+The mobile drawer is a modal [Drawer](/docs/drawer/) titled by `label`, with a close button named by `closeLabel`. With a `close` icon from [IconProvider](/docs/icon-provider/), that button is icon-only. Collapsing while focus sits in expanded-only content moves focus to the trigger.
 
 | Key           | Behavior                                                           |
 | ------------- | ------------------------------------------------------------------ |
@@ -64,7 +64,7 @@ The mobile drawer is a modal [Drawer](/docs/drawer/) titled by `label`, with a c
 
 ## Motion
 
-Under `MotionProvider`, the Sidebar and main spring to their new widths on collapse, and the drawer slides. Set `motion="off"` on AppShell, or rely on reduced motion, to remove both.
+Under `MotionProvider`, the Sidebar and main spring to their new widths on collapse, and the drawer slides. `motion="off"` on AppShell or reduced motion removes both.
 
 ## Styling
 
@@ -119,7 +119,7 @@ Under `MotionProvider`, the Sidebar and main spring to their new widths on colla
 | Prop              | Type                                                     | Default          |
 | ----------------- | -------------------------------------------------------- | ---------------- |
 | label             | ReactNode; visible, nonempty name                        | Required         |
-| closeLabel        | string; drawer close button text                         | Close navigation |
+| closeLabel        | string; drawer close button text or icon label           | Close navigation |
 | parts             | `{ label, drawer, viewport, close }` of PartStyle        | None             |
 | className / style | string / ThemeStyle                                      | None             |
 | ref               | `Ref<HTMLElement>`                                       | None             |

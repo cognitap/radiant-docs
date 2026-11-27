@@ -1,0 +1,74 @@
+---
+title: IconProvider
+description: Supply the icons that Radiant components draw, such as checkmarks, chevrons and spinners.
+---
+
+import { Demo } from '../../components/demo/Demo'
+import { DemoControls, DemoPreview } from '../../components/demo/DemoFrame'
+import { UseRoundIcons } from '../../examples/icon-provider/UseRoundIcons'
+
+<Demo
+  title="Draw controls with a round icon set"
+  files={['icon-provider/UseRoundIcons.tsx', 'icon-provider/roundIcons.tsx']}
+>
+  <DemoControls />
+  <DemoPreview>
+    <UseRoundIcons />
+  </DemoPreview>
+</Demo>
+
+## Usage
+
+Wrap the app, inside or around [ThemeScope](/docs/foundations/theming/), to replace the icons Radiant components draw with your own set. Render it in a client component, because icons are components.
+
+```tsx
+'use client'
+import { Check, ChevronDown, X } from 'lucide-react'
+import { IconProvider } from '@cognitap/radiant'
+
+const icons = { check: Check, chevronDown: ChevronDown, close: X }
+
+export function AppIcons({ children }: { children: React.ReactNode }) {
+  return <IconProvider icons={icons}>{children}</IconProvider>
+}
+```
+
+| Icon                          | Drawn by                                                                                        |
+| ----------------------------- | ----------------------------------------------------------------------------------------------- |
+| `check`, `indeterminate`      | [Checkbox](/docs/checkbox/) marks; `check` also marks the chosen [Select](/docs/select/) item   |
+| `chevronDown`                 | [Select](/docs/select/) and [Combobox](/docs/combobox/) triggers                                |
+| `chevronLeft`, `chevronRight` | [Calendar](/docs/calendar/) month buttons, also in DatePicker; `chevronRight` marks Collapsible |
+| `close`                       | Combobox clear, [Sidebar](/docs/app-shell/) drawer close, childless DialogClose and DrawerClose |
+| `calendar`                    | [DatePicker](/docs/date-picker/) and [DateRangePicker](/docs/date-range-picker/) triggers       |
+| `grip`                        | [SortableList](/docs/sortable-list/) and [DragAndDrop](/docs/drag-and-drop/) handles            |
+| `spinner`                     | [Spinner](/docs/spinner/) and the pending [Button](/docs/button/)                               |
+| `chevronUp`                   | No built-in component yet                                                                       |
+
+## State
+
+`icons` maps names to components. A name you omit keeps the component's built-in drawing. An unknown name throws a `TypeError`.
+
+A nested provider overrides only the names it sets to an icon. A name left out or set to `undefined` keeps the outer provider's icon.
+
+```tsx
+<IconProvider icons={appIcons}>
+  <IconProvider icons={{ check: BoldCheck }}>{approvals}</IconProvider>
+</IconProvider>
+```
+
+## Accessibility
+
+Radiant passes `aria-hidden` to every supplied icon. The component keeps its own name, so an icon never needs a label.
+
+## Styling
+
+Each icon receives `className` and `aria-hidden`. Spread both on the root SVG. Radiant sizes the icon to `1em` square, or to the button's icon size inside a button. Draw with `currentColor` so the icon follows the control's color in every theme and mode.
+
+## API
+
+| Prop       | Type and default                                                |
+| ---------- | --------------------------------------------------------------- |
+| `icons`    | `IconSet`, a partial map of icon names to components. Required. |
+| `children` | React content.                                                  |
+
+Exports IconProvider, IconProviderProps, `IconSet`, `IconName` and `IconComponent`. `ICON_NAMES` lists the ten names: `check`, `indeterminate`, `chevronDown`, `chevronUp`, `chevronLeft`, `chevronRight`, `close`, `calendar`, `grip` and `spinner`. It imports in a server component.

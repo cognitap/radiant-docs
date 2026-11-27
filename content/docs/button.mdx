@@ -74,15 +74,15 @@ Give `iconOnly` buttons an `aria-label`. `pending` sets `aria-busy="true"`, keep
 
 ## Motion
 
-Inside a [`MotionProvider`](/docs/foundations/motion/), a spring scales, moves and reshapes the pressed button. Turn it off with `motion="off"`, theme `motion.mode: 'off'` or the reduced-motion preference. A caller `scale` style or `scale-*` class replaces the press scale. Under reduced motion the pending spinner hides.
+Inside a [`MotionProvider`](/docs/foundations/motion/), a spring scales, moves and reshapes the pressed button. `motion="off"`, theme `motion.mode: 'off'` or reduced motion turns it off. A `scale` style or `scale-*` class replaces the press scale. Reduced motion hides the pending spinner.
 
 ## Styling
 
-`className`, `style`, `ref` and native props reach the button. Select it with `[data-slot~="button"]`; your `data-slot` tokens are appended. Style state with `data-variant`, `data-tone`, `data-control-size`, `aria-pressed`, `aria-busy` and `:disabled`. Keep the focus ring and the pressed cue, an inset ring that becomes a double underline in forced colors.
+`className`, `style`, `ref` and native props reach the button. Select it with `[data-slot~="button"]`; your `data-slot` tokens are appended. Style state with `data-variant`, `data-tone`, `data-control-size`, `aria-pressed`, `aria-busy` and `:disabled`. [IconProvider](/docs/icon-provider/) can replace the [pending spinner](/docs/spinner/#styling). Keep the focus ring and the pressed cue, an inset ring that becomes a double underline in forced colors.
 
-Theme keys live under `components.button`, such as `radius`, `radiusPressed`, `cornerShape`, `shadowPressed`, `pressScale` and `selectedLayer`. Override one in `style`, as in `--rad-button-radius`.
+Theme keys live under `components.button`, such as `radius`, `radiusPressed`, `cornerShape`, `shadowPressed`, `pressScale` and `selectedLayer`. Override one in `style`, such as `--rad-button-radius`.
 
-A pressed button, and a ToggleGroup item, mixes `selectedLayer` (20% by default) of its text color into its fill, so the state stays visible on every variant.
+A pressed button or ToggleGroup item mixes `selectedLayer` (20% by default) of its text color into its fill, so the state shows on every variant.
 
 ## API
 

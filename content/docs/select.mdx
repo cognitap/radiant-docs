@@ -34,7 +34,7 @@ Use Select to pick one value from a styled list. A hidden native `<select>` hand
 </Field>
 ```
 
-Without children, Select renders a trigger and an item for every entry in `items`. Compose the parts below to change either.
+Without children, Select renders a trigger and an item per entry in `items`; compose the parts to change either.
 
 ## Examples
 
@@ -56,15 +56,15 @@ Without children, Select renders a trigger and an item for every entry in `items
 
 ## State
 
-Use `defaultValue`, or `value` with `onValueChange`, not both; mixing them throws. `null` shows the placeholder, and `''` is a real value when an item has it. `open`, `defaultOpen` and `onOpenChange` follow the same rule.
+Use `defaultValue` or `value` with `onValueChange`; mixing them throws. `null` shows the placeholder, and `''` is a real value when an item has it. `open`, `defaultOpen` and `onOpenChange` follow the same rule.
 
-The native select submits the value under `name`, or `''` when empty. Form reset restores `defaultValue` without calling `onValueChange`. A controlled Select keeps its value, so reset your state in `onReset`. An invalid submit focuses the trigger.
+The native select submits the value under `name`, or `''` when empty. Form reset restores `defaultValue` without firing `onValueChange`. A controlled Select keeps its value, so reset your state in `onReset`. An invalid submit focuses the trigger.
 
 `disabled` blocks the control and leaves its value out of form data. `readOnly` keeps the trigger focusable and the value submitted, but nothing opens or changes and `required` is not checked. Field's `disabled`, `required` and `error` apply too. Pass `aria-invalid` to Select to mark it invalid outside Field.
 
 ## Accessibility
 
-The trigger is a `button` with `role="combobox"`, `aria-expanded`, `aria-required`, `aria-invalid` and `aria-readonly`. Name it with Field or with `aria-label` on SelectTrigger. The popup is a `listbox` of `option` items; SelectGroup is a labelled `group`. Give rich labels a plain `textValue` for typeahead.
+The trigger is a `button` with `role="combobox"`, `aria-expanded`, `aria-required`, `aria-invalid` and `aria-readonly`. Name it with Field or `aria-label` on SelectTrigger. The popup is a `listbox` of `option` items; SelectGroup is a labelled `group`. Give rich labels a plain `textValue` for typeahead.
 
 | Key                           | Behavior                                         |
 | ----------------------------- | ------------------------------------------------ |
@@ -79,11 +79,11 @@ The trigger is a `button` with `role="combobox"`, `aria-expanded`, `aria-require
 
 ## Motion
 
-Inside [MotionProvider](/docs/foundations/motion/), the popup fades in; closing is immediate. Set `motion="off"` on SelectContent to turn it off. Reduced motion shows it at full opacity.
+Inside [MotionProvider](/docs/foundations/motion/), the popup fades in; closing is immediate. `motion="off"` on SelectContent or reduced motion shows it at once.
 
 ## Styling
 
-Every part except SelectPortal takes `className`, `style` and `ref`, and adds a caller's `data-slot` after its own.
+Every part except SelectPortal takes `className`, `style` and `ref`, and adds a caller's `data-slot` after its own. The trigger `chevronDown` and chosen-item `check` come from [IconProvider](/docs/icon-provider/) when supplied.
 
 | Part                | Attributes                                                                                                              |
 | ------------------- | ----------------------------------------------------------------------------------------------------------------------- |
