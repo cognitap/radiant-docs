@@ -3,9 +3,9 @@ import { Checkbox } from '@cognitap/radiant'
 import { useState } from 'react'
 import { SelectControl } from '@/components/demo/ActionControls'
 import { DemoControls, DemoPreview } from '@/components/demo/DemoFrame'
-import { InputGroupExample, type InputGroupTask } from './InputGroupExample'
+import { FindProjectWithAddons } from './InputAddonExample'
 import type { ControlSize } from '@cognitap/radiant'
-export function InputGroupPlayground({ task = 'find' }: { task?: InputGroupTask }) {
+export function InputAddonPlayground() {
   const [size, setSize] = useState<ControlSize>('medium'),
     [dir, setDir] = useState<'ltr' | 'rtl'>('ltr'),
     [modifier, setModifier] = useState<'Control' | 'Command'>('Control'),
@@ -28,14 +28,12 @@ export function InputGroupPlayground({ task = 'find' }: { task?: InputGroupTask 
             options={['ltr', 'rtl']}
             onChange={setDir}
           />
-          {task === 'find' && (
-            <SelectControl
-              label="Modifier"
-              value={modifier}
-              options={['Control', 'Command']}
-              onChange={setModifier}
-            />
-          )}
+          <SelectControl
+            label="Modifier"
+            value={modifier}
+            options={['Control', 'Command']}
+            onChange={setModifier}
+          />
         </div>
         <div className="action-toggles">
           <Checkbox
@@ -56,8 +54,7 @@ export function InputGroupPlayground({ task = 'find' }: { task?: InputGroupTask 
         </div>
       </DemoControls>
       <DemoPreview>
-        <InputGroupExample
-          task={task}
+        <FindProjectWithAddons
           controlSize={size}
           dir={dir}
           modifier={modifier}

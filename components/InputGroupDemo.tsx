@@ -1,32 +1,17 @@
+import { InputGroupExample } from '@/examples/inputgroup/InputGroupExample'
 import { Demo } from './demo/Demo'
-import { InputGroupPlayground } from '@/examples/inputgroup/InputGroupPlayground'
+import { DemoControls, DemoPreview } from './demo/DemoFrame'
+
 export function InputGroupDemo() {
   return (
     <Demo
-      title="Find a project"
+      title="Add a prefix and an action"
       files={['inputgroup/InputGroupExample.tsx']}
     >
-      <InputGroupPlayground task="find" />
-    </Demo>
-  )
-}
-export function InputGroupBudgetDemo() {
-  return (
-    <Demo
-      title="Set a project budget"
-      files={['inputgroup/InputGroupExample.tsx']}
-    >
-      <InputGroupPlayground task="budget" />
-    </Demo>
-  )
-}
-export function InputGroupUpdateDemo() {
-  return (
-    <Demo
-      title="Post a study update"
-      files={['inputgroup/InputGroupExample.tsx']}
-    >
-      <InputGroupPlayground task="update" />
+      <DemoControls />
+      <DemoPreview>
+        <InputGroupExample />
+      </DemoPreview>
     </Demo>
   )
 }
