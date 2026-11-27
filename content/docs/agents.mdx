@@ -31,14 +31,14 @@ differ from A2UI's, so use it only for an adapter to another protocol.
 
 Pass the messages for one surface to `A2uiSurface` in a client component.
 Append messages as they stream in: missing components show as skeletons, text
-still on its way reserves a line, and controls keep their state and focus. The
-surface ignores the agent's theme hints, so the nearest
-[ThemeScope](/docs/foundations/theming/) decides how it looks.
+still on its way reserves a line, and controls keep their state and focus. A
+refused message clears those placeholders and `aria-busy` until the next
+accepted one. The nearest [ThemeScope](/docs/foundations/theming/), not the
+agent's theme hints, decides how it looks.
 
 ## Check accessibility on the server
 
-Run the accessibility check before you store a surface, so a user never meets a
-control without a name. `validateA2uiAccessibility` needs no DOM. With
+Check accessibility before you store a surface, so no control lacks a name. `validateA2uiAccessibility` needs no DOM. With
 `fix: true` it returns a fixed copy where a safe fix exists. Props are coerced
 to the schema when the surface renders, or earlier with `coerceA2uiMessages`.
 

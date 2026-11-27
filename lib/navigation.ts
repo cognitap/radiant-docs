@@ -111,6 +111,11 @@ export const categories = [
     slugs: ['locale-provider', 'number-formatter']
   },
   {
+    title: 'Icons',
+    description: 'Supply the icons components draw.',
+    slugs: ['icon-provider']
+  },
+  {
     title: 'Data display',
     description: 'Show records, media, code and charts.',
     slugs: [

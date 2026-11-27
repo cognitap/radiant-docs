@@ -70,11 +70,11 @@ The summary is the control and announces expanded or collapsed. Its text is its 
 
 ## Motion
 
-Content height animates between closed and its natural height, springing under a [MotionProvider](/docs/foundations/motion/). The chevron mirrors in RTL and rotates down when open. Open state changes at once; motion never delays it. Turn motion off with `motion="off"`, a theme motion mode of `off`, or the reduced-motion preference. Set the duration with `--rad-collapsible-duration`.
+Content height animates between closed and its natural height, springing under a [MotionProvider](/docs/foundations/motion/). The chevron mirrors in RTL and rotates down when open. Open state changes at once; motion never delays it. `motion="off"`, theme motion `off` or reduced motion turns it off. Set the duration with `--rad-collapsible-duration`.
 
 ## Styling
 
-`className`, `style` and `ref` reach each part's host. A caller `data-slot` adds to the built-in token, so select with `[data-slot~=collapsible]`.
+`className`, `style` and `ref` reach each part's host. A caller `data-slot` adds to the built-in token, so select with `[data-slot~=collapsible]`. The marker draws `chevronRight` from [IconProvider](/docs/icon-provider/) when supplied.
 
 | Part               | Host      | `data-slot`           | Data attributes              |
 | ------------------ | --------- | --------------------- | ---------------------------- |

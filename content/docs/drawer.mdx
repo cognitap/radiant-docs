@@ -52,7 +52,7 @@ Drawer has no form value. Forms inside the content submit and reset natively; re
 
 ## Accessibility
 
-Content is a native `<dialog>` named by DrawerTitle and described by DrawerDescription. Modal content traps focus and returns it to the trigger on close; non-modal content leaves the page usable. Keep a visible Close action.
+Content is a native `<dialog>` named by DrawerTitle and described by DrawerDescription. Modal content traps focus and returns it to the trigger on close; non-modal content leaves the page usable. Keep a visible Close action. A childless DrawerClose draws a close icon, which [IconProvider](/docs/icon-provider/) can replace, and requires `aria-label` or `aria-labelledby`.
 
 DrawerHandle is a real button. It requires `aria-label` or `aria-labelledby` and throws without one. A polite live region announces the size as a percentage.
 

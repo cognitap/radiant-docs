@@ -39,7 +39,7 @@ Declare the containers in order, then the items. DragAndDrop has no built-in tex
 
 ### Sort files into folders
 
-When an item holds more than plain text, set `textValue` for announcements; `handleLabel` names each handle from it.
+For rich items, set `textValue` for announcements; `handleLabel` names each handle from it.
 
 <SortFilesDemo />
 
@@ -59,7 +59,7 @@ Containers stack in a narrow board and sit side by side from 30rem.
 
 ## Accessibility
 
-Name the board with `aria-label`, `aria-labelledby` or a group Field label. Each container is a group named by its label. Each handle is a pressed-state Button named by its item and described by `instructionsText`. Announcements are polite and name both containers; a drop in place says nothing.
+Name the board with `aria-label`, `aria-labelledby` or a group Field label. Each container is a group named by its label. Each handle is a pressed-state Button named by its item and described by `instructionsText`. Polite announcements name both containers; a drop in place says nothing.
 
 | Key                       | Behavior                                               |
 | ------------------------- | ------------------------------------------------------ |
@@ -88,7 +88,7 @@ Inside `MotionProvider`, items spring to their new places, and a released item g
 | Handle         | `data-slot="button drag-and-drop-handle"`, `aria-pressed`                           |
 | Item content   | `drag-and-drop-item-content`                                                        |
 
-`parts` styles every `label`, `list`, `handle` and `content`. Themes set `components.dragAndDrop`; `--rad-drag-and-drop-*` variables set `container-background`, `container-border-color`, `item-radius`, `item-background`, `marker-color`, `target-border-color`, `full-color` and more.
+`parts` styles every `label`, `list`, `handle` and `content`. Handles draw `grip` from [IconProvider](/docs/icon-provider/) when supplied. Themes set `components.dragAndDrop`; `--rad-drag-and-drop-*` variables set `container-background`, `container-border-color`, `item-radius`, `item-background`, `marker-color`, `target-border-color`, `full-color` and more.
 
 ## API
 

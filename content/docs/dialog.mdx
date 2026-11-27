@@ -14,7 +14,7 @@ import {
 
 ## Usage
 
-Use Dialog for a short task that needs the user's attention before they return to the page. Use [AlertDialog](/docs/alert-dialog/) to confirm or cancel a consequential action, [Drawer](/docs/drawer/) for a panel at a screen edge, [Command](/docs/command/) for a search-and-run palette and [Popover](/docs/popover/) for small content that leaves the page usable.
+Use Dialog for a short task that needs attention before the user returns to the page. Use [AlertDialog](/docs/alert-dialog/) to confirm or cancel a consequential action, [Drawer](/docs/drawer/) for a panel at a screen edge, [Command](/docs/command/) for a search-and-run palette and [Popover](/docs/popover/) for small content that leaves the page usable.
 
 ```tsx
 <Dialog>
@@ -43,13 +43,13 @@ Use Dialog for a short task that needs the user's attention before they return t
 
 ## State
 
-Pass `open` with `onOpenChange` to own the state, or `defaultOpen` to let Dialog own it. Mixing them is a type error. `onOpenChange` is a request: a controlled owner can decline it, and the dialog stays open, even after native Escape.
+Pass `open` with `onOpenChange` to own the state, or `defaultOpen` to let Dialog own it. Mixing them is a type error. `onOpenChange` is a request: a controlled owner can decline it, even after native Escape.
 
-DialogContent is a native `<dialog>`. A `<form method="dialog">` inside it closes the dialog, and Dialog reports `onOpenChange(false)`. Other forms submit normally and stay open; close them after saving. A dialog inside an ancestor form keeps its fields in that form. DialogTrigger and DialogClose default to `type="button"`, so they never submit.
+DialogContent is a native `<dialog>`. A `<form method="dialog">` inside it closes the dialog, and Dialog reports `onOpenChange(false)`. Other forms submit normally and stay open; close them after saving. A dialog inside an ancestor form keeps its fields in that form. DialogTrigger and DialogClose default to `type="button"`.
 
 ## Accessibility
 
-DialogContent is named by DialogTitle through `aria-labelledby` and described by DialogDescription through `aria-describedby`. Always render a DialogTitle, or pass `aria-label` to DialogContent. DialogTrigger sets `aria-haspopup="dialog"`, `aria-expanded` and `aria-controls`.
+DialogContent is named by DialogTitle through `aria-labelledby` and described by DialogDescription through `aria-describedby`. Always render a DialogTitle, or pass `aria-label` to DialogContent. DialogTrigger sets `aria-haspopup="dialog"`, `aria-expanded` and `aria-controls`. A childless DialogClose draws a close icon, which [IconProvider](/docs/icon-provider/) can replace, and requires `aria-label` or `aria-labelledby`.
 
 A modal dialog uses `showModal()`. The browser makes the rest of the page inert and moves focus inside, respecting `autoFocus`. Focus returns to the opener on close.
 
@@ -76,7 +76,7 @@ Inside a [`MotionProvider`](/docs/foundations/motion/), DialogContent springs op
 | DialogTrigger     | `button dialog-trigger` |
 | DialogClose       | `button dialog-close`   |
 
-Set `--rad-dialog-width` (default `32rem`) on DialogContent for a local width. Other variables cover gap, padding, radius, corner shape, border, background, backdrop filter, color, shadow, backdrop, focus ring, title size and weight, and description color and size, each as `--rad-dialog-*`.
+Set `--rad-dialog-width` (default `32rem`) on DialogContent for a local width. Other `--rad-dialog-*` variables cover gap, padding, radius, corner shape, border, background, backdrop filter, color, shadow, backdrop, focus ring, title and description.
 
 ## API
 
