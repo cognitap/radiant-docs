@@ -26,7 +26,11 @@ Wrap the app, inside or around [ThemeScope](/docs/foundations/theming/), to repl
 import { Check, ChevronDown, X } from 'lucide-react'
 import { IconProvider } from '@cognitap/radiant'
 
-;<IconProvider icons={{ check: Check, chevronDown: ChevronDown, close: X }}>{app}</IconProvider>
+const icons = { check: Check, chevronDown: ChevronDown, close: X }
+
+export function AppIcons({ children }: { children: React.ReactNode }) {
+  return <IconProvider icons={icons}>{children}</IconProvider>
+}
 ```
 
 | Icon                          | Drawn by                                                                                        |
