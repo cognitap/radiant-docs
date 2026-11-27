@@ -1,4 +1,4 @@
-import { InputGroupPlayground } from '@/examples/inputgroup/InputGroupPlayground'
+import { InputAddonPlayground } from '@/examples/kbd/InputAddonPlayground'
 import { Demo } from './demo/Demo'
 import { KbdPlayground } from '@/examples/kbd/KbdPlayground'
 export function KbdDemo() {
@@ -36,9 +36,9 @@ export function KbdInputGroupDemo() {
   return (
     <Demo
       title="Search with input addons"
-      files={['inputgroup/InputGroupExample.tsx']}
+      files={['kbd/InputAddonExample.tsx']}
     >
-      <InputGroupPlayground task="find" />
+      <InputAddonPlayground />
     </Demo>
   )
 }

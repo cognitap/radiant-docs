@@ -1320,72 +1320,6 @@ test('Kbd docs combine native notation with application-owned search, Menu and f
         await save.getByRole('tooltip').waitFor()
         assert.equal(await save.getByRole('tooltip').locator('kbd').count(), 3)
         await page.keyboard.press('Escape')
-        assert.deepEqual(errors, [])
-      })
-    } finally {
-      await page.close()
-    }
-  })
-})
-
-test('InputGroup docs preserve addon focus, Kbd hints, native budget forms and Textarea actions', async () => {
-  await withSite(async (baseURL, browser) => {
-    const page = await browser.newPage(),
-      errors = track(page)
-    try {
-      await capture(page, 'input-group-tasks', async () => {
-        await page.goto(`${baseURL}/docs/input-group/`)
-        await page.waitForFunction(
-          () => !document.querySelector<HTMLButtonElement>('.demo-heading button')?.disabled
-        )
-        const find = page.getByRole('region', { name: 'Find a project', exact: true }),
-          input = find.getByRole('searchbox', { name: 'Project search', exact: true })
-        await find.locator('[data-slot~="input-group-addon"] kbd').last().click()
-        assert.equal(await input.evaluate(n => n === document.activeElement), true)
-        await input.fill('Reader')
-        await page.keyboard.press('Control+k')
-        assert.deepEqual(
-          await input.evaluate(n =>
-            n instanceof HTMLInputElement ? [n.selectionStart, n.selectionEnd] : null
-          ),
-          [0, 6]
-        )
-        assert.equal(await find.getByRole('listitem').count(), 1)
-        await find.getByRole('checkbox', { name: 'Read only', exact: true }).check()
-        assert.equal(await input.isEditable(), false)
-        assert.equal(await input.isEnabled(), true)
-        await find.getByRole('checkbox', { name: 'Read only', exact: true }).uncheck()
-        await find.getByRole('combobox', { name: 'Direction', exact: true }).selectOption('rtl')
-        await find
-          .getByRole('combobox', { name: 'Control size', exact: true })
-          .selectOption('small')
-        assert.equal(await find.locator('[data-slot~="input-group"]').getAttribute('dir'), 'rtl')
-        assert.equal(
-          await find.locator('[data-slot~="input-group"]').getAttribute('data-control-size'),
-          'small'
-        )
-        const budget = page.getByRole('region', { name: 'Set a project budget', exact: true }),
-          amount = budget.getByRole('textbox', { name: 'Project budget', exact: true })
-        await amount.fill('350')
-        await budget.getByRole('button', { name: 'Save budget', exact: true }).click()
-        assert.match(await budget.getByRole('status').last().innerText(), /Budget saved: 350 USD/)
-        await budget.getByRole('button', { name: 'Restore budget', exact: true }).click()
-        assert.equal(await amount.inputValue(), '250')
-        const post = page.getByRole('region', { name: 'Post a study update', exact: true })
-        await post
-          .getByRole('textbox', { name: 'Study update', exact: true })
-          .fill('Reviewed the grouped editor')
-        await post.getByRole('button', { name: 'Post update', exact: true }).click()
-        assert.match(
-          await post.getByRole('status').last().innerText(),
-          /Posted: Reviewed the grouped editor/
-        )
-        await post.getByRole('button', { name: 'Restore update', exact: true }).click()
-        assert.equal(
-          await post.getByRole('textbox', { name: 'Study update', exact: true }).inputValue(),
-          'Reviewed the interview notes.'
-        )
-        await page.goto(`${baseURL}/docs/kbd/`)
         const hint = page.getByRole('region', { name: 'Search with input addons', exact: true })
         await hint.locator('.demo-heading button:not(:disabled)').waitFor()
         await hint.locator('[data-slot~="input-group-addon"] kbd').last().click()
@@ -1396,6 +1330,48 @@ test('InputGroup docs preserve addon focus, Kbd hints, native budget forms and T
           true
         )
         assert.equal(await hint.locator('kbd').count(), 3)
+        assert.deepEqual(errors, [])
+      })
+    } finally {
+      await page.close()
+    }
+  })
+})
+
+test('InputGroup demo focuses from its prefix, keeps the action tabbable, and resets', async () => {
+  await withSite(async (baseURL, browser) => {
+    const page = await browser.newPage(),
+      errors = track(page)
+    try {
+      await capture(page, 'input-group-demo', async () => {
+        await page.goto(`${baseURL}/docs/input-group/`)
+        const demo = page.getByRole('region', { name: 'Add a prefix and an action', exact: true }),
+          input = demo.getByRole('textbox', { name: 'Amount (USD)', exact: true }),
+          clear = demo.getByRole('button', { name: 'Clear', exact: true })
+        await demo.locator('.demo-heading button:not(:disabled)').waitFor()
+        const gaps = await clear.evaluate(button => {
+          const group = button.closest('[data-slot~="input-group"]')!
+          const outer = group.getBoundingClientRect()
+          const inner = button.getBoundingClientRect()
+          const style = getComputedStyle(group)
+          return {
+            end: outer.right - inner.right - parseFloat(style.borderRightWidth),
+            top: inner.top - outer.top - parseFloat(style.borderTopWidth),
+            bottom: outer.bottom - inner.bottom - parseFloat(style.borderBottomWidth)
+          }
+        })
+        assert.ok(gaps.end > 0)
+        assert.ok(Math.abs(gaps.end - gaps.top) < 1 && Math.abs(gaps.end - gaps.bottom) < 1)
+        await demo.locator('[data-slot~="input-group-addon"]').first().click()
+        assert.equal(await input.evaluate(node => node === document.activeElement), true)
+        await input.fill('350')
+        await page.keyboard.press('Tab')
+        assert.equal(await clear.evaluate(node => node === document.activeElement), true)
+        await page.keyboard.press('Enter')
+        assert.equal(await input.inputValue(), '')
+        assert.equal(await clear.evaluate(node => node === document.activeElement), true)
+        await demo.getByRole('button', { name: 'Reset preview', exact: true }).click()
+        assert.equal(await input.inputValue(), '250')
         assert.deepEqual(errors, [])
       })
     } finally {
