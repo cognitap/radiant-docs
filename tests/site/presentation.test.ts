@@ -1227,52 +1227,33 @@ test('OTP docs keep one native value through paste, verification and refused rec
   })
 })
 
-test('ButtonGroup docs preserve individual tab stops, native forms and split Menu actions', async () => {
+test('ButtonGroup docs preserve individual keyboard actions', async () => {
   await withSite(async (baseURL, browser) => {
     const page = await browser.newPage(),
       errors = track(page)
     try {
-      await capture(page, 'button-group-tasks', async () => {
-        await page.goto(`${baseURL}/docs/button-group/`)
+      await capture(page, 'button-group', async () => {
+        await page.goto(`${baseURL}/docs/button-group/`, { waitUntil: 'domcontentloaded' })
         await page.waitForFunction(
           () => !document.querySelector<HTMLButtonElement>('.demo-heading button')?.disabled
         )
-        const project = page.getByRole('region', { name: 'Edit project actions', exact: true }),
-          title = project.getByRole('textbox', { name: 'Project title', exact: true })
-        await title.fill('North star')
+        const group = page.getByRole('group', { name: 'Browse weeks', exact: true })
+        const previous = group.getByRole('button', { name: 'Previous', exact: true })
+        const today = group.getByRole('button', { name: 'Today', exact: true })
+        const next = group.getByRole('button', { name: 'Next', exact: true })
+        const status = page
+          .getByRole('region', { name: 'Live preview', exact: true })
+          .getByRole('status')
+        await previous.click()
+        assert.equal(await status.innerText(), 'Week -1')
         await page.keyboard.press('Tab')
-        assert.equal(
-          await project
-            .getByRole('button', { name: 'Save project', exact: true })
-            .evaluate(node => node === document.activeElement),
-          true
-        )
+        assert.ok(await today.evaluate(node => node === document.activeElement))
+        await page.keyboard.press('Enter')
+        assert.equal(await status.innerText(), 'This week')
         await page.keyboard.press('Tab')
-        assert.equal(
-          await project
-            .getByRole('button', { name: 'Restore title', exact: true })
-            .evaluate(node => node === document.activeElement),
-          true
-        )
-        await project.getByRole('button', { name: 'Save project', exact: true }).click()
-        assert.match(await project.getByRole('status').last().innerText(), /Saved North star/)
-        await project.getByRole('button', { name: 'Restore title', exact: true }).click()
-        assert.equal(await title.inputValue(), 'Reader study')
-        const publish = page.getByRole('region', { name: 'Publish a report', exact: true })
-        await publish.getByRole('button', { name: 'More publication actions', exact: true }).click()
-        await publish.getByRole('menuitem', { name: 'Schedule for tomorrow', exact: true }).click()
-        assert.match(await publish.getByRole('status').last().innerText(), /scheduled for tomorrow/)
-        const weeks = page.getByRole('region', { name: 'Browse review weeks', exact: true })
-        await weeks
-          .getByRole('combobox', { name: 'Orientation', exact: true })
-          .selectOption('vertical')
-        await weeks.getByRole('combobox', { name: 'Direction', exact: true }).selectOption('rtl')
-        assert.equal(
-          await weeks.locator('[data-slot="button-group"]').getAttribute('data-orientation'),
-          'vertical'
-        )
-        await weeks.getByRole('button', { name: 'Next week', exact: true }).click()
-        assert.match(await weeks.getByRole('status').last().innerText(), /1 week after/)
+        assert.ok(await next.evaluate(node => node === document.activeElement))
+        await page.keyboard.press('Space')
+        assert.equal(await status.innerText(), 'Week +1')
         assert.deepEqual(errors, [])
       })
     } finally {

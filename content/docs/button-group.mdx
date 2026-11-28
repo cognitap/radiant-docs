@@ -1,82 +1,37 @@
 ---
 title: ButtonGroup
-description: Join related Buttons visually while each keeps its own focus and action.
+description: Keep related actions close together.
 ---
 
-import {
-  ButtonGroupDemo,
-  ButtonGroupPublishDemo,
-  ButtonGroupWeeksDemo
-} from '../../components/ButtonGroupDemo'
+import { ButtonGroupDemo } from '../../components/ButtonGroupDemo'
 
 <ButtonGroupDemo />
 
 ## Usage
 
-Use ButtonGroup for adjacent actions that belong together. Use [Toolbar](/docs/toolbar/) when arrow keys should move between controls, [ToggleGroup](/docs/toggle-group/) for one or many pressed choices, and a single [Button](/docs/button/) for one action.
+Group related [Button](/docs/button/) actions. Set `orientation="vertical"` to stack them. For a split action, pair a Button with a [Menu](/docs/menu/) trigger.
 
 ```tsx
-<ButtonGroup aria-label="Project actions">
-  <Button
-    variant="outline"
-    type="submit"
-  >
-    Save project
-  </Button>
-  <Button
-    variant="outline"
-    type="reset"
-  >
-    Restore title
-  </Button>
+<ButtonGroup aria-label="Browse weeks">
+  <Button variant="outline">Previous</Button>
+  <Button variant="outline">Next</Button>
 </ButtonGroup>
 ```
 
-## Examples
-
-### Publish a report
-
-<ButtonGroupPublishDemo />
-
-### Browse review weeks
-
-<ButtonGroupWeeksDemo />
-
-## State
-
-ButtonGroup has no value, selection or roving focus. Each Button keeps its own action, `disabled`, `pending` and `pressed` state. Submit and reset Buttons inside a group work as they do anywhere else in a form. A split action pairs a Button with a [Menu](/docs/menu/) trigger, and the Menu keeps its own state.
-
 ## Accessibility
 
-The root has `role="group"`, which you can't override. Name it with `aria-label` or `aria-labelledby` when the buttons need context. The group name doesn't replace each Button's name, so name icon-only Buttons too.
-
-| Key             | Behavior                             |
-| --------------- | ------------------------------------ |
-| Tab / Shift+Tab | Visit each enabled or pending Button |
-| Enter / Space   | Activate the focused Button          |
-| Arrow keys      | No group behavior                    |
-
-## Motion
-
-The group doesn't animate. Each Button keeps its press [motion](/docs/button/#motion); set `motion="off"` on a Button to turn it off.
+Each button has its own Tab stop. Name the group with `aria-label` or `aria-labelledby` when the actions need context. Use [Toolbar](/docs/toolbar/) for arrow-key navigation or [ToggleGroup](/docs/toggle-group/) for related choices.
 
 ## Styling
 
-The root is one `div`. `className`, `style` and `ref` reach it. It has `data-slot="button-group"`, followed by any tokens you pass in `data-slot`, and `data-orientation` is `horizontal` or `vertical`.
-
-Direct `button` children lose their inner corners and overlap borders by `--rad-button-border-width`, so wrapped Buttons stay unjoined. `components.buttonGroup.radius` or `--rad-button-group-radius` sets the outer corners and falls back to the Button radius. Corners are logical, so `dir="rtl"` works.
+The gap is half the theme’s normal spacing. Set `components.buttonGroup.gap` or `--rad-button-group-gap` to adjust it. Each button keeps its own shape and [motion](/docs/button/#motion).
 
 ## API
 
-### ButtonGroup
+| Prop                  | Type                                     | Default    |
+| --------------------- | ---------------------------------------- | ---------- |
+| orientation           | horizontal / vertical                    | horizontal |
+| children              | ReactNode                                | None       |
+| Native div attributes | Includes `className`, `style`, and `ref` | Native     |
 
-| Prop                  | Type                                                                            | Default        |
-| --------------------- | ------------------------------------------------------------------------------- | -------------- |
-| orientation           | `Orientation` (horizontal / vertical); others throw                             | horizontal     |
-| children              | ReactNode; Buttons or Button-based triggers                                     | None           |
-| data-slot             | string; extra tokens after `button-group`                                       | `button-group` |
-| className / style     | string / ThemeStyle                                                             | None           |
-| ref                   | `Ref<HTMLDivElement>`                                                           | None           |
-| Native div attributes | `aria-label`, `aria-labelledby`, `dir`, events; no `role` or `aria-orientation` | Native         |
-
-Exports: `ButtonGroup`, `ButtonGroupProps`, `Orientation`.
+Exports `ButtonGroup`, `ButtonGroupProps`, and `Orientation`.
