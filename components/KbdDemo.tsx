@@ -1,44 +1,17 @@
-import { InputAddonPlayground } from '@/examples/kbd/InputAddonPlayground'
+import { KbdExample } from '@/examples/kbd/KbdExample'
 import { Demo } from './demo/Demo'
-import { KbdPlayground } from '@/examples/kbd/KbdPlayground'
+import { DemoControls, DemoPreview } from './demo/DemoFrame'
+
 export function KbdDemo() {
   return (
     <Demo
-      title="Find a project"
+      title="Keyboard keys"
       files={['kbd/KbdExample.tsx']}
     >
-      <KbdPlayground task="find" />
-    </Demo>
-  )
-}
-export function KbdDuplicateDemo() {
-  return (
-    <Demo
-      title="Duplicate a study note"
-      files={['kbd/KbdExample.tsx']}
-    >
-      <KbdPlayground task="duplicate" />
-    </Demo>
-  )
-}
-export function KbdSaveDemo() {
-  return (
-    <Demo
-      title="Save a study note"
-      files={['kbd/KbdExample.tsx']}
-    >
-      <KbdPlayground task="save" />
-    </Demo>
-  )
-}
-
-export function KbdInputGroupDemo() {
-  return (
-    <Demo
-      title="Search with input addons"
-      files={['kbd/InputAddonExample.tsx']}
-    >
-      <InputAddonPlayground />
+      <DemoControls />
+      <DemoPreview>
+        <KbdExample />
+      </DemoPreview>
     </Demo>
   )
 }
