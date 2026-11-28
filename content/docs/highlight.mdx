@@ -1,90 +1,42 @@
 ---
 title: Highlight
-description: Mark matching substrings in search results while keeping the original spelling.
+description: Mark part of a text that matches a search.
 ---
 
 import { Demo } from '../../components/demo/Demo'
 import { DemoControls, DemoPreview } from '../../components/demo/DemoFrame'
-import { FindCafe } from '../../examples/highlight/FindCafe'
-import { MatchDestination } from '../../examples/highlight/MatchDestination'
-import { MatchCommand } from '../../examples/highlight/MatchCommand'
+import { MatchPositions } from '../../examples/highlight/MatchPositions'
 
 <Demo
-  title="Find a match in venue notes"
-  files={['highlight/FindCafe.tsx']}
+  title="Match positions"
+  files={['highlight/MatchPositions.tsx']}
 >
   <DemoControls />
   <DemoPreview>
-    <FindCafe />
+    <MatchPositions />
   </DemoPreview>
 </Demo>
 
 ## Usage
 
-Use Highlight for emphasis based on a search query. Use [Badge](/docs/badge/) for a separate status or category label and [AnnotatedText](/docs/annotated-text/) to label parts of a text.
-
-```tsx
-import { Highlight } from '@cognitap/radiant'
-
-;<Highlight
-  text="Café near the office"
-  query="cafe"
-  ignoreDiacritics
-/>
-```
-
-## Examples
-
-### Mark a destination in Combobox results
-
-Use custom option children to render Highlight with the current Combobox query.
-
-<Demo
-  title="Mark a destination in Combobox results"
-  files={['highlight/MatchDestination.tsx']}
->
-  <DemoControls />
-  <DemoPreview>
-    <MatchDestination />
-  </DemoPreview>
-</Demo>
-
-### Mark a command in a workspace palette
-
-Highlight each command label using the query owned by the palette.
-
-<Demo
-  title="Mark a command in a workspace palette"
-  files={['highlight/MatchCommand.tsx']}
->
-  <DemoControls />
-  <DemoPreview>
-    <MatchCommand />
-  </DemoPreview>
-</Demo>
-
-## State
-
-Pass the search text into `query`. Case is ignored by default. Use `ignoreDiacritics` to match accents such as café with cafe. Highlight preserves the spelling and grapheme boundaries in `text`. An empty query renders the original text without marks.
+Pass the original string and a literal query. Matching ignores case by default. Set `ignoreDiacritics` to match “café” with “cafe” and keep the original spelling. An empty query shows plain text.
 
 ## Accessibility
 
-Matches use native `mark` elements. The search control or result list owns focus and keyboard navigation. When supplying custom [Combobox](/docs/combobox/) or [Command](/docs/command/) option children, give the option its full label.
+Matches render as native `<mark>` elements. Keep the full accessible name when using Highlight inside a [Combobox](/docs/combobox/) or [Command](/docs/command/) option.
 
 ## Styling
 
-`className` and `style` target the inline span. Override selection colors or other mark styles with `parts.mark`.
+Whole-word matches have even padding. Partial matches stay flush with the surrounding text. Use `parts.mark` to style the matches.
 
 ## API
 
-### Highlight
+| Prop             | Type      | Default  |
+| ---------------- | --------- | -------- |
+| text             | string    | Required |
+| query            | string    | Required |
+| caseSensitive    | boolean   | false    |
+| ignoreDiacritics | boolean   | false    |
+| parts.mark       | PartStyle | None     |
 
-| Prop               | Type and default                                         |
-| ------------------ | -------------------------------------------------------- |
-| `text`             | Original string to display.                              |
-| `query`            | Literal substring to match.                              |
-| `caseSensitive`    | Boolean. Defaults to false and uses locale case mapping. |
-| `ignoreDiacritics` | Boolean. Defaults to false.                              |
-| `parts`            | mark.                                                    |
-
-Exports Highlight and HighlightProps.
+Exports `Highlight` and `HighlightProps`.
