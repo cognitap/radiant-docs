@@ -1,0 +1,31 @@
+---
+title: InlineCode
+description: Style commands, file paths, and identifiers inside a sentence.
+---
+
+import { Demo } from '../../components/demo/Demo'
+import { DemoControls, DemoPreview } from '../../components/demo/DemoFrame'
+import { InlineCodeExample } from '../../examples/inline-code/InlineCodeExample'
+
+<Demo
+  title="In a sentence"
+  files={['inline-code/InlineCodeExample.tsx']}
+  reset={false}
+>
+  <DemoControls />
+  <DemoPreview>
+    <InlineCodeExample />
+  </DemoPreview>
+</Demo>
+
+## Usage
+
+Use [CodeBlock](/docs/code-block/) for a complete snippet and [Kbd](/docs/kbd/) for keyboard shortcuts.
+
+## Styling
+
+Set `components.inlineCode` in your theme to change the font size, colors, padding, or radius.
+
+## API
+
+`InlineCode` accepts native `<code>` props and exports `InlineCodeProps`.
