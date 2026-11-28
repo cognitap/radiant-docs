@@ -1,129 +1,33 @@
 ---
 title: CodeBlock
-description: Show source code readers can scroll and copy.
+description: Show a snippet readers can scroll and copy.
 ---
 
-import {
-  CodeBlockDemo,
-  CodeBlockConfigurationDemo,
-  CodeBlockExportDemo
-} from '../../components/CodeBlockDemo'
+import { CodeBlockDemo } from '../../components/CodeBlockDemo'
 
 <CodeBlockDemo />
 
 ## Usage
 
-Use CodeBlock for a complete snippet readers can copy.
-
-```tsx
-<CodeBlock
-  code="pnpm add @cognitap/radiant"
-  language="shell"
->
-  <CodeBlockHeader>
-    <span>Install command</span>
-    <CodeBlockCopy>Copy install command</CodeBlockCopy>
-  </CodeBlockHeader>
-  <CodeBlockViewport aria-label="Install command" />
-</CodeBlock>
-```
-
-CodeBlock includes no highlighting engine. Pass highlighted React nodes as CodeBlockContent children; copying still uses the raw code string.
-
-## Examples
-
-### Generate export configuration
-
-<CodeBlockConfigurationDemo />
-
-### Inspect session export
-
-<CodeBlockExportDemo />
-
-## State
-
-The application owns code and language; there is no editable value. Replacing code clears copy feedback and never copies automatically.
-
-CodeBlockCopy is an action, not a toggle. It rejects pressed, defaultPressed and onPressedChange, never sets aria-pressed, and always renders `type="button"`, so it cannot submit a surrounding form.
-
-Copying starts only on activation. The button stays focused and pending while one clipboard write runs; a second press waits. Feedback reports success, or asks the reader to copy manually when the clipboard is unavailable or refused. A result for replaced code is not announced.
+Pass the original snippet as `code`. For syntax colors, pass highlighted nodes to `CodeBlockContent`. The copy button copies the original string and briefly shows a checkmark and “Copied”.
 
 ## Accessibility
 
-Name the viewport with aria-label or aria-labelledby. It is a focusable [ScrollArea](/docs/scroll-area/), so long lines stay keyboard reachable. Line numbers are hidden from assistive technology and excluded from copying.
-
-| Key                   | Behavior                                 |
-| --------------------- | ---------------------------------------- |
-| Tab / Shift+Tab       | Reach the copy button, then the viewport |
-| Enter / Space on copy | Copy the raw code                        |
-| Arrow and paging keys | Scroll the focused viewport              |
-
-A polite status output announces and displays feedback, and the copy button references it. Do not add a second live region for the same result.
-
-The viewport defaults to left-to-right inside right-to-left pages. Set its dir for right-to-left source.
-
-## Motion
-
-CodeBlock adds no animation. CodeBlockCopy keeps Button's press motion and reduced-motion behavior.
+Tab reaches the copy button and viewport. Arrow keys scroll the focused viewport. Copy feedback is announced, and line numbers are hidden from assistive technology.
 
 ## Styling
 
-className, style and ref reach each part's host. The root carries data-language, data-copy-state (idle, pending, success or error) and, with line numbers, an empty data-line-numbers. Inner slots are code-block-status, code-block-line-numbers and code-block-code.
-
-`components.codeBlock` sets radius, border, surface, padding, header spacing, maxHeight, font size, line height, number gap and colors, and status color through `--rad-code-block-*`.
+Use `components.codeBlock` in your theme to set the surface, border, spacing, and code typography.
 
 ## API
 
-### CodeBlock
-
-| Prop              | Type                  | Default                                                      |
-| ----------------- | --------------------- | ------------------------------------------------------------ |
-| code              | string                | Required                                                     |
-| language          | string                | None; sets data-language only                                |
-| lineNumbers       | boolean               | false                                                        |
-| loadingText       | string                | 'Copying code…'                                              |
-| copiedText        | string                | 'Code copied.'                                               |
-| errorText         | string                | 'Could not copy code. Select the code and copy it manually.' |
-| parts             | status style hook     | None                                                         |
-| className / style | string / ThemeStyle   | None                                                         |
-| ref               | `Ref<HTMLDivElement>` | None                                                         |
-| Other props       | Native div props      | Native defaults                                              |
-
-### CodeBlockHeader
-
-| Prop        | Type                  | Default         |
-| ----------- | --------------------- | --------------- |
-| ref         | `Ref<HTMLDivElement>` | None            |
-| Other props | Native div props      | Native defaults |
-
-### CodeBlockViewport
-
-| Prop                         | Type                                   | Default                |
-| ---------------------------- | -------------------------------------- | ---------------------- |
-| aria-label / aria-labelledby | string                                 | One required           |
-| dir                          | ltr / rtl                              | ltr                    |
-| orientation                  | vertical / horizontal / both           | both                   |
-| children                     | ReactNode                              | `<CodeBlockContent />` |
-| Other props                  | [ScrollArea](/docs/scroll-area/) props | ScrollArea defaults    |
-
-### CodeBlockContent
-
-| Prop        | Type                  | Default         |
-| ----------- | --------------------- | --------------- |
-| children    | Highlighted ReactNode | The code string |
-| ref         | `Ref<HTMLPreElement>` | None            |
-| Other props | Native pre props      | Native defaults |
-
-### CodeBlockCopy
-
-| Prop        | Type                                                        | Default                   |
-| ----------- | ----------------------------------------------------------- | ------------------------- |
-| children    | ReactNode                                                   | 'Copy code'               |
-| pending     | boolean                                                     | false; true while copying |
-| render      | (resolved: CodeBlockRenderProps) => ReactElement            | Native button             |
-| Other props | [Button](/docs/button/) props except type and pressed state | Button defaults           |
-
-Exports each part's Props type and `CodeBlockRenderProps`.
+| Part                | Props                                                                                                                                                                                |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `CodeBlock`         | `code` is required. `language` sets metadata. `lineNumbers` shows a gutter and defaults to `false`. `loadingText`, `copiedText`, `errorText`, and `parts.status` customize feedback. |
+| `CodeBlockHeader`   | Holds the title and actions. Accepts native div props.                                                                                                                               |
+| `CodeBlockViewport` | Supply `aria-label` or `aria-labelledby`. Defaults to `dir="ltr"`, `orientation="both"`, and `<CodeBlockContent />`. Accepts [ScrollArea](/docs/scroll-area/) props.                 |
+| `CodeBlockContent`  | Accepts highlighted `children` and native pre props.                                                                                                                                 |
+| `CodeBlockCopy`     | Accepts action [Button](/docs/button/) props. The default label is “Copy code”.                                                                                                      |
 
 ### InlineCode
 
