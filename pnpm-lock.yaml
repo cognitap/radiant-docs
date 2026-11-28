@@ -167,8 +167,8 @@ importers:
   .:
     dependencies:
       '@cognitap/radiant':
-        specifier: 0.0.111
-        version: 0.0.111(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(tailwindcss@4.3.3)
+        specifier: 0.1.0
+        version: 0.1.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(tailwindcss@4.3.3)
       '@tanstack/react-form':
         specifier: 1.33.5
         version: 1.33.5(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
@@ -276,8 +276,8 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@cognitap/radiant@0.0.111':
-    resolution: {integrity: sha512-RB7CRGsgIcm/BqNtR9fY/Pqwc1jIX2PCrHrhN9XZojywjM8j8KUZdOgzAURi4l4VAasD33E5v4yAnosC2C4YhA==}
+  '@cognitap/radiant@0.1.0':
+    resolution: {integrity: sha512-mj0hlIovkj8S25Eb3frXAuMAvfcUtWJvif/Qt1Rl9HP5UfrktRZamRODO2e9QdJxo29Z+qOBycRJ2hQMULOigA==}
     peerDependencies:
       lucide-react: ^1.0.0
       react: ^19.3.0
@@ -2533,7 +2533,7 @@ snapshots:
   '@cloudflare/workerd-windows-64@1.20261019.1':
     optional: true
 
-  '@cognitap/radiant@0.0.111(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(tailwindcss@4.3.3)':
+  '@cognitap/radiant@0.1.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(tailwindcss@4.3.3)':
     dependencies:
       '@a2ui/web_core': 0.15.0
       class-variance-authority: 0.7.1

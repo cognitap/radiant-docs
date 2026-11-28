@@ -1,32 +1,17 @@
+import { ButtonGroupExample } from '@/examples/buttongroup/ButtonGroupExample'
 import { Demo } from './demo/Demo'
-import { ButtonGroupPlayground } from '@/examples/buttongroup/ButtonGroupPlayground'
+import { DemoControls, DemoPreview } from './demo/DemoFrame'
+
 export function ButtonGroupDemo() {
   return (
     <Demo
-      title="Edit project actions"
+      title="Browse weeks"
       files={['buttongroup/ButtonGroupExample.tsx']}
     >
-      <ButtonGroupPlayground task="project" />
-    </Demo>
-  )
-}
-export function ButtonGroupPublishDemo() {
-  return (
-    <Demo
-      title="Publish a report"
-      files={['buttongroup/ButtonGroupExample.tsx']}
-    >
-      <ButtonGroupPlayground task="publish" />
-    </Demo>
-  )
-}
-export function ButtonGroupWeeksDemo() {
-  return (
-    <Demo
-      title="Browse review weeks"
-      files={['buttongroup/ButtonGroupExample.tsx']}
-    >
-      <ButtonGroupPlayground task="weeks" />
+      <DemoControls />
+      <DemoPreview>
+        <ButtonGroupExample />
+      </DemoPreview>
     </Demo>
   )
 }
