@@ -645,71 +645,44 @@ test('ToggleGroup alignment demo moves focus separately and tracks selection', a
   })
 })
 
-test('Toolbar shares one focus entry while native actions and nested dialog keep their behavior', async () => {
+test('Toolbar formats text with a single keyboard entry', async () => {
   await withSite(async (baseURL, browser) => {
-    const page = await browser.newPage(),
+    const page = await browser.newPage({ viewport: { width: 320, height: 850 } }),
       errors = track(page)
     try {
       await capture(page, 'toolbar-actions', async () => {
         await page.goto(`${baseURL}/docs/toolbar/`)
-        await page.waitForFunction(
-          () => !document.querySelector<HTMLButtonElement>('.demo-heading button')?.disabled
-        )
-        const demo = page.getByRole('region', { name: 'Edit a document', exact: true }),
-          bar = demo.getByRole('toolbar', { name: 'Document editor', exact: true }),
-          italic = bar.getByRole('button', { name: 'Italic', exact: true })
-        assert.equal(
-          await bar.evaluate(
-            node =>
-              Array.from(node.querySelectorAll('button')).filter(
-                action => action.tabIndex === 0 && action.getClientRects().length > 0
-              ).length
-          ),
-          1
-        )
-        await italic.click()
+        const demo = page.getByRole('region', { name: 'Format text', exact: true }),
+          bar = demo.getByRole('toolbar', { name: 'Formatting', exact: true }),
+          clear = bar.getByRole('button', { name: 'Clear', exact: true }),
+          bold = bar.getByRole('button', { name: 'Bold', exact: true }),
+          italic = bar.getByRole('button', { name: 'Italic', exact: true }),
+          sample = demo
+            .getByRole('region', { name: 'Live preview' })
+            .getByText('Project notes', { exact: true }),
+          reset = demo.getByRole('button', { name: 'Reset preview', exact: true })
+        await page.waitForFunction(() => {
+          const button = document.querySelector<HTMLButtonElement>('.demo-heading button')
+          return button && !button.disabled
+        })
+        assert.equal(await bar.locator('button[tabindex="0"]').count(), 1)
+        assert.ok(await clear.isDisabled())
+        await bold.focus()
+        await page.keyboard.press('ArrowRight')
+        assert.ok(await italic.evaluate(node => node === document.activeElement))
+        assert.equal(await italic.getAttribute('aria-pressed'), 'false')
+        await page.keyboard.press('Space')
         assert.equal(await italic.getAttribute('aria-pressed'), 'true')
-        await page.keyboard.press('ArrowRight')
-        assert.equal(
-          await bar
-            .getByRole('button', { name: 'More', exact: true })
-            .evaluate(node => node === document.activeElement),
-          true
-        )
-        await page.keyboard.press('ArrowDown')
-        await page.getByRole('menuitem', { name: 'Export document', exact: true }).click()
-        assert.match(
-          await demo.locator('.demo-canvas output[aria-live="polite"]').innerText(),
-          /Export requested/
-        )
-        const actions = page.getByRole('region', { name: 'Manage document actions', exact: true })
-        await actions.getByRole('button', { name: 'Reading settings', exact: true }).click()
-        const dialog = page.getByRole('dialog', { name: 'Reading settings', exact: true }),
-          group = dialog.getByRole('group', { name: 'Reading density', exact: true })
-        assert.equal(await group.locator('button[tabindex="0"]').count(), 1)
-        await group.getByRole('button', { name: 'Compact', exact: true }).click()
-        await page.keyboard.press('ArrowRight')
-        assert.equal(
-          await group
-            .getByRole('button', { name: 'Comfortable', exact: true })
-            .evaluate(node => node === document.activeElement),
-          true
-        )
-        await page.keyboard.press('Escape')
-        await actions.getByRole('checkbox', { name: 'Publishing in progress', exact: true }).check()
-        assert.equal(
-          await actions
-            .getByRole('button', { name: 'Publish', exact: true })
-            .getAttribute('aria-busy'),
-          'true'
-        )
-        await demo.getByRole('button', { name: 'Reset preview', exact: true }).click()
-        assert.equal(
-          await demo
-            .getByRole('button', { name: 'Italic', exact: true })
-            .getAttribute('aria-pressed'),
-          'false'
-        )
+        assert.equal(await sample.evaluate(node => getComputedStyle(node).fontStyle), 'italic')
+        await bold.click()
+        assert.equal(await sample.evaluate(node => getComputedStyle(node).fontWeight), '700')
+        await clear.click()
+        assert.equal(await italic.getAttribute('aria-pressed'), 'false')
+        assert.equal(await bold.getAttribute('aria-pressed'), 'false')
+        await italic.click()
+        await reset.click()
+        assert.equal(await italic.getAttribute('aria-pressed'), 'false')
+        assert.ok(await clear.isDisabled())
         assert.deepEqual(errors, [])
       })
     } finally {
