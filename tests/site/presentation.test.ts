@@ -1225,55 +1225,28 @@ test('ButtonGroup docs preserve individual keyboard actions', async () => {
   })
 })
 
-test('Kbd docs combine native notation with application-owned search, Menu and form shortcuts', async () => {
+test('Kbd docs show native key notation for one key and a combination', async () => {
   await withSite(async (baseURL, browser) => {
-    const page = await browser.newPage(),
-      errors = track(page)
+    const page = await browser.newPage({ viewport: { width: 320, height: 800 } })
+    const errors = track(page)
     try {
-      await capture(page, 'kbd-tasks', async () => {
-        await page.goto(`${baseURL}/docs/kbd/`)
-        await page.waitForFunction(
-          () => !document.querySelector<HTMLButtonElement>('.demo-heading button')?.disabled
+      await capture(page, 'kbd-notation', async () => {
+        await page.goto(`${baseURL}/docs/kbd/`, { waitUntil: 'domcontentloaded' })
+        const demo = page.getByRole('region', { name: 'Keyboard keys', exact: true })
+        const keys = demo.locator('kbd:not([data-slot~="kbd-group"])')
+        assert.deepEqual(await keys.allTextContents(), ['Esc', 'Control', 'K'])
+        const group = demo.locator('kbd[data-slot~="kbd-group"]')
+        assert.equal(await group.textContent(), 'Control+K')
+        assert.equal(await group.getAttribute('dir'), 'ltr')
+        assert.deepEqual(
+          await demo
+            .locator('kbd')
+            .evaluateAll(nodes => nodes.map(node => getComputedStyle(node).fontWeight)),
+          ['400', '400', '400', '400']
         )
-        const find = page.getByRole('region', { name: 'Find a project', exact: true })
-        await find.getByRole('button', { name: 'Find project', exact: true }).focus()
-        await page.keyboard.press('Control+k')
-        const input = find.getByRole('textbox', { name: 'Project search', exact: true })
-        assert.equal(await input.evaluate(n => n === document.activeElement), true)
-        await input.fill('Reader')
-        assert.equal(await find.getByRole('listitem').count(), 1)
-        assert.equal(await find.locator('kbd').count(), 3)
-        await find.getByRole('combobox', { name: 'Modifier', exact: true }).selectOption('Command')
-        assert.match(await find.locator('kbd').first().innerText(), /Command/)
-        const duplicate = page.getByRole('region', { name: 'Duplicate a study note', exact: true })
-        await duplicate.getByRole('button', { name: 'Study note actions', exact: true }).click()
-        const item = duplicate.getByRole('menuitem', { name: 'Duplicate note', exact: true })
-        assert.equal(await item.locator('kbd').count(), 3)
-        await item.click()
-        assert.equal(await duplicate.getByRole('listitem').count(), 2)
-        const save = page.getByRole('region', { name: 'Save a study note', exact: true })
-        await save
-          .getByRole('textbox', { name: 'Study note', exact: true })
-          .fill('Review key notation')
-        await page.keyboard.press('Control+s')
-        assert.match(
-          await save.getByRole('status').last().innerText(),
-          /Saved note: Review key notation/
+        assert.ok(
+          await demo.locator('kbd').evaluateAll(nodes => nodes.every(node => node.tabIndex === -1))
         )
-        await save.getByRole('button', { name: 'Saving shortcut', exact: true }).focus()
-        await save.getByRole('tooltip').waitFor()
-        assert.equal(await save.getByRole('tooltip').locator('kbd').count(), 3)
-        await page.keyboard.press('Escape')
-        const hint = page.getByRole('region', { name: 'Search with input addons', exact: true })
-        await hint.locator('.demo-heading button:not(:disabled)').waitFor()
-        await hint.locator('[data-slot~="input-group-addon"] kbd').last().click()
-        assert.equal(
-          await hint
-            .getByRole('searchbox', { name: 'Project search', exact: true })
-            .evaluate(n => n === document.activeElement),
-          true
-        )
-        assert.equal(await hint.locator('kbd').count(), 3)
         assert.deepEqual(errors, [])
       })
     } finally {
