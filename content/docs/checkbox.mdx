@@ -1,89 +1,38 @@
 ---
 title: Checkbox
-description: Let people turn an independent option on or off, or tick items in a checklist.
+description: Toggle an independent option.
 ---
 
-import {
-  CheckboxDemo,
-  CheckboxPermissionsDemo,
-  CheckboxConsentDemo
-} from '../../components/CheckboxDemo'
+import { CheckboxDemo } from '../../components/CheckboxDemo'
 
 <CheckboxDemo />
 
 ## Usage
 
-Use Checkbox for an independent yes/no choice or one option in a checklist. Use [CheckboxGroup](/docs/checkbox-group/) for a list with select-all and a `string[]` value, [Switch](/docs/switch/) for a setting that applies immediately, and [RadioGroup](/docs/radio-group/) for one choice out of several.
-
-```tsx
-<Checkbox
-  label="Email me updates"
-  name="updates"
-  value="email"
-  defaultChecked
-/>
-```
-
-## Examples
-
-### Select all permissions
-
-<CheckboxPermissionsDemo />
-
-### Require consent
-
-<CheckboxConsentDemo />
+Use [CheckboxGroup](/docs/checkbox-group/) for related options that share a value array. Use [Switch](/docs/switch/) for a setting that takes effect immediately.
 
 ## State
 
-Use `defaultChecked` for an uncontrolled checkbox, or `checked` with `onChange` and read `event.target.checked`. Choose one owner per mount; passing both, or switching owner, throws.
+Use `defaultChecked` for the initial state or pass `checked` with `onChange` and read `event.currentTarget.checked`. Keep that choice until remount.
 
-`indeterminate` shows a mixed mark for a select-all parent. It is separate from `checked`, never submitted, and the browser clears it when the user toggles, so derive it from the children, as the permissions example does.
+Use `indeterminate` for a partially selected group. The browser clears the mixed mark on activation, so derive it from the group’s selection.
 
-A checked box submits `name=value`, with `value` defaulting to `on`. An unchecked or disabled box submits nothing. Read several with `FormData.getAll(name)`. Reset restores `defaultChecked`; a controlled checkbox keeps its current `checked`, so reset your state in `onReset`. `required` uses native validation and `form` links an outside form.
-
-Checkbox does not accept `readOnly`; use `disabled`, or show the value as text.
+An enabled, checked box submits its `name` and `value`. The default value is `on`. Form reset restores `defaultChecked`.
 
 ## Accessibility
 
-Checkbox renders a native `input type="checkbox"`. The browser reports `aria-checked="mixed"` while it is indeterminate. Name it with `label`, a [Field](/docs/field/) label, `aria-label` or `aria-labelledby`. Inside Field it takes Field's id, disabled, required, invalid state and description. The check and dash icons are hidden from assistive technology.
-
-| Key             | Behavior                      |
-| --------------- | ----------------------------- |
-| Tab / Shift+Tab | Move focus to or from the box |
-| Space           | Toggle checked                |
-
-## Motion
-
-The mark changes immediately. The checkbox scales slightly on press when reduced motion is off. The permissions example animates the mark with `useSpring`. See [motion setup](/docs/foundations/motion/).
+Give each checkbox a `label`, a [Field](/docs/field/) label, `aria-label` or `aria-labelledby`. Press Space to toggle a focused checkbox. Assistive technology reports the indeterminate state as mixed.
 
 ## Styling
 
-`className`, `style`, `ref` and native props target the input. Its styling hooks are `data-slot="checkbox"`, `data-control-size` and `data-invalid`. Set `radius` and `cornerShape` in `components.checkbox` to tune its corners. The `check` and `indeterminate` marks come from [IconProvider](/docs/icon-provider/) when supplied. See [focus outlines](/docs/foundations/theming/#focus-outlines) for error and focus colors.
-
-| Part              | Element                                     | `data-slot`          |
-| ----------------- | ------------------------------------------- | -------------------- |
-| `parts.wrapper`   | The `<label>` row with `label`, else a span | `checkbox-wrapper`   |
-| `parts.label`     | Label text                                  | `checkbox-label`     |
-| `parts.indicator` | Check and dash icons                        | `checkbox-indicator` |
+The checked state fills an inset square with the theme accent. Use `parts.wrapper`, `parts.label` and `parts.indicator` to style the row, text and marks. See [IconProvider](/docs/icon-provider/) for custom marks and [focus outlines](/docs/foundations/theming/#focus-outlines) for focus and error colors.
 
 ## API
 
-| Checkbox prop       | Type                                          | Default   |
-| ------------------- | --------------------------------------------- | --------- |
-| checked             | boolean; pair with onChange                   | None      |
-| defaultChecked      | boolean; uncontrolled start and reset value   | false     |
-| onChange            | `ChangeEventHandler<HTMLInputElement>`        | None      |
-| indeterminate       | boolean; mixed mark, not submitted            | false     |
-| label               | ReactNode; omit when Field supplies it        | None      |
-| controlSize         | small / medium / large                        | medium    |
-| name / value        | string; submitted when checked                | None / on |
-| form                | string; form id                               | None      |
-| required / disabled | boolean; disabled is not submitted            | false     |
-| aria-invalid        | boolean / 'true' / 'false'; sets data-invalid | None      |
-| className / style   | string / ThemeStyle                           | None      |
-| parts               | wrapper / label / indicator PartStyle         | None      |
-| ref                 | `Ref<HTMLInputElement>`                       | None      |
-| Native attributes   | Input attributes and events; type is fixed    | Native    |
+Checkbox accepts native checkbox attributes and events.
 
-Exports `Checkbox` and `CheckboxProps`.
+| Prop                        | Purpose                                              |
+| --------------------------- | ---------------------------------------------------- |
+| `controlSize`               | `small`, `medium` (default), or `large`.             |
+| `required`, `disabled`      | Inherit from Field.                                  |
+| `className`, `style`, `ref` | Target the native input with `data-slot="checkbox"`. |
