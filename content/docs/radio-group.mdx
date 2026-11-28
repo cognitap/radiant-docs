@@ -1,129 +1,39 @@
 ---
 title: RadioGroup
-description: Pick exactly one value from a short, visible list of native radios.
+description: Choose one option from a short list.
 ---
 
-import {
-  RadioDemo,
-  RadioDeliveryDemo,
-  RadioFilterDemo,
-  RadioSurveyDemo
-} from '../../components/RadioDemo'
+import { RadioDemo } from '../../components/RadioDemo'
 
 <RadioDemo />
 
 ## Usage
 
-Use RadioGroup to choose one of a few visible options. It renders a [Field](/docs/field/) fieldset; each Radio is a native input. Use [Select](/docs/select/) for long lists, [ToggleGroup](/docs/toggle-group/) for toolbar-style choices, [CheckboxGroup](/docs/checkbox-group/) for several values and [Switch](/docs/switch/) for one setting.
-
-```tsx
-<RadioGroup
-  label="Delivery speed"
-  name="delivery"
-  defaultValue="standard"
->
-  <Radio
-    value="standard"
-    label="Standard"
-    description="Arrives in 3 to 5 days."
-  />
-  <Radio
-    value="express"
-    label="Express"
-    description="Arrives the next day."
-  />
-</RadioGroup>
-```
-
-## Examples
-
-### Submit a delivery speed
-
-<RadioDeliveryDemo />
-
-### Filter tasks by status
-
-<RadioFilterDemo />
-
-### Require an answer
-
-<RadioSurveyDemo />
+Give each `Radio` a distinct string `value`. Use [Select](/docs/select/) for a long list or [CheckboxGroup](/docs/checkbox-group/) for multiple choices.
 
 ## State
 
-Use `defaultValue` for browser-owned selection, or `value` with `onValueChange`, not both. `null` means no selection; `''` is a real value. Only `value={null}` clears a group.
+Use `defaultValue` for the initial choice or pass `value` with `onValueChange`. Set a controlled value to `null` to clear it.
 
-The group's `onChange` receives the native change event of the selected radio. Write state from `onValueChange` or `onChange`, not both.
-
-`name` is optional; a generated one keeps arrow keys, `required` and submission working. Pass `name` when a form reads the value, and `form` when the group sits outside that form. The selected radio submits one entry; none, or a disabled group, submits nothing.
-
-Form reset returns an uncontrolled group to `defaultValue`. A controlled group keeps its value, so reset your state in the form's `onReset`.
-
-Inside a group, Radio throws on its own `name`, `checked` or `defaultChecked`. A standalone Radio takes them and native `onChange`. Radio has no `readOnly`, because native radios ignore it. Use `disabled`, or a controlled group that ignores changes.
+Set `name` to use the selected value in form data. Form reset restores `defaultValue` for uncontrolled groups. Reset controlled values in the form’s `onReset`.
 
 ## Accessibility
 
-`label` becomes the required `legend`. The group's `description` and `error` are linked to the group, and a Radio's `description` to that radio. Every Radio needs a name: `label`, `aria-label` or `aria-labelledby`. `error` marks the group invalid; only then do its radios show the invalid border.
+Label the group and each option. Tab enters and leaves the group. Arrow keys select the next or previous enabled option, and Space selects the focused option.
 
-| Key                      | Behavior                                                          |
-| ------------------------ | ----------------------------------------------------------------- |
-| Tab                      | Moves into the group, to the selected radio or else the first one |
-| Tab / Shift+Tab in group | Moves out of the group                                            |
-| Arrow Down / Arrow Right | Selects the next enabled radio, wrapping                          |
-| Arrow Up / Arrow Left    | Selects the previous enabled radio, wrapping                      |
-| Space                    | Selects the focused radio                                         |
-
-## Motion
-
-The dot changes instantly. The plan example springs it with the public `useSpring` hook in a local `RadioFeedback` adapter, which follows reduced motion and theme `motion.mode: 'off'`.
+Use `description` for help and `error` for a validation message. RadioGroup uses [Field](/docs/field/) for both.
 
 ## Styling
 
-The group's className, style, ref and native props reach the `fieldset` (`data-slot="field radio-group"`, `data-control-size`, `data-invalid`). `parts.options` styles the options grid (`radio-group-options`); set `display: flex` for a row. `parts.label`, `parts.description`, `parts.error` and `parts.required` style the Field parts.
-
-A Radio's className, style, ref and native props reach the `input` (`data-slot="radio"` then a caller's tokens, `data-control-size`). `parts.wrapper` styles the label and description (`radio-wrapper`), `parts.label` the text (`radio-label`), `parts.description` the help (`radio-description`) and `parts.indicator` the dot (`radio-indicator`).
-
-Theme the control with `--rad-radio-*` tokens, such as `--rad-radio-group-gap`, `--rad-radio-size`, `--rad-radio-mark`, `--rad-radio-description-color` and `--rad-radio-description-size`.
+Use `parts.options` or `--rad-radio-group-gap` for option spacing. On a Radio, use `parts.indicator` or `--rad-radio-mark` to style the dot.
 
 ## API
 
-### RadioGroup
+| Prop          | Purpose                                                                   |
+| ------------- | ------------------------------------------------------------------------- |
+| `controlSize` | `small`, `medium` (default), or `large`. Radios inherit the group’s size. |
+| `required`    | Requires one choice before submitting.                                    |
+| `disabled`    | Disables the whole group or a single option.                              |
+| `form`        | Associates the group with a form elsewhere on the page.                   |
 
-| Prop              | Type                                                        | Default   |
-| ----------------- | ----------------------------------------------------------- | --------- |
-| label             | ReactNode; the legend                                       | Required  |
-| name              | string; native name and form data key                       | Generated |
-| value             | string / null; controlled selection                         | None      |
-| defaultValue      | string / null; uncontrolled initial selection               | null      |
-| onValueChange     | (value: string) => void                                     | None      |
-| onChange          | `(event: ChangeEvent<HTMLInputElement>) => void`            | None      |
-| description       | ReactNode; linked help text                                 | None      |
-| error             | ReactNode; marks the group invalid                          | None      |
-| required          | boolean; marks every radio required                         | false     |
-| requiredIndicator | ReactNode; replaces the required marker                     | `*`       |
-| disabled          | boolean; disables every radio                               | false     |
-| form              | string; associates the fieldset and every radio with a form | None      |
-| controlSize       | small / medium / large; shared by every Radio               | medium    |
-| parts             | label / description / error / required / options            | None      |
-| className / style | string / ThemeStyle                                         | None      |
-| ref               | `Ref<HTMLFieldSetElement>`                                  | None      |
-| Other props       | Native fieldset props                                       | Native    |
-
-### Radio
-
-| Prop                     | Type                                                | Default              |
-| ------------------------ | --------------------------------------------------- | -------------------- |
-| value                    | string; submitted value, `''` allowed               | Required             |
-| label                    | ReactNode; otherwise name the input with aria-label | None                 |
-| description              | ReactNode; supporting text under the label          | None                 |
-| checked / defaultChecked | boolean; standalone only                            | false                |
-| onChange                 | `(event: ChangeEvent<HTMLInputElement>) => void`    | None                 |
-| name                     | string; standalone only                             | None                 |
-| disabled / required      | boolean                                             | false                |
-| controlSize              | small / medium / large                              | Group's, else medium |
-| parts                    | wrapper / label / description / indicator           | None                 |
-| className / style        | string / ThemeStyle                                 | None                 |
-| ref                      | `Ref<HTMLInputElement>`                             | None                 |
-| Other props              | Native input props except type and readOnly         | Native               |
-
-Exports: `RadioGroup`, `Radio`, `RadioGroupProps`, `RadioProps`.
+`className`, `style`, and `ref` target the fieldset on RadioGroup and the native input on Radio.
