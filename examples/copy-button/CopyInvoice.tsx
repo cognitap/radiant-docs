@@ -1,19 +1,30 @@
 'use client'
 
 import { CopyButton, InlineCode } from '@cognitap/radiant'
+import { MotionProvider } from '@cognitap/radiant/motion/react'
+
+const invoice = 'INV-2408'
 
 export function CopyInvoice() {
   return (
-    <div className="grid justify-items-start gap-2">
-      <InlineCode>INV-2408</InlineCode>
-      <CopyButton
-        value="INV-2408"
-        resetDelay={4000}
-        variant="outline"
-        copiedText="Invoice number copied."
+    <MotionProvider>
+      <div
+        className="relative grid justify-items-start gap-2"
+        style={{
+          width: '16rem',
+          maxWidth: '100%',
+          gridTemplateRows: 'auto auto minmax(2lh, auto)'
+        }}
       >
-        Copy invoice number
-      </CopyButton>
-    </div>
+        <InlineCode>{invoice}</InlineCode>
+        <CopyButton
+          value={invoice}
+          copiedText="Invoice number copied"
+          errorText="Could not copy. Select the number to copy it."
+        >
+          Copy invoice number
+        </CopyButton>
+      </div>
+    </MotionProvider>
   )
 }
