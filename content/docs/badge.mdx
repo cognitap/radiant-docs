@@ -1,79 +1,31 @@
 ---
 title: Badge
-description: Label a status, count or category with compact passive text.
+description: Short labels for statuses, counts, and categories.
 ---
 
-import {
-  BadgeDemo,
-  BadgeTableDemo,
-  BadgeCountDemo,
-  BadgeDecorativeDemo
-} from '../../components/BadgeDemo'
+import { BadgeDemo } from '../../components/BadgeDemo'
 
 <BadgeDemo />
 
 ## Usage
 
-Use Badge for short text that labels a status, a count or a category. Use [Tag](/docs/tag/) when people can remove the item, [Kbd](/docs/kbd/) for keyboard keys, [Button](/docs/button/) or [Link](/docs/link/) for anything clickable, and [Alert](/docs/alert/) for updates that must be announced.
-
-```tsx
-<Badge tone="warning">Needs review</Badge>
-```
-
-`tone` only sets color: `neutral` (default) for information, `accent` for success or confirmation, `warning` for a problem the user can still avoid, and `danger` for a failure. Say the status in the text; color only reinforces it.
-
-## Examples
-
-### Show status in a table
-
-<BadgeTableDemo />
-
-### Count items beside a heading
-
-<BadgeCountDemo />
-
-A bare number reads with its surrounding text, as "Open reviews 12", so keep counts next to a label that explains them.
-
-### Hide repeated text
-
-<BadgeDecorativeDemo />
-
-`decorative` hides the badge from assistive technology. Use it only when adjacent text already says the same thing.
-
-## State
-
-Badge holds no state, has no controlled or uncontrolled props and contributes no form value.
+Use text that conveys the status on its own, such as “Needs review”. Put counts next to a label that says what they count. Use [Tag](/docs/tag/) for removable items, [Button](/docs/button/) for actions, and [Link](/docs/link/) for navigation.
 
 ## Accessibility
 
-Badge renders a plain `span` with no role, so its visible text is its accessible content. Its types reject `role`, `tabIndex`, `contentEditable`, `aria-label`, `aria-labelledby`, `aria-live` and `aria-hidden`, and the component strips them at runtime. Badge adds no live region; applications announce status changes themselves.
-
-| Key             | Behavior                              |
-| --------------- | ------------------------------------- |
-| Tab / Shift+Tab | Skip the badge; it is never focusable |
-
-## Motion
-
-Badge has no motion. Forced colors use `CanvasText` for text and border and `Canvas` for the background.
+Badge is plain text and stays out of the tab order. Set `decorative` only when nearby text already says the same thing. Use an [Alert](/docs/alert/) to announce an update.
 
 ## Styling
 
-| Part  | Element | data-slot | Data attributes                |
-| ----- | ------- | --------- | ------------------------------ |
-| Badge | `span`  | `badge`   | `data-tone`, `data-decorative` |
-
-`className`, `style` and the ref reach the span. Caller classes merge after the defaults, caller `style` wins, and a caller `data-slot` is appended to `badge`. `components.badge` or `--rad-badge-*` variables set radius, background, color, borderColor, borderWidth, borderStyle, paddingInline, paddingBlock and fontSize. Long text wraps within the available width.
+Use `components.badge` or `--rad-badge-*` variables to style the badge. Target it with `[data-slot~="badge"]`.
 
 ## API
 
-| Badge prop        | Type                                                                   | Default         |
-| ----------------- | ---------------------------------------------------------------------- | --------------- |
-| children          | ReactNode                                                              | None            |
-| tone              | neutral / accent / warning / danger                                    | neutral         |
-| decorative        | boolean                                                                | false           |
-| className / style | string / ThemeStyle                                                    | None            |
-| data-slot         | Additional identity tokens                                             | badge           |
-| ref               | `Ref<HTMLSpanElement>`                                                 | None            |
-| Native span props | Except role, tabIndex, contentEditable and naming, live or hidden ARIA | Native defaults |
+| Prop              | Type                                     | Default |
+| ----------------- | ---------------------------------------- | ------- |
+| children          | ReactNode                                | None    |
+| tone              | neutral / accent / warning / danger      | neutral |
+| decorative        | boolean                                  | false   |
+| Native span props | Includes `className`, `style`, and `ref` | Native  |
 
-Exports: `Badge`; types `BadgeProps`, `BadgeTone`.
+Exports `Badge`, `BadgeProps`, and `BadgeTone`.
