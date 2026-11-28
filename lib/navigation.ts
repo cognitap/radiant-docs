@@ -130,6 +130,7 @@ export const categories = [
       'indicator',
       'tag',
       'kbd',
+      'inline-code',
       'code-block',
       'highlight',
       'annotated-text',

@@ -1,6 +1,6 @@
 ---
 title: CodeBlock
-description: Show source code readers can scroll and copy, with InlineCode for terms inside text.
+description: Show source code readers can scroll and copy.
 ---
 
 import {
@@ -13,13 +13,13 @@ import {
 
 ## Usage
 
-Use CodeBlock for a complete snippet a reader may copy. Use InlineCode for a command, path or identifier inside a sentence, and [Kbd](/docs/kbd/) for keys.
+Use CodeBlock for a complete snippet readers can copy.
 
 ```tsx
-<p>
-  Install <InlineCode>@cognitap/radiant</InlineCode> first.
-</p>
-<CodeBlock code="pnpm add @cognitap/radiant" language="shell">
+<CodeBlock
+  code="pnpm add @cognitap/radiant"
+  language="shell"
+>
   <CodeBlockHeader>
     <span>Install command</span>
     <CodeBlockCopy>Copy install command</CodeBlockCopy>
@@ -70,7 +70,7 @@ CodeBlock adds no animation. CodeBlockCopy keeps Button's press motion and reduc
 
 className, style and ref reach each part's host. The root carries data-language, data-copy-state (idle, pending, success or error) and, with line numbers, an empty data-line-numbers. Inner slots are code-block-status, code-block-line-numbers and code-block-code.
 
-`components.codeBlock` sets radius, border, surface, padding, header spacing, maxHeight, font size, line height, number gap and colors, and status color through `--rad-code-block-*`. `components.inlineCode` sets radius, padding, background, color and fontSize through `--rad-inline-code-*`.
+`components.codeBlock` sets radius, border, surface, padding, header spacing, maxHeight, font size, line height, number gap and colors, and status color through `--rad-code-block-*`.
 
 ## API
 
@@ -123,13 +123,8 @@ className, style and ref reach each part's host. The root carries data-language,
 | render      | (resolved: CodeBlockRenderProps) => ReactElement            | Native button             |
 | Other props | [Button](/docs/button/) props except type and pressed state | Button defaults           |
 
+Exports each part's Props type and `CodeBlockRenderProps`.
+
 ### InlineCode
 
-| Prop              | Type                | Default         |
-| ----------------- | ------------------- | --------------- |
-| children          | ReactNode           | None            |
-| className / style | string / ThemeStyle | None            |
-| ref               | `Ref<HTMLElement>`  | None            |
-| Other props       | Native code props   | Native defaults |
-
-Exports `InlineCodeProps`, each part's Props type and `CodeBlockRenderProps`.
+See the [InlineCode guide](/docs/inline-code/).
