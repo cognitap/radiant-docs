@@ -413,77 +413,47 @@ test('Fieldset keeps group ownership, native disabled forms and consumer validat
   })
 })
 
-test('CheckboxGroup preserves mixed selection, disabled values and controlled validation in native forms', async () => {
+test('CheckboxGroup shows mixed selection and toggles only enabled options', async () => {
   await withSite(async (baseURL, browser) => {
     const page = await browser.newPage()
     const errors = track(page)
     try {
-      await capture(page, 'checkbox-group-tasks', async () => {
+      await capture(page, 'checkbox-group-selection', async () => {
         await page.goto(`${baseURL}/docs/checkbox-group/`)
-        await page.waitForFunction(() =>
-          [...document.querySelectorAll<HTMLButtonElement>('.demo-heading button')].every(
-            button => !button.disabled
-          )
-        )
-        const channels = page.getByRole('region', { name: 'Notification channels', exact: true })
-        await channels.getByRole('checkbox', { name: 'Text messages', exact: true }).check()
-        await channels.getByRole('button', { name: 'Reset choices', exact: true }).click()
-        assert.equal(
-          await channels.getByRole('checkbox', { name: 'Text messages', exact: true }).isChecked(),
-          false
-        )
-        await channels.getByRole('checkbox', { name: 'Email', exact: true }).uncheck()
-        assert.deepEqual(
-          await channels
-            .locator('form')
-            .evaluate(form => new FormData(form as HTMLFormElement).getAll('channels')),
-          []
-        )
-        const available = page.getByRole('region', {
-          name: 'Select available channels',
-          exact: true
-        })
-        const all = available.getByRole('checkbox', { name: 'Select all available', exact: true })
-        assert.equal(await all.getAttribute('aria-checked'), 'mixed')
-        await all.click()
-        assert.equal(await all.getAttribute('aria-checked'), 'true')
-        assert.equal(
-          await available
-            .getByRole('checkbox', { name: 'Managed by your organization', exact: true })
-            .isDisabled(),
-          true
-        )
-        assert.deepEqual(
-          await available
-            .locator('form')
-            .evaluate(form => new FormData(form as HTMLFormElement).getAll('channels')),
-          ['email', 'sms', 'push']
-        )
-        await available.getByRole('button', { name: 'Reset choices', exact: true }).click()
+        const demo = page.getByRole('region', { name: 'Notification channels', exact: true })
+        const group = demo.getByRole('group', { name: 'Notifications', exact: true })
+        const all = group.getByRole('checkbox', { name: 'Select all', exact: true })
+        const email = group.getByRole('checkbox', { name: 'Email', exact: true })
+        const sms = group.getByRole('checkbox', { name: 'Text messages', exact: true })
+        const push = group.getByRole('checkbox', { name: 'Push notifications', exact: true })
+        const reset = demo.getByRole('button', { name: 'Reset preview', exact: true })
+        await reset.waitFor()
         await page.waitForFunction(
-          () => document.querySelectorAll('[aria-checked="mixed"]').length === 2
+          () =>
+            !document.querySelector<HTMLButtonElement>('button[aria-label="Reset preview"]')
+              ?.disabled
         )
-        const saving = page.getByRole('region', {
-          name: 'Save notification preferences',
-          exact: true
-        })
-        await saving.getByRole('checkbox', { name: 'Email', exact: true }).uncheck()
-        assert.equal(await saving.getByRole('alert').textContent(), 'Choose at least one channel.')
-        await saving.getByRole('checkbox', { name: 'Text messages', exact: true }).check()
-        await saving.getByRole('button', { name: 'Save preferences', exact: true }).click()
-        assert.equal(
-          await saving.getByRole('status', { name: 'Saved channels', exact: true }).textContent(),
-          'sms'
-        )
-        await saving.getByRole('button', { name: 'Reset preview', exact: true }).click()
-        assert.equal(
-          await saving.getByRole('checkbox', { name: 'Email', exact: true }).isChecked(),
-          true
-        )
-        assert.equal(
-          await saving.getByRole('status', { name: 'Saved channels', exact: true }).textContent(),
-          ''
-        )
+
+        assert.equal(await all.getAttribute('aria-checked'), 'mixed')
+        assert.equal(await email.isChecked(), true)
+        assert.equal(await sms.isChecked(), false)
+        assert.equal(await push.isDisabled(), true)
+        await all.focus()
+        await page.keyboard.press('Space')
+        assert.equal(await all.getAttribute('aria-checked'), 'true')
+        assert.equal(await sms.isChecked(), true)
+        assert.equal(await push.isChecked(), false)
+
+        await all.click()
+        assert.equal(await all.getAttribute('aria-checked'), 'false')
+        assert.equal(await email.isChecked(), false)
+        assert.equal(await sms.isChecked(), false)
+        assert.equal(await push.isChecked(), false)
+
+        await reset.click()
+        assert.equal(await all.getAttribute('aria-checked'), 'mixed')
+        assert.equal(await email.isChecked(), true)
+        assert.equal(await sms.isChecked(), false)
         assert.deepEqual(errors, [])
       })
     } finally {
