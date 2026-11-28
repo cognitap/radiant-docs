@@ -1794,9 +1794,9 @@ test('EmptyState docs create real table records, recover an empty Combobox and r
   })
 })
 
-test('CodeBlock docs copy raw commands and generated exports, report denied writes and keep long source keyboard reachable', async () => {
+test('CodeBlock docs copy the snippet, report denied writes and keep long lines keyboard reachable', async () => {
   await withSite(async (baseURL, browser) => {
-    const page = await browser.newPage(),
+    const page = await browser.newPage({ viewport: { width: 320, height: 800 } }),
       errors = track(page)
     await page.addInitScript(() => {
       const writes: string[] = []
@@ -1813,98 +1813,69 @@ test('CodeBlock docs copy raw commands and generated exports, report denied writ
       })
     })
     try {
-      await capture(page, 'code-block-tasks', async () => {
+      await capture(page, 'code-block', async () => {
         await page.goto(baseURL + '/docs/code-block/')
-        await page.waitForFunction(
-          () => !document.querySelector<HTMLButtonElement>('.demo-heading button')?.disabled
-        )
-        const install = page.getByRole('region', { name: 'Package installation', exact: true })
-        const theme = await install.locator('[data-slot="code-block"]').evaluate(node => {
-          if (!(node instanceof HTMLElement)) throw new Error('Code block must have a native host')
-          const root = node
-          root.style.setProperty('--rad-code-block-border-width', '3px')
-          root.style.setProperty('--rad-code-block-font-size', '18px')
+        const demo = page.getByRole('region', { name: 'Copy a snippet', exact: true })
+        const block = demo.locator('.demo-stage [data-slot="code-block"]')
+        const code = block.locator('[data-slot="code-block-code"]')
+        const copy = block.locator('button[data-slot~="code-block-copy"]')
+        const viewport = demo.getByRole('group', { name: 'greeting.ts', exact: true })
+        const numbers = block.locator('[data-slot="code-block-line-numbers"]')
+        const snippet = await code.textContent()
+        assert.match(snippet ?? '', /^export function greet/)
+        assert.equal(await numbers.count(), 0)
+        await demo.getByRole('checkbox', { name: 'Line numbers', exact: true }).check()
+        assert.equal(await numbers.getAttribute('aria-hidden'), 'true')
+        assert.equal(await code.textContent(), snippet)
+
+        const theme = await block.evaluate(node => {
+          node.style.setProperty('--rad-code-block-border-width', '3px')
+          node.style.setProperty('--rad-code-block-font-size', '18px')
           const result = {
-            border: getComputedStyle(root).borderTopWidth,
-            font: getComputedStyle(root.querySelector('code')!).fontSize
+            border: getComputedStyle(node).borderTopWidth,
+            font: getComputedStyle(node.querySelector('code')!).fontSize
           }
-          root.style.removeProperty('--rad-code-block-border-width')
-          root.style.removeProperty('--rad-code-block-font-size')
+          node.style.removeProperty('--rad-code-block-border-width')
+          node.style.removeProperty('--rad-code-block-font-size')
           return result
         })
         assert.deepEqual(theme, { border: '3px', font: '18px' })
-        await install
-          .getByRole('combobox', { name: 'Package manager', exact: true })
-          .selectOption('npm')
-        await install.getByRole('button', { name: 'Copy install command', exact: true }).click()
-        await install.getByText('Code copied.', { exact: true }).waitFor()
-        assert.equal(
-          await page.evaluate(() => Reflect.get(window, 'codeBlockWrites').at(-1)),
-          'npm install @cognitap/radiant'
-        )
-        const form = page.getByRole('form', { name: 'Export configuration', exact: true })
-        await form
-          .getByRole('textbox', { name: 'Collection', exact: true })
-          .fill('participant_notes')
-        await form.getByRole('checkbox', { name: 'Include session timings', exact: true }).uncheck()
-        await form
-          .getByRole('button', { name: 'Generate export configuration', exact: true })
-          .click()
-        await form.getByRole('button', { name: 'Copy export configuration', exact: true }).click()
-        const json = await page.evaluate(() => Reflect.get(window, 'codeBlockWrites').at(-1))
-        assert.deepEqual(JSON.parse(json), {
-          collection: 'participant_notes',
-          fields: ['participantId', 'accuracy'],
-          limit: 100
-        })
-        assert.equal(json.endsWith('\n'), true)
+
+        await block.getByRole('button', { name: 'Copy code', exact: true }).waitFor()
+        assert.equal(await copy.locator('svg:visible').count(), 1)
+        await copy.click()
+        await block.getByRole('button', { name: 'Copied', exact: true }).waitFor()
+        assert.equal(await copy.locator('svg:visible').count(), 1)
+        assert.deepEqual(await page.evaluate(() => Reflect.get(window, 'codeBlockWrites')), [
+          snippet
+        ])
         await page.evaluate(() => {
           document.documentElement.dataset.clipboard = 'deny'
         })
-        await form.getByRole('button', { name: 'Copy export configuration', exact: true }).click()
-        await form
+        await copy.press('Enter')
+        await demo
           .getByText('Could not copy code. Select the code and copy it manually.', { exact: true })
           .waitFor()
-        assert.equal(
-          await form
-            .getByRole('button', { name: 'Copy export configuration', exact: true })
-            .evaluate(node => node === document.activeElement),
-          true
-        )
+        assert.equal(await copy.evaluate(node => node === document.activeElement), true)
         await page.evaluate(() => {
           delete document.documentElement.dataset.clipboard
         })
-        await form.getByRole('button', { name: 'Copy export configuration', exact: true }).click()
-        await form.getByText('Code copied.', { exact: true }).waitFor()
-        const exportDemo = page.getByRole('region', { name: 'Inspect session export', exact: true })
-        await exportDemo
-          .getByRole('combobox', { name: 'Direction', exact: true })
-          .selectOption('rtl')
-        await page.setViewportSize({ width: 320, height: 800 })
-        const sessions = exportDemo.getByRole('region', { name: 'Session export', exact: true })
-        await sessions
-          .getByRole('checkbox', { name: 'Completed sessions only', exact: true })
-          .check()
-        await sessions.getByRole('button', { name: 'Copy session CSV', exact: true }).click()
-        const csv = await page.evaluate(() => Reflect.get(window, 'codeBlockWrites').at(-1))
-        assert.equal(csv.includes('\r\n'), true)
-        assert.equal(csv.includes('"S-104"'), true)
-        assert.equal(csv.includes('Jonas'), false)
-        const viewport = sessions.getByRole('group', {
-          name: 'Session export: sessions.csv',
-          exact: true
-        })
-        await viewport.focus()
+        await copy.press('Enter')
+        await block.getByRole('button', { name: 'Copied', exact: true }).waitFor()
+        assert.deepEqual(await page.evaluate(() => Reflect.get(window, 'codeBlockWrites')), [
+          snippet,
+          snippet
+        ])
+
+        await copy.press('Tab')
         assert.equal(await viewport.evaluate(node => node === document.activeElement), true)
         await viewport.press('ArrowRight')
         await page.waitForFunction(
-          () =>
-            document.querySelector<HTMLElement>('[aria-label="Session export: sessions.csv"]')!
-              .scrollLeft > 0
+          () => document.querySelector<HTMLElement>('[aria-label="greeting.ts"]')!.scrollLeft > 0
         )
         assert.equal(await viewport.evaluate(node => getComputedStyle(node).direction), 'ltr')
         assert.equal(
-          await sessions.locator('[data-slot="code-block"]').evaluate(node => {
+          await block.evaluate(node => {
             const rect = node.getBoundingClientRect()
             return rect.left >= 0 && rect.right <= innerWidth
           }),
