@@ -1238,6 +1238,12 @@ test('Kbd docs show native key notation for one key and a combination', async ()
         const group = demo.locator('kbd[data-slot~="kbd-group"]')
         assert.equal(await group.textContent(), 'Control+K')
         assert.equal(await group.getAttribute('dir'), 'ltr')
+        assert.deepEqual(
+          await demo
+            .locator('kbd')
+            .evaluateAll(nodes => nodes.map(node => getComputedStyle(node).fontWeight)),
+          ['400', '400', '400', '400']
+        )
         assert.ok(
           await demo.locator('kbd').evaluateAll(nodes => nodes.every(node => node.tabIndex === -1))
         )
