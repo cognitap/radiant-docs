@@ -51,10 +51,16 @@ export function Search() {
     return () => window.removeEventListener('keydown', shortcut)
   }, [])
 
-  const records =
+  const matches =
     search && data?.query === search && !error
-      ? data.items.flatMap(item => (item.type === 'table' ? item.rows : [item])).slice(0, 20)
+      ? data.items.flatMap(item => (item.type === 'table' ? item.rows : [item]))
       : []
+  const query = search.trim().toLowerCase()
+  const exact = matches.findIndex(
+    record => record.type === 'page' && record.content.toLowerCase() === query
+  )
+  if (exact > 0) matches.unshift(...matches.splice(exact, 1))
+  const records = matches.slice(0, 20)
   const urls = new Map(records.map(record => [record.id, record.url]))
   const items: CommandOption[] = records.map((record, index) => ({
     value: record.id,
