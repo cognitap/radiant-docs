@@ -1,89 +1,39 @@
 ---
 title: Link
-description: Navigate to a page, section or site with a native anchor.
+description: Navigate to a page, section, or site.
 ---
 
-import { LinkDemo, LinkProseDemo, RouterLinkDemo, MotionLinkDemo } from '../../components/LinkDemo'
+import { LinkDemo } from '../../components/LinkDemo'
 
 <LinkDemo />
 
 ## Usage
 
-Use Link to go somewhere: a page, a section or another site. Use [Button](/docs/button/) for an action, such as saving or submitting, or when you need a pending or disabled state. Use [NavLink](/docs/nav-link/) for application navigation that marks the current page.
+Use [Button](/docs/button/) for actions such as saving. Use [NavLink](/docs/nav-link/) to mark the current page in a navigation list.
 
-```tsx
-<Link href="/docs/getting-started/">Read the installation guide</Link>
-```
-
-## Examples
-
-### Link inside text
-
-<LinkProseDemo />
-
-### Navigate with a router
-
-<RouterLinkDemo />
-
-The `render` callback receives `LinkRenderProps`. Forward all of them, including children, ref, handlers, target and rel, to one anchor. A router intercepts only plain same-origin clicks and leaves modified clicks, targets and downloads to the browser.
-
-### Style a link as a button
-
-<MotionLinkDemo />
-
-`solid`, `soft`, `outline` and `ghost` share Button's look and `controlSize`. The element stays an anchor.
+For a router, forward the props from `render`, including the ref and children, to an anchor or a router component that renders one. Let the browser handle modified clicks and downloads.
 
 ## Accessibility
 
-The anchor's text, or `aria-label`, is its accessible name. Without `href` it is not a link. `render` must return one anchor or a component that forwards props to one, or Link throws. With `external`, say in the text that the link opens a new tab. Link has no disabled state; render plain text for an unavailable destination.
-
-| Key             | Behavior                                  |
-| --------------- | ----------------------------------------- |
-| Tab / Shift+Tab | Move focus to and from the link           |
-| Enter           | Follow the link                           |
-| Space           | Scroll the page; does not follow the link |
+Use link text that names the destination. Enter follows the link. Space scrolls the page. If the link opens a new tab, say so in its text.
 
 ## Motion
 
-`inline` and `subtle` fade color and thicken the underline on hover, and stop under reduced motion. Action variants use Button's transitions. For press springs, use `MotionLink` from `@cognitap/radiant/motion/react` inside a `MotionProvider`. `motion="off"` turns them off, and system reduced motion always wins. Inline and subtle links never compress. Navigation is never delayed.
+For [press springs](/docs/foundations/motion/) on button variants, use `MotionLink` inside `MotionProvider` from `@cognitap/radiant/motion/react`. Use `motion="off"` to disable the spring.
 
 ## Styling
 
-Link has one part, the anchor. `className`, `style` and `ref` reach it. It sets `data-slot="link"`, followed by any tokens you pass, plus `data-variant`, `data-tone` and `data-control-size`.
-
-| Variable                                                   | Default                        |
-| ---------------------------------------------------------- | ------------------------------ |
-| `--rad-link-color` / `--rad-link-hover-color`              | Tone color / darkened on hover |
-| `--rad-link-underline-offset`                              | 0.1875rem                      |
-| `--rad-link-decoration-thickness` / `-hover`               | 0.0625rem / 0.125rem           |
-| `--rad-link-color-duration`                                | Motion color duration, 150ms   |
-| `--rad-link-focus-color` / `-width` / `-offset` / `-style` | Theme focus ring               |
-
-Action variants read Button's `--rad-button-*` variables.
+Set `components.link` in your [theme](/docs/foundations/theming/) to style text links. Button variants share Button's styling and sizing.
 
 ## API
 
-### Link
+| Prop          | Default       | Use                                                                |
+| ------------- | ------------- | ------------------------------------------------------------------ |
+| `href`        |               | Set the destination.                                               |
+| `variant`     | `inline`      | Choose `inline`, `subtle`, `solid`, `soft`, `outline`, or `ghost`. |
+| `tone`        | `accent`      | Choose `accent`, `neutral`, `warning`, or `danger`.                |
+| `controlSize` | `medium`      | Set the size of button variants.                                   |
+| `external`    | `false`       | Defaults to `target="_blank"` and `rel="noopener noreferrer"`.     |
+| `render`      | Native anchor | Supply an adapter for your router.                                 |
 
-| Prop                | Type                                                        | Default       |
-| ------------------- | ----------------------------------------------------------- | ------------- |
-| variant             | inline / subtle / solid / soft / outline / ghost            | inline        |
-| tone                | accent / neutral / warning / danger                         | accent        |
-| controlSize         | small / medium / large; action variants only                | medium        |
-| external            | boolean; sets target `_blank` and rel `noopener noreferrer` | false         |
-| render              | (props: LinkRenderProps) => ReactElement                    | Native anchor |
-| className / style   | string / ThemeStyle                                         | None          |
-| ref                 | `Ref<HTMLAnchorElement>`                                    | None          |
-| Native anchor props | href, target, rel, download, events, `aria-*`               | Native        |
-
-An explicit `target` or `rel` overrides `external`.
-
-### MotionLink
-
-Takes every Link prop plus `motion`: inherit / off, default inherit.
-
-### LinkRenderProps
-
-Native anchor props plus `style?: ThemeStyle`, a `data-slot` string starting with `link`, `data-variant`, `data-tone` and `data-control-size`.
-
-Exports: `Link`, `LinkProps`, `LinkRenderProps`, `LinkVariant` from `@cognitap/radiant`; `MotionLink`, `MotionLinkProps` from `@cognitap/radiant/motion/react`.
+Explicit `target` and `rel` values override the `external` defaults.
