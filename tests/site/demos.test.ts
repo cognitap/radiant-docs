@@ -2,56 +2,35 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import { capture, track, withSite } from './site.ts'
 
-test('Button tasks preserve independent pressed state, native pending guards, forms and adapter refs', async () => {
+test('Button demo keeps focus and blocks repeat activation while a native submit is pending', async () => {
   await withSite(async (baseURL, browser) => {
-    const page = await browser.newPage(),
+    const page = await browser.newPage({ viewport: { width: 320, height: 900 } }),
       errors = track(page)
     try {
-      await capture(page, 'independent-frames', async () => {
+      await capture(page, 'button-submit', async () => {
         await page.goto(`${baseURL}/docs/button/`)
-        await page.waitForFunction(() =>
-          [...document.querySelectorAll<HTMLButtonElement>('.demo-heading button')].every(
-            button => !button.disabled
-          )
+        const demo = page.getByRole('region', { name: 'Save changes', exact: true }),
+          button = demo.getByRole('button', { name: 'Save changes', exact: true })
+        await page.waitForFunction(
+          () => !document.querySelector<HTMLButtonElement>('.demo-heading button')?.disabled
         )
-        const format = page.getByRole('region', { name: 'Format a draft', exact: true }),
-          bold = format.getByRole('button', { name: 'Bold', exact: true }),
-          italic = format.getByRole('button', { name: 'Italic', exact: true }),
-          bookmark = page.getByRole('region', { name: 'Save an article for later', exact: true }),
-          save = bookmark.getByRole('button', { name: 'Bookmark article', exact: true })
-        await bold.click()
-        assert.equal(await bold.getAttribute('aria-pressed'), 'true')
-        assert.equal(await italic.getAttribute('aria-pressed'), 'true')
-        assert.equal(await save.getAttribute('aria-pressed'), 'false')
-        await save.click()
-        assert.equal(await save.getAttribute('aria-pressed'), 'true')
-        await bookmark.getByRole('checkbox', { name: 'Sync in progress', exact: true }).check()
-        await save.click()
-        assert.equal(await save.getAttribute('aria-pressed'), 'true')
-        assert.equal(await save.getAttribute('aria-busy'), 'true')
-        await bookmark.getByRole('button', { name: 'Reset preview', exact: true }).click()
-        assert.equal(await save.getAttribute('aria-pressed'), 'false')
-        assert.equal(await bold.getAttribute('aria-pressed'), 'true')
-        const workspace = page.getByRole('region', { name: 'Save workspace', exact: true })
-        await workspace
-          .getByRole('textbox', { name: 'Workspace name', exact: true })
-          .fill('New studio')
-        await workspace.getByRole('button', { name: 'Save changes', exact: true }).click()
-        await workspace.getByText('Saved “New studio”.', { exact: true }).waitFor()
-        await workspace
-          .getByRole('checkbox', { name: 'Simulate a failed request', exact: true })
-          .check()
-        await workspace.getByRole('button', { name: 'Save changes', exact: true }).click()
-        await workspace.getByText('Could not save. Try again.', { exact: true }).waitFor()
-        const adapter = page.getByRole('region', { name: 'Forward a native action', exact: true }),
-          action = adapter.getByRole('button', {
-            name: 'Export the current report for your team',
-            exact: true
+        assert.equal(await button.getAttribute('type'), 'submit')
+        await demo.locator('form').evaluate(form => {
+          form.addEventListener('submit', () => {
+            form.dataset.submits = String(Number(form.dataset.submits ?? 0) + 1)
           })
-        await adapter.getByRole('button', { name: 'Focus export action', exact: true }).click()
-        assert.equal(await action.evaluate(node => node === document.activeElement), true)
+        })
+        await button.focus()
         await page.keyboard.press('Enter')
-        await adapter.getByText('Requested report export.', { exact: true }).waitFor()
+        await demo.getByText('Saving…', { exact: true }).waitFor()
+        assert.equal(await button.getAttribute('aria-busy'), 'true')
+        assert.equal(await button.evaluate(node => node === document.activeElement), true)
+        await page.keyboard.press('Space')
+        assert.equal(await demo.locator('form').getAttribute('data-submits'), '1')
+        await demo.getByText('Saved.', { exact: true }).waitFor()
+        assert.equal(await button.getAttribute('aria-busy'), null)
+        await demo.getByRole('button', { name: 'Reset preview' }).click()
+        assert.equal(await demo.getByText('Saved.', { exact: true }).count(), 0)
         assert.deepEqual(errors, [])
       })
     } finally {
@@ -76,7 +55,7 @@ test('a blocked clipboard reports the failure and leaves the preview usable', as
     try {
       await capture(page, 'blocked-clipboard', async () => {
         await page.goto(`${baseURL}/docs/button/`)
-        const demo = page.getByRole('region', { name: 'Save workspace', exact: true })
+        const demo = page.getByRole('region', { name: 'Save changes', exact: true })
         await demo.locator('summary').click()
         const label = await demo
           .locator('[data-slot~="code-block-viewport"][aria-label^="Source: "]')
@@ -88,7 +67,7 @@ test('a blocked clipboard reports the failure and leaves the preview usable', as
           .getByText('Could not copy code. Select the code and copy it manually.', { exact: true })
           .waitFor()
         await demo.getByRole('button', { name: 'Save changes' }).click()
-        await demo.getByText('Saved “Orbit Studio”.', { exact: true }).waitFor()
+        await demo.getByText('Saved.', { exact: true }).waitFor()
         assert.deepEqual(errors, [])
       })
     } finally {
