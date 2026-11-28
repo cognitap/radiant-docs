@@ -1,109 +1,42 @@
 ---
 title: NavLink
-description: Navigate application destinations with current-page links and native disclosures.
+description: Mark the current page in application navigation.
 ---
 
-import { NavLinkDemo, NavLinkProjectsDemo, NavLinkSettingsDemo } from '../../components/NavLinkDemo'
+import { NavLinkDemo } from '../../components/NavLinkDemo'
 
 <NavLinkDemo />
 
 ## Usage
 
-Use NavLink for destinations in an application sidebar. The consumer's router chooses active; the current anchor exposes `aria-current="page"` and `data-selected`, which carries the active style. Use [Link](/docs/link/) for ordinary links and [Menu](/docs/menu/) for action menus.
-
-```tsx
-<nav aria-label="Workspace">
-  <NavLink
-    href="/overview"
-    active
-    description="Study health"
-  >
-    Overview
-  </NavLink>
-  <NavLinkGroup defaultOpen>
-    <NavLinkGroupTrigger>Projects</NavLinkGroupTrigger>
-    <NavLinkGroupContent>
-      <NavLink href="/projects/reader">Reader study</NavLink>
-    </NavLinkGroupContent>
-  </NavLinkGroup>
-</nav>
-```
-
-## Examples
-
-### Browse a project library
-
-<NavLinkProjectsDemo />
-
-### Navigate team settings
-
-<NavLinkSettingsDemo />
+Use NavLink in a sidebar or other application navigation. Set `active` from the current route. Use [Link](/docs/link/) for links that need no current-page styling.
 
 ## State
 
-Routing belongs to the application. active changes presentation and current-page semantics without intercepting navigation. Supply render to forward resolved props, children and ref to your router's anchor. Preserve native modified clicks, targets and downloads.
+The active link exposes `aria-current="page"`. To use a router, forward the props from `render`, including the ref and children, to its anchor.
 
-NavLinkGroup composes [Collapsible](/docs/collapsible/). Choose open with onOpenChange or defaultOpen; controlled owners may refuse requests. Prop synchronization fires no request. A destination and a group disclosure are separate controls.
+Use `NavLinkGroup` to disclose nested links. Add a `NavLinkGroupTrigger` and put the destinations in `NavLinkGroupContent`. Use `defaultOpen` for the initial state or `open` with `onOpenChange` to control it.
 
 ## Accessibility
 
-Place links inside a named nav landmark. Keep labels, icons and descriptions noninteractive; nested destinations belong in GroupContent. Icons are decorative. Visible descriptions are part of each link’s accessible name. Explicit names and external description IDs are preserved.
-
-| Key                      | Behavior                                |
-| ------------------------ | --------------------------------------- |
-| Tab / Shift+Tab          | Visit visible links and group summaries |
-| Enter on link            | Follow its native destination           |
-| Enter / Space on summary | Toggle the native disclosure            |
-
-Closed groups exclude their links from keyboard traversal. Applications handle route announcements and accepted-page focus; these examples focus the updated content.
+Give the navigation a name. Tab visits visible links and group triggers. Enter follows a link. Enter or Space opens and closes a group.
 
 ## Motion
 
-Group disclosures inherit Collapsible's spring adapter and reduced-motion behavior. motion="off" disables disclosure motion. Link navigation remains immediate.
+Groups use [Collapsible](/docs/collapsible/) motion. Set `motion="off"` on a group to turn off its animation.
 
 ## Styling
 
-Root className, style, events and ref reach the actual anchor, details, summary or content div. Slot tokens retain Link and Collapsible identities and add nav-link, nav-link-group, nav-link-group-trigger and nav-link-group-content.
+Use `components.navLink` in your [theme](/docs/foundations/theming/) for active, hover, and focus styles. Use `parts` to style the icon, label, or description.
 
-parts.icon, parts.label and parts.description style visible content. `components.navLink` provides typography, spacing, active, hover, description, nested-indent and focus tokens, including `focusStyle`. Logical borders and indentation follow direction.
+Set `indicatorColor` to outline the current page.
 
 ## API
 
-### NavLink
-
-| Prop                          | Type / default                    |
-| ----------------------------- | --------------------------------- |
-| href                          | Required string                   |
-| active                        | boolean; false                    |
-| icon / description / children | ReactNode; children required      |
-| controlSize                   | small / medium / large; medium    |
-| parts                         | icon / label / description styles |
-| render                        | Resolved Link props → anchor      |
-| external / target / download  | Link and native anchor behavior   |
-| ref                           | HTMLAnchorElement                 |
-
-### NavLinkGroup
-
-| Prop               | Type / default                       |
-| ------------------ | ------------------------------------ |
-| open / defaultOpen | boolean; one owner; initially closed |
-| onOpenChange       | (open: boolean) → void               |
-| motion             | inherit / off; inherit               |
-| ref                | HTMLDetailsElement                   |
-
-### NavLinkGroupTrigger
-
-| Prop                          | Type / default                  |
-| ----------------------------- | ------------------------------- |
-| icon / description / children | ReactNode; children required    |
-| controlSize / parts           | Same content styling as NavLink |
-| ref                           | HTMLElement summary             |
-
-### NavLinkGroupContent
-
-| Prop     | Type / default            |
-| -------- | ------------------------- |
-| children | Nested navigation content |
-| ref      | HTMLDivElement            |
-
-All parts accept native host props and ThemeStyle. Exports each component's Props type and NavLinkRenderProps.
+| NavLink prop          | Default       | Use                                   |
+| --------------------- | ------------- | ------------------------------------- |
+| `href`                | Required      | Set the destination.                  |
+| `active`              | `false`       | Mark the current page.                |
+| `icon`, `description` |               | Add context to the visible label.     |
+| `controlSize`         | `medium`      | Choose `small`, `medium`, or `large`. |
+| `render`              | Native anchor | Supply a router adapter.              |

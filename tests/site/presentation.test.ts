@@ -1410,72 +1410,36 @@ test('PasswordInput docs reveal and conceal the same native input at narrow widt
   })
 })
 
-test('NavLink docs connect native destinations, disclosure ownership and router content focus at narrow widths', async () => {
+test('NavLink demo follows the current fragment and groups destinations at narrow widths', async () => {
   await withSite(async (baseURL, browser) => {
-    const page = await browser.newPage(),
+    const page = await browser.newPage({ viewport: { width: 320, height: 900 } }),
       errors = track(page)
     try {
       await capture(page, 'nav-link-tasks', async () => {
         await page.goto(`${baseURL}/docs/nav-link/`)
-        await page.waitForFunction(
-          () => !document.querySelector<HTMLButtonElement>('.demo-heading button')?.disabled
-        )
-        const workspace = page.getByRole('region', {
-          name: 'Browse a study workspace',
-          exact: true
+        await page.waitForFunction(() => {
+          const reset = document.querySelector<HTMLButtonElement>('.demo-heading button')
+          return reset && !reset.disabled
         })
-        await workspace.getByRole('link', { name: /^Participants/ }).click()
-        assert.equal(
-          await workspace.getByRole('link', { name: /^Participants/ }).getAttribute('aria-current'),
-          'page'
-        )
-        await page.getByRole('heading', { name: 'Study participants', exact: true }).waitFor()
-        assert.equal(
-          await workspace
-            .locator('section[aria-label="Workspace page"]')
-            .evaluate(n => n === document.activeElement),
-          true
-        )
-        const projects = page.getByRole('region', { name: 'Browse a project library', exact: true })
-        await projects.getByRole('link', { name: /^Component kit/ }).click()
-        assert.match(
-          await projects.locator('section[aria-label="Project page"]').innerText(),
-          /8 participants/
-        )
-        await projects.locator('[data-slot~="nav-link-group-trigger"]').click()
-        assert.equal(
-          await projects
-            .locator('[data-slot~="nav-link-group"]')
-            .evaluate((n: HTMLDetailsElement) => n.open),
-          false
-        )
-        await projects.locator('[data-slot~="nav-link-group-trigger"]').press('Enter')
-        assert.equal(
-          await projects
-            .locator('[data-slot~="nav-link-group"]')
-            .evaluate((n: HTMLDetailsElement) => n.open),
-          true
-        )
-        const settings = page.getByRole('region', { name: 'Navigate team settings', exact: true })
-        await settings.getByRole('link', { name: /^Access rules/ }).click()
-        assert.match(
-          await settings.locator('section[aria-label="Settings page"]').innerText(),
-          /Two administrators/
+        const demo = page.getByRole('region', { name: 'Browse a workspace' }),
+          bar = demo.getByRole('navigation', { name: 'Workspace' }),
+          overview = bar.getByRole('link', { name: 'Overview', exact: true }),
+          members = bar.getByRole('link', { name: 'Members', exact: true }),
+          trigger = bar.locator('summary').filter({ hasText: 'Settings' }),
+          content = demo.getByRole('region', { name: 'Workspace page' })
+        assert.equal(await overview.getAttribute('aria-current'), 'page')
+        assert.equal(await members.isVisible(), false)
+        await trigger.press('Space')
+        await members.waitFor()
+        await members.press('Enter')
+        await content.getByText('See who has access to this workspace.').waitFor()
+        assert.equal(await members.getAttribute('aria-current'), 'page')
+        assert.equal(await overview.getAttribute('aria-current'), null)
+        await page.waitForFunction(() =>
+          document.activeElement?.matches('section[aria-label="Workspace page"]:not([hidden])')
         )
         assert.equal(
-          await settings.getByRole('link', { name: /^Access rules/ }).getAttribute('aria-current'),
-          'page'
-        )
-        await settings.getByRole('combobox', { name: 'Direction', exact: true }).selectOption('rtl')
-        assert.equal(
-          await settings
-            .getByRole('link', { name: /^Access rules/ })
-            .evaluate(n => getComputedStyle(n).direction),
-          'rtl'
-        )
-        await page.setViewportSize({ width: 320, height: 900 })
-        assert.equal(
-          await page.locator('[data-slot~="nav-link"]').evaluateAll(nodes =>
+          await bar.locator('[data-slot~="nav-link"]').evaluateAll(nodes =>
             nodes.every(node => {
               const b = node.getBoundingClientRect()
               return b.width === 0 || (b.left >= 0 && b.right <= window.innerWidth)
@@ -1483,6 +1447,11 @@ test('NavLink docs connect native destinations, disclosure ownership and router 
           ),
           true
         )
+        await page.goBack()
+        await content.getByText('See the latest workspace activity.').waitFor()
+        assert.equal(await overview.getAttribute('aria-current'), 'page')
+        await trigger.press('Enter')
+        await members.waitFor({ state: 'hidden' })
         assert.deepEqual(errors, [])
       })
     } finally {
