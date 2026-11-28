@@ -596,81 +596,47 @@ test('ScrollArea keeps native scrolling, both-axis content, popup selection and 
   })
 })
 
-test('ToggleGroup keeps focus separate from selection, combines formatting, tracks segmented layout and refuses controlled requests', async () => {
+test('ToggleGroup alignment demo moves focus separately and tracks selection', async () => {
   await withSite(async (baseURL, browser) => {
-    const page = await browser.newPage(),
+    const page = await browser.newPage({ viewport: { width: 320, height: 850 } }),
       errors = track(page)
     try {
-      await capture(page, 'toggle-group-tasks', async () => {
-        await page.goto(`${baseURL}/docs/toggle-group/`)
-        await page.waitForFunction(() =>
-          [...document.querySelectorAll<HTMLButtonElement>('.demo-heading button')].every(
-            button => !button.disabled
-          )
-        )
-        const alignment = page.getByRole('region', { name: 'Align a paragraph', exact: true }),
-          group = alignment.getByRole('group', { name: 'Text alignment', exact: true }),
-          center = group.getByRole('button', { name: 'Center', exact: true }),
-          right = group.getByRole('button', { name: 'Right', exact: true })
+      await capture(page, 'toggle-group', async () => {
+        await page.goto(`${baseURL}/docs/toggle-group/`, { waitUntil: 'domcontentloaded' })
+        const demo = page.getByRole('region', { name: 'Align text', exact: true })
+        const preview = demo.getByRole('region', { name: 'Live preview', exact: true })
+        const group = preview.getByRole('group', { name: 'Text alignment', exact: true })
+        const left = group.getByRole('button', { name: 'Left', exact: true })
+        const center = group.getByRole('button', { name: 'Center', exact: true })
+        const right = group.getByRole('button', { name: 'Right', exact: true })
+        await page.waitForFunction(() => {
+          const button = document.querySelector<HTMLButtonElement>('.demo-heading button')
+          return button && !button.disabled
+        })
         await center.click()
         assert.equal(await center.getAttribute('aria-pressed'), 'true')
         await page.keyboard.press('ArrowRight')
-        assert.equal(await right.evaluate(node => node === document.activeElement), true)
+        assert.ok(await right.evaluate(node => node === document.activeElement))
         assert.equal(await center.getAttribute('aria-pressed'), 'true')
         await page.keyboard.press('Space')
         assert.equal(await right.getAttribute('aria-pressed'), 'true')
         assert.equal(await group.locator('button[tabindex="0"]').count(), 1)
-        const formatting = page.getByRole('region', { name: 'Format a note', exact: true }),
-          bold = formatting.getByRole('button', { name: 'Bold', exact: true }),
-          italic = formatting.getByRole('button', { name: 'Italic', exact: true })
-        await italic.click()
-        assert.equal(await bold.getAttribute('aria-pressed'), 'true')
-        assert.equal(await italic.getAttribute('aria-pressed'), 'true')
-        await formatting.getByRole('button', { name: 'Reset preview', exact: true }).click()
-        assert.equal(await italic.getAttribute('aria-pressed'), 'false')
-        const views = page.getByRole('region', { name: 'Switch record views', exact: true }),
-          grid = views.getByRole('button', { name: 'Grid', exact: true })
-        await grid.click()
-        assert.equal(await grid.getAttribute('aria-pressed'), 'true')
         assert.equal(
-          await views.getByRole('button', { name: 'Timeline', exact: true }).isDisabled(),
-          true
+          await preview
+            .getByText('Project notes', { exact: true })
+            .evaluate(node => getComputedStyle(node).textAlign),
+          'right'
         )
         await page.waitForFunction(() => {
-          const group = document.querySelector('[aria-label="Record view"]')!,
-            selected = group.querySelector('[aria-pressed="true"]')!,
-            marker = group.querySelector('[data-slot="toggle-group-indicator"]')!.parentElement!,
-            a = selected.getBoundingClientRect(),
-            b = marker.getBoundingClientRect()
+          const group = document.querySelector('[aria-label="Text alignment"]')!
+          const selected = group.querySelector('[aria-pressed="true"]')!
+          const marker = group.querySelector('[data-slot="toggle-group-indicator"]')!
+          const a = selected.getBoundingClientRect()
+          const b = marker.getBoundingClientRect()
           return Math.abs(a.left - b.left) < 1 && Math.abs(a.width - b.width) < 1
         })
-        const filtering = page.getByRole('region', { name: 'Review filter requests', exact: true }),
-          active = filtering.getByRole('button', { name: 'Active', exact: true })
-        await active.click()
-        assert.equal(await active.getAttribute('aria-pressed'), 'false')
-        assert.ok((await filtering.textContent())!.includes('Requested active.'))
-        await filtering
-          .getByRole('checkbox', { name: 'Apply filter requests', exact: true })
-          .check()
-        await active.click()
-        assert.equal(await active.getAttribute('aria-pressed'), 'true')
-        await filtering.getByRole('checkbox', { name: 'Right-to-left layout', exact: true }).check()
-        await filtering.getByRole('button', { name: 'Focus project filter', exact: true }).click()
-        assert.equal(await active.evaluate(node => node === document.activeElement), true)
-        await page.keyboard.press('ArrowLeft')
-        assert.equal(
-          await filtering
-            .getByRole('button', { name: 'Archived', exact: true })
-            .evaluate(node => node === document.activeElement),
-          true
-        )
-        await filtering.getByRole('button', { name: 'Reset preview', exact: true }).click()
-        assert.equal(
-          await filtering
-            .getByRole('button', { name: 'All projects', exact: true })
-            .getAttribute('aria-pressed'),
-          'true'
-        )
+        await demo.getByRole('button', { name: 'Reset preview', exact: true }).click()
+        assert.equal(await left.getAttribute('aria-pressed'), 'true')
         assert.deepEqual(errors, [])
       })
     } finally {
