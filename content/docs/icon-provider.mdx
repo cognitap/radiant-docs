@@ -33,16 +33,17 @@ export function AppIcons({ children }: { children: React.ReactNode }) {
 }
 ```
 
-| Icon                          | Drawn by                                                                                        |
-| ----------------------------- | ----------------------------------------------------------------------------------------------- |
-| `check`, `indeterminate`      | [Checkbox](/docs/checkbox/) marks; `check` also marks the chosen [Select](/docs/select/) item   |
-| `chevronDown`                 | [Select](/docs/select/) and [Combobox](/docs/combobox/) triggers                                |
-| `chevronLeft`, `chevronRight` | [Calendar](/docs/calendar/) month buttons, also in DatePicker; `chevronRight` marks Collapsible |
-| `close`                       | Combobox clear, [Sidebar](/docs/app-shell/) drawer close, childless DialogClose and DrawerClose |
-| `calendar`                    | [DatePicker](/docs/date-picker/) and [DateRangePicker](/docs/date-range-picker/) triggers       |
-| `grip`                        | [SortableList](/docs/sortable-list/) and [DragAndDrop](/docs/drag-and-drop/) handles            |
-| `spinner`                     | [Spinner](/docs/spinner/) and the pending [Button](/docs/button/)                               |
-| `chevronUp`                   | No built-in component yet                                                                       |
+| Icon                          | Drawn by                                                                                                   |
+| ----------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `check`, `indeterminate`      | [Checkbox](/docs/checkbox/) marks. `check` also marks [Select](/docs/select/) items and CopyButton success |
+| `copy`                        | [CopyButton](/docs/copy-button/) action                                                                    |
+| `chevronDown`                 | [Select](/docs/select/) and [Combobox](/docs/combobox/) triggers                                           |
+| `chevronLeft`, `chevronRight` | [Calendar](/docs/calendar/) month buttons, also in DatePicker; `chevronRight` marks Collapsible            |
+| `close`                       | Combobox clear, [Sidebar](/docs/app-shell/) drawer close, childless DialogClose and DrawerClose            |
+| `calendar`                    | [DatePicker](/docs/date-picker/) and [DateRangePicker](/docs/date-range-picker/) triggers                  |
+| `grip`                        | [SortableList](/docs/sortable-list/) and [DragAndDrop](/docs/drag-and-drop/) handles                       |
+| `spinner`                     | [Spinner](/docs/spinner/) and the pending [Button](/docs/button/)                                          |
+| `chevronUp`                   | No built-in component yet                                                                                  |
 
 ## State
 
@@ -71,4 +72,4 @@ Each icon receives `className` and `aria-hidden`. Spread both on the root SVG. R
 | `icons`    | `IconSet`, a partial map of icon names to components. Required. |
 | `children` | React content.                                                  |
 
-Exports IconProvider, IconProviderProps, `IconSet`, `IconName` and `IconComponent`. `ICON_NAMES` lists the ten names: `check`, `indeterminate`, `chevronDown`, `chevronUp`, `chevronLeft`, `chevronRight`, `close`, `calendar`, `grip` and `spinner`. It imports in a server component.
+Exports IconProvider, IconProviderProps, `IconSet`, `IconName` and `IconComponent`. `ICON_NAMES` lists the available names and imports in a server component.
