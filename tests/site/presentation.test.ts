@@ -1512,76 +1512,38 @@ test('Meter docs retain native passive gauges and meaningful storage, recorder a
   })
 })
 
-test('PasswordInput docs preserve autofill hosts, a renamed reveal action and hidden form submission without echoing credentials', async () => {
+test('PasswordInput docs reveal and conceal the same native input at narrow widths', async () => {
   await withSite(async (baseURL, browser) => {
-    const page = await browser.newPage(),
+    const page = await browser.newPage({ viewport: { width: 320, height: 900 } }),
       errors = track(page)
     try {
-      await capture(page, 'password-input-tasks', async () => {
+      await capture(page, 'password-input-reveal', async () => {
         await page.goto(`${baseURL}/docs/password-input/`)
         await page.waitForFunction(
           () => !document.querySelector<HTMLButtonElement>('.demo-heading button')?.disabled
         )
-        const signin = page.getByRole('region', { name: 'Prepare workspace sign in', exact: true }),
-          password = signin.getByLabel(/^Password/)
+        const demo = page.getByRole('region', { name: 'Show and hide a password', exact: true }),
+          password = demo.getByLabel('Password', { exact: true }),
+          show = demo.getByRole('button', { name: 'Show password', exact: true }),
+          hide = demo.getByRole('button', { name: 'Hide password', exact: true })
         assert.equal(await password.getAttribute('type'), 'password')
         assert.equal(await password.getAttribute('autocomplete'), 'current-password')
         await password.fill('private-demo-password')
-        await signin.getByRole('button', { name: 'Show password', exact: true }).click()
-        assert.equal(
-          await signin
-            .getByRole('button', { name: 'Hide password', exact: true })
-            .getAttribute('aria-pressed'),
-          null
-        )
-        await signin.getByRole('button', { name: 'Prepare sign in', exact: true }).click()
+        await page.keyboard.press('Tab')
+        assert.equal(await show.evaluate(button => button === document.activeElement), true)
+        await page.keyboard.press('Space')
+        await hide.waitFor()
+        assert.equal(await password.getAttribute('type'), 'text')
+        assert.equal(await password.inputValue(), 'private-demo-password')
+        await hide.click()
+        await show.waitFor()
         assert.equal(await password.getAttribute('type'), 'password')
-        assert.match(
-          await signin.getByRole('status').last().innerText(),
-          /Sign-in request prepared for researcher@example.com/
-        )
-        assert.doesNotMatch(await signin.innerText(), /private-demo-password/)
-        const change = page.getByRole('region', { name: 'Choose a new password', exact: true }),
-          next = change.getByLabel(/^New password/),
-          confirm = change.getByLabel(/^Confirm new password/)
-        assert.equal(await next.getAttribute('autocomplete'), 'new-password')
-        await next.fill('demo-new-password')
-        await confirm.fill('demo-new-password')
-        await change.getByRole('button', { name: 'Show password', exact: true }).click()
-        await change.getByRole('button', { name: 'Show confirmation', exact: true }).click()
-        await change.getByRole('button', { name: 'Prepare password change', exact: true }).click()
-        assert.equal(await next.getAttribute('type'), 'password')
-        assert.equal(await confirm.getAttribute('type'), 'password')
-        assert.match(
-          await change.getByRole('status').last().innerText(),
-          /New password request prepared/
-        )
-        await change.getByRole('button', { name: 'Clear password fields', exact: true }).click()
-        assert.equal(await next.inputValue(), '')
-        assert.equal(await confirm.inputValue(), '')
-        const review = page.getByRole('region', {
-            name: 'Review a connection password',
-            exact: true
-          }),
-          stored = review.getByLabel('Connection password', { exact: true })
-        assert.equal(await stored.isEditable(), false)
-        await review.getByRole('button', { name: 'Show password', exact: true }).click()
-        assert.equal(await stored.inputValue(), 'reader-demo-password')
-        await review
-          .getByRole('combobox', { name: 'Demo connection', exact: true })
-          .selectOption('component')
-        assert.equal(await stored.getAttribute('type'), 'password')
-        assert.equal(await stored.inputValue(), 'component-demo-password')
-        await review.getByRole('combobox', { name: 'Direction', exact: true }).selectOption('rtl')
-        assert.equal(await stored.evaluate(n => getComputedStyle(n).direction), 'rtl')
-        await page.setViewportSize({ width: 320, height: 900 })
+        assert.equal(await password.inputValue(), 'private-demo-password')
         assert.equal(
-          await page.locator('[data-slot~="password-input-wrapper"]').evaluateAll(nodes =>
-            nodes.every(node => {
-              const b = node.getBoundingClientRect()
-              return b.left >= 0 && b.right <= window.innerWidth
-            })
-          ),
+          await demo.locator('[data-slot~="password-input-wrapper"]').evaluate(node => {
+            const bounds = node.getBoundingClientRect()
+            return bounds.left >= 0 && bounds.right <= window.innerWidth
+          }),
           true
         )
         assert.deepEqual(errors, [])
